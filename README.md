@@ -1,4 +1,4 @@
-# Pencil and Paper
+# Papr.world
 
 Working title for a cozy communal paper-world sandbox game.
 
