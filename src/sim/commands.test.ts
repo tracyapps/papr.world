@@ -135,13 +135,13 @@ describe('crafting commands', () => {
     // counter. Collecting from the middle has to remove that entry, not the
     // last one.
     const state = createDefaultGameState();
-    state.world.thingMaker.trayOutputs = ['flimsy-shovel', 'creased-hoe', 'folding-hook'];
+    state.world.thingMaker.trayOutputs = ['flimsy-shovel', 'creased-hoe', 'crease-scout'];
 
     const result = applyGameCommand(state, { type: 'collectOutput', index: 1 });
 
     expect(result.ok).toBe(true);
     expect(state.player.tools['creased-hoe']).toBe(1);
-    expect(state.world.thingMaker.trayOutputs).toEqual(['flimsy-shovel', 'folding-hook']);
+    expect(state.world.thingMaker.trayOutputs).toEqual(['flimsy-shovel', 'crease-scout']);
   });
 
   it('keeps the record of what was made after the tray is cleared', () => {
@@ -165,11 +165,11 @@ describe('crafting commands', () => {
 
   it('non-tool outputs go to items, not tools', () => {
     const state = createDefaultGameState();
-    state.world.thingMaker.trayOutputs = ['folding-hook'];
+    state.world.thingMaker.trayOutputs = ['crease-scout'];
 
     applyGameCommand(state, { type: 'collectOutput', index: 0 });
 
-    expect(state.player.items['folding-hook']).toBe(1);
+    expect(state.player.items['crease-scout']).toBe(1);
     expect(state.player.equippedTool).toBeNull();
   });
 });

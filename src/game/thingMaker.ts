@@ -7,12 +7,19 @@ import {
   MAKER_UPGRADE_INGREDIENTS,
   RECIPE_DEFS,
   getCraftDuration,
+  looseRecipes,
+  recipesInFamily,
   type IngredientRequirement,
   type RecipeDefinition,
   type RecipeId,
-  isRecipeAvailable,
 } from '../sim/catalogs/recipes';
-import { canStartRecipe, dispatchGameCommand, resolveIngredientAllocation } from '../sim/commands';
+import { TOOL_DEFS, TOOL_FAMILIES, TOOL_FAMILY_ORDER, type ToolFamilyId } from '../sim/catalogs/tools';
+import {
+  craftBlockersFor,
+  describeCraftBlocker,
+  dispatchGameCommand,
+  resolveIngredientAllocation,
+} from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { RESOURCE_CATEGORIES, RESOURCE_DEFS } from '../world/resources';
 import type { ResourceId } from '../world/types';
@@ -247,6 +254,131 @@ function formatIngredients(ingredients: readonly IngredientRequirement[]) {
     .join(' · ');
 }
 
+/**
+ * Ingredients as slots, each saying how many you actually hold.
+ *
+ * "3 any Sticks & Twigs" told a player what was needed and nothing about
+ * whether they had it, so the only way to find out was to press a disabled
+ * button. Each slot now carries its own have/need count and marks itself
+ * short, which is also what lets the card explain a refusal without a
+ * separate error line.
+ */
+function renderIngredientSlots(recipe: RecipeDefinition): string {
+  const inventory = getGameState().player.inventory;
+  return recipe.ingredients.map((ingredient) => {
+    const label = ingredient.kind === 'exact'
+      ? RESOURCE_DEFS[ingredient.resource].shortLabel
+      : `any ${RESOURCE_CATEGORIES[ingredient.family].label}`;
+    const have = ingredient.kind === 'exact'
+      ? inventory[ingredient.resource] ?? 0
+      : resourceIds
+        .filter((resource) => RESOURCE_DEFS[resource].category === ingredient.family)
+        .reduce((sum, resource) => sum + (inventory[resource] ?? 0), 0);
+    const short = have < ingredient.quantity;
+    return `
+      <li class="craft-slot${short ? ' is-short' : ''}">
+        <span class="craft-slot-label">${label}</span>
+        <span class="craft-slot-count"><strong>${Math.min(have, ingredient.quantity)}</strong>/${ingredient.quantity}</span>
+      </li>`;
+  }).join('');
+}
+
+/**
+ * The plan slot.
+ *
+ * Called out separately from the materials because it is not consumed and
+ * you cannot gather more of it — a plan is found once and kept. Empty it is
+ * a dashed outline with a ghost mark, the same language as a drop target on
+ * a web form; filled it is solid.
+ */
+function renderPlanSlot(recipe: RecipeDefinition): string {
+  const found = getGameState().player.plans.includes(recipe.id as RecipeId);
+  return `
+    <div class="craft-plan-slot${found ? ' is-found' : ''}">
+      <span class="craft-plan-mark" aria-hidden="true"></span>
+      <span class="craft-plan-copy">
+        <strong>${found ? recipe.planName : 'Plan not found yet'}</strong>
+        <small>${found ? 'In your scrapbook' : 'Find this plan to unlock the recipe'}</small>
+      </span>
+    </div>`;
+}
+
+/**
+ * Recipes you are about to remake something you already own with need a
+ * second press.
+ *
+ * Making a spare to give away is a real thing to want, so this is not
+ * blocked — but it costs the same materials as the first one, and a player
+ * who misread the row should not lose them to a single click. Cleared on any
+ * other interaction by the re-render.
+ */
+let confirmingRemake: RecipeId | null = null;
+
+function renderRecipeRung(recipeId: RecipeId, makerLevel: number, activeCraft: RecipeId | null): string {
+  const recipe = RECIPE_DEFS[recipeId];
+  const state = getGameState();
+  const blockers = craftBlockersFor(recipeId);
+  const owned = recipe.output.kind === 'tool'
+    ? state.player.tools[recipe.output.toolId] ?? 0
+    : state.player.items[recipe.output.itemId] ?? 0;
+  const tool = recipe.output.kind === 'tool' ? TOOL_DEFS[recipe.output.toolId] : null;
+  const duration = getCraftDuration(recipe, makerLevel).toFixed(1);
+  const working = activeCraft === recipeId;
+  const confirming = confirmingRemake === recipeId;
+
+  const label = working ? 'Making…'
+    : confirming ? 'Make another — press again'
+      : owned > 0 ? 'Make another'
+        : 'Make thing';
+  const reason = blockers[0] ? describeCraftBlocker(blockers[0]) : '';
+
+  return `
+    <details class="craft-rung${owned > 0 ? ' is-owned' : ''}${blockers.length ? ' is-blocked' : ''}">
+      <summary>
+        <span class="craft-rung-title">
+          ${tool ? `<span class="craft-rung-tier">Level ${tool.tier}</span>` : ''}
+          <strong>${recipe.name}</strong>
+        </span>
+        <span class="craft-rung-state">${owned > 0 ? `You have ${owned}` : reason || 'Ready to make'}</span>
+      </summary>
+      <div class="craft-rung-body">
+        <p class="craft-rung-description">${recipe.description}</p>
+        ${tool ? `<p class="craft-rung-limitation">${tool.limitation}</p>` : ''}
+        ${renderPlanSlot(recipe)}
+        <ul class="craft-slots">${renderIngredientSlots(recipe)}</ul>
+        <div class="craft-rung-actions">
+          <span class="craft-rung-time">${duration}s to make</span>
+          <button type="button" data-recipe-id="${recipeId}"${blockers.length || working ? ' disabled' : ''}${reason ? ` title="${reason}"` : ''}>${label}</button>
+        </div>
+      </div>
+    </details>`;
+}
+
+/** A family's ladder, collapsed to one line until opened. */
+function renderFamily(family: ToolFamilyId, makerLevel: number, activeCraft: RecipeId | null): string {
+  const rungs = recipesInFamily(family);
+  if (rungs.length === 0) return '';
+  const definition = TOOL_FAMILIES[family];
+  const state = getGameState();
+  // The summary answers "where am I on this ladder?" without opening it.
+  const best = rungs
+    .map((recipeId) => RECIPE_DEFS[recipeId].output)
+    .filter((output) => output.kind === 'tool' && (state.player.tools[output.toolId] ?? 0) > 0)
+    .at(-1);
+  const standing = best && best.kind === 'tool'
+    ? `${TOOL_DEFS[best.toolId].name} · level ${TOOL_DEFS[best.toolId].tier} of ${rungs.length}`
+    : `None yet · ${rungs.length} level${rungs.length === 1 ? '' : 's'}`;
+
+  return `
+    <details class="craft-family" open>
+      <summary>
+        <span class="craft-family-title"><strong>${definition.label}</strong><small>${definition.summary}</small></span>
+        <span class="craft-family-standing">${standing}</span>
+      </summary>
+      <div class="craft-family-body">${rungs.map((recipeId) => renderRecipeRung(recipeId, makerLevel, activeCraft)).join('')}</div>
+    </details>`;
+}
+
 export function isNearThingMaker(avatarPosition: THREE.Vector3) {
   const dx = avatarPosition.x - thingMakerPosition.x;
   const dz = avatarPosition.z - thingMakerPosition.z;
@@ -447,27 +579,23 @@ export function renderThingMakerPanel() {
   }
 
   if (makerRecipesElement) {
-    makerRecipesElement.innerHTML = recipes
-      .filter((recipe) => state.player.plans.includes(recipe.id as RecipeId))
-      .filter((recipe) => isRecipeAvailable(recipe.id as RecipeId))
-      .map((recipe) => {
-        const recipeId = recipe.id as RecipeId;
-        const duration = getCraftDuration(recipe, maker.level).toFixed(1);
-        const disabled = !canStartRecipe(recipeId);
-        const buttonText = activeCraft?.recipeId === recipeId ? 'Making...' : 'Make thing';
-        return `
-          <article class="recipe-card">
-            <h3>${recipe.name}</h3>
-            <p>${recipe.description}</p>
-            <div class="recipe-meta">
-              <span>${formatIngredients(recipe.ingredients)}</span>
-              <span>${duration}s</span>
-            </div>
-            <button type="button" data-recipe-id="${recipe.id}" ${disabled ? 'disabled' : ''}>${buttonText}</button>
-          </article>
-        `;
-      })
+    // The whole ladder shows, not only the rungs you have plans for. Seeing
+    // what two levels up will cost is the point of a progression; hiding it
+    // until you already hold the plan tells you nothing you can act on.
+    const activeRecipeId = activeCraft?.recipeId ?? null;
+    const families = TOOL_FAMILY_ORDER
+      .map((family) => renderFamily(family, maker.level, activeRecipeId))
       .join('');
+    const others = looseRecipes();
+    const otherBlock = others.length === 0 ? '' : `
+      <details class="craft-family">
+        <summary>
+          <span class="craft-family-title"><strong>Other things</strong><small>One-offs that are not part of a ladder.</small></span>
+          <span class="craft-family-standing">${others.length}</span>
+        </summary>
+        <div class="craft-family-body">${others.map((recipeId) => renderRecipeRung(recipeId, maker.level, activeRecipeId)).join('')}</div>
+      </details>`;
+    makerRecipesElement.innerHTML = families + otherBlock;
   }
 
   if (makerInventoryElement) {
@@ -578,8 +706,29 @@ export function wireThingMakerDom() {
     const recipeButton = target.closest<HTMLButtonElement>('[data-recipe-id]');
     if (recipeButton?.dataset.recipeId) {
       const recipeId = recipeButton.dataset.recipeId as RecipeId;
-      if (recipeId in RECIPE_DEFS) startCraft(recipeId);
+      if (!(recipeId in RECIPE_DEFS)) return;
+      const output = RECIPE_DEFS[recipeId].output;
+      const state = getGameState();
+      const owned = output.kind === 'tool'
+        ? state.player.tools[output.toolId] ?? 0
+        : state.player.items[output.itemId] ?? 0;
+      // A spare to give away is a fair thing to want; losing a full set of
+      // materials to a misread row is not. Owning one turns the first press
+      // into a question.
+      if (owned > 0 && confirmingRemake !== recipeId) {
+        confirmingRemake = recipeId;
+        makerMessage = `You already have a ${output.label}. Press again to make another — it costs the same.`;
+        renderThingMakerPanel();
+        return;
+      }
+      confirmingRemake = null;
+      startCraft(recipeId);
       return;
+    }
+    // Any other click in the panel abandons a pending confirmation.
+    if (confirmingRemake) {
+      confirmingRemake = null;
+      renderThingMakerPanel();
     }
 
     if (target.closest('[data-close-maker]')) {

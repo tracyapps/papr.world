@@ -70,3 +70,35 @@ describe('footprints', () => {
     expect(blocker?.id).toBe('starter-house');
   });
 });
+
+describe('a tree claims more ground than it physically occupies', () => {
+  // The clearing's cozy treeline sits at known spots; roots block digging
+  // out to 0.52, but the trunk you can actually see is 0.28.
+  const [treeX, treeZ] = [-9.2, -7.2];
+  const PLAYER = 0.22;
+
+  it('refuses a dig against the roots', () => {
+    expect(findDigFootprintBlocker(treeX + 0.6, treeZ, 0.425)?.label).toBe('a tree');
+  });
+
+  it('lets you walk closer than you can dig', () => {
+    // The regression this guards: one radius served both, so the player
+    // stopped 0.74 units from a trunk drawn at 0.28 — an invisible wall more
+    // than twice the width of the tree, felt as a sticky treeline.
+    expect(findSolidBlocker(treeX + 0.6, treeZ, PLAYER)).toBeNull();
+    expect(findDigFootprintBlocker(treeX + 0.6, treeZ, PLAYER)).not.toBeNull();
+  });
+
+  it('still stops you at the trunk itself', () => {
+    expect(findSolidBlocker(treeX + 0.2, treeZ, PLAYER)?.label).toBe('a tree');
+    expect(isSolidAt(treeX, treeZ, PLAYER)).toBe(true);
+  });
+
+  it('keeps genuinely solid things solid to their full width', () => {
+    // The Thing Maker declares no separate physical radius, so it blocks
+    // movement exactly as far as it blocks digging. The default must not
+    // quietly shrink everything that never opted in.
+    expect(findSolidBlocker(-0.12 + 1.2, -3.22, PLAYER)?.label).toBe('the Thing Maker');
+    expect(findDigFootprintBlocker(-0.12 + 1.2, -3.22, PLAYER)?.label).toBe('the Thing Maker');
+  });
+});

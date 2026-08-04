@@ -3,6 +3,7 @@ import { TOOL_DEFS, type ToolId } from './catalogs/tools';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import type { DigDiscovery } from './catalogs/geology';
 import { SEED_DEFS, type SeedId } from './catalogs/seeds';
+import { MAX_TREE_GROWTH, type TreeGrowthState } from './catalogs/trees';
 
 export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
@@ -29,7 +30,12 @@ export type ActiveCraftState = {
 
 export type PageModificationState = {
   terrainEdits: Record<string, TerrainEditCellState>;
-  treeGrowth: Record<string, unknown>;
+  /**
+   * Only trees that have actually been cut appear here. An absent key means
+   * an untouched, flourishing tree, so a forest page costs nothing to store
+   * until someone works it.
+   */
+  treeGrowth: Record<string, TreeGrowthState>;
   plantedCells: Record<string, unknown>;
   placedEntities: Record<string, unknown>;
 };
@@ -182,13 +188,35 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
   return result;
 }
 
+/**
+ * Tree records are dropped rather than repaired when malformed. A tree with
+ * no record reads as flourishing, which is the safe direction to fail: a
+ * corrupt save gives the player a whole forest back, never a permanently
+ * bald one they cannot fix.
+ */
+function normalizeTreeGrowth(value: unknown): Record<string, TreeGrowthState> {
+  const result: Record<string, TreeGrowthState> = {};
+  for (const [treeKey, rawTree] of Object.entries(safeObject(value))) {
+    const tree = safeObject(rawTree);
+    if (typeof tree.growth !== 'number' || !Number.isFinite(tree.growth)) continue;
+    if (typeof tree.trimmedAt !== 'number' || !Number.isFinite(tree.trimmedAt)) continue;
+    result[treeKey] = {
+      growth: Math.max(0, Math.min(MAX_TREE_GROWTH, tree.growth)),
+      trimmedAt: tree.trimmedAt,
+      trims: typeof tree.trims === 'number' && Number.isFinite(tree.trims)
+        ? Math.max(0, Math.floor(tree.trims)) : 0,
+    };
+  }
+  return result;
+}
+
 function normalizePageModifications(value: unknown): Record<string, PageModificationState> {
   const result: Record<string, PageModificationState> = {};
   for (const [pageId, rawPage] of Object.entries(safeObject(value))) {
     const page = safeObject(rawPage);
     result[pageId] = {
       terrainEdits: normalizeTerrainEdits(page.terrainEdits),
-      treeGrowth: safeObject(page.treeGrowth),
+      treeGrowth: normalizeTreeGrowth(page.treeGrowth),
       plantedCells: safeObject(page.plantedCells),
       placedEntities: safeObject(page.placedEntities),
     };

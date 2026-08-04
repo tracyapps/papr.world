@@ -6,6 +6,7 @@ import {
   type ResourceCategoryId,
   type ResourceId,
 } from '../sim/catalogs/resources';
+import { BIOME_SCATTER } from '../sim/catalogs/obtaining';
 import type { Biome, HarvestVisual } from './types';
 
 export { RESOURCE_CATEGORIES, RESOURCE_CATEGORY_ORDER };
@@ -31,6 +32,18 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'l
   'ribbonwood-sticks': {
     material: 'paper.salmon', visual: 'twigBundle', mapColor: '#b45e67',
     biomes: ['forest', 'scrapflats'],
+  },
+  // Deliberately absent from `BIOME_RESOURCES`: this never generates as a
+  // loose pile. Cork reads as bark without new artwork.
+  //
+  // NOTE: `biomes` here means "where this can be obtained", where every
+  // other entry means "where this scatters". Two meanings in one field —
+  // harmless while only the generator reads it, and the reason
+  // `docs/biome-knowledge.md` proposes replacing it with an `obtainedBy`
+  // descriptor before anything else starts reading it.
+  'redwood-bark-curls': {
+    material: 'paper.cork', visual: 'twigBundle', mapColor: '#8a4a33',
+    biomes: ['forest'],
   },
   'mossy-paper-fiber': {
     material: 'paper.monstera', visual: 'fiberTuft', mapColor: '#4f823f',
@@ -81,10 +94,13 @@ export const RESOURCE_DEFS = Object.fromEntries(
   ]),
 ) as Record<ResourceId, ResourceDefinition>;
 
-export const BIOME_RESOURCES: Record<Biome, ResourceId[]> = {
-  clearing: ['kraft-twigs', 'mossy-paper-fiber', 'bluefold-pebbles'],
-  forest: ['kraft-twigs', 'ribbonwood-sticks', 'mossy-paper-fiber', 'graphite-cardstone'],
-  meadow: ['mossy-paper-fiber', 'confetti-stones', 'bluefold-pebbles', 'kraft-twigs'],
-  dunes: ['sunbaked-cardboard', 'bluefold-pebbles'],
-  scrapflats: ['sunbaked-cardboard', 'graphite-cardstone', 'confetti-stones', 'ribbonwood-sticks'],
-};
+/**
+ * What the generator scatters as loose piles, per biome.
+ *
+ * Derived from `catalogs/obtaining.ts` rather than written twice. This was a
+ * hand-kept list sitting beside the scatter table, so the two could disagree
+ * about where a material lived and nothing would notice — the reference site
+ * and a critter would then confidently describe a world the generator was
+ * not building.
+ */
+export const BIOME_RESOURCES: Record<Biome, ResourceId[]> = BIOME_SCATTER;

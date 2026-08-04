@@ -1,4 +1,7 @@
 import rawContent from '../content/conversations.json';
+import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
+import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
+import { biomesFor, isBiomeExclusive, toolRequiredFor } from '../sim/catalogs/obtaining';
 import { getPage } from '../world/pages';
 import { getRegionName } from '../world/regions';
 import { pageOfPosition, type Biome } from '../world/types';
@@ -128,6 +131,48 @@ function getContext(critter: Critter): ConversationContext {
   };
 }
 
+/**
+ * Placeholders that read the game's own catalogs.
+ *
+ * `{{material:redwood-bark-curls}}` and `{{tool-for:redwood-bark-curls}}`
+ * mean a critter's instructions are quoting the same tables the simulation
+ * plays by. A hand-written line saying "you'll need the sturdy scissors for
+ * that" is a fact copied outside the system that owns it, and it goes stale
+ * silently the first time a tier is retuned — the squirrel keeps saying it,
+ * confidently, forever. These cannot: rename a tool, and every line that
+ * names it renames itself.
+ *
+ * Wording stays authored. Only the facts inside it are looked up.
+ */
+const CATALOG_PLACEHOLDERS: Record<string, (argument: string) => string> = {
+  /** A material's full name. */
+  material: (id) => RESOURCE_CORE_DEFS[id as ResourceId]?.label ?? id,
+  /** Its short name, for lines that already have a lot going on. */
+  'material-short': (id) => RESOURCE_CORE_DEFS[id as ResourceId]?.shortLabel ?? id,
+  /** A tool's name. */
+  tool: (id) => TOOL_DEFS[id as ToolId]?.name ?? id,
+  /** The tool a material needs, or plain hands. */
+  'tool-for': (id) => {
+    const toolId = toolRequiredFor(id as ResourceId);
+    return toolId ? TOOL_DEFS[toolId].name : 'nothing but your hands';
+  },
+  /** Where a material can be found, as a readable list. */
+  'found-in': (id) => {
+    const biomes = biomesFor(id as ResourceId);
+    if (biomes.length === 0) return 'nowhere anyone has found yet';
+    if (biomes.length === 1) return biomes[0];
+    return `${biomes.slice(0, -1).join(', ')} and ${biomes.at(-1)}`;
+  },
+  /**
+   * Whether a material is biome-exclusive, as a clause that can be dropped
+   * into a sentence. Computed, so a critter never claims exclusivity for
+   * something that has quietly become available somewhere else.
+   */
+  'only-here': (id) => (isBiomeExclusive(id as ResourceId)
+    ? "and it's the only place you'll find it"
+    : 'though it turns up elsewhere too'),
+};
+
 function fillTemplate(line: string, critter: Critter, context: ConversationContext) {
   const replacements: Record<string, string> = {
     name: critter.params.name,
@@ -136,7 +181,10 @@ function fillTemplate(line: string, critter: Critter, context: ConversationConte
     biome: context.biomeLabel,
     pageId: context.pageId,
   };
-  return line.replace(/\{\{(name|species|region|biome|pageId)\}\}/g, (_, key: string) => replacements[key]);
+  return line.replace(/\{\{([a-z-]+)(?::([a-z0-9-]+))?\}\}/gi, (whole, key: string, argument?: string) => {
+    if (argument !== undefined) return CATALOG_PLACEHOLDERS[key]?.(argument) ?? whole;
+    return replacements[key] ?? whole;
+  });
 }
 
 function fillChoice(choice: ConversationChoice, critter: Critter, context: ConversationContext): ConversationChoice {

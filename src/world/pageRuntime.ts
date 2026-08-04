@@ -26,6 +26,8 @@ import { getGameState } from '../sim/state';
 import { RESOURCE_DEFS } from './resources';
 import { buildTerrainPlantVisual } from './plantRuntime';
 import { registerTerrainPlant } from '../game/plantInteractions';
+import { treeSpeciesOf } from './treeRuntime';
+import { registerTrimmableTree } from '../game/treeInteractions';
 
 // Turns serializable PageData into a Three.js group.
 // Authored data and generated data flow through the exact same path.
@@ -153,6 +155,20 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         textureUrl: def.url,
       });
       group.add(tree);
+      // `positionalId` is already derived from the tree's generated
+      // coordinates, so it is stable across reloads and identical on every
+      // client — which is what makes it usable as the save key for growth.
+      registerTrimmableTree({
+        id: featureId,
+        object: tree,
+        pageId: page.id,
+        treeKey: prop.id ?? positionalId,
+        species: treeSpeciesOf(prop.tree),
+        x: prop.x,
+        z: prop.z,
+        height,
+        baseY,
+      });
       registerMapFeature({
         color: prop.mapColor ?? def.mapColor,
         id: featureId,

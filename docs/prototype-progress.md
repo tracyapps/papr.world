@@ -416,6 +416,8 @@ the catalog so their costs, tiers, and artwork are settled work; flipping one
 flag turns them on. **Crafting something you cannot then use is worse than not
 seeing it.**
 
+> Superseded 2026-08-04: the flag is now `true`. See "Renewable Trees" below.
+
 ### Scrapbook counts
 
 "12 tucked away" says nothing "12" does not. Counts now stand alone in their
@@ -713,6 +715,104 @@ The plant tool slot renders as a bare numbered slot — it needs seed-pouch
 artwork. Butterflies deliberately have no idle actions: their whole body is
 the animation, and a hovering insect that stops to groom reads as a physics
 bug.
+
+## Renewable Trees (2026-08-04)
+
+Trees stop being scenery. The `trim` verb is live, `TRIM_TOOLS_READY` is
+`true`, and both pairs of scissors are craftable and usable.
+
+### Growth is derived, not ticked
+
+`src/sim/catalogs/trees.ts` holds the whole model, renderer-free. A tree has
+**growth**, not hit points; trimming spends it, time restores it, and the tree
+is never destroyed. What persists is the growth left at the last cut plus the
+timestamp of that cut — everything since is arithmetic on elapsed time, the
+same shape as `plantStageAt` in `catalogs/seeds.ts`.
+
+That choice is doing three jobs at once:
+
+- **No timers.** Nothing ticks for trees on unloaded pages, which at ~48 trees
+  per forest page is the difference between a model and a liability.
+- **Catch-up is free.** A tree looks right the instant its page streams back
+  in, including after the game has been shut for an hour. The doc asked for
+  catch-up while a page is unloaded; there is no code for it, because there is
+  no other case.
+- **Untouched trees cost nothing.** No record means flourishing, so a forest
+  is zero bytes in the save until someone actually cuts something.
+
+Stage boundaries are the design doc's table exactly: 75+ flourishing, 40–74
+trimmed, 1–39 cropped, 0 resting. Recovery is `MAX / 300` per second — full
+in five minutes, a stage crossed every ~75s, sitting at the prototype end of
+the doc's range so the whole cycle is watchable while play-testing. The later
+15–30 minute cozy target is one constant.
+
+### Yield
+
+Deterministic in tree id and cut count, via the same FNV walk that schedules
+seed drops — a save reload must not reroll a cut, and two clients must agree
+knowing only how many times a tree has been cut. Species decide *what*
+(pine → twigs, leafy → fiber, redwood → ribbonwood), stage decides *how much*,
+and only a flourishing tree can turn up the occasional better find.
+
+**Kids scissors refuse redwoods.** The tool descriptions already said one
+snips soft new growth and the other takes bark curls and structural branches;
+this makes that true. It is the reason Tier 2 scissors exist beyond a bigger
+number.
+
+A redwood's primary yield is **`redwood-bark-curls`**, and it is the first
+material in the game with no loose pile anywhere — deliberately absent from
+`BIOME_RESOURCES`, so no dig and no scattered bundle can produce one. A
+redwood plus sturdy scissors is the only source. That turns the tier-2 shears
+from a bigger number into the key to a material, and it means `biomes` on
+that resource describes where it can be *obtained* rather than where it is
+scattered.
+
+### The refusal that could not be reached
+
+`hasTrimActionAt` originally required `status === 'valid'`, so the screen
+interaction router never called `tryTrimAt` for a redwood you lacked the
+shears for — the carefully worded refusal was unreachable and the click fell
+silently through to petting. Out-of-reach and resting trees were mute for the
+same reason.
+
+`planting` already had this right, and its comment says why: *"the click must
+be consumed so the player gets an explanation rather than the silent nothing
+of a click that falls through to the world."* The hit test now returns true
+for refusals too, and only declines when there is no tool or no tree.
+
+Worth remembering as a shape of bug: a resolver that correctly computes four
+refusal reasons is still broken if the thing that calls it only asks about
+success. The reasons existed and were tested; nothing routed to them.
+
+### Visuals
+
+Width does most of the work — a cut tree reads as *narrower*, not shorter,
+because a shrinking trunk is what makes a paper tree look like rubber.
+Redwoods take only a quarter of the height reduction, per the doc's warning.
+`world/treeRuntime.ts` corrects the mesh position by half the height loss so
+the foot stays planted rather than the tree hovering. Growth inside a stage
+blends toward the next, so recovery swells rather than popping four times.
+
+When trees gain separate canopy geometry, `applyTreeStageVisual` is the seam:
+nothing outside that file knows how the look is achieved.
+
+### Frame budget
+
+`docs/next-session.md` warned that per-frame world queries are what broke
+clicking, and that the symptom is not stutter. Nothing here runs on the frame
+path: trees register as their page builds, `hasTrimActionAt` early-returns
+unless trim mode is active, and the recovery pass is throttled to twice a
+second over a set containing only trees that are actually mid-regrowth —
+empty on every page until someone cuts something.
+
+### Not done: the personal harvest allowance
+
+The doc's multiplayer answer is a hybrid — shared stage visible to everyone,
+plus a short per-player allowance so one fast player cannot leave newcomers an
+empty forest. Only the **shared** half is built. In single-player the
+allowance would be a second invisible gate that does nothing, and it is
+additive when it is needed: a per-player map keyed by tree id, checked in
+`trimTree`. No refactor is being deferred, only a feature.
 
 ## HUD Layout Layer (2026-08-03)
 

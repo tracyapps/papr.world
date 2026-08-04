@@ -1359,7 +1359,6 @@ body {
 .panel-kicker,
 .maker-message,
 .maker-output,
-.recipe-card p,
 .inventory-list {
   font-size: 12px;
   line-height: 1.35;
@@ -1438,24 +1437,244 @@ body {
   gap: 8px;
 }
 
-.recipe-card {
+/* --- Tool ladders -------------------------------------------------------
+ *
+ * The plan list is a tree: family > level > detail. Both levels are native
+ * <details>, which is keyboard-operable and announced as an expandable group
+ * for free — a custom disclosure would have to reimplement all of that and
+ * would get it slightly wrong.
+ *
+ * Rows collapse to one line carrying the only two things worth scanning:
+ * what it is, and whether you can make it.
+ */
+
+.craft-family {
   background: rgb(255 255 255 / 0.5);
   border: 1px solid rgb(62 49 35 / 0.14);
   border-radius: 8px;
+}
+
+.craft-family > summary,
+.craft-rung > summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  list-style: none;
   padding: 9px;
 }
 
-.recipe-card h3 {
-  font-size: 14px;
-  margin: 0 0 4px;
+/* The default triangle sits at a different baseline in every browser. */
+.craft-family > summary::-webkit-details-marker,
+.craft-rung > summary::-webkit-details-marker {
+  display: none;
 }
 
-.recipe-card p {
+.craft-family > summary::before,
+.craft-rung > summary::before {
+  content: '▸';
+  color: #8a7256;
+  flex: none;
+  font-size: 10px;
+  transition: transform 120ms ease;
+}
+
+.craft-family[open] > summary::before,
+.craft-rung[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.craft-family > summary:focus-visible,
+.craft-rung > summary:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid #315f5c;
+  outline-offset: -2px;
+}
+
+.craft-family-title,
+.craft-rung-title {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.craft-family-title strong {
+  font-size: 13px;
+}
+
+.craft-family-title small,
+.craft-rung-state {
+  color: #7a6a58;
+  font-size: 11px;
+}
+
+.craft-family-standing {
+  color: #5f5346;
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.craft-family-body {
+  display: grid;
+  gap: 6px;
+  padding: 0 9px 9px;
+}
+
+.craft-rung {
+  background: rgb(255 255 255 / 0.55);
+  border: 1px solid rgb(62 49 35 / 0.12);
+  border-radius: 7px;
+}
+
+/* Owned levels are marked on their edge rather than tinted: the list is
+ * scanned down its left side, and a filled background would fight the
+ * short/blocked states inside the card. */
+.craft-rung.is-owned {
+  border-left: 3px solid #4f7d4a;
+}
+
+.craft-rung.is-blocked > summary {
+  opacity: 0.72;
+}
+
+.craft-rung-tier {
+  color: #8a7256;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.craft-rung-title strong {
+  font-size: 12.5px;
+}
+
+.craft-rung-body {
+  border-top: 1px solid rgb(62 49 35 / 0.1);
+  display: grid;
+  gap: 8px;
+  padding: 9px;
+}
+
+.craft-rung-description,
+.craft-rung-limitation {
   color: #5b5046;
-  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  margin: 0;
 }
 
-.recipe-card button,
+.craft-rung-limitation {
+  border-left: 2px solid rgb(62 49 35 / 0.18);
+  color: #715d4a;
+  font-size: 11.5px;
+  padding-left: 7px;
+}
+
+/* The plan slot deliberately borrows the visual language of a file drop
+ * target: dashed while empty, solid once filled. A plan is not a material —
+ * it is not consumed and cannot be gathered — so it must not read as one
+ * more line in the ingredient list. */
+.craft-plan-slot {
+  align-items: center;
+  border: 2px dashed rgb(62 49 35 / 0.3);
+  border-radius: 7px;
+  display: flex;
+  gap: 8px;
+  padding: 7px 8px;
+}
+
+.craft-plan-slot.is-found {
+  background: rgb(88 116 158 / 0.1);
+  border-color: #58749e;
+  border-style: solid;
+}
+
+.craft-plan-mark {
+  background: rgb(62 49 35 / 0.18);
+  block-size: 20px;
+  clip-path: polygon(0 0, 72% 0, 100% 26%, 100% 100%, 0 100%);
+  flex: none;
+  inline-size: 16px;
+}
+
+.craft-plan-slot.is-found .craft-plan-mark {
+  background: #58749e;
+}
+
+.craft-plan-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.craft-plan-copy strong {
+  font-size: 11.5px;
+}
+
+.craft-plan-copy small {
+  color: #7a6a58;
+  font-size: 10.5px;
+}
+
+.craft-slots {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.craft-slot {
+  align-items: center;
+  background: rgb(255 255 255 / 0.42);
+  border: 1px solid rgb(62 49 35 / 0.12);
+  border-radius: 6px;
+  display: flex;
+  font-size: 11.5px;
+  gap: 6px;
+  justify-content: space-between;
+  padding: 5px 7px;
+}
+
+/* Colour is not the only signal: a short slot also reads as short from its
+ * have/need numbers, which are always present. */
+.craft-slot.is-short {
+  border-color: rgb(150 74 43 / 0.4);
+}
+
+.craft-slot.is-short .craft-slot-count strong {
+  color: #964a2b;
+}
+
+.craft-slot-count {
+  color: #7a6a58;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.craft-slot-count strong {
+  color: #3e3123;
+}
+
+.craft-rung-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.craft-rung-time {
+  color: #7a6a58;
+  flex: none;
+  font-size: 11px;
+}
+
+.craft-rung-actions button,
 .upgrade-button {
   background: #315f5c;
   border: 0;
@@ -1470,24 +1689,21 @@ body {
   width: 100%;
 }
 
-.recipe-card button:disabled,
+.craft-rung-actions button {
+  width: auto;
+}
+
+.craft-rung-actions button:disabled,
 .upgrade-button:disabled {
   background: #b9afa2;
   cursor: not-allowed;
 }
 
-.recipe-meta,
 .inventory-row {
   align-items: center;
   display: flex;
   gap: 6px;
   justify-content: space-between;
-}
-
-.recipe-meta {
-  color: #715d4a;
-  font-size: 11px;
-  margin-bottom: 8px;
 }
 
 .inventory-row {

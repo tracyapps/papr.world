@@ -1,4 +1,4 @@
-import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
+import { TOOL_DEFS, toolsInFamily, type ToolId } from '../sim/catalogs/tools';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { getActionMode, onActionModeChanged, setActionMode, type ActionMode } from '../game/actionMode';
@@ -10,8 +10,17 @@ import { requestHudLayout } from './hudLayout';
 const interactArtUrl = new URL('../../designs/arrows.svg', import.meta.url).href;
 const tornPaperUrl = new URL('../../designs/paper-tear 2.svg', import.meta.url).href;
 
-const SHOVEL_TOOL_ID: ToolId = 'flimsy-shovel';
-const HOE_TOOL_ID: ToolId = 'creased-hoe';
+/**
+ * Each rail slot is a *family*, not a tool.
+ *
+ * Read from the catalog rather than listed here, so a new rung on a ladder
+ * appears in the rail without touching this file — and, more importantly, so
+ * upgrading can never leave you still clicking the old tool because a
+ * hardcoded id was missed.
+ */
+const SHOVEL_TOOL_IDS = toolsInFamily('shovel');
+const HOE_TOOL_IDS = toolsInFamily('hoe');
+const TRIM_TOOL_IDS = toolsInFamily('scissors');
 
 /**
  * How a slot decides whether the player may use it, and what it says when
@@ -20,7 +29,16 @@ const HOE_TOOL_ID: ToolId = 'creased-hoe';
  */
 type SlotRequirement =
   | { kind: 'none' }
-  | { kind: 'tool'; toolId: ToolId };
+  | { kind: 'tool'; toolId: ToolId }
+  /**
+   * One slot, a family of tools, best one wins.
+   *
+   * Scissors come in two tiers that do the same job at different strengths,
+   * and giving each its own slot would mean a rail where two of four buttons
+   * are the same verb — and where upgrading silently leaves you clicking the
+   * old one. Listed weakest first; the slot equips the best you own.
+   */
+  | { kind: 'anyTool'; toolIds: readonly ToolId[] };
 
 type ToolbarSlot = {
   slot: number;
@@ -49,25 +67,29 @@ const TOOLBAR_SLOTS: ToolbarSlot[] = [
   },
   {
     slot: 2,
-    label: 'Flimsy Shovel',
+    label: 'Shovel',
     mode: 'dig',
-    requires: { kind: 'tool', toolId: SHOVEL_TOOL_ID },
-    artUrl: getToolArt(SHOVEL_TOOL_ID)?.sourceUrl,
-    artFrame: getToolArt(SHOVEL_TOOL_ID)?.frame,
+    requires: { kind: 'anyTool', toolIds: SHOVEL_TOOL_IDS },
+    artUrl: getToolArt(SHOVEL_TOOL_IDS[0])?.sourceUrl,
+    artFrame: getToolArt(SHOVEL_TOOL_IDS[0])?.frame,
   },
   {
     slot: 3,
-    label: 'Creased Hoe',
+    label: 'Hoe',
     mode: 'plant',
-    requires: { kind: 'tool', toolId: HOE_TOOL_ID },
-    artUrl: getToolArt(HOE_TOOL_ID)?.sourceUrl,
-    artFrame: getToolArt(HOE_TOOL_ID)?.frame,
+    requires: { kind: 'anyTool', toolIds: HOE_TOOL_IDS },
+    artUrl: getToolArt(HOE_TOOL_IDS[0])?.sourceUrl,
+    artFrame: getToolArt(HOE_TOOL_IDS[0])?.frame,
   },
   {
     slot: 4,
-    label: 'Empty tool slot',
-    mode: null,
-    requires: { kind: 'none' },
+    label: 'Scissors',
+    mode: 'trim',
+    requires: { kind: 'anyTool', toolIds: TRIM_TOOL_IDS },
+    // The rail shows the starter pair even once you own the sturdy ones —
+    // the slot art is the verb, not the specific tool in hand.
+    artUrl: getToolArt('kids-scissors')?.sourceUrl,
+    artFrame: getToolArt('kids-scissors')?.frame,
   },
 ];
 
@@ -92,6 +114,11 @@ function heldSeed(): SeedId | null {
     .find((candidate) => (state.player.inventory[candidate] ?? 0) > 0) ?? null;
 }
 
+/** The best owned tool from a family, or null when you own none of them. */
+function bestOwnedTool(toolIds: readonly ToolId[]): ToolId | null {
+  return [...toolIds].reverse().find(ownsTool) ?? null;
+}
+
 /** Why the slot is currently unusable, or null when it is ready. */
 function slotLock(slot: ToolbarSlot): string | null {
   switch (slot.requires.kind) {
@@ -99,6 +126,10 @@ function slotLock(slot: ToolbarSlot): string | null {
       return ownsTool(slot.requires.toolId)
         ? null
         : `Make a ${TOOL_DEFS[slot.requires.toolId].name} in the Thing Maker first`;
+    case 'anyTool':
+      return bestOwnedTool(slot.requires.toolIds)
+        ? null
+        : `Make a ${TOOL_DEFS[slot.requires.toolIds[0]].name} in the Thing Maker first`;
     default:
       return null;
   }
@@ -116,6 +147,9 @@ export function selectToolSlot(slotNumber: number) {
 
   if (slot.requires.kind === 'tool') {
     dispatchGameCommand({ type: 'equipTool', toolId: slot.requires.toolId });
+  }
+  if (slot.requires.kind === 'anyTool') {
+    dispatchGameCommand({ type: 'equipTool', toolId: bestOwnedTool(slot.requires.toolIds) });
   }
   // Reaching for the hoe with seeds in the scrapbook but none chosen picks
   // one up, so the common case (sow something) needs one click, while

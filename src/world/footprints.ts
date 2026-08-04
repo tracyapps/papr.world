@@ -18,6 +18,21 @@ export type DigFootprint = {
    * stroll through walls or make them refuse to cross a scattered stick.
    */
   solid?: boolean;
+  /**
+   * How much room the object takes up *physically*, when that is smaller
+   * than the ground it claims.
+   *
+   * A tree is the case this exists for. Its roots spread — you cannot dig a
+   * bed against the trunk — but the trunk itself is a narrow thing you should
+   * be able to walk right up to and squeeze past. Using one radius for both
+   * put an invisible wall around every tree at more than twice the width of
+   * the visible trunk, which is what made the treeline feel sticky.
+   *
+   * Defaults to the dig radius, so anything that genuinely is as solid as it
+   * is wide — a wall, the Thing Maker — needs to say nothing.
+   */
+  solidRadiusX?: number;
+  solidRadiusZ?: number;
 };
 
 const CLEARING_DETAIL_FOOTPRINTS: DigFootprint[] = [
@@ -28,7 +43,7 @@ const CLEARING_DETAIL_FOOTPRINTS: DigFootprint[] = [
   // Not solid: the pond is walkable, and land critters avoid it through the
   // water registry instead (they wade rather than bounce off a wall).
   { id: 'paper-pond', label: 'the paper pond', x: -5.2, z: 4.7, radiusX: 1.5, radiusZ: 1.05 },
-  { id: 'listening-tree', label: 'the listening tree', x: -1.7, z: -6.8, radiusX: 0.62, radiusZ: 0.62, solid: true },
+  { id: 'listening-tree', label: 'the listening tree', x: -1.7, z: -6.8, radiusX: 0.62, radiusZ: 0.62, solid: true, solidRadiusX: 0.3, solidRadiusZ: 0.3 },
   { id: 'porch-mobile', label: 'the porch mobile', x: 5.2, z: -1.9, radiusX: 0.72, radiusZ: 0.72, solid: true },
 ];
 
@@ -42,8 +57,23 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
   const id = `page:${page.id}:prop:${prop.id ?? index}`;
   switch (prop.kind) {
     case 'tree': {
-      const radius = prop.tree.startsWith('redwood') ? 0.8 : 0.52;
-      return { id, label: 'a tree', x: prop.x, z: prop.z, radiusX: radius, radiusZ: radius, solid: true };
+      // Roots claim the ground; the trunk claims far less of it. The solid
+      // radius is matched to the trunk the player can actually see — the map
+      // feature registers the same 0.28 in `pageRuntime.ts`.
+      const redwood = prop.tree.startsWith('redwood');
+      const radius = redwood ? 0.8 : 0.52;
+      const trunk = redwood ? 0.46 : 0.28;
+      return {
+        id,
+        label: 'a tree',
+        x: prop.x,
+        z: prop.z,
+        radiusX: radius,
+        radiusZ: radius,
+        solid: true,
+        solidRadiusX: trunk,
+        solidRadiusZ: trunk,
+      };
     }
     // Loose material and flat scraps lie *on* the ground. They block digging
     // (something is already there) but nothing should walk around a twig.
@@ -89,7 +119,17 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
   if (page.id === '0,0') {
     footprints.push(...CLEARING_DETAIL_FOOTPRINTS);
     CLEARING_COZY_TREE_SPOTS.forEach(([x, z], index) => {
-      footprints.push({ id: `clearing-cozy-tree:${index}`, label: 'a tree', x, z, radiusX: 0.52, radiusZ: 0.52, solid: true });
+      footprints.push({
+        id: `clearing-cozy-tree:${index}`,
+        label: 'a tree',
+        x,
+        z,
+        radiusX: 0.52,
+        radiusZ: 0.52,
+        solid: true,
+        solidRadiusX: 0.28,
+        solidRadiusZ: 0.28,
+      });
     });
     [-1, -0.25, 0.5, 1.25].forEach((z, index) => {
       // Shrubs are ankle height — walkable.
@@ -108,9 +148,11 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
   return footprints;
 }
 
-function overlaps(footprint: DigFootprint, x: number, z: number, radius: number) {
-  const dx = (x - footprint.x) / (footprint.radiusX + radius);
-  const dz = (z - footprint.z) / (footprint.radiusZ + radius);
+function overlaps(footprint: DigFootprint, x: number, z: number, radius: number, physical = false) {
+  const footprintX = physical ? footprint.solidRadiusX ?? footprint.radiusX : footprint.radiusX;
+  const footprintZ = physical ? footprint.solidRadiusZ ?? footprint.radiusZ : footprint.radiusZ;
+  const dx = (x - footprint.x) / (footprintX + radius);
+  const dz = (z - footprint.z) / (footprintZ + radius);
   return dx * dx + dz * dz < 1;
 }
 
@@ -136,7 +178,7 @@ export function findDigFootprintBlocker(x: number, z: number, radius: number): D
 export function findSolidBlocker(x: number, z: number, radius: number): DigFootprint | null {
   // Peeks rather than generates: this runs every frame for every nearby
   // critter, and a walking animal must never cause world generation.
-  return findFootprint(x, z, radius, (footprint) => Boolean(footprint.solid), peekPage);
+  return findFootprint(x, z, radius, (footprint) => Boolean(footprint.solid), peekPage, true);
 }
 
 export function isSolidAt(x: number, z: number, radius = 0): boolean {
@@ -150,6 +192,7 @@ function findFootprint(
   radius: number,
   accept: (footprint: DigFootprint) => boolean,
   lookup: (px: number, pz: number) => PageData | null,
+  physical = false,
 ): DigFootprint | null {
   const center = pageOfPosition(x, z);
   for (let px = center.px - 1; px <= center.px + 1; px += 1) {
@@ -157,7 +200,7 @@ function findFootprint(
       const page = lookup(px, pz);
       if (!page) continue;
       const blocker = pageFootprints(page)
-        .find((footprint) => accept(footprint) && overlaps(footprint, x, z, radius));
+        .find((footprint) => accept(footprint) && overlaps(footprint, x, z, radius, physical));
       if (blocker) return blocker;
     }
   }

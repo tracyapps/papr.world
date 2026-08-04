@@ -2,45 +2,141 @@
   "version": 1,
   "everyday": {
     "greetings": {
-      "squirrel": ["Oh! Hello. I was counting acorns, but I am happy to lose count.", "You came back! I saved the sunniest patch of paper."],
-      "butterfly": ["The air tastes like blue paper today.", "I have been practicing a very small loop-de-loop."],
-      "raccoon": ["Psst. I found something extremely interesting. It was a button.", "Hello, neighbor. Your pockets sound promising."],
-      "bunny": ["Hi! I heard your footsteps before I saw you.", "Everything is especially sniffable today."],
-      "bird": ["Cheep! That means hello. It also means cheep.", "I have news from the tall tree. Most of it is about wind."],
-      "cat": ["Oh. It is you. You may stay.", "I was not waiting here. This simply happens to be where you arrived."],
-      "woodchuck": ["Mind the cutter guard! The big lever is still finding its manners.", "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti."]
+      "squirrel": [
+        "Oh! Hello. I was counting acorns, but I am happy to lose count.",
+        "You came back! I saved the sunniest patch of paper."
+      ],
+      "butterfly": [
+        "The air tastes like blue paper today.",
+        "I have been practicing a very small loop-de-loop."
+      ],
+      "raccoon": [
+        "Psst. I found something extremely interesting. It was a button.",
+        "Hello, neighbor. Your pockets sound promising."
+      ],
+      "bunny": [
+        "Hi! I heard your footsteps before I saw you.",
+        "Everything is especially sniffable today."
+      ],
+      "bird": [
+        "Cheep! That means hello. It also means cheep.",
+        "I have news from the tall tree. Most of it is about wind."
+      ],
+      "cat": [
+        "Oh. It is you. You may stay.",
+        "I was not waiting here. This simply happens to be where you arrived."
+      ],
+      "woodchuck": [
+        "Mind the cutter guard! The big lever is still finding its manners.",
+        "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti."
+      ]
     },
     "placeReplies": {
-      "squirrel": ["The notebook path remembers everyone who walks on it. Listen closely—it crinkles in different accents.", "There is a very good thinking tree near the north edge of {{region}}."],
-      "butterfly": ["The blue paper pond is only pretending to be water. Please do not tell it I said so.", "Some scraps flutter more when they are pleased."],
-      "raccoon": ["Every scrap pile is a treasure pile with poor publicity.", "The house window likes visitors. It gets bored staring in only one direction."],
-      "bunny": ["The soft green patches are warmer than the big sheet. I checked all of them.", "If you stand very still, {{region}} keeps moving anyway. That is how you know it is alive."],
-      "bird": ["The trees trade rumors whenever the breeze turns them sideways.", "I saw a shiny scrap past the path. Or possibly the sun. Both are worth visiting."],
-      "cat": ["The best seat is whichever one someone else was about to use.", "The porch is acceptable at sunset. I have issued it a provisional approval."],
-      "woodchuck": ["The Wood Mill sits where the notebook trail meets the oldest trees. That saves us a great deal of carrying.", "Ribbonwood bundles turn up near the forest edge. Walk over the loose bundles and they will tuck into your scrapbook."]
+      "squirrel": [
+        "The notebook path remembers everyone who walks on it. Listen closely—it crinkles in different accents.",
+        "There is a very good thinking tree near the north edge of {{region}}."
+      ],
+      "butterfly": [
+        "The blue paper pond is only pretending to be water. Please do not tell it I said so.",
+        "Some scraps flutter more when they are pleased."
+      ],
+      "raccoon": [
+        "Every scrap pile is a treasure pile with poor publicity.",
+        "The house window likes visitors. It gets bored staring in only one direction."
+      ],
+      "bunny": [
+        "The soft green patches are warmer than the big sheet. I checked all of them.",
+        "If you stand very still, {{region}} keeps moving anyway. That is how you know it is alive."
+      ],
+      "bird": [
+        "The trees trade rumors whenever the breeze turns them sideways.",
+        "I saw a shiny scrap past the path. Or possibly the sun. Both are worth visiting."
+      ],
+      "cat": [
+        "The best seat is whichever one someone else was about to use.",
+        "The porch is acceptable at sunset. I have issued it a provisional approval."
+      ],
+      "woodchuck": [
+        "The Wood Mill sits where the notebook trail meets the oldest trees. That saves us a great deal of carrying.",
+        "Ribbonwood bundles turn up near the forest edge. Walk over the loose bundles and they will tuck into your scrapbook."
+      ]
     },
     "selfReplies": {
-      "squirrel": ["I collect tiny things with important shapes.", "My tail is five pieces of paper and one piece of confidence."],
-      "butterfly": ["My wings never agree on which color is the favorite.", "I can land on a pencil line without smudging it. Usually."],
-      "raccoon": ["I wash my paws even when there is no water. It is about the ceremony.", "My mask is formalwear. I am always ready for an occasion."],
-      "bunny": ["I know seven kinds of quiet and three kinds of lettuce.", "My ears are excellent umbrellas for very small friends."],
-      "bird": ["I keep songs in the folds under my wings.", "I am working on a duet with the wind chime. The wind chime does not know yet."],
-      "cat": ["My hobbies include sitting near things and improving them.", "I have never knocked anything off a table without a reason. The reasons are private."],
-      "woodchuck": ["I am Chisel: miller, measurer, and occasional sandwich inspector.", "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen."]
+      "squirrel": [
+        "I collect tiny things with important shapes.",
+        "My tail is five pieces of paper and one piece of confidence."
+      ],
+      "butterfly": [
+        "My wings never agree on which color is the favorite.",
+        "I can land on a pencil line without smudging it. Usually."
+      ],
+      "raccoon": [
+        "I wash my paws even when there is no water. It is about the ceremony.",
+        "My mask is formalwear. I am always ready for an occasion."
+      ],
+      "bunny": [
+        "I know seven kinds of quiet and three kinds of lettuce.",
+        "My ears are excellent umbrellas for very small friends."
+      ],
+      "bird": [
+        "I keep songs in the folds under my wings.",
+        "I am working on a duet with the wind chime. The wind chime does not know yet."
+      ],
+      "cat": [
+        "My hobbies include sitting near things and improving them.",
+        "I have never knocked anything off a table without a reason. The reasons are private."
+      ],
+      "woodchuck": [
+        "I am Chisel: miller, measurer, and occasional sandwich inspector.",
+        "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen."
+      ]
     },
     "traitReplies": {
-      "bold": ["I tried something before deciding whether it was sensible. It was excellent.", "Today feels like a good day to go first."],
-      "curious": ["I have had three questions since breakfast and breakfast was one of them.", "I keep wondering what is behind things. Usually it is more things!"],
-      "dramatic": ["A breeze moved my favorite scrap. I may write a play about the betrayal.", "Everything today has been enormous, even the tiny parts."],
-      "gentle": ["I found a quiet spot and left half of it empty in case a friend came by.", "I am taking special care not to crease the morning."],
-      "mischievous": ["I moved one small thing two inches. Nobody suspects me yet.", "I know a joke that only works if you are standing beside a scrap pile."],
-      "shy": ["It has been a quiet day. I liked it, but I am glad you visited.", "I practiced saying hello before you arrived. Hello."],
-      "sleepy": ["I am awake in all the important places.", "I found a sunbeam shaped exactly like a nap."]
+      "bold": [
+        "I tried something before deciding whether it was sensible. It was excellent.",
+        "Today feels like a good day to go first."
+      ],
+      "curious": [
+        "I have had three questions since breakfast and breakfast was one of them.",
+        "I keep wondering what is behind things. Usually it is more things!"
+      ],
+      "dramatic": [
+        "A breeze moved my favorite scrap. I may write a play about the betrayal.",
+        "Everything today has been enormous, even the tiny parts."
+      ],
+      "gentle": [
+        "I found a quiet spot and left half of it empty in case a friend came by.",
+        "I am taking special care not to crease the morning."
+      ],
+      "mischievous": [
+        "I moved one small thing two inches. Nobody suspects me yet.",
+        "I know a joke that only works if you are standing beside a scrap pile."
+      ],
+      "shy": [
+        "It has been a quiet day. I liked it, but I am glad you visited.",
+        "I practiced saying hello before you arrived. Hello."
+      ],
+      "sleepy": [
+        "I am awake in all the important places.",
+        "I found a sunbeam shaped exactly like a nap."
+      ]
     },
     "choices": [
-      { "id": "day", "label": "How is your day?", "replyPool": "trait" },
-      { "id": "place", "label": "Tell me about this place", "replyPool": "place" },
-      { "id": "self", "label": "Tell me about you", "replyPool": "self" },
+      {
+        "id": "day",
+        "label": "How is your day?",
+        "replyPool": "trait"
+      },
+      {
+        "id": "place",
+        "label": "Tell me about this place",
+        "replyPool": "place"
+      },
+      {
+        "id": "self",
+        "label": "Tell me about you",
+        "replyPool": "self"
+      },
       {
         "id": "pet",
         "label": "Give a gentle pet",
@@ -58,68 +154,371 @@
     ]
   },
   "milestones": [
-    { "level": "pet", "flag": "milestone:pet", "opening": "{{name}} settles beside your feet as naturally as a scrap finding its place on the page.", "label": "Stay together awhile", "reply": "Neither of you needs to fill the quiet. The clearing does that for you." },
-    { "level": "buddy", "flag": "milestone:buddy", "opening": "{{name}} hurries over with news saved especially for you. “Good. My favorite listening person is here.”", "label": "I saved some news too", "reply": "You trade small stories until both of them feel important." },
-    { "level": "friend", "flag": "milestone:friend", "opening": "{{name}} smiles before you have even said hello. “I was hoping your footsteps would be the next ones.”", "label": "I was hoping to see you too", "reply": "The words make a warm little place between you." },
-    { "level": "curious", "flag": "milestone:curious", "opening": "{{name}} listens to you approach. “I think I know your footsteps now.”", "label": "Then I’ll learn yours too", "reply": "{{name}} demonstrates: two ordinary steps, one very distinctive tiny hop." }
+    {
+      "level": "pet",
+      "flag": "milestone:pet",
+      "opening": "{{name}} settles beside your feet as naturally as a scrap finding its place on the page.",
+      "label": "Stay together awhile",
+      "reply": "Neither of you needs to fill the quiet. The clearing does that for you."
+    },
+    {
+      "level": "buddy",
+      "flag": "milestone:buddy",
+      "opening": "{{name}} hurries over with news saved especially for you. “Good. My favorite listening person is here.”",
+      "label": "I saved some news too",
+      "reply": "You trade small stories until both of them feel important."
+    },
+    {
+      "level": "friend",
+      "flag": "milestone:friend",
+      "opening": "{{name}} smiles before you have even said hello. “I was hoping your footsteps would be the next ones.”",
+      "label": "I was hoping to see you too",
+      "reply": "The words make a warm little place between you."
+    },
+    {
+      "level": "curious",
+      "flag": "milestone:curious",
+      "opening": "{{name}} listens to you approach. “I think I know your footsteps now.”",
+      "label": "Then I’ll learn yours too",
+      "reply": "{{name}} demonstrates: two ordinary steps, one very distinctive tiny hop."
+    }
   ],
   "storylets": [
     {
-      "id": "chisel-mill-welcome", "critterIds": ["-2,0#woodchuck"], "priority": 90, "maxPlays": 1, "storyArc": "The Wood Mill",
-      "opening": ["Chisel pats the edge of the enormous cutting table. “Welcome to the Wood Mill. It is mostly a mill already, and the remaining parts are arranged in very convincing piles.”"],
+      "id": "chisel-mill-welcome",
+      "critterIds": [
+        "-2,0#woodchuck"
+      ],
+      "priority": 90,
+      "maxPlays": 1,
+      "storyArc": "The Wood Mill",
+      "opening": [
+        "Chisel pats the edge of the enormous cutting table. “Welcome to the Wood Mill. It is mostly a mill already, and the remaining parts are arranged in very convincing piles.”"
+      ],
       "choices": [
-        { "id": "cutter", "label": "What will the big cutter do?", "replies": ["“Square broad paper timber, trim wall panels, and make clean building pieces. The guard stays down whenever the lever is feeling ambitious.”"], "friendship": 2, "endsScene": true },
-        { "id": "help", "label": "Can I help with the mill?", "replies": ["“Soon. I am making a list of jobs, supplies, and snacks. The jobs list is currently shortest.”"], "addFlags": ["chisel:offered-help"], "friendship": 3, "endsScene": true }
+        {
+          "id": "cutter",
+          "label": "What will the big cutter do?",
+          "replies": [
+            "“Square broad paper timber, trim wall panels, and make clean building pieces. The guard stays down whenever the lever is feeling ambitious.”"
+          ],
+          "friendship": 2,
+          "endsScene": true
+        },
+        {
+          "id": "help",
+          "label": "Can I help with the mill?",
+          "replies": [
+            "“Soon. I am making a list of jobs, supplies, and snacks. The jobs list is currently shortest.”"
+          ],
+          "addFlags": [
+            "chisel:offered-help"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "clearing-materials-welcome", "storyArc": "Local knowledge", "priority": 10, "maxPlays": 1,
-      "species": ["squirrel", "bunny", "bird", "cat", "raccoon", "butterfly"], "biomes": ["clearing"],
-      "friendshipLevels": ["stranger", "curious", "friend", "buddy", "pet"],
-      "opening": ["{{name}} glances around {{region}}. “Loose bundles can go straight into your scrapbook—just walk across them. Kraft twigs and mossy fiber are especially handy starter materials.”"],
+      "id": "clearing-materials-welcome",
+      "storyArc": "Local knowledge",
+      "priority": 10,
+      "maxPlays": 1,
+      "species": [
+        "squirrel",
+        "bunny",
+        "bird",
+        "cat",
+        "raccoon",
+        "butterfly"
+      ],
+      "biomes": [
+        "clearing"
+      ],
+      "friendshipLevels": [
+        "stranger",
+        "curious",
+        "friend",
+        "buddy",
+        "pet"
+      ],
+      "opening": [
+        "{{name}} glances around {{region}}. “Loose bundles can go straight into your scrapbook—just walk across them. Kraft twigs and mossy fiber are especially handy starter materials.”"
+      ],
       "choices": [
-        { "id": "where", "label": "Where should I look?", "replies": ["“Near the path and around the softer green folds. The little resource marks on your map can help too.”"], "endsScene": true },
-        { "id": "thanks", "label": "Thanks for the tip", "replies": ["“Of course. Neighbors should know where the useful scraps hide.”"], "friendship": 1, "endsScene": true }
+        {
+          "id": "where",
+          "label": "Where should I look?",
+          "replies": [
+            "“Near the path and around the softer green folds. The little resource marks on your map can help too.”"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "thanks",
+          "label": "Thanks for the tip",
+          "replies": [
+            "“Of course. Neighbors should know where the useful scraps hide.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "bandit-button-1-missing", "critterIds": ["0,0#raccoon"], "priority": 100, "excludesFlags": ["bandit:promised", "bandit:complete"], "storyArc": "The Moon Button",
-      "opening": ["Bandit pats every pocket twice, then looks up. “Problem. A round, pearly, extremely excellent button has escaped me.”"],
+      "id": "bandit-button-1-missing",
+      "critterIds": [
+        "0,0#raccoon"
+      ],
+      "priority": 100,
+      "excludesFlags": [
+        "bandit:promised",
+        "bandit:complete"
+      ],
+      "storyArc": "The Moon Button",
+      "opening": [
+        "Bandit pats every pocket twice, then looks up. “Problem. A round, pearly, extremely excellent button has escaped me.”"
+      ],
       "choices": [
-        { "id": "help", "label": "I’ll help you look", "replies": ["“You will? Good. It likes shiny places. Or dark places. Or places, generally.”"], "addFlags": ["bandit:promised"], "friendship": 3, "endsScene": true },
-        { "id": "describe", "label": "What makes it special?", "replies": ["“It looks like a tiny moon and makes my collection feel complete-ish. Will you help?”"], "addFlags": ["bandit:promised"], "friendship": 2, "endsScene": true }
+        {
+          "id": "help",
+          "label": "I’ll help you look",
+          "replies": [
+            "“You will? Good. It likes shiny places. Or dark places. Or places, generally.”"
+          ],
+          "addFlags": [
+            "bandit:promised"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "describe",
+          "label": "What makes it special?",
+          "replies": [
+            "“It looks like a tiny moon and makes my collection feel complete-ish. Will you help?”"
+          ],
+          "addFlags": [
+            "bandit:promised"
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "bandit-button-2-clue", "critterIds": ["0,0#raccoon"], "priority": 100, "requiresFlags": ["bandit:promised"], "excludesFlags": ["bandit:clue", "bandit:complete"], "storyArc": "The Moon Button",
-      "opening": ["“Update!” Bandit whispers loudly. “The pond heard a plip last night. Suspiciously button-shaped behavior.”"],
+      "id": "bandit-button-2-clue",
+      "critterIds": [
+        "0,0#raccoon"
+      ],
+      "priority": 100,
+      "requiresFlags": [
+        "bandit:promised"
+      ],
+      "excludesFlags": [
+        "bandit:clue",
+        "bandit:complete"
+      ],
+      "storyArc": "The Moon Button",
+      "opening": [
+        "“Update!” Bandit whispers loudly. “The pond heard a plip last night. Suspiciously button-shaped behavior.”"
+      ],
       "choices": [
-        { "id": "pond", "label": "Check around the pond", "replies": ["You search the blue paper edge. Bandit finds one silver thread caught beneath a fold. “A clue! We are professionals now.”"], "addFlags": ["bandit:clue"], "friendship": 3, "endsScene": true },
-        { "id": "tree", "label": "Ask the listening tree", "replies": ["The tree rustles toward the pond. Bandit gasps. “The witness has spoken.”"], "addFlags": ["bandit:clue"], "friendship": 3, "endsScene": true }
+        {
+          "id": "pond",
+          "label": "Check around the pond",
+          "replies": [
+            "You search the blue paper edge. Bandit finds one silver thread caught beneath a fold. “A clue! We are professionals now.”"
+          ],
+          "addFlags": [
+            "bandit:clue"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "tree",
+          "label": "Ask the listening tree",
+          "replies": [
+            "The tree rustles toward the pond. Bandit gasps. “The witness has spoken.”"
+          ],
+          "addFlags": [
+            "bandit:clue"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "bandit-button-3-found", "critterIds": ["0,0#raccoon"], "priority": 100, "requiresFlags": ["bandit:clue"], "excludesFlags": ["bandit:found", "bandit:complete"], "storyArc": "The Moon Button",
-      "opening": ["Bandit holds up the silver thread. It leads beneath the porch garden, where something gives a very guilty glint."],
+      "id": "bandit-button-3-found",
+      "critterIds": [
+        "0,0#raccoon"
+      ],
+      "priority": 100,
+      "requiresFlags": [
+        "bandit:clue"
+      ],
+      "excludesFlags": [
+        "bandit:found",
+        "bandit:complete"
+      ],
+      "storyArc": "The Moon Button",
+      "opening": [
+        "Bandit holds up the silver thread. It leads beneath the porch garden, where something gives a very guilty glint."
+      ],
       "choices": [
-        { "id": "reach", "label": "Reach beneath the leaves", "replies": ["Your fingers find a pearly paper button with one bent hole. Bandit hugs it, then remembers dignity. “Excellent finding.”"], "addFlags": ["bandit:found"], "friendship": 4, "endsScene": true },
-        { "id": "coax", "label": "Coax it out with a twig", "replies": ["The button rolls free in a tiny circle. Bandit pounces with both little hands. “Captured without casualties.”"], "addFlags": ["bandit:found"], "friendship": 4, "endsScene": true }
+        {
+          "id": "reach",
+          "label": "Reach beneath the leaves",
+          "replies": [
+            "Your fingers find a pearly paper button with one bent hole. Bandit hugs it, then remembers dignity. “Excellent finding.”"
+          ],
+          "addFlags": [
+            "bandit:found"
+          ],
+          "friendship": 4,
+          "endsScene": true
+        },
+        {
+          "id": "coax",
+          "label": "Coax it out with a twig",
+          "replies": [
+            "The button rolls free in a tiny circle. Bandit pounces with both little hands. “Captured without casualties.”"
+          ],
+          "addFlags": [
+            "bandit:found"
+          ],
+          "friendship": 4,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "bandit-button-4-mend", "critterIds": ["0,0#raccoon"], "priority": 100, "requiresFlags": ["bandit:found"], "excludesFlags": ["bandit:mended", "bandit:complete"], "storyArc": "The Moon Button",
-      "opening": ["“The moon is home,” Bandit says, “but one hole is creased. Every treasure deserves careful repairs.”"],
+      "id": "bandit-button-4-mend",
+      "critterIds": [
+        "0,0#raccoon"
+      ],
+      "priority": 100,
+      "requiresFlags": [
+        "bandit:found"
+      ],
+      "excludesFlags": [
+        "bandit:mended",
+        "bandit:complete"
+      ],
+      "storyArc": "The Moon Button",
+      "opening": [
+        "“The moon is home,” Bandit says, “but one hole is creased. Every treasure deserves careful repairs.”"
+      ],
       "choices": [
-        { "id": "tape", "label": "Mend it with a tape sliver", "replies": ["Together you smooth a near-invisible strip across the crease. Bandit tests it twice. “Stronger for having been found.”"], "addFlags": ["bandit:mended"], "friendship": 4, "endsScene": true },
-        { "id": "leave-mark", "label": "Keep the crease as a memory", "replies": ["Bandit studies the crease. “Proof of adventure,” he decides. “That is also a kind of repair.”"], "addFlags": ["bandit:mended"], "friendship": 4, "endsScene": true }
+        {
+          "id": "tape",
+          "label": "Mend it with a tape sliver",
+          "replies": [
+            "Together you smooth a near-invisible strip across the crease. Bandit tests it twice. “Stronger for having been found.”"
+          ],
+          "addFlags": [
+            "bandit:mended"
+          ],
+          "friendship": 4,
+          "endsScene": true
+        },
+        {
+          "id": "leave-mark",
+          "label": "Keep the crease as a memory",
+          "replies": [
+            "Bandit studies the crease. “Proof of adventure,” he decides. “That is also a kind of repair.”"
+          ],
+          "addFlags": [
+            "bandit:mended"
+          ],
+          "friendship": 4,
+          "endsScene": true
+        }
       ]
     },
     {
-      "id": "bandit-button-5-gift", "critterIds": ["0,0#raccoon"], "priority": 100, "requiresFlags": ["bandit:mended"], "excludesFlags": ["bandit:complete"], "storyArc": "The Moon Button",
-      "opening": ["Bandit arrives wearing the moon button on a loop of thread. Beside it hangs a smaller button, warm as toast. “Collections need stories. This one is yours.”"],
+      "id": "bandit-button-5-gift",
+      "critterIds": [
+        "0,0#raccoon"
+      ],
+      "priority": 100,
+      "requiresFlags": [
+        "bandit:mended"
+      ],
+      "excludesFlags": [
+        "bandit:complete"
+      ],
+      "storyArc": "The Moon Button",
+      "opening": [
+        "Bandit arrives wearing the moon button on a loop of thread. Beside it hangs a smaller button, warm as toast. “Collections need stories. This one is yours.”"
+      ],
       "choices": [
-        { "id": "accept", "label": "Accept the little sun button", "replies": ["Bandit ties it carefully to your scrapbook. “Now our collections know each other.”"], "addFlags": ["bandit:complete"], "friendship": 14, "endsScene": true },
-        { "id": "share", "label": "Hang it in the clearing", "replies": ["You hang the sun button where everyone can see it. Bandit’s eyes shine. “A public treasure. Very advanced friendship.”"], "addFlags": ["bandit:complete"], "friendship": 14, "endsScene": true }
+        {
+          "id": "accept",
+          "label": "Accept the little sun button",
+          "replies": [
+            "Bandit ties it carefully to your scrapbook. “Now our collections know each other.”"
+          ],
+          "addFlags": [
+            "bandit:complete"
+          ],
+          "friendship": 14,
+          "endsScene": true
+        },
+        {
+          "id": "share",
+          "label": "Hang it in the clearing",
+          "replies": [
+            "You hang the sun button where everyone can see it. Bandit’s eyes shine. “A public treasure. Very advanced friendship.”"
+          ],
+          "addFlags": [
+            "bandit:complete"
+          ],
+          "friendship": 14,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "forest-bark-curls-knowledge",
+      "biomes": [
+        "forest"
+      ],
+      "priority": 40,
+      "maxPlays": 3,
+      "storyArc": "What grows here",
+      "opening": [
+        "“You're in luck standing here, you know. This is bark-curl country — {{only-here:redwood-bark-curls}}.”",
+        "“Smell that? Redwoods. There's {{material:redwood-bark-curls}} to be had here, {{only-here:redwood-bark-curls}}.”"
+      ],
+      "choices": [
+        {
+          "id": "how",
+          "label": "How do I get {{material-short:redwood-bark-curls}}?",
+          "replies": [
+            "“Not with your hands, and not with the little round-tipped pair. I hear you need {{tool-for:redwood-bark-curls}} to get through the bark.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "what-for",
+          "label": "What's it good for?",
+          "replies": [
+            "“The nice decorative work. It's the handsome stuff — you don't waste it on a fence post.”"
+          ],
+          "friendship": 1
+        },
+        {
+          "id": "where-else",
+          "label": "Where else can I find it?",
+          "replies": [
+            "“You can find it in {{found-in:redwood-bark-curls}}. Only off a living redwood, mind — you'll never find a pile of it lying about.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
       ]
     }
   ]

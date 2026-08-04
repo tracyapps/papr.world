@@ -1,4 +1,4 @@
-export type ActionMode = 'interact' | 'dig' | 'plant';
+export type ActionMode = 'interact' | 'dig' | 'plant' | 'trim';
 
 type ActionModeListener = (mode: ActionMode) => void;
 

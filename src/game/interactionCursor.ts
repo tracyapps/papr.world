@@ -3,6 +3,7 @@ import { getActionMode } from './actionMode';
 import { getScreenInteractionAt } from './interactionRouter';
 import { getDigTargetStatusAtScreen } from './toolActions';
 import { gardenActionAtScreen } from './planting';
+import { assessTrimTarget } from './treeInteractions';
 
 /**
  * One cursor per *verb*, not per action.
@@ -50,7 +51,12 @@ function refreshCursor() {
   const interaction = getScreenInteractionAt(hoverX, hoverY);
   canvas.classList.toggle('is-interactable', Boolean(interaction));
 
-  if (interaction && interaction.id !== 'equipped-tool' && interaction.id !== 'planting') {
+  if (
+    interaction
+    && interaction.id !== 'equipped-tool'
+    && interaction.id !== 'planting'
+    && interaction.id !== 'tree-trim'
+  ) {
     setCursor('hand');
     return;
   }
@@ -66,6 +72,15 @@ function refreshCursor() {
   if (getActionMode() === 'plant') {
     const { action } = gardenActionAtScreen(hoverX, hoverY);
     setCursor('garden', action.ok);
+    return;
+  }
+
+  // Trim mode reads the same resolver the click does, so a valid-looking
+  // cursor can never precede a refusal. Aiming at nothing keeps the chop
+  // cursor rather than falling back to the arrow: you are still holding
+  // scissors, and swapping art on empty ground reads as a bug.
+  if (getActionMode() === 'trim') {
+    setCursor('chop', assessTrimTarget(hoverX, hoverY).status === 'valid');
     return;
   }
 

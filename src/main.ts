@@ -52,6 +52,7 @@ import { pickTerrainAtScreen } from './game/toolActions';
 import { getActionMode, setActionMode } from './game/actionMode';
 import { initializeToolToolbar, selectToolSlot } from './ui/toolToolbar';
 import { hasPlantInteractionAt, tryPlantInteractionAt, updatePlantInteractions } from './game/plantInteractions';
+import { describeTrimRegistry, hasTrimActionAt, tryTrimAt, updateTrimmableTrees } from './game/treeInteractions';
 import { initializeHudLayout, requestHudLayout } from './ui/hudLayout';
 
 // Bootstrap: build the world, wire the UI, run the frame loop.
@@ -140,6 +141,15 @@ registerScreenInteraction({
   priority: 30,
   hitTest: hasPlantActionAt,
   interact: tryPlantAt,
+});
+// Sits between planting and digging. All three are mode-gated so they can
+// never contend, but keeping the tool verbs adjacent in priority means the
+// ordering stays obvious as more of them land.
+registerScreenInteraction({
+  id: 'tree-trim',
+  priority: 25,
+  hitTest: hasTrimActionAt,
+  interact: tryTrimAt,
 });
 registerScreenInteraction({
   id: 'equipped-tool',
@@ -244,6 +254,7 @@ function animate(animationTime = 0) {
   updatePetEffects(delta);
   updateCozyInteractions(delta, elapsed);
   updateHarvestables();
+  updateTrimmableTrees();
   updatePlanting();
   updatePlantInteractions(delta, elapsed);
   updateRegionBanner(avatar.position);
@@ -281,6 +292,8 @@ declare global {
       position: () => { x: number; z: number };
       /** Console-only spatial QA helper; gameplay never calls this. */
       teleport: (x: number, z: number) => void;
+      /** Console-only: why the trim system can or cannot see a tree. */
+      trees: () => ReturnType<typeof describeTrimRegistry>;
     };
   }
 }
@@ -292,6 +305,7 @@ window.__paperWorld = {
     avatar.position.x = x;
     avatar.position.z = z;
   },
+  trees: describeTrimRegistry,
 };
 
 window.addEventListener('resize', resize);

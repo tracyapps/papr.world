@@ -53,8 +53,24 @@ export const TOOL_ART = {
     // rail's near-black paper.
     sourceUrl: new URL('../../assets/source/tools/garden-hoe-alt.svg', import.meta.url).href,
     // Runs lower-left to upper-right with the blade high, so the head is the
-    // part you see rather than a long crushed handle.
-    frame: { width: 330, left: -52, top: 34, rotate: -24, activeLift: -48, activeBadgeLift: -18 },
+    // part you see rather than a long crushed handle. Sat higher and further
+    // right than the shovel, which made the two rails read as unaligned
+    // against the shortcut badges; more of the pole is now cropped off the
+    // left edge so both tools enter the slot from the same place.
+    frame: { width: 330, left: -74, top: 48, rotate: -24, activeLift: -48, activeBadgeLift: -18 },
+  },
+  // Framing copied from the flimsy shovel: these are the same drawing at a
+  // different level of care, so they should sit in the slot identically.
+  // Nudge them individually once you have looked at them.
+  'okayish-shovel': {
+    aspectRatio: 493 / 169,
+    sourceUrl: new URL('../../assets/source/tools/okayish-shovel.svg', import.meta.url).href,
+    frame: { width: 320, left: -42, top: 55, rotate: -11, flipX: true, activeLift: -62, activeBadgeLift: -24 },
+  },
+  'heavy-duty-shovel': {
+    aspectRatio: 493 / 169,
+    sourceUrl: new URL('../../assets/source/tools/heavy-duty-shovel.svg', import.meta.url).href,
+    frame: { width: 320, left: -42, top: 55, rotate: -11, flipX: true, activeLift: -62, activeBadgeLift: -24 },
   },
   'kids-scissors': {
     aspectRatio: 305 / 205,
@@ -92,8 +108,13 @@ export function toolArtStyle(frame: ToolArtFrame): string {
   ].join(';');
 }
 
+/**
+ * Drawn, but with no tool definition yet.
+ *
+ * The dig system has exactly three geology layers, so the shovel ladder is
+ * three rungs; `fancy-shovel` is waiting on a fourth thing to dig for rather
+ * than on a drawing.
+ */
 export const FUTURE_SHOVEL_ART = {
-  okayish: new URL('../../assets/source/tools/okayish-shovel.svg', import.meta.url).href,
-  heavyDuty: new URL('../../assets/source/tools/heavy-duty-shovel.svg', import.meta.url).href,
   fancy: new URL('../../assets/source/tools/fancy-shovel.svg', import.meta.url).href,
 } as const;

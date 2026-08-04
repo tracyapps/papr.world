@@ -31,6 +31,10 @@ export type ResourceCoreDefinition = {
 export const RESOURCE_CORE_DEFS = {
   'kraft-twigs': { id: 'kraft-twigs', label: 'Kraft-paper twigs', shortLabel: 'Kraft twigs', category: 'sticks', iconKey: 'resource.kraft-twigs' },
   'ribbonwood-sticks': { id: 'ribbonwood-sticks', label: 'Ribbonwood sticks', shortLabel: 'Ribbonwood', category: 'sticks', iconKey: 'resource.ribbonwood-sticks' },
+  // The first material with no loose pile anywhere in the world: bark curls
+  // only come off a living redwood, and only to heavier shears. That is what
+  // makes the tier-2 scissors worth making rather than a bigger number.
+  'redwood-bark-curls': { id: 'redwood-bark-curls', label: 'Redwood bark curls', shortLabel: 'Bark curls', category: 'sticks', iconKey: 'resource.redwood-bark-curls' },
   'mossy-paper-fiber': { id: 'mossy-paper-fiber', label: 'Mossy paper fiber', shortLabel: 'Paper fiber', category: 'fiber', iconKey: 'resource.mossy-paper-fiber' },
   'confetti-stones': { id: 'confetti-stones', label: 'Confetti stones', shortLabel: 'Confetti stone', category: 'stones', iconKey: 'resource.confetti-stones' },
   'graphite-cardstone': { id: 'graphite-cardstone', label: 'Graphite cardstone', shortLabel: 'Cardstone', category: 'stones', iconKey: 'resource.graphite-cardstone' },

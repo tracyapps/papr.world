@@ -2,6 +2,8 @@ import {
   MAKER_UPGRADE_INGREDIENTS,
   RECIPE_DEFS,
   getCraftDuration,
+  isRecipeAvailable,
+  previousTierTool,
   type IngredientRequirement,
   type RecipeId,
 } from './catalogs/recipes';
@@ -12,6 +14,15 @@ import { TOOL_DEFS } from './catalogs/tools';
 import { TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
 import type { DigDiscovery } from './catalogs/geology';
 import { SEED_DEFS, bloomSeconds, plantStageAt, type SeedId } from './catalogs/seeds';
+import {
+  TRIM_STAGE_RESPONSES,
+  describeTrimYield,
+  resolveTrimYield,
+  treeGrowthAt,
+  treeStageFor,
+  trimProfileForTier,
+  type TreeAddress,
+} from './catalogs/trees';
 
 export type ResourceAllocation = Partial<Record<ResourceId, number>>;
 
@@ -29,6 +40,7 @@ export type GameCommand =
   | { type: 'selectSeed'; seedId: SeedId | null }
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
   | { type: 'tendPlant'; target: TerrainCellAddress; now: number }
+  | { type: 'trimTree'; target: TreeAddress; now: number }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
   | { type: 'upgradeThingMaker' };
 
@@ -178,9 +190,11 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
     case 'startCraft': {
       const recipe = RECIPE_DEFS[command.recipeId];
       if (!recipe) return { ok: false, reason: 'That plan is unknown.' };
-      if (!state.player.plans.includes(command.recipeId)) return { ok: false, reason: 'That plan is not in the scrapbook yet.' };
-      if (state.world.thingMaker.activeCraft) return { ok: false, reason: 'The Thing Maker is already working.' };
-      if (state.world.thingMaker.level < recipe.minimumMakerLevel) return { ok: false, reason: 'The Thing Maker needs a better module for that plan.' };
+      // The command re-checks rather than trusting the UI, but through the
+      // same resolver the UI used — so a refusal here can never surprise a
+      // player who was looking at an enabled button.
+      const blocked = craftBlockers(state, command.recipeId)[0];
+      if (blocked) return { ok: false, reason: describeCraftBlocker(blocked) };
       const allocation = resolveIngredientAllocation(state.player.inventory, recipe.ingredients);
       if (!allocation) return { ok: false, reason: 'Not enough suitable materials.' };
       spendAllocation(state, allocation);
@@ -435,6 +449,61 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       return { ok: true, message: 'You smooth the leaves and fluff the paper soil. The Buttonbloom perks up.' };
     }
 
+    case 'trimTree': {
+      const equippedTool = state.player.equippedTool;
+      const tool = equippedTool ? TOOL_DEFS[equippedTool] : null;
+      if (!tool || tool.verb !== 'trim' || (state.player.tools[equippedTool!] ?? 0) <= 0) {
+        return { ok: false, reason: 'Hold a pair of scissors to trim a tree.' };
+      }
+      const { target } = command;
+      if (!target.pageId || !target.treeKey) {
+        return { ok: false, reason: 'That tree could not be found.' };
+      }
+      const profile = trimProfileForTier(tool.tier);
+      if (target.species === 'redwood' && !profile.handlesRedwood) {
+        return {
+          ok: false,
+          reason: `${tool.name} will not get through redwood bark — this one wants heavier shears.`,
+        };
+      }
+
+      const page = state.world.pages[target.pageId] ??= {
+        terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {},
+      };
+      const record = page.treeGrowth[target.treeKey];
+      const stage = treeStageFor(treeGrowthAt(record, command.now));
+      if (stage === 'resting') {
+        return { ok: false, reason: TRIM_STAGE_RESPONSES.resting };
+      }
+
+      const trims = (record?.trims ?? 0) + 1;
+      const yields = resolveTrimYield({
+        treeKey: target.treeKey,
+        species: target.species,
+        tier: tool.tier,
+        stage,
+        trims,
+      });
+
+      // The cut is capped at what is actually there: a full-strength snip at
+      // a nearly bare tree takes it to rest rather than into debt. Growth is
+      // a quantity of tree, not a health bar to drive negative.
+      const remaining = Math.max(0, treeGrowthAt(record, command.now) - profile.cost);
+      page.treeGrowth[target.treeKey] = { growth: remaining, trimmedAt: command.now, trims };
+
+      const grants: ResourceAllocation = {};
+      for (const entry of yields) {
+        state.player.inventory[entry.resource] = (state.player.inventory[entry.resource] ?? 0) + entry.quantity;
+        grants[entry.resource] = (grants[entry.resource] ?? 0) + entry.quantity;
+      }
+
+      return {
+        ok: true,
+        grants,
+        message: `${describeTrimYield(yields)}. ${TRIM_STAGE_RESPONSES[treeStageFor(remaining)]}`,
+      };
+    }
+
     case 'updatePlantSeedDrop': {
       const edit = gardenEdit(state, command.target);
       if (!edit) return { ok: false, reason: 'That flower cannot make seeds.' };
@@ -509,14 +578,64 @@ export function dispatchGameCommand(command: GameCommand): CommandResult {
   return result;
 }
 
-export function canStartRecipe(recipeId: RecipeId) {
-  const state = getGameState();
+/**
+ * Everything standing between the player and this craft.
+ *
+ * A list rather than a boolean, and shared by the command and the UI, so the
+ * Thing Maker can say *which* thing is missing instead of greying a button
+ * out silently. The same arrangement as `assessDigTarget` and the garden
+ * overlay: one resolver, so what the panel shows can never disagree with
+ * what the click does.
+ */
+export type CraftBlocker =
+  | { kind: 'unimplemented' }
+  | { kind: 'no-plan' }
+  | { kind: 'maker-level'; required: number }
+  | { kind: 'previous-tier'; toolId: ToolId }
+  | { kind: 'materials' }
+  | { kind: 'busy' };
+
+export function craftBlockers(state: GameState, recipeId: RecipeId): CraftBlocker[] {
   const recipe = RECIPE_DEFS[recipeId];
-  return Boolean(
-    recipe
-    && state.player.plans.includes(recipeId)
-    && !state.world.thingMaker.activeCraft
-    && state.world.thingMaker.level >= recipe.minimumMakerLevel
-    && resolveIngredientAllocation(state.player.inventory, recipe.ingredients),
-  );
+  if (!recipe) return [{ kind: 'unimplemented' }];
+  const blockers: CraftBlocker[] = [];
+
+  if (!isRecipeAvailable(recipeId)) blockers.push({ kind: 'unimplemented' });
+  if (!state.player.plans.includes(recipeId)) blockers.push({ kind: 'no-plan' });
+  if (state.world.thingMaker.level < recipe.minimumMakerLevel) {
+    blockers.push({ kind: 'maker-level', required: recipe.minimumMakerLevel });
+  }
+  if (recipe.output.kind === 'tool') {
+    const previous = previousTierTool(recipe.output.toolId);
+    // One rung at a time. Owning the rung below is the gate, not having ever
+    // made it — a tool you gave away should not permanently bar the ladder.
+    if (previous && (state.player.tools[previous] ?? 0) <= 0) {
+      blockers.push({ kind: 'previous-tier', toolId: previous });
+    }
+  }
+  if (!resolveIngredientAllocation(state.player.inventory, recipe.ingredients)) {
+    blockers.push({ kind: 'materials' });
+  }
+  if (state.world.thingMaker.activeCraft) blockers.push({ kind: 'busy' });
+  return blockers;
+}
+
+export function craftBlockersFor(recipeId: RecipeId): CraftBlocker[] {
+  return craftBlockers(getGameState(), recipeId);
+}
+
+/** One short line naming the missing thing, for a button title or a refusal. */
+export function describeCraftBlocker(blocker: CraftBlocker): string {
+  switch (blocker.kind) {
+    case 'unimplemented': return 'That one is not finished yet.';
+    case 'no-plan': return 'You have not found this plan yet.';
+    case 'maker-level': return `Needs a level ${blocker.required} Thing Maker.`;
+    case 'previous-tier': return `Make a ${TOOL_DEFS[blocker.toolId].name} first.`;
+    case 'materials': return 'Not enough suitable materials.';
+    case 'busy': return 'The Thing Maker is already working.';
+  }
+}
+
+export function canStartRecipe(recipeId: RecipeId) {
+  return craftBlockersFor(recipeId).length === 0;
 }

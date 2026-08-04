@@ -3,6 +3,8 @@ import { aspect } from '../core/math';
 import { createCutout, createRoofFace, createSheet, createWall, createWindowWall, groundedCutoutY } from '../render/builders';
 import { getMaterial } from '../render/materials';
 import { registerCozyObject } from '../game/cozyInteractions';
+import { registerTrimmableTree } from '../game/treeInteractions';
+import type { TreeSpecies } from '../sim/catalogs/trees';
 import { registerMapFeature } from './mapFeatures';
 import { sampleTerrainHeight } from './terrain';
 import { buildWaterSurface, getWaterBody } from './water';
@@ -202,17 +204,37 @@ export function buildCozyClearingDetails(parent: THREE.Group) {
     [4.4, 9.1, 2.8, -0.15, 1], [0.0, 10.0, 3.3, 0.2, 4], [-4.1, 9.4, 2.7, -0.22, 0],
     [-8.0, 7.3, 3.25, 0.14, 2], [-9.4, 3.0, 2.8, -0.12, 1], [-9.8, -2.0, 3.4, 0.2, 4],
   ];
-  for (const [x, z, height, rotationY, textureIndex] of treeSpots) {
+  // Which species each drawing is, for the growth model. The first two
+  // entries in `treeDefs` are leafy; the rest are pines.
+  const treeSpecies: TreeSpecies[] = ['leafy', 'leafy', 'pine', 'pine', 'pine'];
+  treeSpots.forEach(([x, z, height, rotationY, textureIndex], index) => {
     const [textureUrl, aspectRatio] = treeDefs[textureIndex];
+    const baseY = sampleTerrainHeight(x, z);
     const tree = createCutout({
       textureUrl,
       aspectRatio,
       height,
-      position: [x, groundedCutoutY(sampleTerrainHeight(x, z), height), z],
+      position: [x, groundedCutoutY(baseY, height), z],
       rotationY,
     });
     parent.add(tree);
-  }
+    // The clearing's treeline is hand-placed rather than generated, so it
+    // never passed through `buildProp` and was invisible to trimming — the
+    // most walkable trees in the game were the only ones you could not cut.
+    // The id matches its dig footprint in `world/footprints.ts` so the two
+    // systems are talking about the same tree.
+    registerTrimmableTree({
+      id: `clearing-cozy-tree:${index}`,
+      object: tree,
+      pageId: '0,0',
+      treeKey: `cozy-tree:${index}`,
+      species: treeSpecies[textureIndex],
+      x,
+      z,
+      height,
+      baseY,
+    });
+  });
 
   // A tiny planted border beside the house, built from small versions of the
   // supplied leafy cutouts so it reads as toy shrubs rather than new art.
