@@ -1,0 +1,28 @@
+{
+  "name": "pencil-and-paper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets:compile": "node tools/compile-assets.mjs",
+    "assets:sample": "node tools/generate-sample-assets.mjs",
+    "content:check": "node tools/validate-conversations.mjs",
+    "hud:check": "node tools/check-hud-layout.mjs",
+    "dev": "vite --host 0.0.0.0",
+    "build": "npm run content:check && npm run styles:check && tsc && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "styles:check": "node tools/check-styles.mjs"
+  },
+  "dependencies": {
+    "@types/three": "^0.181.0",
+    "colyseus.js": "^0.15.0",
+    "three": "^0.181.2",
+    "vite": "^7.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.10"
+  }
+}

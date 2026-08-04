@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-07-07T02:58:06.315Z",
+  "assets": [
+    {
+      "key": "paper.construction.brown.01",
+      "source": "assets/source/textures/paper_construction_brown_01.svg",
+      "runtime": "assets/runtime/textures/paper_construction_brown_01.png",
+      "size": "512x512",
+      "notes": "Reusable 512px tile. Fibers should remain visible but not noisy at gameplay distance."
+    },
+    {
+      "key": "paper.construction.green.01",
+      "source": "assets/source/textures/paper_construction_green_01.svg",
+      "runtime": "assets/runtime/textures/paper_construction_green_01.png",
+      "size": "512x512",
+      "notes": "Reusable 512px tile for foliage and simple walls. Avoid perfect flat color."
+    },
+    {
+      "key": "paper.notebook.blue-lined.01",
+      "source": "assets/source/textures/paper_notebook_blue_lined_01.svg",
+      "runtime": "assets/runtime/textures/paper_notebook_blue_lined_01.png",
+      "size": "512x512",
+      "notes": "Reusable 512px tile. Line spacing is exaggerated so it reads from the camera."
+    },
+    {
+      "key": "terrain.clearing.sheet.01",
+      "source": "assets/source/textures/terrain_clearing_sheet_01.svg",
+      "runtime": "assets/runtime/textures/terrain_clearing_sheet_01.png",
+      "size": "1024x1024",
+      "notes": "Larger 1024px ground sheet. Uses edge detail and broad stains for scale."
+    },
+    {
+      "key": "resource.brown-paper-patch.01",
+      "source": "assets/source/textures/resource_brown_paper_patch_01.svg",
+      "runtime": "assets/runtime/textures/resource_brown_paper_patch_01.png",
+      "size": "512x512",
+      "notes": "Inspectable source texture for harvestable layered scraps."
+    },
+    {
+      "key": "avatar.placeholder.flat.01",
+      "source": "assets/source/textures/avatar_placeholder_flat_01.svg",
+      "runtime": "assets/runtime/textures/avatar_placeholder_flat_01.png",
+      "size": "512x512",
+      "notes": "Transparent runtime PNG made from chroma-keyed source. Used before drawing exists."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true,
+    // Colyseus @colyseus/schema uses legacy property decorators.
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  },
+  "include": ["src", "../shared/src"]
+}

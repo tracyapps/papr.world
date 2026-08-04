@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="612" height="195" viewBox="0 0 612 195">
+<style>
+:root {
+  --color-03af28: #03AF28;
+  --color-e9ff00: #E9FF00;
+  --color-00cb63: #00CB63;
+  --color-00a345: #00A345;
+  --color-107b27: #107B27;
+  --color-a2b10a: #A2B10A;
+  --color-0a8d4a: #0A8D4A;
+  --color-0d793a: #0D793A;
+  --color-0b4d19: #0B4D19;
+  --color-707a0b: #707A0B;
+  --color-084023: #084023;
+  --color-08401f: #08401F;
+  --color-0b3715: #0B3715;
+  --color-454b05: #454B05;
+  --color-0a301d: #0A301D;
+  --color-083019: #083019;
+  --color-4eb80b: #4EB80B;
+  --color-ffb700: #FFB700;
+  --color-62ba1a: #62BA1A;
+  --color-ff8100: #FF8100;
+  --color-82dd00: #82DD00;
+  --color-ca3607: #CA3607;
+  --color-3c8012: #3C8012;
+  --color-ab7e0b: #AB7E0B;
+  --color-59b50e: #59B50E;
+  --color-a95907: #A95907;
+  --color-67a113: #67A113;
+  --color-982d0b: #982D0B;
+  --color-29520f: #29520F;
+  --color-6c5008: #6C5008;
+  --color-386a0f: #386A0F;
+  --color-693b0c: #693B0C;
+  --color-48720b: #48720B;
+  --color-591c08: #591C08;
+  --color-1d3a0b: #1D3A0B;
+  --color-4e3a08: #4E3A08;
+  --color-24440b: #24440B;
+  --color-492908: #492908;
+  --color-293e0c: #293E0C;
+  --color-501704: #501704;
+}
+</style>
+<defs>
+  <linearGradient id="grad0" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#494949"/>
+    <stop offset="0.45" stop-color="#ABABAB"/>
+    <stop offset="0.94" stop-color="#242424"/>
+  </linearGradient>
+  <filter id="fx1" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="1.01" numOctaves="4" seed="2555" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.25" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad2" x1="0.03" y1="0.32" x2="0.97" y2="0.68">
+    <stop offset="0" stop-color="#474747"/>
+    <stop offset="0.99" stop-color="#151515"/>
+  </linearGradient>
+  <linearGradient id="grad3" x1="0" y1="0.5" x2="1" y2="0.5">
+    <stop offset="0.71" stop-color="#313131"/>
+    <stop offset="0.98" stop-color="#202020"/>
+  </linearGradient>
+  <linearGradient id="grad4" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad5" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad6" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad7" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad8" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad9" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad10" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad11" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad12" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+  <linearGradient id="grad13" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#D9D9D9"/>
+    <stop offset="1" stop-color="#000000"/>
+  </linearGradient>
+</defs>
+<g class="layer-rectangle" filter="url(#fx1)">
+<path d="M 192.01 90.44 C 192.01 90.44 502.82 90.54 502.82 90.54 C 502.82 90.54 541.43 90.3 541.43 90.3 C 541.43 90.3 543.51 90.49 543.51 90.49 C 543.51 90.49 543.61 107.11 543.61 107.11 C 543.61 107.11 544 117.87 544 117.87 C 544 117.87 502.01 117.84 502.01 117.84 C 502.01 117.84 208.34 118.83 208.34 118.83 C 208.34 118.83 192 119.72 192 119.72 C 192 119.72 192.62 108.64 192.62 108.64 C 192.62 108.64 192.19 100.1 192.19 100.1 C 192.19 100.1 192.01 90.44 192.01 90.44 Z" fill="url(#grad0)" stroke-linejoin="round"/>
+</g>
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 9.25 58.4 C 9.66 66.38 9.2 186.84 9.29 187.24 C 9.39 187.64 154.82 189.29 177.78 189.65 C 219.1 189.65 203.23 194.11 205.59 108.03 C 204.34 12.73 214.54 9.18 177.71 9.18 C 138.82 6.65 22.37 8.31 19.97 8.41 C 17.57 8.51 9.22 8.31 9.02 8.51 C 8.83 8.71 8.84 50.42 9.25 58.4 Z" fill="url(#grad2)" stroke-linejoin="round"/>
+</g>
+</g>
+<g class="layer-path">
+<path d="M 605 68.53 C 605 68.53 604.36 136.96 604.36 136.96 C 604.36 136.96 581.68 137 564.4 137 C 547.12 137 536 124.28 536 102.17 C 536 82.52 547.98 67 566.55 67 C 585.12 67 605 68.53 605 68.53 Z M 549.72 102.51 C 549.72 118.83 551.99 123.89 563.88 123.89 C 575.77 123.89 589.19 124.45 589.19 124.45 C 589.19 124.45 589.7 82.73 589.7 82.73 C 589.7 82.73 578.13 81.68 565.35 81.68 C 552.58 81.68 549.72 88.01 549.72 102.51 Z" fill="url(#grad3)" stroke-linejoin="round"/>
+</g>
+<g class="layer-rectangle" transform="rotate(0.93 105 10)" opacity="0.8" style="mix-blend-mode:overlay">
+<rect x="9" y="8" width="192" height="4" rx="8" fill="url(#grad4)"/>
+</g>
+<g class="layer-rectangle" transform="rotate(90 203.18 100.48)" opacity="0.9" style="mix-blend-mode:overlay">
+<rect x="115.68" y="97.66" width="174.99" height="5.65" rx="8" fill="url(#grad5)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="30" width="136" height="7" rx="8" fill="url(#grad6)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="51.67" width="136" height="7" rx="8" fill="url(#grad7)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="73.33" width="136" height="7" rx="8" fill="url(#grad8)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="95" width="136" height="7" rx="8" fill="url(#grad9)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="116.67" width="136" height="7" rx="8" fill="url(#grad10)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="138.33" width="136" height="7" rx="8" fill="url(#grad11)"/>
+</g>
+<g class="layer-rectangle" opacity="0.5" style="mix-blend-mode:overlay">
+<rect x="27" y="160" width="136" height="7" rx="8" fill="url(#grad12)"/>
+</g>
+<g class="layer-rectangle" opacity="0.8" style="mix-blend-mode:overlay">
+<rect x="10" y="185" width="186" height="5" rx="8" fill="url(#grad13)"/>
+</g>
+</svg>

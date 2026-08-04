@@ -1,0 +1,846 @@
+{
+  "generatedAt": "2026-07-29T23:13:47.409Z",
+  "sourceRoot": "assets/source",
+  "runtimeRoot": "assets/runtime",
+  "maxRuntimeDimension": 4096,
+  "assets": [
+    {
+      "key": "UI.scrapbook-cover",
+      "source": "assets/source/UI/scrapbook-cover.svg",
+      "runtime": "assets/runtime/UI/scrapbook-cover.png",
+      "type": "texture",
+      "usage": "ui",
+      "sourceSize": "451x586",
+      "size": "451x586"
+    },
+    {
+      "key": "avatars.avatar-placeholder-flat-01",
+      "source": "assets/source/avatars/avatar_placeholder_flat_01.svg",
+      "runtime": "assets/runtime/avatars/avatar_placeholder_flat_01.png",
+      "type": "texture",
+      "usage": "avatar",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.3d-squares-aqua",
+      "source": "assets/source/materials/3d-squares-aqua.svg",
+      "runtime": "assets/runtime/materials/3d-squares-aqua.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "100x100",
+      "size": "100x100"
+    },
+    {
+      "key": "materials.3d-squares-orange",
+      "source": "assets/source/materials/3d-squares-orange.svg",
+      "runtime": "assets/runtime/materials/3d-squares-orange.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "100x100",
+      "size": "100x100"
+    },
+    {
+      "key": "materials.3d-squares-pink",
+      "source": "assets/source/materials/3d-squares-pink.svg",
+      "runtime": "assets/runtime/materials/3d-squares-pink.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "100x100",
+      "size": "100x100"
+    },
+    {
+      "key": "materials.3d-squares-purple",
+      "source": "assets/source/materials/3d-squares-purple.svg",
+      "runtime": "assets/runtime/materials/3d-squares-purple.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "100x100",
+      "size": "100x100"
+    },
+    {
+      "key": "materials.argyle-child-bluegreen",
+      "source": "assets/source/materials/argyle-child-bluegreen.svg",
+      "runtime": "assets/runtime/materials/argyle-child-bluegreen.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1000x800",
+      "size": "1000x800"
+    },
+    {
+      "key": "materials.building-blocks-aqua",
+      "source": "assets/source/materials/building-blocks-aqua.svg",
+      "runtime": "assets/runtime/materials/building-blocks-aqua.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "200x345",
+      "size": "200x345"
+    },
+    {
+      "key": "materials.building-blocks-blue",
+      "source": "assets/source/materials/building-blocks-blue.svg",
+      "runtime": "assets/runtime/materials/building-blocks-blue.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "200x345",
+      "size": "200x345"
+    },
+    {
+      "key": "materials.building-blocks-brown",
+      "source": "assets/source/materials/building-blocks-brown.svg",
+      "runtime": "assets/runtime/materials/building-blocks-brown.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "314x542",
+      "size": "314x542"
+    },
+    {
+      "key": "materials.building-blocks-darkgrey",
+      "source": "assets/source/materials/building-blocks-darkgrey.svg",
+      "runtime": "assets/runtime/materials/building-blocks-darkgrey.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "192x331",
+      "size": "192x331"
+    },
+    {
+      "key": "materials.building-blocks-green",
+      "source": "assets/source/materials/building-blocks-green.svg",
+      "runtime": "assets/runtime/materials/building-blocks-green.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "314x542",
+      "size": "314x542"
+    },
+    {
+      "key": "materials.building-blocks-light-green",
+      "source": "assets/source/materials/building-blocks-light-green.svg",
+      "runtime": "assets/runtime/materials/building-blocks-light-green.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "200x345",
+      "size": "200x345"
+    },
+    {
+      "key": "materials.camouflage-blobs-desert",
+      "source": "assets/source/materials/camouflage-blobs-desert.svg",
+      "runtime": "assets/runtime/materials/camouflage-blobs-desert.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.camouflage-blobs-green",
+      "source": "assets/source/materials/camouflage-blobs-green.svg",
+      "runtime": "assets/runtime/materials/camouflage-blobs-green.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.construction-paper-blue-1",
+      "source": "assets/source/materials/construction-paper-blue-1.svg",
+      "runtime": "assets/runtime/materials/construction-paper-blue-1.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-blue-2",
+      "source": "assets/source/materials/construction-paper-blue-2.svg",
+      "runtime": "assets/runtime/materials/construction-paper-blue-2.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-blue-3",
+      "source": "assets/source/materials/construction-paper-blue-3.svg",
+      "runtime": "assets/runtime/materials/construction-paper-blue-3.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-brown-1",
+      "source": "assets/source/materials/construction-paper-brown-1.svg",
+      "runtime": "assets/runtime/materials/construction-paper-brown-1.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-brown-2",
+      "source": "assets/source/materials/construction-paper-brown-2.svg",
+      "runtime": "assets/runtime/materials/construction-paper-brown-2.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-brown-3",
+      "source": "assets/source/materials/construction-paper-brown-3.svg",
+      "runtime": "assets/runtime/materials/construction-paper-brown-3.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-green-1",
+      "source": "assets/source/materials/construction-paper-green-1.svg",
+      "runtime": "assets/runtime/materials/construction-paper-green-1.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-green-2",
+      "source": "assets/source/materials/construction-paper-green-2.svg",
+      "runtime": "assets/runtime/materials/construction-paper-green-2.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.construction-paper-green-3",
+      "source": "assets/source/materials/construction-paper-green-3.svg",
+      "runtime": "assets/runtime/materials/construction-paper-green-3.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.cork-board",
+      "source": "assets/source/materials/cork-board.svg",
+      "runtime": "assets/runtime/materials/cork-board.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.crosshatch-cubes-yellow-maroon",
+      "source": "assets/source/materials/crosshatch-cubes-yellow-maroon.svg",
+      "runtime": "assets/runtime/materials/crosshatch-cubes-yellow-maroon.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1200",
+      "size": "2000x1200"
+    },
+    {
+      "key": "materials.curving-deeper-bluegreens",
+      "source": "assets/source/materials/curving-deeper-bluegreens.svg",
+      "runtime": "assets/runtime/materials/curving-deeper-bluegreens.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.curving-deeper-blues",
+      "source": "assets/source/materials/curving-deeper-blues.svg",
+      "runtime": "assets/runtime/materials/curving-deeper-blues.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.curving-deeper-rainbow",
+      "source": "assets/source/materials/curving-deeper-rainbow.svg",
+      "runtime": "assets/runtime/materials/curving-deeper-rainbow.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.curving-deeper-redpink-blues",
+      "source": "assets/source/materials/curving-deeper-redpink-blues.svg",
+      "runtime": "assets/runtime/materials/curving-deeper-redpink-blues.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.curving-deeper-spectrum",
+      "source": "assets/source/materials/curving-deeper-spectrum.svg",
+      "runtime": "assets/runtime/materials/curving-deeper-spectrum.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "materials.folded-stripes-blue-green-yellow",
+      "source": "assets/source/materials/folded-stripes-blue-green-yellow.svg",
+      "runtime": "assets/runtime/materials/folded-stripes-blue-green-yellow.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "179x99",
+      "size": "179x99"
+    },
+    {
+      "key": "materials.folded-stripes-blue-purple-pink-white",
+      "source": "assets/source/materials/folded-stripes-blue-purple-pink-white.svg",
+      "runtime": "assets/runtime/materials/folded-stripes-blue-purple-pink-white.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "72x40",
+      "size": "72x40"
+    },
+    {
+      "key": "materials.folded-stripes-green-blues",
+      "source": "assets/source/materials/folded-stripes-green-blues.svg",
+      "runtime": "assets/runtime/materials/folded-stripes-green-blues.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "360x200",
+      "size": "360x200"
+    },
+    {
+      "key": "materials.folded-stripes-yellow-pink-purple",
+      "source": "assets/source/materials/folded-stripes-yellow-pink-purple.svg",
+      "runtime": "assets/runtime/materials/folded-stripes-yellow-pink-purple.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "360x200",
+      "size": "360x200"
+    },
+    {
+      "key": "materials.monstera-patch",
+      "source": "assets/source/materials/monstera-patch.svg",
+      "runtime": "assets/runtime/materials/monstera-patch.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "277x231",
+      "size": "277x231"
+    },
+    {
+      "key": "materials.paper-construction-brown-01",
+      "source": "assets/source/materials/paper_construction_brown_01.svg",
+      "runtime": "assets/runtime/materials/paper_construction_brown_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.paper-construction-green-01",
+      "source": "assets/source/materials/paper_construction_green_01.svg",
+      "runtime": "assets/runtime/materials/paper_construction_green_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.paper-notebook-blue-lined-01",
+      "source": "assets/source/materials/paper_notebook_blue_lined_01.svg",
+      "runtime": "assets/runtime/materials/paper_notebook_blue_lined_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.resource-brown-paper-patch-01",
+      "source": "assets/source/materials/resource_brown_paper_patch_01.svg",
+      "runtime": "assets/runtime/materials/resource_brown_paper_patch_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.ribbon-weave-greenyellow",
+      "source": "assets/source/materials/ribbon-weave-greenyellow.svg",
+      "runtime": "assets/runtime/materials/ribbon-weave-greenyellow.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "400x400",
+      "size": "400x400"
+    },
+    {
+      "key": "materials.ribbon-weave-pink",
+      "source": "assets/source/materials/ribbon-weave-pink.svg",
+      "runtime": "assets/runtime/materials/ribbon-weave-pink.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "400x400",
+      "size": "400x400"
+    },
+    {
+      "key": "materials.ribbon-weave-salmon",
+      "source": "assets/source/materials/ribbon-weave-salmon.svg",
+      "runtime": "assets/runtime/materials/ribbon-weave-salmon.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "400x400",
+      "size": "400x400"
+    },
+    {
+      "key": "materials.roof-shingles-01",
+      "source": "assets/source/materials/roof-shingles-01.svg",
+      "runtime": "assets/runtime/materials/roof-shingles-01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "306x316",
+      "size": "306x316"
+    },
+    {
+      "key": "materials.roof-shingles-02",
+      "source": "assets/source/materials/roof-shingles-02.svg",
+      "runtime": "assets/runtime/materials/roof-shingles-02.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "306x316",
+      "size": "306x316"
+    },
+    {
+      "key": "materials.subtle-bubbles-blues",
+      "source": "assets/source/materials/subtle-bubbles-blues.svg",
+      "runtime": "assets/runtime/materials/subtle-bubbles-blues.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.subtle-bubbles-greenblues",
+      "source": "assets/source/materials/subtle-bubbles-greenblues.svg",
+      "runtime": "assets/runtime/materials/subtle-bubbles-greenblues.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.subtle-bubbles-pinkyellows",
+      "source": "assets/source/materials/subtle-bubbles-pinkyellows.svg",
+      "runtime": "assets/runtime/materials/subtle-bubbles-pinkyellows.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.subtle-bubbles-purplepinks",
+      "source": "assets/source/materials/subtle-bubbles-purplepinks.svg",
+      "runtime": "assets/runtime/materials/subtle-bubbles-purplepinks.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.terrain-clearing-sheet-01",
+      "source": "assets/source/materials/terrain_clearing_sheet_01.svg",
+      "runtime": "assets/runtime/materials/terrain_clearing_sheet_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "1024x1024",
+      "size": "1024x1024"
+    },
+    {
+      "key": "materials.wall-siding-01",
+      "source": "assets/source/materials/wall-siding-01.svg",
+      "runtime": "assets/runtime/materials/wall-siding-01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "282x201",
+      "size": "282x201"
+    },
+    {
+      "key": "materials.wall-siding-02",
+      "source": "assets/source/materials/wall-siding-02.svg",
+      "runtime": "assets/runtime/materials/wall-siding-02.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "282x201",
+      "size": "282x201"
+    },
+    {
+      "key": "materials.wooden-floor-grey",
+      "source": "assets/source/materials/wooden-floor-grey.svg",
+      "runtime": "assets/runtime/materials/wooden-floor-grey.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.wooden-floor-light-brown",
+      "source": "assets/source/materials/wooden-floor-light-brown.svg",
+      "runtime": "assets/runtime/materials/wooden-floor-light-brown.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.wrapping-paper-blue-plaid-01",
+      "source": "assets/source/materials/wrapping-paper-blue-plaid-01.svg",
+      "runtime": "assets/runtime/materials/wrapping-paper-blue-plaid-01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "120x143",
+      "size": "120x143"
+    },
+    {
+      "key": "materials.wrapping-paper-circles-01",
+      "source": "assets/source/materials/wrapping-paper-circles-01.svg",
+      "runtime": "assets/runtime/materials/wrapping-paper-circles-01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "90x90",
+      "size": "90x90"
+    },
+    {
+      "key": "materials.wrapping-paper-orange-01",
+      "source": "assets/source/materials/wrapping-paper-orange-01.svg",
+      "runtime": "assets/runtime/materials/wrapping-paper-orange-01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "148x150",
+      "size": "148x150"
+    },
+    {
+      "key": "props.cardboard-tear-dark",
+      "source": "assets/source/props/cardboard-tear-dark.svg",
+      "runtime": "assets/runtime/props/cardboard-tear-dark.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "props.cardboard-tear-light",
+      "source": "assets/source/props/cardboard-tear-light.svg",
+      "runtime": "assets/runtime/props/cardboard-tear-light.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "props.green-hills-01",
+      "source": "assets/source/props/green-hills-01.svg",
+      "runtime": "assets/runtime/props/green-hills-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1324x953",
+      "size": "1324x953"
+    },
+    {
+      "key": "props.green-hills-02",
+      "source": "assets/source/props/green-hills-02.svg",
+      "runtime": "assets/runtime/props/green-hills-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1445x953",
+      "size": "1445x953"
+    },
+    {
+      "key": "props.green-hills-03",
+      "source": "assets/source/props/green-hills-03.svg",
+      "runtime": "assets/runtime/props/green-hills-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1177x953",
+      "size": "1177x953"
+    },
+    {
+      "key": "props.green-hills-04",
+      "source": "assets/source/props/green-hills-04.svg",
+      "runtime": "assets/runtime/props/green-hills-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1240x953",
+      "size": "1240x953"
+    },
+    {
+      "key": "props.green-hills-05",
+      "source": "assets/source/props/green-hills-05.svg",
+      "runtime": "assets/runtime/props/green-hills-05.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1106x953",
+      "size": "1106x953"
+    },
+    {
+      "key": "props.mountain-line-01",
+      "source": "assets/source/props/mountain-line-01.svg",
+      "runtime": "assets/runtime/props/mountain-line-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "4007x1058",
+      "size": "4007x1058"
+    },
+    {
+      "key": "props.mountain-line-02",
+      "source": "assets/source/props/mountain-line-02.svg",
+      "runtime": "assets/runtime/props/mountain-line-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1896x1058",
+      "size": "1896x1058"
+    },
+    {
+      "key": "props.mountain-line-03",
+      "source": "assets/source/props/mountain-line-03.svg",
+      "runtime": "assets/runtime/props/mountain-line-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "2045x1058",
+      "size": "2045x1058"
+    },
+    {
+      "key": "props.mountain-line-04",
+      "source": "assets/source/props/mountain-line-04.svg",
+      "runtime": "assets/runtime/props/mountain-line-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "2778x1058",
+      "size": "2778x1058"
+    },
+    {
+      "key": "props.mountain-line-05",
+      "source": "assets/source/props/mountain-line-05.svg",
+      "runtime": "assets/runtime/props/mountain-line-05.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "2635x1058",
+      "size": "2635x1058"
+    },
+    {
+      "key": "props.paper-tear",
+      "source": "assets/source/props/paper-tear.svg",
+      "runtime": "assets/runtime/props/paper-tear.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "props.pine-tree-medium-01",
+      "source": "assets/source/props/pine-tree-medium-01.svg",
+      "runtime": "assets/runtime/props/pine-tree-medium-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "560x879",
+      "size": "560x879"
+    },
+    {
+      "key": "props.pine-tree-medium-02",
+      "source": "assets/source/props/pine-tree-medium-02.svg",
+      "runtime": "assets/runtime/props/pine-tree-medium-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "623x846",
+      "size": "623x846"
+    },
+    {
+      "key": "props.pine-tree-tall-01",
+      "source": "assets/source/props/pine-tree-tall-01.svg",
+      "runtime": "assets/runtime/props/pine-tree-tall-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "543x997",
+      "size": "543x997"
+    },
+    {
+      "key": "props.post-it",
+      "source": "assets/source/props/post-it.svg",
+      "runtime": "assets/runtime/props/post-it.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "384x410",
+      "size": "384x410"
+    },
+    {
+      "key": "props.redwood",
+      "source": "assets/source/props/redwood.svg",
+      "runtime": "assets/runtime/props/redwood.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood2",
+      "source": "assets/source/props/redwood2.svg",
+      "runtime": "assets/runtime/props/redwood2.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood3",
+      "source": "assets/source/props/redwood3.svg",
+      "runtime": "assets/runtime/props/redwood3.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood4",
+      "source": "assets/source/props/redwood4.svg",
+      "runtime": "assets/runtime/props/redwood4.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood5",
+      "source": "assets/source/props/redwood5.svg",
+      "runtime": "assets/runtime/props/redwood5.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood6",
+      "source": "assets/source/props/redwood6.svg",
+      "runtime": "assets/runtime/props/redwood6.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.redwood7",
+      "source": "assets/source/props/redwood7.svg",
+      "runtime": "assets/runtime/props/redwood7.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "787x2385",
+      "size": "787x2385"
+    },
+    {
+      "key": "props.ripped-wallpaper",
+      "source": "assets/source/props/ripped-wallpaper.svg",
+      "runtime": "assets/runtime/props/ripped-wallpaper.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "props.single-green-hill-01",
+      "source": "assets/source/props/single-green-hill-01.svg",
+      "runtime": "assets/runtime/props/single-green-hill-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "946x953",
+      "size": "946x953"
+    },
+    {
+      "key": "props.single-green-hill-02",
+      "source": "assets/source/props/single-green-hill-02.svg",
+      "runtime": "assets/runtime/props/single-green-hill-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1045x953",
+      "size": "1045x953"
+    },
+    {
+      "key": "props.single-green-hill-03",
+      "source": "assets/source/props/single-green-hill-03.svg",
+      "runtime": "assets/runtime/props/single-green-hill-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x953",
+      "size": "520x953"
+    },
+    {
+      "key": "props.single-green-hill-04",
+      "source": "assets/source/props/single-green-hill-04.svg",
+      "runtime": "assets/runtime/props/single-green-hill-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "701x953",
+      "size": "701x953"
+    },
+    {
+      "key": "props.tape-01",
+      "source": "assets/source/props/tape-01.svg",
+      "runtime": "assets/runtime/props/tape-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "39x248",
+      "size": "39x248"
+    },
+    {
+      "key": "props.torn-paper",
+      "source": "assets/source/props/torn-paper.svg",
+      "runtime": "assets/runtime/props/torn-paper.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1920x1080",
+      "size": "1920x1080"
+    },
+    {
+      "key": "props.tree-01",
+      "source": "assets/source/props/tree-01.svg",
+      "runtime": "assets/runtime/props/tree-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "722x936",
+      "size": "722x936"
+    },
+    {
+      "key": "props.tree-02",
+      "source": "assets/source/props/tree-02.svg",
+      "runtime": "assets/runtime/props/tree-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "624x871",
+      "size": "624x871"
+    },
+    {
+      "key": "props.window-single-closed-01",
+      "source": "assets/source/props/window-single-closed-01.svg",
+      "runtime": "assets/runtime/props/window-single-closed-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "260x439",
+      "size": "260x439"
+    },
+    {
+      "key": "props.window-single-open-01",
+      "source": "assets/source/props/window-single-open-01.svg",
+      "runtime": "assets/runtime/props/window-single-open-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "262x436",
+      "size": "262x436"
+    },
+    {
+      "key": "props.window-small-square-closed-01",
+      "source": "assets/source/props/window-small-square-closed-01.svg",
+      "runtime": "assets/runtime/props/window-small-square-closed-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "241x309",
+      "size": "241x309"
+    }
+  ],
+  "skipped": []
+}

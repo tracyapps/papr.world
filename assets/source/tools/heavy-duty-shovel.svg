@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="633" height="172" viewBox="0 0 633 172">
+<style>
+:root {
+  --color-03af28: #03AF28;
+  --color-e9ff00: #E9FF00;
+  --color-00cb63: #00CB63;
+  --color-00a345: #00A345;
+  --color-107b27: #107B27;
+  --color-a2b10a: #A2B10A;
+  --color-0a8d4a: #0A8D4A;
+  --color-0d793a: #0D793A;
+  --color-0b4d19: #0B4D19;
+  --color-707a0b: #707A0B;
+  --color-084023: #084023;
+  --color-08401f: #08401F;
+  --color-0b3715: #0B3715;
+  --color-454b05: #454B05;
+  --color-0a301d: #0A301D;
+  --color-083019: #083019;
+  --color-4eb80b: #4EB80B;
+  --color-ffb700: #FFB700;
+  --color-62ba1a: #62BA1A;
+  --color-ff8100: #FF8100;
+  --color-82dd00: #82DD00;
+  --color-ca3607: #CA3607;
+  --color-3c8012: #3C8012;
+  --color-ab7e0b: #AB7E0B;
+  --color-59b50e: #59B50E;
+  --color-a95907: #A95907;
+  --color-67a113: #67A113;
+  --color-982d0b: #982D0B;
+  --color-29520f: #29520F;
+  --color-6c5008: #6C5008;
+  --color-386a0f: #386A0F;
+  --color-693b0c: #693B0C;
+  --color-48720b: #48720B;
+  --color-591c08: #591C08;
+  --color-1d3a0b: #1D3A0B;
+  --color-4e3a08: #4E3A08;
+  --color-24440b: #24440B;
+  --color-492908: #492908;
+  --color-293e0c: #293E0C;
+  --color-501704: #501704;
+}
+</style>
+<defs>
+  <linearGradient id="grad0" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#5B3C00"/>
+    <stop offset="0.45" stop-color="#865900"/>
+    <stop offset="0.94" stop-color="#694B10"/>
+  </linearGradient>
+  <filter id="fx1" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="1.01" numOctaves="4" seed="2555" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.25" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad2" x1="0" y1="0.5" x2="1" y2="0.5">
+    <stop offset="0.71" stop-color="#313131"/>
+    <stop offset="0.98" stop-color="#202020"/>
+  </linearGradient>
+  <linearGradient id="grad3" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#444444"/>
+    <stop offset="0.44" stop-color="#7D7D7D"/>
+    <stop offset="0.49" stop-color="#969696"/>
+    <stop offset="0.54" stop-color="#868686"/>
+    <stop offset="0.85" stop-color="#525252"/>
+  </linearGradient>
+  <linearGradient id="grad4" x1="0" y1="0.5" x2="1" y2="0.5">
+    <stop offset="0.56" stop-color="#444444" stop-opacity="0"/>
+    <stop offset="0.92" stop-color="#444444"/>
+  </linearGradient>
+</defs>
+<g class="layer-rectangle" filter="url(#fx1)">
+<path d="M 211.01 74.52 C 211.01 74.52 560.43 74.35 560.43 74.35 C 560.43 74.35 562.51 74.57 562.51 74.57 C 562.51 74.57 563 106.51 563 106.51 C 563 106.51 211 108.68 211 108.68 C 211 108.68 211.42 91.36 211.42 91.36 C 211.42 91.36 211.01 74.52 211.01 74.52 Z" fill="url(#grad0)" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 624 52.73 C 624 52.73 623.36 129.95 623.36 129.95 C 623.36 129.95 600.68 130 583.4 130 C 566.12 130 555 115.65 555 90.69 C 555 68.52 566.98 51 585.55 51 C 604.12 51 624 52.73 624 52.73 Z M 571.4 91.32 C 571.4 109.74 570.99 115.21 582.88 115.21 C 594.77 115.21 605.46 115.23 605.46 115.23 C 605.46 115.23 606.02 68.47 606.02 68.47 C 606.02 68.47 597.13 67.56 584.35 67.56 C 571.58 67.56 571.4 74.96 571.4 91.32 Z" fill="url(#grad2)" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 213 17.22 C 213 17.22 210.95 157.33 210.95 157.24 C 210.95 157.15 205.29 164.84 201.93 164.75 C 198.57 164.65 113.29 164.22 79.41 152.2 C 39.47 136.7 6.42 96.46 6.98 84.48 C 7.53 72.49 29.02 36.4 85.09 14.98 C 100.58 7.65 192.91 9.87 200.97 10.4 C 205.7 12.22 213 17.22 213 17.22 Z" fill="url(#grad3)" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 213 17.22 C 213 17.22 210.95 157.33 210.95 157.24 C 210.95 157.15 205.29 164.84 201.93 164.75 C 198.57 164.65 113.29 164.22 79.41 152.2 C 39.47 136.7 6.42 96.46 6.98 84.48 C 7.53 72.49 28.89 36.32 84.97 14.9 C 100.45 7.56 195.8 11.43 203.87 11.97 C 208.6 13.78 213 17.22 213 17.22 Z" fill="url(#grad4)" stroke-linejoin="round"/>
+</g>
+<g class="layer-rectangle">
+<path d="M 205.4 11.96 C 205.4 11.96 213 18 213 18 C 213 18 213 156 213 156 C 213 156 204.51 163.88 204.51 163.88 C 204.51 163.88 205.4 11.96 205.4 11.96 Z" fill="#1E1E1E" stroke-linejoin="round"/>
+</g>
+</svg>

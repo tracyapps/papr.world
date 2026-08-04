@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pencil and Paper Prototype</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game"></canvas>
+      <div class="hud" aria-label="Prototype status">
+        <div class="chip">The Paper Clearing</div>
+        <div id="maker-interaction-prompt" class="hint maker-prompt" hidden>Click the Thing Maker or press E</div>
+        <div id="equipped-tool-chip" class="hint equipped-tool-chip">Hands free</div>
+      </div>
+      <div id="hud-actions" class="hud-actions">
+        <button id="hud-help" class="hud-icon-button" type="button" aria-label="Help and controls" aria-expanded="false">
+          <span aria-hidden="true">?</span>
+        </button>
+        <button id="hud-settings" class="hud-icon-button" type="button" aria-label="Settings" aria-expanded="false">
+          <span class="hud-icon-cog" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div id="mini-map-widget" class="mini-map hud-widget" aria-label="Explored paper map" data-hud-widget="miniMap">
+        <div class="hud-drag-grip" aria-hidden="true"></div>
+        <canvas id="mini-map" width="156" height="156"></canvas>
+        <button class="hud-resize-handle" type="button" aria-label="Resize minimap" data-hud-resize="miniMap"></button>
+      </div>
+      <div id="compass-widget" class="compass hud-widget" aria-label="Compass heading" data-hud-widget="compass">
+        <div class="hud-drag-grip" aria-hidden="true"></div>
+        <div class="compass-tilt">
+          <div id="compass-rose" class="compass-rose" aria-hidden="true">
+            <span class="compass-arrow compass-arrow-n"></span>
+            <span class="compass-arrow compass-arrow-e"></span>
+            <span class="compass-arrow compass-arrow-s"></span>
+            <span class="compass-arrow compass-arrow-w"></span>
+          </div>
+          <div id="compass-heading" class="compass-heading">N</div>
+        </div>
+        <button class="hud-resize-handle" type="button" aria-label="Resize compass" data-hud-resize="compass"></button>
+      </div>
+      <div id="scrapbook-dock" class="scrapbook-dock" aria-label="Scrapbook">
+        <div id="scrapbook-strip" class="scrapbook-strip" aria-hidden="true">
+          <div id="scrapbook-tabs" class="scrapbook-tabs" role="tablist" aria-label="Scrapbook sections"></div>
+          <div id="scrapbook-panel" class="scrapbook-strip-body" role="tabpanel" tabindex="0"></div>
+        </div>
+        <button id="scrapbook-toggle" class="scrapbook-cover" type="button" aria-label="Open scrapbook" aria-expanded="false" aria-controls="scrapbook-strip"></button>
+      </div>
+      <div id="thing-maker-panel" class="thing-maker-panel" aria-label="Thing Maker console" aria-hidden="true">
+        <div class="maker-panel-header">
+          <div>
+            <p class="panel-kicker">Manual Thing Maker</p>
+            <h1>Plan Slot Console</h1>
+          </div>
+          <button class="icon-button" type="button" data-close-maker aria-label="Close Thing Maker">×</button>
+        </div>
+        <p id="maker-message" class="maker-message"></p>
+        <div class="maker-meter" aria-label="Craft progress">
+          <div id="maker-progress" class="maker-progress"></div>
+        </div>
+        <div class="maker-grid">
+          <section>
+            <h2>Plans</h2>
+            <div id="maker-recipes" class="recipe-list"></div>
+          </section>
+          <section>
+            <h2>Materials</h2>
+            <div id="maker-inventory" class="inventory-list"></div>
+            <button id="maker-upgrade" class="upgrade-button" type="button">Upgrade crankworks</button>
+          </section>
+        </div>
+        <div id="maker-output" class="maker-output"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,1566 @@
+:root {
+  color: #2d261e;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  /* HUD layout zones. Authored in src/ui/hudLayout.ts and mirrored here as
+     fallbacks so the stylesheet still renders sensibly before the layout
+     module runs. Do not hardcode these values anywhere else. */
+  --hud-edge: 16px;
+  --hud-rail-gap: 12px;
+  --hud-rail-width: clamp(142px, 11vw, 160px);
+  /* Bottom space owned by the scrapbook dock, including the cover in its
+     raised (open) position. Anything bottom-anchored clears this. */
+  --hud-dock-reserve: 272px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #ece6d4;
+}
+
+.equipped-tool-chip {
+  opacity: 0.74;
+}
+
+.equipped-tool-chip.has-tool {
+  background: rgb(224 238 198 / 0.94);
+  border-color: rgb(67 91 45 / 0.28);
+  color: #39532e;
+  opacity: 1;
+}
+
+/* One bottom-centre column for every transient message. Toasts are flow
+   children here rather than individually positioned, so two of them can no
+   longer occupy the same coordinates. */
+.hud-toast-stack {
+  align-items: center;
+  /* Rides above whatever the scrapbook dock currently occupies, so opening
+     the strip lifts the toasts instead of burying them. */
+  bottom: calc(var(--hud-dock-reserve, 148px) - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  left: 50%;
+  pointer-events: none;
+  position: fixed;
+  transform: translateX(-50%);
+  transition: bottom 220ms ease;
+  width: min(460px, calc(100vw - 32px));
+  z-index: 24;
+}
+
+/* The critter dialogue card opens bottom-centre. Lift the stack above it so
+   a harvest toast never lands on a conversation. */
+.hud-toast-stack.is-raised {
+  bottom: calc(var(--hud-dock-reserve, 148px) + 120px);
+}
+
+.cozy-world-toast {
+  background: rgb(255 249 226 / 0.96) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 260px auto;
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 10px;
+  box-shadow: 0 14px 32px rgb(54 39 27 / 0.22);
+  display: grid;
+  gap: 2px;
+  max-width: 100%;
+  opacity: 0;
+  padding: 11px 18px 12px;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(12px) rotate(-0.5deg);
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.cozy-world-toast strong {
+  color: #6a3d2a;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cozy-world-toast span {
+  font: 600 14px/1.4 Georgia, serif;
+}
+
+.cozy-world-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0) rotate(-0.5deg);
+}
+
+/* Was fixed at right:18/top:190 — the exact coordinates of the saved-places
+   panel, which has a higher z-index and swallowed it. Now a flow child of
+   the shared toast stack. */
+.harvest-toast {
+  background: rgb(255 249 226 / 0.96) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 260px auto;
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 10px;
+  box-shadow: 0 14px 32px rgb(54 39 27 / 0.22);
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  max-width: 100%;
+  opacity: 0;
+  padding: 10px 16px;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(12px) rotate(0.4deg);
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.harvest-toast strong { color: #5e3b29; font-size: 13px; }
+.harvest-toast span { color: #715a48; font-size: 11px; }
+.harvest-toast.is-visible { opacity: 1; transform: translateY(0) rotate(0.4deg); }
+
+/* Garden refusal card. Wider than a toast because it carries a requirement
+   and the current value side by side — a one-liner can say "no", but only
+   numbers tell the player what "yes" would look like. */
+.garden-hint {
+  background: rgb(255 249 226 / 0.97) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 300px auto;
+  border: 1px solid rgb(72 54 36 / 0.3);
+  border-radius: 11px 9px 12px 10px;
+  box-shadow: 0 16px 36px rgb(54 39 27 / 0.26);
+  display: grid;
+  gap: 5px;
+  max-width: 100%;
+  opacity: 0;
+  padding: 12px 16px 13px;
+  pointer-events: none;
+  text-align: left;
+  transform: translateY(12px) rotate(-0.3deg);
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.garden-hint.is-visible { opacity: 1; transform: translateY(0) rotate(-0.3deg); }
+
+.garden-hint-title {
+  color: #6a3d2a;
+  font: 700 14px/1.25 Georgia, serif;
+}
+
+.garden-hint-body {
+  color: #5c4938;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+
+.garden-hint-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 3px 0 0;
+}
+
+.garden-hint-facts > div {
+  align-items: baseline;
+  display: flex;
+  gap: 6px;
+}
+
+.garden-hint-facts dt {
+  color: #8a7460;
+  font: 600 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.garden-hint-facts dd {
+  color: #453324;
+  font: 700 13px/1 Georgia, serif;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+/* Critter petting feedback. Third member of the toast stack. */
+.pet-toast {
+  background: rgb(255 249 226 / 0.96) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 260px auto;
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgb(54 39 27 / 0.18);
+  color: #4a3528;
+  font: 14px/1.4 system-ui, sans-serif;
+  margin: 0;
+  max-width: 100%;
+  opacity: 0;
+  padding: 6px 14px;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(10px);
+  transition: opacity 350ms ease, transform 220ms ease;
+}
+
+.pet-toast.is-visible { opacity: 1; transform: translateY(0); }
+
+/* A hidden toast still occupies a flex row, which would float the visible
+   one upward by however many of its siblings happen to be idle. Take
+   inactive toasts out of flow instead of hiding them, so the layout is
+   stable *and* the opacity fade still plays on the way out
+   (`display: none` would cut it off mid-transition). */
+.hud-toast-stack > :not(.is-visible) {
+  bottom: 0;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+/* Reduced motion: keep every state change legible but drop the sliding,
+   scaling, and rotating that carries no information. Opacity is retained so
+   appear/disappear is still perceivable. */
+@media (prefers-reduced-motion: reduce) {
+  .hud-toast-stack,
+  .hud-toast-stack > *,
+  .region-banner,
+  .tool-toolbar-slots,
+  .tool-slot,
+  .tool-slot-art,
+  .tool-shortcut,
+  .critter-dialogue,
+  .scrapbook-strip,
+  .scrapbook-cover,
+  .scrapbook-tab,
+  .hud-overlay,
+  .hud-overlay-card,
+  .hud-icon-button,
+  .hud-widget {
+    transition-duration: 1ms !important;
+  }
+
+  .hud-overlay-card,
+  .hud-overlay.is-open .hud-overlay-card {
+    transform: none;
+  }
+
+  /* Entry/exit offsets only — the resting transform of each element is
+     re-declared rather than blanket-removed, so nothing loses its layout
+     (the toast stack's centring translate, the cover's paper tilt). */
+  .cozy-world-toast,
+  .cozy-world-toast.is-visible {
+    transform: rotate(-0.5deg);
+  }
+
+  .harvest-toast,
+  .harvest-toast.is-visible {
+    transform: rotate(0.4deg);
+  }
+
+  .pet-toast,
+  .pet-toast.is-visible {
+    transform: none;
+  }
+
+  .region-banner,
+  .region-banner.is-visible {
+    transform: translate(-50%, 0);
+  }
+
+  .critter-dialogue,
+  .critter-dialogue.is-open {
+    transform: translate(-50%, 0) rotate(-0.4deg);
+  }
+}
+
+/* Top-centre band. The compass used to default to this exact spot (centred,
+   y:76) and was covered on every region change; its default now lives in the
+   right-hand column so this band belongs to the banner alone. */
+.region-banner {
+  color: #fff9e8;
+  display: grid;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  text-align: center;
+  text-shadow: 0 2px 8px rgb(45 32 23 / 0.65);
+  top: 26px;
+  transform: translate(-50%, -8px);
+  transition: opacity 500ms ease, transform 500ms ease;
+  z-index: 20;
+}
+
+.region-banner strong { font: 700 26px/1.05 Georgia, serif; }
+.region-banner span { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.region-banner.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+.critter-dialogue {
+  background: #fff8df url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 360px auto;
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 13px 10px 15px 11px;
+  bottom: 24px;
+  box-shadow: 0 22px 54px rgb(49 35 25 / 0.3);
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  opacity: 0;
+  padding: 22px 24px 20px;
+  pointer-events: none;
+  position: fixed;
+  transform: translate(-50%, 24px) rotate(-0.4deg);
+  transition: opacity 180ms ease, transform 220ms ease;
+  width: 560px;
+  z-index: 35;
+}
+
+.critter-dialogue.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0) rotate(-0.4deg);
+}
+
+.critter-dialogue-tape {
+  background: rgb(226 191 113 / 0.68);
+  height: 22px;
+  left: 50%;
+  position: absolute;
+  top: -11px;
+  transform: translateX(-50%) rotate(2deg);
+  width: 82px;
+}
+
+.critter-dialogue-close {
+  background: transparent;
+  border: 0;
+  color: #674c38;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  padding: 5px 8px;
+  position: absolute;
+  right: 8px;
+  top: 6px;
+}
+
+.critter-dialogue-kicker,
+.critter-dialogue-meta {
+  color: #795f48;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.055em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.critter-dialogue-name {
+  color: #443126;
+  font: 700 28px/1.05 Georgia, serif;
+  margin: 3px 0 4px;
+}
+
+.critter-dialogue-arc {
+  color: #9a5d38;
+  font: italic 700 12px/1.3 Georgia, serif;
+  margin: 8px 0 -8px;
+}
+
+.critter-dialogue-speech {
+  color: #3d3027;
+  font: 600 17px/1.5 Georgia, serif;
+  margin: 18px 0;
+  min-height: 52px;
+}
+
+.critter-dialogue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.critter-dialogue-actions button {
+  background: rgb(255 252 239 / 0.86);
+  border: 1px solid rgb(75 55 38 / 0.25);
+  border-radius: 999px;
+  color: #49372a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.critter-dialogue-actions button:hover,
+.critter-dialogue-actions button:focus-visible {
+  background: #f1d978;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 620px) {
+  .critter-dialogue {
+    bottom: 12px;
+    padding: 20px 16px 16px;
+    width: calc(100vw - 24px);
+  }
+
+  .critter-dialogue-actions button {
+    flex: 1 1 44%;
+  }
+}
+
+#app,
+#game {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+#game {
+  cursor: none;
+}
+
+#game.is-camera-orbiting {
+  cursor: grabbing;
+}
+
+.is-camera-orbiting #game {
+  cursor: grabbing;
+}
+
+.game-cursor {
+  --cursor-x: -100px;
+  --cursor-y: -100px;
+  height: 58px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  transform: translate3d(var(--cursor-x), var(--cursor-y), 0);
+  transition: opacity 90ms ease;
+  width: 58px;
+  z-index: 80;
+}
+
+.game-cursor img {
+  display: block;
+  filter: drop-shadow(1px 2px 2px rgb(20 16 14 / 0.34));
+  height: 100%;
+  transform: translate(var(--hotspot-x, -14%), var(--hotspot-y, -12%));
+  transition: filter 130ms ease, opacity 130ms ease, transform 130ms ease;
+  width: 100%;
+}
+
+/* Each cursor's hotspot lives in two custom properties so the valid/invalid
+   state rules can reuse it. They previously repeated the dig cursor's
+   `translate(-42%, -70%)` literally, which meant any *other* tool cursor
+   snapped to dig's hotspot the moment it became valid or invalid.
+
+   The names must NOT be --cursor-x/--cursor-y. Those carry the pointer's
+   position in pixels and are set on .game-cursor, so they inherit into the
+   image — the fallback in `translate(var(--cursor-x, -14%), ...)` never
+   applies, and the image gets translated by the pointer position a second
+   time. The drawn cursor then sits at double the real one: dead-on in the
+   top-left corner, and flung off-screen as you approach the centre. Any
+   cursor without its own hotspot rule below did exactly that. */
+.game-cursor[data-cursor="hand"] img {
+  --hotspot-x: -48%;
+  --hotspot-y: -24%;
+}
+
+.game-cursor[data-cursor="dig"] img,
+.game-cursor[data-cursor="garden"] img {
+  --hotspot-x: -42%;
+  --hotspot-y: -70%;
+}
+
+.game-cursor.is-visible {
+  opacity: 1;
+}
+
+.game-cursor.is-invalid-target img {
+  filter: grayscale(0.55) drop-shadow(1px 2px 1px rgb(20 16 14 / 0.18));
+  opacity: 0.38;
+  transform: translate(var(--hotspot-x, -14%), var(--hotspot-y, -12%)) scale(0.92);
+}
+
+/* Only tool cursors light up — `hand` and `default` are always "valid" and
+   would otherwise glow permanently. */
+.game-cursor.is-valid-target[data-cursor="dig"] img,
+.game-cursor.is-valid-target[data-cursor="garden"] img {
+  filter: drop-shadow(0 0 2px rgb(255 250 230 / 0.95)) drop-shadow(2px 4px 3px rgb(20 16 14 / 0.38));
+  transform: translate(var(--hotspot-x, -14%), var(--hotspot-y, -12%)) scale(1.05);
+}
+
+.is-camera-orbiting .game-cursor {
+  opacity: 0;
+}
+
+/* Inset past the tool rail. Derived from the rail width so the two can never
+   drift apart when the rail is resized. */
+.hud {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  left: calc(var(--hud-rail-width) + 34px);
+  pointer-events: none;
+  position: fixed;
+  right: calc(var(--hud-edge) + 172px);
+  top: var(--hud-top, 16px);
+}
+
+.tool-toolbar {
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  width: var(--hud-rail-width);
+  z-index: 8;
+}
+
+.tool-toolbar::before {
+  backdrop-filter: blur(10px) saturate(0.8);
+  background: rgb(12 13 14 / 0.82);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.tool-toolbar-paper {
+  display: block;
+  filter: grayscale(1) brightness(0.08) contrast(1.3);
+  height: clamp(142px, 11vw, 160px);
+  left: 0;
+  object-fit: fill;
+  opacity: 0.9;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: rotate(90deg);
+  transform-origin: left top;
+  width: 100vh;
+}
+
+/* Scaled to fit the space above the scrapbook dock instead of running to a
+   fixed height. Previously the slots ran 75px→555px while the open scrapbook
+   cover rose to within 260px of the bottom edge, so every viewport under
+   ~815px tall buried slot 3 behind the book.
+   Scaling (rather than re-tuning slot metrics at a breakpoint) keeps the
+   hand-placed artwork composition byte-identical at every size.
+   --hud-rail-scale is computed in src/ui/hudLayout.ts. */
+.tool-toolbar-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  left: 16px;
+  pointer-events: auto;
+  position: absolute;
+  top: 75px;
+  transform: scale(var(--hud-rail-scale, 1));
+  transform-origin: left top;
+  transition: transform 160ms ease;
+}
+
+.tool-slot {
+  background: transparent;
+  border: 0;
+  color: white;
+  cursor: pointer;
+  height: 140px;
+  padding: 0;
+  position: relative;
+  transform: translateX(0);
+  transition: transform 190ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  width: 184px;
+}
+
+/* Framing comes from the tool's own art data (game/toolPresentation.ts) via
+   custom properties, so a new tool ships its own placement instead of needing
+   a per-slot CSS rule. The fallbacks keep artless or unframed slots sane. */
+.tool-slot-art {
+  filter: drop-shadow(0 0 0 rgb(255 251 229 / 0)) drop-shadow(1px 3px 2px rgb(0 0 0 / 0.1));
+  left: var(--art-left, 20px);
+  object-fit: contain;
+  opacity: 0.3;
+  position: absolute;
+  top: var(--art-top, 1px);
+  transform: rotate(var(--art-rotate, -10deg)) scaleX(var(--art-flip, 1)) scale(0.94);
+  transform-origin: 30% 60%;
+  transition: filter 190ms ease, opacity 160ms ease, transform 190ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  /* Height follows from the image's own aspect ratio — no max-height, or a
+     wide tool like the hoe gets squashed instead of scaled. */
+  width: var(--art-width, 116px);
+}
+
+.tool-shortcut {
+  align-items: center;
+  background: rgb(4 4 5 / 0.83);
+  border: 3px solid rgb(3 3 3 / 0.82);
+  border-radius: 12px;
+  box-shadow: 0 4px 7px rgb(0 0 0 / 0.28);
+  color: rgb(255 255 255 / 0.88);
+  display: flex;
+  font: 900 40px/1 Georgia, serif;
+  height: 64px;
+  justify-content: center;
+  left: 12px;
+  position: absolute;
+  top: 84px;
+  transform: rotate(-2deg);
+  transition: background 150ms ease, color 150ms ease, transform 180ms ease;
+  width: 64px;
+  z-index: 2;
+}
+
+.tool-slot:hover:not(.is-active) {
+  transform: translateX(9px);
+}
+
+.tool-slot:hover:not(.is-active) .tool-slot-art {
+  opacity: 0.62;
+  transform: rotate(var(--art-rotate, -10deg)) scaleX(var(--art-flip, 1)) scale(0.98);
+}
+
+.tool-slot:hover:not(.is-active) .tool-shortcut {
+  background: rgb(21 21 22 / 0.95);
+  color: white;
+  transform: rotate(1deg) translateY(-2px);
+}
+
+.tool-slot.is-active {
+  transform: translateX(18px);
+}
+
+.tool-slot.is-active .tool-slot-art {
+  filter: drop-shadow(0 0 1px #fffbea) drop-shadow(0 0 1px #fffbea) drop-shadow(4px 7px 5px rgb(0 0 0 / 0.44));
+  opacity: 1;
+  transform:
+    translateY(var(--art-active-lift, 0px))
+    rotate(var(--art-rotate, -10deg))
+    scaleX(var(--art-flip, 1))
+    scale(1.04);
+}
+
+.tool-slot.is-active .tool-shortcut {
+  background: #00f52c;
+  border-color: #020202;
+  color: #050505;
+}
+
+.tool-slot.is-active .tool-shortcut {
+  transform:
+    translate(-18px, var(--art-active-badge-lift, 0px))
+    rotate(-2deg)
+    scale(1.05);
+}
+
+.tool-slot.is-locked .tool-slot-art {
+  filter: grayscale(0.2) drop-shadow(1px 3px 2px rgb(0 0 0 / 0.1));
+  opacity: 0.27;
+}
+
+.tool-slot:focus-visible {
+  outline: none;
+}
+
+.tool-slot:focus-visible .tool-shortcut {
+  outline: 3px solid #fffbea;
+  outline-offset: 3px;
+}
+
+.maker-prompt[hidden] {
+  display: none;
+}
+
+.chip,
+.hint {
+  backdrop-filter: blur(10px);
+  background: rgb(255 252 240 / 0.78);
+  border: 1px solid rgb(62 49 35 / 0.18);
+  box-shadow: 0 10px 24px rgb(52 41 31 / 0.12);
+  color: #2d261e;
+}
+
+.chip {
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1;
+  padding: 10px 12px;
+}
+
+.hint {
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 8px 10px;
+}
+
+.hud-widget {
+  --hud-scale: 1;
+  pointer-events: auto;
+  transform: scale(var(--hud-scale));
+  transform-origin: top left;
+  touch-action: none;
+  user-select: none;
+}
+
+.hud-widget.is-dragging,
+.hud-widget.is-resizing {
+  cursor: grabbing;
+}
+
+.hud-drag-grip {
+  background:
+    radial-gradient(circle, rgb(62 49 35 / 0.25) 1px, transparent 1.5px);
+  background-size: 7px 7px;
+  height: 20px;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  transition: opacity 120ms ease;
+  width: 40px;
+  z-index: 2;
+}
+
+.hud-widget:hover .hud-drag-grip,
+.hud-widget:focus-within .hud-drag-grip {
+  opacity: 1;
+}
+
+.hud-resize-handle {
+  background: rgb(255 252 240 / 0.92);
+  border: 1px solid rgb(62 49 35 / 0.22);
+  border-radius: 8px 0 8px 0;
+  bottom: 0;
+  box-shadow: 0 4px 10px rgb(52 41 31 / 0.16);
+  cursor: nwse-resize;
+  height: 22px;
+  padding: 0;
+  pointer-events: auto;
+  position: absolute;
+  right: 0;
+  width: 22px;
+  z-index: 3;
+}
+
+.hud-resize-handle::before {
+  border-bottom: 2px solid rgb(62 49 35 / 0.48);
+  border-right: 2px solid rgb(62 49 35 / 0.48);
+  bottom: 5px;
+  content: "";
+  height: 8px;
+  position: absolute;
+  right: 5px;
+  width: 8px;
+}
+
+.hud-resize-handle:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.8);
+  outline-offset: 2px;
+}
+
+.mini-map {
+  backdrop-filter: blur(10px);
+  background: rgb(255 252 240 / 0.72);
+  border: 1px solid rgb(62 49 35 / 0.18);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgb(52 41 31 / 0.14);
+  height: 156px;
+  overflow: hidden;
+  padding: 6px;
+  position: fixed;
+  width: 156px;
+  z-index: 8;
+}
+
+.mini-map canvas {
+  display: block;
+  height: 100%;
+  image-rendering: auto;
+  width: 100%;
+}
+
+.compass {
+  display: grid;
+  position: fixed;
+  z-index: 8;
+}
+
+.compass-tilt {
+  --compass-spin: 0deg;
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(255 248 214 / 0.96) 0 37%, rgb(203 188 127 / 0.96) 38% 47%, rgb(91 76 48 / 0.92) 48% 53%, rgb(32 26 22 / 0.9) 54% 58%, transparent 59%),
+    radial-gradient(ellipse at 50% 78%, rgb(42 35 28 / 0.26), transparent 62%);
+  border-radius: 50%;
+  box-shadow:
+    0 12px 22px rgb(42 35 28 / 0.2),
+    inset 0 -8px 16px rgb(42 35 28 / 0.18),
+    inset 0 5px 8px rgb(255 255 255 / 0.38);
+  display: grid;
+  height: 76px;
+  justify-items: center;
+  perspective: 180px;
+  place-items: center;
+  transform: rotateX(52deg);
+  transform-origin: center 68%;
+  width: 76px;
+}
+
+.compass-rose,
+.compass-heading {
+  grid-area: 1 / 1;
+}
+
+.compass-rose {
+  height: 62px;
+  position: relative;
+  transform: rotate(var(--compass-spin));
+  transition: transform 80ms linear;
+  width: 62px;
+}
+
+.compass-arrow {
+  clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%);
+  height: 29px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform-origin: 50% 100%;
+  width: 18px;
+}
+
+.compass-arrow-n {
+  background: #ef2c34;
+  transform: translate(-50%, -100%);
+}
+
+.compass-arrow-e {
+  background: #25a1c9;
+  transform: translate(-50%, -100%) rotate(90deg);
+}
+
+.compass-arrow-s {
+  background: #e0b63b;
+  transform: translate(-50%, -100%) rotate(180deg);
+}
+
+.compass-arrow-w {
+  background: #37aa55;
+  transform: translate(-50%, -100%) rotate(270deg);
+}
+
+.compass-heading {
+  align-items: center;
+  background: rgb(255 252 239 / 0.88);
+  border: 1px solid rgb(54 43 31 / 0.28);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgb(42 35 28 / 0.18);
+  color: #332a24;
+  display: flex;
+  font-size: 11px;
+  font-weight: 850;
+  height: 24px;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 1;
+  transform: rotateX(-52deg);
+  width: 24px;
+  z-index: 1;
+}
+
+/* Offset past the tool rail. The dock used to start at left:0 with its cover
+/* ---------------------------------------------------------------------
+   Scrapbook strip
+   ---------------------------------------------------------------------
+   A full-width band of torn paper along the bottom edge. It replaced a
+   pop-up book view for three reasons: a growing material list lays out
+   along the strip instead of forcing an ever-larger modal, tabs keep
+   categories findable once there are dozens of materials, and closing it
+   leaves a completely clean world view for screenshots.
+
+   The cover (the red book) is the toggle and is the only part visible
+   when closed. It is inset past --hud-rail-width so it never sits in the
+   tool rail's column. */
+
+.scrapbook-dock {
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  z-index: 9;
+}
+
+.scrapbook-strip {
+  background:
+    url('../designs/paper-tear 2.svg') center top / 100% 22px no-repeat,
+    linear-gradient(rgb(255 249 226 / 0.97), rgb(253 245 218 / 0.97)),
+    url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 320px auto;
+  box-shadow: 0 -12px 30px rgb(46 34 26 / 0.24);
+  display: grid;
+  gap: 6px;
+  grid-template-rows: auto 1fr;
+  height: var(--scrapbook-strip-height, 188px);
+  padding: 26px 20px 14px calc(var(--hud-rail-width) + 210px);
+  pointer-events: auto;
+  transform: translateY(100%);
+  transition: transform 260ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  will-change: transform;
+}
+
+.scrapbook-dock.is-open .scrapbook-strip {
+  transform: translateY(0);
+}
+
+/* Hidden strips must not be focus-reachable, or Tab walks into a closed
+   scrapbook. aria-hidden alone does not remove focusability. */
+.scrapbook-strip[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.scrapbook-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.scrapbook-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px 8px 4px 4px;
+  color: #7d6753;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  font: 600 12px/1.2 system-ui, sans-serif;
+  gap: 6px;
+  padding: 6px 11px;
+  transition: background 140ms ease, color 140ms ease;
+  white-space: nowrap;
+}
+
+.scrapbook-tab:hover {
+  background: rgb(140 110 78 / 0.1);
+  color: #55412f;
+}
+
+.scrapbook-tab.is-selected {
+  background: rgb(255 253 244 / 0.95);
+  border-color: rgb(72 54 36 / 0.22);
+  border-bottom-color: transparent;
+  color: #453324;
+}
+
+.scrapbook-tab-count {
+  color: #9b8571;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scrapbook-tab.is-selected .scrapbook-tab-count { color: #7d6753; }
+
+.scrapbook-tab:focus-visible,
+.scrapbook-strip-body:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.8);
+  outline-offset: 2px;
+}
+
+.scrapbook-strip-body {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.scrapbook-panel-note {
+  color: #8a7460;
+  font: italic 11px/1.3 Georgia, serif;
+  margin: 0 0 6px;
+}
+
+.scrapbook-empty {
+  color: #8a7460;
+  font: italic 13px/1.4 Georgia, serif;
+  margin: 8px 0 0;
+}
+
+/* Items run along the strip rather than down a page. */
+.scrapbook-items {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scrapbook-item {
+  align-items: center;
+  background: rgb(255 253 244 / 0.9);
+  border: 1px solid rgb(72 54 36 / 0.18);
+  border-radius: 9px;
+  display: flex;
+  gap: 8px;
+  min-width: 186px;
+  padding: 8px 10px;
+}
+
+.scrapbook-item-icon {
+  background: var(--material-color, #9a623b);
+  border: 1px solid rgb(50 38 27 / 0.25);
+  border-radius: 5px;
+  flex: none;
+  height: 26px;
+  transform: rotate(-4deg);
+  width: 26px;
+}
+
+.scrapbook-item-art {
+  flex: none;
+  height: 30px;
+  object-fit: contain;
+  width: 30px;
+}
+
+.scrapbook-item-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.scrapbook-item-copy strong {
+  color: #453324;
+  font: 700 12px/1.2 Georgia, serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scrapbook-item-copy small {
+  color: #86705c;
+  font-size: 10px;
+}
+
+/* The quantity, standing on its own. Tabular figures so a column of counts
+   does not jitter as digits change. */
+.scrapbook-item-count {
+  color: #453324;
+  font: 700 15px/1 Georgia, serif;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  padding-left: 6px;
+}
+
+.scrapbook-item-action {
+  background: rgb(255 252 239 / 0.95);
+  border: 1px solid rgb(72 54 36 / 0.26);
+  border-radius: 999px;
+  color: #49372a;
+  cursor: pointer;
+  font: 650 10px/1 system-ui, sans-serif;
+  margin-left: auto;
+  padding: 5px 9px;
+}
+
+.scrapbook-item-action[aria-pressed="true"] { background: #7f9a58; color: #fffdf1; }
+.scrapbook-item-action:disabled { cursor: default; opacity: 0.38; }
+
+.scrapbook-item.is-undiscovered { opacity: 0.5; }
+.scrapbook-item.is-undiscovered .scrapbook-item-icon { filter: grayscale(0.8); }
+
+/* Saved places, hosted by the Map tab. */
+.places-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.places-label { color: #7d6753; font: 600 11px/1 system-ui, sans-serif; }
+
+.places-select {
+  background: rgb(255 252 239 / 0.95);
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 6px;
+  color: #3f3026;
+  font: 13px/1.3 system-ui, sans-serif;
+  min-width: 170px;
+  padding: 5px;
+}
+
+.places-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.places-button {
+  background: rgb(255 252 239 / 0.95);
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 999px;
+  color: #49372a;
+  cursor: pointer;
+  font: 650 12px/1 system-ui, sans-serif;
+  padding: 6px 10px;
+}
+
+.places-button:disabled { cursor: default; opacity: 0.4; }
+
+.places-status {
+  color: #6d5947;
+  font: 12px/1.4 system-ui, sans-serif;
+  margin: 0;
+  min-width: 150px;
+}
+
+/* The cover: the only part of the scrapbook visible when closed. */
+.scrapbook-cover {
+  background:
+    image-set(url("/assets/runtime/UI/scrapbook-cover.png") 1x),
+    linear-gradient(145deg, #5b0505, #330303);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: 0;
+  bottom: -88px;
+  cursor: pointer;
+  height: 216px;
+  left: calc(var(--hud-rail-width) + 28px);
+  pointer-events: auto;
+  position: absolute;
+  transform: rotate(-4deg);
+  transform-origin: 20% 88%;
+  transition: bottom 260ms ease, transform 260ms ease;
+  width: 166px;
+}
+
+.scrapbook-dock.is-open .scrapbook-cover {
+  bottom: calc(var(--scrapbook-strip-height, 188px) - 128px);
+  transform: rotate(-12deg) translateY(-6px);
+}
+
+.scrapbook-cover:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.8);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------
+   Top-right icon buttons and their overlays
+   ---------------------------------------------------------------------
+   These replaced the permanent instructional hint text in the HUD.
+   Controls reference is read once and never again, so it belongs behind
+   the help icon rather than in the world view forever. */
+
+.hud-actions {
+  display: flex;
+  gap: 8px;
+  position: fixed;
+  right: var(--hud-edge, 16px);
+  top: var(--hud-top, 16px);
+  z-index: 12;
+}
+
+.hud-icon-button {
+  align-items: center;
+  background: rgb(255 249 226 / 0.92);
+  border: 1px solid rgb(72 54 36 / 0.26);
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgb(54 39 27 / 0.2);
+  color: #5b4634;
+  cursor: pointer;
+  display: flex;
+  font: 700 17px/1 Georgia, serif;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  transition: background 140ms ease, transform 140ms ease;
+  width: 34px;
+}
+
+.hud-icon-button:hover { background: rgb(255 253 244 / 0.98); transform: translateY(-1px); }
+
+.hud-icon-button:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
+/* Cog drawn in CSS so there is no icon-font or extra asset dependency. */
+.hud-icon-cog {
+  background: currentcolor;
+  border-radius: 50%;
+  box-shadow:
+    0 -7px 0 -4.4px currentcolor, 0 7px 0 -4.4px currentcolor,
+    -7px 0 0 -4.4px currentcolor, 7px 0 0 -4.4px currentcolor,
+    5px 5px 0 -4.7px currentcolor, -5px -5px 0 -4.7px currentcolor,
+    5px -5px 0 -4.7px currentcolor, -5px 5px 0 -4.7px currentcolor;
+  display: block;
+  height: 11px;
+  position: relative;
+  width: 11px;
+}
+
+.hud-icon-cog::after {
+  background: rgb(255 249 226 / 0.92);
+  border-radius: 50%;
+  content: "";
+  inset: 3.5px;
+  position: absolute;
+}
+
+.hud-overlay {
+  align-items: center;
+  backdrop-filter: blur(3px);
+  background: rgb(38 28 20 / 0.42);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  opacity: 0;
+  padding: 24px;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity 180ms ease;
+  z-index: 70;
+}
+
+.hud-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.hud-overlay-card {
+  background:
+    linear-gradient(rgb(255 250 232 / 0.96), rgb(255 250 232 / 0.96)),
+    url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 340px auto;
+  border: 1px solid rgb(72 54 36 / 0.28);
+  border-radius: 12px 9px 14px 10px;
+  box-shadow: 0 26px 60px rgb(43 30 21 / 0.4);
+  color: #3f3026;
+  max-height: min(78vh, 620px);
+  overflow-y: auto;
+  padding: 26px 30px 24px;
+  position: relative;
+  transform: translateY(10px);
+  transition: transform 220ms ease;
+  width: min(520px, 100%);
+}
+
+.hud-overlay.is-open .hud-overlay-card { transform: translateY(0); }
+
+.hud-overlay-close {
+  background: transparent;
+  border: 0;
+  color: #6d5644;
+  cursor: pointer;
+  font: 400 24px/1 system-ui, sans-serif;
+  padding: 4px 8px;
+  position: absolute;
+  right: 10px;
+  top: 8px;
+}
+
+.hud-overlay-close:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
+.hud-overlay-kicker {
+  color: #8a7460;
+  font: 700 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.hud-overlay-card h2 { font: 700 26px/1.1 Georgia, serif; margin: 0 0 14px; }
+
+.hud-overlay-subhead {
+  color: #6d5644;
+  font: 700 11px/1 system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  margin: 18px 0 8px;
+  text-transform: uppercase;
+}
+
+.hud-controls-list { display: grid; gap: 5px; margin: 0; }
+
+.hud-controls-row {
+  align-items: baseline;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(120px, 190px) 1fr;
+}
+
+.hud-controls-row dt { margin: 0; }
+.hud-controls-row dd { color: #5c4938; font-size: 13px; margin: 0; }
+
+.hud-controls-row kbd {
+  background: rgb(255 253 244 / 0.95);
+  border: 1px solid rgb(72 54 36 / 0.26);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: #453324;
+  display: inline-block;
+  font: 600 11px/1.3 system-ui, sans-serif;
+  padding: 3px 7px;
+}
+
+.hud-setting {
+  align-items: flex-start;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+}
+
+.hud-setting input { margin-top: 3px; }
+.hud-setting strong { display: block; font: 600 14px/1.3 system-ui, sans-serif; }
+.hud-setting small { color: #7d6753; display: block; font-size: 12px; }
+
+.hud-overlay-note {
+  color: #8a7460;
+  font: italic 12px/1.5 Georgia, serif;
+  margin: 18px 0 0;
+}
+
+@media (max-width: 720px) {
+  .scrapbook-strip { padding-left: 20px; }
+  .scrapbook-cover { height: 150px; width: 116px; bottom: -62px; }
+  .scrapbook-dock.is-open .scrapbook-cover {
+    bottom: calc(var(--scrapbook-strip-height, 188px) - 92px);
+  }
+}
+
+.thing-maker-panel {
+  backdrop-filter: blur(16px);
+  background: rgb(255 252 240 / 0.9);
+  border: 1px solid rgb(62 49 35 / 0.18);
+  border-radius: 8px;
+  bottom: 18px;
+  box-shadow: 0 18px 42px rgb(52 41 31 / 0.2);
+  color: #2d261e;
+  max-height: min(680px, calc(100vh - 36px));
+  opacity: 0;
+  overflow: auto;
+  padding: 14px;
+  pointer-events: none;
+  position: fixed;
+  right: 18px;
+  transform: translateY(10px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  width: min(440px, calc(100vw - 36px));
+}
+
+.thing-maker-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.maker-panel-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.panel-kicker,
+.maker-message,
+.maker-output,
+.recipe-card p,
+.inventory-list {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.panel-kicker {
+  color: #7b4b29;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0 0 2px;
+  text-transform: uppercase;
+}
+
+.maker-panel-header h1 {
+  font-size: 20px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.icon-button {
+  align-items: center;
+  background: #fff7df;
+  border: 1px solid rgb(62 49 35 / 0.2);
+  border-radius: 999px;
+  color: #3d3023;
+  cursor: pointer;
+  display: grid;
+  flex: 0 0 auto;
+  font-size: 22px;
+  font-weight: 600;
+  height: 32px;
+  line-height: 1;
+  place-items: center;
+  width: 32px;
+}
+
+.maker-message {
+  background: #fff6d6;
+  border: 1px dashed rgb(122 78 45 / 0.4);
+  border-radius: 8px;
+  margin: 12px 0;
+  padding: 9px 10px;
+}
+
+.maker-meter {
+  background: rgb(61 48 35 / 0.12);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.maker-progress {
+  background: linear-gradient(90deg, #477f7a, #f2a03d);
+  border-radius: inherit;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 120ms linear;
+}
+
+.maker-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(132px, 0.85fr);
+  margin-top: 14px;
+}
+
+.maker-grid h2 {
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.recipe-list,
+.inventory-list {
+  display: grid;
+  gap: 8px;
+}
+
+.recipe-card {
+  background: rgb(255 255 255 / 0.5);
+  border: 1px solid rgb(62 49 35 / 0.14);
+  border-radius: 8px;
+  padding: 9px;
+}
+
+.recipe-card h3 {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+.recipe-card p {
+  color: #5b5046;
+  margin: 0 0 8px;
+}
+
+.recipe-card button,
+.upgrade-button {
+  background: #315f5c;
+  border: 0;
+  border-radius: 7px;
+  color: #fffdf4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.recipe-card button:disabled,
+.upgrade-button:disabled {
+  background: #b9afa2;
+  cursor: not-allowed;
+}
+
+.recipe-meta,
+.inventory-row {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.recipe-meta {
+  color: #715d4a;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.inventory-row {
+  background: rgb(255 255 255 / 0.42);
+  border: 1px solid rgb(62 49 35 / 0.12);
+  border-radius: 7px;
+  padding: 7px 8px;
+}
+
+.inventory-row strong {
+  font-size: 13px;
+}
+
+.upgrade-button {
+  background: #744f9a;
+  margin-top: 10px;
+}
+
+.maker-output {
+  color: #55483b;
+  margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+  .hud {
+    align-items: stretch;
+    flex-direction: column;
+    left: 10px;
+    right: 138px;
+    top: 10px;
+  }
+
+  .chip,
+  .hint {
+    width: fit-content;
+  }
+
+  .mini-map {
+    height: 118px;
+    width: 118px;
+  }
+
+  .compass-tilt {
+    height: 62px;
+    width: 62px;
+  }
+
+  .compass-rose {
+    height: 50px;
+    width: 50px;
+  }
+
+  .compass-arrow {
+    height: 23px;
+    width: 15px;
+  }
+
+  /* The strip is full-width at every size; only the cover shrinks. It stays
+     inset past the tool rail so the two never share the bottom-left corner. */
+  .scrapbook-cover {
+    bottom: -78px;
+    height: 190px;
+    width: 145px;
+  }
+
+  .thing-maker-panel {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+
+  .maker-grid {
+    grid-template-columns: 1fr;
+  }
+}

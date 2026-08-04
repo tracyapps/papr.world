@@ -1,0 +1,463 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="306" height="316" viewBox="0 0 306 316">
+<defs>
+  <linearGradient id="grad0" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx1" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad2" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx3" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad4" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx5" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad6" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx7" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad8" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx9" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad10" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx11" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad12" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx13" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad14" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx15" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad16" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx17" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad18" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx19" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad20" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx21" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad22" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx23" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad24" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx25" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad26" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx27" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad28" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx29" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad30" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx31" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad32" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx33" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad34" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx35" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad36" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx37" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad38" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx39" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad40" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx41" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad42" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx43" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad44" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx45" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad46" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx47" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad48" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx49" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad50" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx51" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+  <linearGradient id="grad52" x1="0.63" y1="0.98" x2="0.37" y2="0.02">
+    <stop offset="0.02" stop-color="#421616"/>
+    <stop offset="0.97" stop-color="#76372F"/>
+  </linearGradient>
+  <filter id="fx53" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="s0b"/>
+<feOffset in="s0b" dx="0" dy="1" result="s0o"/>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"/>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"/>
+<feMerge result="base">
+<feMergeNode in="s0"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+  </filter>
+</defs>
+<g filter="url(#fx1)">
+<path d="M -0.74 227 C -0.74 227 63.26 227 63.26 227 C 63.26 227 62.96 300.63 62.96 300.63 C 62.96 300.63 63.15 306.02 60.62 310.6 C 59.26 313.58 54.03 315.86 54.03 315.86 C 54.03 315.86 9.81 316.06 9.81 316.06 C 9.81 316.06 5.31 313.25 3.51 311.6 C 0.21 305.64 -1 301.16 -1 301.16 C -1 301.16 -0.74 227 -0.74 227 Z" fill="url(#grad0)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx3)">
+<path d="M 60.26 227 C 60.26 227 124.26 227 124.26 227 C 124.26 227 123.96 300.63 123.96 300.63 C 123.96 300.63 124.15 306.02 121.62 310.6 C 120.26 313.58 115.03 315.86 115.03 315.86 C 115.03 315.86 70.81 316.06 70.81 316.06 C 70.81 316.06 66.31 313.25 64.51 311.6 C 61.21 305.64 60 301.16 60 301.16 C 60 301.16 60.26 227 60.26 227 Z" fill="url(#grad2)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx5)">
+<path d="M -0.97 153.06 C -0.97 153.06 33.26 153 33.26 153 C 33.26 153 32.96 226.63 32.96 226.63 C 32.96 226.63 33.15 232.02 30.62 236.6 C 29.26 239.58 24.03 241.86 24.03 241.86 C 24.03 241.86 -0.97 242.05 -0.97 242.05 C -0.97 242.05 -0.97 153.06 -0.97 153.06 Z" fill="url(#grad4)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx7)">
+<path d="M 121.26 227 C 121.26 227 185.26 227 185.26 227 C 185.26 227 184.96 300.63 184.96 300.63 C 184.96 300.63 185.15 306.02 182.62 310.6 C 181.26 313.58 176.03 315.86 176.03 315.86 C 176.03 315.86 131.81 316.06 131.81 316.06 C 131.81 316.06 127.31 313.25 125.51 311.6 C 122.21 305.64 121 301.16 121 301.16 C 121 301.16 121.26 227 121.26 227 Z" fill="url(#grad6)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx9)">
+<path d="M 31.53 153 C 31.53 153 95.53 153 95.53 153 C 95.53 153 95.23 226.63 95.23 226.63 C 95.23 226.63 95.41 232.02 92.89 236.6 C 91.52 239.58 86.29 241.86 86.29 241.86 C 86.29 241.86 42.07 242.06 42.07 242.06 C 42.07 242.06 37.57 239.25 35.78 237.6 C 32.48 231.64 31.26 227.16 31.26 227.16 C 31.26 227.16 31.53 153 31.53 153 Z" fill="url(#grad8)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx11)">
+<path d="M 182.26 227 C 182.26 227 246.26 227 246.26 227 C 246.26 227 245.96 300.63 245.96 300.63 C 245.96 300.63 246.15 306.02 243.62 310.6 C 242.26 313.58 237.03 315.86 237.03 315.86 C 237.03 315.86 192.81 316.06 192.81 316.06 C 192.81 316.06 188.31 313.25 186.51 311.6 C 183.21 305.64 182 301.16 182 301.16 C 182 301.16 182.26 227 182.26 227 Z" fill="url(#grad10)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx13)">
+<path d="M 92.53 153 C 92.53 153 156.53 153 156.53 153 C 156.53 153 156.23 226.63 156.23 226.63 C 156.23 226.63 156.41 232.02 153.89 236.6 C 152.52 239.58 147.29 241.86 147.29 241.86 C 147.29 241.86 103.07 242.06 103.07 242.06 C 103.07 242.06 98.57 239.25 96.78 237.6 C 93.48 231.64 92.26 227.16 92.26 227.16 C 92.26 227.16 92.53 153 92.53 153 Z" fill="url(#grad12)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx15)">
+<path d="M 242.26 227 C 242.26 227 306.26 227 306.26 227 C 306.26 227 305.96 300.63 305.96 300.63 C 305.96 300.63 306.15 306.02 303.62 310.6 C 302.26 313.58 297.03 315.86 297.03 315.86 C 297.03 315.86 252.81 316.06 252.81 316.06 C 252.81 316.06 248.31 313.25 246.51 311.6 C 243.21 305.64 242 301.16 242 301.16 C 242 301.16 242.26 227 242.26 227 Z" fill="url(#grad14)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx17)">
+<path d="M 153.53 153 C 153.53 153 217.53 153 217.53 153 C 217.53 153 217.23 226.63 217.23 226.63 C 217.23 226.63 217.41 232.02 214.89 236.6 C 213.52 239.58 208.29 241.86 208.29 241.86 C 208.29 241.86 164.07 242.06 164.07 242.06 C 164.07 242.06 159.57 239.25 157.78 237.6 C 154.48 231.64 153.26 227.16 153.26 227.16 C 153.26 227.16 153.53 153 153.53 153 Z" fill="url(#grad16)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx19)">
+<path d="M 214.53 153 C 214.53 153 278.53 153 278.53 153 C 278.53 153 278.23 226.63 278.23 226.63 C 278.23 226.63 278.41 232.02 275.89 236.6 C 274.52 239.58 269.29 241.86 269.29 241.86 C 269.29 241.86 225.07 242.06 225.07 242.06 C 225.07 242.06 220.57 239.25 218.78 237.6 C 215.48 231.64 214.26 227.16 214.26 227.16 C 214.26 227.16 214.53 153 214.53 153 Z" fill="url(#grad18)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx21)">
+<path d="M 274.53 153 C 274.53 153 306.17 153.11 306.17 153.11 C 306.17 153.11 306.18 242.07 306.18 242.07 C 306.18 242.07 285.07 242.06 285.07 242.06 C 285.07 242.06 280.57 239.25 278.78 237.6 C 275.48 231.64 274.26 227.16 274.26 227.16 C 274.26 227.16 274.53 153 274.53 153 Z" fill="url(#grad20)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx23)">
+<path d="M -0.74 78 C -0.74 78 63.26 78 63.26 78 C 63.26 78 62.96 151.63 62.96 151.63 C 62.96 151.63 63.15 157.02 60.62 161.6 C 59.26 164.58 54.03 166.86 54.03 166.86 C 54.03 166.86 9.81 167.06 9.81 167.06 C 9.81 167.06 5.31 164.25 3.51 162.6 C 0.21 156.64 -1 152.16 -1 152.16 C -1 152.16 -0.74 78 -0.74 78 Z" fill="url(#grad22)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx25)">
+<path d="M 60.26 78 C 60.26 78 124.26 78 124.26 78 C 124.26 78 123.96 151.63 123.96 151.63 C 123.96 151.63 124.15 157.02 121.62 161.6 C 120.26 164.58 115.03 166.86 115.03 166.86 C 115.03 166.86 70.81 167.06 70.81 167.06 C 70.81 167.06 66.31 164.25 64.51 162.6 C 61.21 156.64 60 152.16 60 152.16 C 60 152.16 60.26 78 60.26 78 Z" fill="url(#grad24)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx27)">
+<path d="M -1 0.06 C -1 0.06 33.24 0 33.24 0 C 33.24 0 32.94 73.63 32.94 73.63 C 32.94 73.63 33.12 79.02 30.59 83.6 C 29.23 86.58 24 88.86 24 88.86 C 24 88.86 -1 89.05 -1 89.05 C -1 89.05 -1 0.06 -1 0.06 Z" fill="url(#grad26)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx29)">
+<path d="M 121.26 78 C 121.26 78 185.26 78 185.26 78 C 185.26 78 184.96 151.63 184.96 151.63 C 184.96 151.63 185.15 157.02 182.62 161.6 C 181.26 164.58 176.03 166.86 176.03 166.86 C 176.03 166.86 131.81 167.06 131.81 167.06 C 131.81 167.06 127.31 164.25 125.51 162.6 C 122.21 156.64 121 152.16 121 152.16 C 121 152.16 121.26 78 121.26 78 Z" fill="url(#grad28)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx31)">
+<path d="M 31.5 0 C 31.5 0 95.5 0 95.5 0 C 95.5 0 95.2 73.63 95.2 73.63 C 95.2 73.63 95.39 79.02 92.86 83.6 C 91.49 86.58 86.26 88.86 86.26 88.86 C 86.26 88.86 42.05 89.06 42.05 89.06 C 42.05 89.06 37.55 86.25 35.75 84.6 C 32.45 78.64 31.24 74.16 31.24 74.16 C 31.24 74.16 31.5 0 31.5 0 Z" fill="url(#grad30)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx33)">
+<path d="M 182.26 78 C 182.26 78 246.26 78 246.26 78 C 246.26 78 245.96 151.63 245.96 151.63 C 245.96 151.63 246.15 157.02 243.62 161.6 C 242.26 164.58 237.03 166.86 237.03 166.86 C 237.03 166.86 192.81 167.06 192.81 167.06 C 192.81 167.06 188.31 164.25 186.51 162.6 C 183.21 156.64 182 152.16 182 152.16 C 182 152.16 182.26 78 182.26 78 Z" fill="url(#grad32)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx35)">
+<path d="M 92.5 0 C 92.5 0 156.5 0 156.5 0 C 156.5 0 156.2 73.63 156.2 73.63 C 156.2 73.63 156.39 79.02 153.86 83.6 C 152.49 86.58 147.26 88.86 147.26 88.86 C 147.26 88.86 103.05 89.06 103.05 89.06 C 103.05 89.06 98.55 86.25 96.75 84.6 C 93.45 78.64 92.24 74.16 92.24 74.16 C 92.24 74.16 92.5 0 92.5 0 Z" fill="url(#grad34)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx37)">
+<path d="M 242.26 78 C 242.26 78 306.26 78 306.26 78 C 306.26 78 305.96 151.63 305.96 151.63 C 305.96 151.63 306.15 157.02 303.62 161.6 C 302.26 164.58 297.03 166.86 297.03 166.86 C 297.03 166.86 252.81 167.06 252.81 167.06 C 252.81 167.06 248.31 164.25 246.51 162.6 C 243.21 156.64 242 152.16 242 152.16 C 242 152.16 242.26 78 242.26 78 Z" fill="url(#grad36)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx39)">
+<path d="M 153.5 0 C 153.5 0 217.5 0 217.5 0 C 217.5 0 217.2 73.63 217.2 73.63 C 217.2 73.63 217.39 79.02 214.86 83.6 C 213.49 86.58 208.26 88.86 208.26 88.86 C 208.26 88.86 164.05 89.06 164.05 89.06 C 164.05 89.06 159.55 86.25 157.75 84.6 C 154.45 78.64 153.24 74.16 153.24 74.16 C 153.24 74.16 153.5 0 153.5 0 Z" fill="url(#grad38)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx41)">
+<path d="M 214.5 0 C 214.5 0 278.5 0 278.5 0 C 278.5 0 278.2 73.63 278.2 73.63 C 278.2 73.63 278.39 79.02 275.86 83.6 C 274.49 86.58 269.26 88.86 269.26 88.86 C 269.26 88.86 225.05 89.06 225.05 89.06 C 225.05 89.06 220.55 86.25 218.75 84.6 C 215.45 78.64 214.24 74.16 214.24 74.16 C 214.24 74.16 214.5 0 214.5 0 Z" fill="url(#grad40)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx43)">
+<path d="M 274.5 0 C 274.5 0 306.14 0.11 306.14 0.11 C 306.14 0.11 306.15 89.07 306.15 89.07 C 306.15 89.07 285.05 89.06 285.05 89.06 C 285.05 89.06 280.55 86.25 278.75 84.6 C 275.45 78.64 274.24 74.16 274.24 74.16 C 274.24 74.16 274.5 0 274.5 0 Z" fill="url(#grad42)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx45)">
+<path d="M -0.71 -0.01 C -0.71 -0.01 63.29 -0.01 63.29 -0.01 C 63.29 -0.01 62.96 -0.19 62.96 -0.19 C 62.96 -0.19 63.15 5.2 60.62 9.78 C 59.26 12.76 54.03 15.04 54.03 15.04 C 54.03 15.04 9.81 15.24 9.81 15.24 C 9.81 15.24 5.31 12.43 3.51 10.77 C 0.21 4.82 -1 0.34 -1 0.34 C -1 0.34 -0.71 -0.01 -0.71 -0.01 Z" fill="url(#grad44)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx47)">
+<path d="M 60.29 -0.01 C 60.29 -0.01 124.29 -0.01 124.29 -0.01 C 124.29 -0.01 123.96 -0.19 123.96 -0.19 C 123.96 -0.19 124.15 5.2 121.62 9.78 C 120.26 12.76 115.03 15.04 115.03 15.04 C 115.03 15.04 70.81 15.24 70.81 15.24 C 70.81 15.24 66.31 12.43 64.51 10.77 C 61.21 4.82 60 0.34 60 0.34 C 60 0.34 60.29 -0.01 60.29 -0.01 Z" fill="url(#grad46)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx49)">
+<path d="M 121.29 -0.01 C 121.29 -0.01 185.29 -0.01 185.29 -0.01 C 185.29 -0.01 184.96 -0.19 184.96 -0.19 C 184.96 -0.19 185.15 5.2 182.62 9.78 C 181.26 12.76 176.03 15.04 176.03 15.04 C 176.03 15.04 131.81 15.24 131.81 15.24 C 131.81 15.24 127.31 12.43 125.51 10.77 C 122.21 4.82 121 0.34 121 0.34 C 121 0.34 121.29 -0.01 121.29 -0.01 Z" fill="url(#grad48)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx51)">
+<path d="M 182.29 -0.01 C 182.29 -0.01 246.29 -0.01 246.29 -0.01 C 246.29 -0.01 245.96 -0.19 245.96 -0.19 C 245.96 -0.19 246.15 5.2 243.62 9.78 C 242.26 12.76 237.03 15.04 237.03 15.04 C 237.03 15.04 192.81 15.24 192.81 15.24 C 192.81 15.24 188.31 12.43 186.51 10.77 C 183.21 4.82 182 0.34 182 0.34 C 182 0.34 182.29 -0.01 182.29 -0.01 Z" fill="url(#grad50)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx53)">
+<path d="M 242.29 -0.01 C 242.29 -0.01 306.29 -0.01 306.29 -0.01 C 306.29 -0.01 305.96 -0.19 305.96 -0.19 C 305.96 -0.19 306.15 5.2 303.62 9.78 C 302.26 12.76 297.03 15.04 297.03 15.04 C 297.03 15.04 252.81 15.24 252.81 15.24 C 252.81 15.24 248.31 12.43 246.51 10.77 C 243.21 4.82 242 0.34 242 0.34 C 242 0.34 242.29 -0.01 242.29 -0.01 Z" fill="url(#grad52)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+</svg>

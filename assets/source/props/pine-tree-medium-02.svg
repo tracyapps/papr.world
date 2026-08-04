@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="623" height="846" viewBox="0 0 623 846">
+<defs>
+  <filter id="fx0" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad1" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx2" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad3" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx4" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad5" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx6" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad7" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx8" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad9" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx10" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad11" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx12" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad13" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx14" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad15" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx16" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad17" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx18" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad19" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx20" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad21" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx22" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <linearGradient id="grad23" x1="0.5" y1="0" x2="0.5" y2="1">
+    <stop offset="0" stop-color="#00531A"/>
+    <stop offset="0.92" stop-color="#00AE39"/>
+  </linearGradient>
+  <filter id="fx24" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="989" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+</defs>
+<g filter="url(#fx0)">
+<path d="M 271.83 643.19 C 271.83 643.19 355.62 643.19 355.62 643.19 C 355.62 643.19 349.13 672.23 349.13 672.23 C 349.13 672.23 349.37 759.75 349.37 759.75 C 349.37 759.75 355.62 794 355.62 794 C 355.62 794 271.83 794 271.83 794 C 271.83 794 276.75 771.16 276.75 771.16 C 276.75 771.16 278.3 760.26 280.24 727.89 C 282.17 695.51 278.65 718.53 277.84 686.11 C 277.02 653.69 271.83 643.19 271.83 643.19 Z" fill="#37250E" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx2)">
+<path d="M 328.3 727.96 C 309.53 677.58 293.36 692.15 293.36 692.15 C 293.36 692.15 261.9 749.34 261.9 749.34 C 305.36 579.01 187.56 739.2 166.66 746.26 C 148.48 752.39 174.13 682.85 154.72 684.8 C 130.4 688.84 75.63 762.45 80.83 745.03 C 152.17 646.44 0.92 749.91 0.92 749.91 C 0.92 749.91 144.24 633.33 157.72 536.18 C 281.33 483.75 288.55 465.07 288.55 465.07 C 288.55 465.07 316.02 559.68 316.02 559.68 C 316.02 559.68 340.06 707.53 328.3 727.96 Z" fill="url(#grad1)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(428.91 598.08) scale(-1 1) translate(-428.91 -598.08)" filter="url(#fx4)">
+<path d="M 414.76 746.8 C 395.7 752.93 449.29 660.99 428.94 662.94 C 403.45 666.98 346.02 740.6 351.47 723.18 C 426.26 624.58 262.9 709.47 262.9 709.47 C 262.9 709.47 392.27 621.87 406.41 524.72 C 535.99 472.29 569.24 443.22 569.24 443.22 C 569.24 443.22 594.92 536.3 554.01 620.16 C 522.79 684.16 424.24 743.74 414.76 746.8 Z" fill="url(#grad3)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx6)">
+<path d="M 311.61 589.5 C 311.61 589.5 269.39 642.57 248.49 649.62 C 230.3 655.76 247.76 582.52 228.34 584.47 C 204.03 588.51 191.03 617.11 155.18 642.68 C 226.52 544.09 42.79 628.84 42.79 628.84 C 42.79 628.84 168.98 572.3 159.73 471.62 C 283.34 419.19 303.11 413.66 303.11 413.66 C 303.11 413.66 337.68 463.9 337.68 463.9 C 337.68 463.9 311.61 589.5 311.61 589.5 Z" fill="url(#grad5)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(439.2 542.74) scale(-1 1) translate(-439.2 -542.74)" filter="url(#fx8)">
+<path d="M 570.68 590.77 C 570.68 590.77 507.39 663.49 507.39 663.49 C 546.93 569.57 538.45 566.55 530.52 567 C 511.46 573.14 473.6 620.03 420.57 651.02 C 495.35 552.42 302.75 637.17 302.75 637.17 C 302.75 637.17 435.04 580.63 425.33 479.95 C 554.92 427.52 575.65 422 575.65 422 C 575.65 422 570.68 590.77 570.68 590.77 Z" fill="url(#grad7)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx10)">
+<path d="M 329.09 477.55 C 314.85 524.15 296.87 574.95 296.87 574.95 C 296.87 574.95 291.3 479.99 291.3 479.99 C 299.85 409.05 255.05 587.99 235.55 594.91 C 218.58 600.92 248.09 511.27 220.69 507.16 C 214.84 492.58 241.88 530.45 168.81 567.94 C 235.93 439.97 96.86 539.01 96.86 539.01 C 96.86 539.01 195.68 459.6 209.28 352.82 C 324.63 301.41 307.95 311.6 307.95 311.6 C 307.95 311.6 329.25 380.11 329.25 380.11 C 329.25 380.11 340.06 457.52 329.09 477.55 Z" fill="url(#grad9)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(399.32 435.46) scale(-1 1) translate(-399.32 -435.46)" filter="url(#fx12)">
+<path d="M 417.23 579.2 C 399.44 585.21 466.69 473.91 406.41 482.87 C 400.28 468.28 423.87 514.74 347.26 552.23 C 369.67 480.76 271.83 523.3 271.83 523.3 C 271.83 523.3 375.43 443.89 389.69 337.11 C 510.62 285.71 493.13 295.89 493.13 295.89 C 493.13 295.89 515.46 364.4 515.46 364.4 C 515.46 364.4 437.67 572.28 417.23 579.2 Z" fill="url(#grad11)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx14)">
+<path d="M 305.33 388.5 C 305.33 388.5 269.41 430.2 250.62 463.96 C 235.12 469.51 254.02 369.33 237.48 371.1 C 233.4 401.45 206.36 485.51 199.38 467.49 C 227.57 376.64 140.59 443.29 140.59 443.29 C 140.59 443.29 203.97 345.33 234.49 243.95 C 339.84 196.51 297.4 162.18 297.4 162.18 C 297.4 162.18 315.88 270.81 315.88 270.81 C 315.88 270.81 305.33 388.5 305.33 388.5 Z" fill="url(#grad13)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(368.45 331.15) scale(-1 1) translate(-368.45 -331.15)" filter="url(#fx16)">
+<path d="M 436.71 395.85 C 436.71 395.85 412.71 443.5 412.71 443.5 C 423.59 326.28 375.6 457.27 356.92 463.65 C 346.46 366.84 302.67 492.77 295.35 474.75 C 324.9 383.9 264.01 450.63 264.01 450.63 C 264.01 450.63 330.46 352.68 362.44 251.29 C 472.89 203.86 428.4 169.52 428.4 169.52 C 428.4 169.52 447.78 278.15 447.78 278.15 C 447.78 278.15 436.71 395.85 436.71 395.85 Z" fill="url(#grad15)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx18)">
+<path d="M 333.08 315.33 C 317.13 357.35 317.41 380.27 317.41 380.27 C 317.41 380.27 298.25 281.36 247.9 358.7 C 257.63 315.84 242.91 274.07 251.31 293.61 C 236.87 297.25 176.51 345.02 176.51 345.02 C 176.51 345.02 222.25 289 253.12 197.91 C 326.52 150.67 304.16 139.51 304.16 139.51 C 304.16 139.51 317.71 202.46 317.71 202.46 C 317.71 202.46 340.06 296.92 333.08 315.33 Z" fill="url(#grad17)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(361.31 244.35) scale(-1 1) translate(-361.31 -244.35)" filter="url(#fx20)">
+<path d="M 360.63 337.11 C 363.5 274.13 282.68 347.1 282.68 347.1 C 282.68 347.1 330.62 291.08 362.99 199.99 C 439.94 152.76 416.49 141.6 416.49 141.6 C 416.49 141.6 430.7 204.54 430.7 204.54 C 430.7 204.54 384.19 334.52 360.63 337.11 Z" fill="url(#grad19)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g filter="url(#fx22)">
+<path d="M 339.98 252.27 C 339.98 252.27 298.39 199.77 312.2 287.18 C 291.78 265.55 277.07 233.79 290.41 200.33 C 272.64 232.73 267.74 248.52 257.61 299.35 C 257.38 236.3 207.05 263.69 207.05 263.69 C 207.05 263.69 256.97 220.79 272.01 129.24 C 287.87 155.75 303.35 40.58 303.35 40.58 C 303.35 40.58 324.46 146.57 324.46 146.57 C 324.46 146.57 339.98 252.27 339.98 252.27 Z" fill="url(#grad21)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g transform="translate(341.62 167.2) scale(-1 1) translate(-341.62 -167.2)" filter="url(#fx24)">
+<path d="M 328.31 280.58 C 328.08 217.53 275.31 244.92 275.31 244.92 C 275.31 244.92 351.64 175.69 359.27 84.32 C 375.9 110.83 380.78 31 380.78 31 C 380.78 31 407.93 151.54 407.93 151.54 C 407.93 151.54 334.96 233.24 328.31 280.58 Z" fill="url(#grad23)" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+</svg>
