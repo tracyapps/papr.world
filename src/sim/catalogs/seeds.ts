@@ -23,6 +23,16 @@ import type { ResourceId } from './resources';
  */
 export type PlantStage = 'seeded' | 'sprout' | 'bud' | 'bloom';
 
+/**
+ * The silhouette a garden plant grows into. `plantRuntime.ts` keeps one
+ * builder per family, and the bloom stage is where each family diverges — the
+ * earlier stages (mound, sprout, swelling bud) read the same for everything.
+ *
+ * `mending` is not a plant shape at all: it is the groundcover that stitches
+ * a bed back into the sheet, and it never blooms.
+ */
+export type PlantVisualFamily = 'flower' | 'bush' | 'row' | 'stalk' | 'head' | 'vine' | 'mending';
+
 export const PLANT_STAGE_ORDER: PlantStage[] = ['seeded', 'sprout', 'bud', 'bloom'];
 
 export const SEED_DEFS = {
@@ -31,11 +41,68 @@ export const SEED_DEFS = {
     name: 'Buttonbloom Seeds',
     effect: 'garden',
     description: 'Folds into a cheerful button-shaped garden flower.',
-    // Cumulative seconds to *enter* sprout, bud, and bloom. Tuned for a play
-    // session, not a chore: a bloom in about two minutes of pottering.
-    stageSeconds: [14, 45, 95],
+    // Cumulative seconds to *enter* sprout, bud, and bloom. Tuned so this
+    // starter flower matures during a play session without being immediate.
+    stageSeconds: [45, 150, 300],
     // Wants elbow room — leaves a visible gap between blooms.
     spacing: 0.85,
+    visual: 'flower',
+    harvest: { resource: 'buttonbloom-seeds', quantity: 1, mode: 'repeat', repeatSeconds: 300 },
+  },
+  'raspberry-bush-seeds': {
+    id: 'raspberry-bush-seeds',
+    name: 'Raspberry Bush Seeds',
+    effect: 'garden',
+    description: 'Grows into a leafy bush strung with paper raspberries.',
+    stageSeconds: [90, 420, 1200],
+    spacing: 0.9,
+    visual: 'bush',
+    accent: '#c73e52',
+    harvest: { resource: 'raspberries', quantity: 3, mode: 'repeat', repeatSeconds: 600 },
+  },
+  'crinkle-carrot-seeds': {
+    id: 'crinkle-carrot-seeds',
+    name: 'Crinkle-carrot Seeds',
+    effect: 'garden',
+    description: 'Rows of frilly green tops over hidden orange paper roots.',
+    stageSeconds: [60, 240, 720],
+    spacing: 0.55,
+    visual: 'row',
+    accent: '#e07b3a',
+    harvest: { resource: 'crinkle-carrots', quantity: 3, mode: 'whole' },
+  },
+  'ribbon-corn-seeds': {
+    id: 'ribbon-corn-seeds',
+    name: 'Ribbon-corn Seeds',
+    effect: 'garden',
+    description: 'Tall stalks that unfurl into golden ribbon cobs.',
+    stageSeconds: [120, 600, 1800],
+    spacing: 0.95,
+    visual: 'stalk',
+    accent: '#e3bd45',
+    harvest: { resource: 'ribbon-corn', quantity: 3, mode: 'whole' },
+  },
+  'folded-cabbage-seeds': {
+    id: 'folded-cabbage-seeds',
+    name: 'Folded-cabbage Seeds',
+    effect: 'garden',
+    description: 'Tight ruffled heads of pale green folded paper.',
+    stageSeconds: [90, 360, 1080],
+    spacing: 0.8,
+    visual: 'head',
+    accent: '#7fa06a',
+    harvest: { resource: 'folded-cabbage', quantity: 2, mode: 'whole' },
+  },
+  'paper-tomato-seeds': {
+    id: 'paper-tomato-seeds',
+    name: 'Paper-tomato Seeds',
+    effect: 'garden',
+    description: 'A bushy vine strung with ripe red paper fruit.',
+    stageSeconds: [90, 480, 1500],
+    spacing: 0.85,
+    visual: 'vine',
+    accent: '#d14a35',
+    harvest: { resource: 'paper-tomato', quantity: 4, mode: 'repeat', repeatSeconds: 720 },
   },
   'mend-me-seeds': {
     id: 'mend-me-seeds',
@@ -44,9 +111,10 @@ export const SEED_DEFS = {
     description: 'Stitches an empty paper-soil bed back into the surrounding sheet.',
     // Mending uses its own `mendsAt` timer and never blooms; these stages
     // only drive the little tuft's visual growth while it works.
-    stageSeconds: [6, 16, 30],
+    stageSeconds: [30, 100, 240],
     // Groundcover: meant to be sown edge to edge to close a patch of ground.
     spacing: 0.3,
+    visual: 'mending',
   },
 } as const satisfies Partial<Record<ResourceId, {
   id: ResourceId;
@@ -55,13 +123,80 @@ export const SEED_DEFS = {
   description: string;
   stageSeconds: readonly [number, number, number];
   spacing: number;
+  visual: PlantVisualFamily;
+  /** The accent colour the plant's bloom and produce use, where it has one. */
+  accent?: string;
+  /**
+   * What a blooming plant leaves on the ground to be picked up. A garden
+   * flower drops its own seed to keep the loop going; a food plant drops its
+   * fruit instead, so finding new seeds stays the interesting part.
+   */
+  harvest?: {
+    resource: ResourceId;
+    quantity: number;
+    mode: 'repeat' | 'whole';
+    /** Seconds until another harvest on plants that keep producing. */
+    repeatSeconds?: number;
+  };
 }>>;
 
 export type SeedId = keyof typeof SEED_DEFS;
 
+/** Seeds currently carried, in the stable order used by every picker. */
+export function carriedSeedIds(
+  inventory: Readonly<Partial<Record<ResourceId, number>>>,
+): SeedId[] {
+  return (Object.keys(SEED_DEFS) as SeedId[])
+    .filter((seedId) => (inventory[seedId] ?? 0) > 0);
+}
+
+/**
+ * Keep a preferred packet selected while it has seeds, otherwise advance to
+ * the next carried packet and wrap once. This is shared by planting and shop
+ * sales so the hoe strip can never highlight an empty packet.
+ */
+export function availableSeedSelection(
+  preferred: SeedId | null,
+  inventory: Readonly<Partial<Record<ResourceId, number>>>,
+): SeedId | null {
+  if (preferred && (inventory[preferred] ?? 0) > 0) return preferred;
+  const order = Object.keys(SEED_DEFS) as SeedId[];
+  const start = preferred ? order.indexOf(preferred) : -1;
+  for (let offset = 1; offset <= order.length; offset += 1) {
+    const candidate = order[(start + offset) % order.length];
+    if ((inventory[candidate] ?? 0) > 0) return candidate;
+  }
+  return null;
+}
+
 /** Total seconds from sowing to full bloom. */
 export function bloomSeconds(seedId: SeedId): number {
   return SEED_DEFS[seedId].stageSeconds[2];
+}
+
+/** Short shelf/selector copy for authored growth times. */
+export function formatGrowthTime(seedId: SeedId): string {
+  const seconds = bloomSeconds(seedId);
+  if (seconds < 60) return `about ${seconds} sec`;
+  const minutes = Math.round(seconds / 60);
+  return `about ${minutes} min`;
+}
+
+/** What a blooming plant drops to be picked up, or null when it drops nothing. */
+export function plantProduce(seedId: SeedId): ResourceId | null {
+  const def = SEED_DEFS[seedId];
+  return 'harvest' in def ? def.harvest?.resource ?? null : null;
+}
+
+/** Complete harvest rule for a mature plant, or null for mending groundcover. */
+export function plantHarvest(seedId: SeedId): {
+  resource: ResourceId;
+  quantity: number;
+  mode: 'repeat' | 'whole';
+  repeatSeconds?: number;
+} | null {
+  const def = SEED_DEFS[seedId];
+  return 'harvest' in def ? def.harvest ?? null : null;
 }
 
 /**

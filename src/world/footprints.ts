@@ -1,5 +1,16 @@
 import { getPage, peekPage } from './pages';
-import { pageOfPosition, type PageData, type PropData } from './types';
+import { pageId, pageOfPosition, type PageData, type PropData } from './types';
+import { getGameState } from '../sim/state';
+import { placedPieceFootprint } from './buildPieces';
+import {
+  GREENHOUSE_COUNTER,
+  GREENHOUSE_LENGTH,
+  GREENHOUSE_PAGE,
+  GREENHOUSE_PLANTERS,
+  GREENHOUSE_POSITION,
+  GREENHOUSE_WIDTH,
+  greenhouseWorldPoint,
+} from './seedStoreLayout';
 
 export type DigFootprint = {
   id: string;
@@ -95,27 +106,55 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
 }
 
 /**
- * Footprints are derived from page props, and props never change after a page
- * is built — so this is computed once per page rather than on every query.
+ * Footprints are derived from page props, which never change after a page is
+ * built — so this is computed once per page rather than on every query.
  *
  * Not a micro-optimisation: rebuilding the list meant mapping every prop and
  * pushing the clearing's 15 trees and 4 shrubs, on every single call, from
  * code that runs several times a frame per critter.
+ *
+ * Placed pieces are the exception: they are a live part of the page. After a
+ * piece appears the cache for its page must be invalidated (see
+ * `invalidateFootprintCache`), otherwise a fresh bench would be walkable and
+ * dig-throughable until something unrelated rebuilt the list.
  */
-const footprintCache = new WeakMap<PageData, DigFootprint[]>();
+const footprintCache = new Map<string, DigFootprint[]>();
 
 function pageFootprints(page: PageData): DigFootprint[] {
-  const cached = footprintCache.get(page);
+  const cached = footprintCache.get(page.id);
   if (cached) return cached;
   const built = buildPageFootprints(page);
-  footprintCache.set(page, built);
+  footprintCache.set(page.id, built);
   return built;
+}
+
+/**
+ * Drop the cached footprint list for a page (or every page, with no args).
+ *
+ * Call this after placing or removing a piece so the very next query sees it.
+ * Only ever called at user-action rate — a placement — never from the per-
+ * frame movement paths.
+ */
+export function invalidateFootprintCache(pageIds?: Iterable<string>) {
+  if (!pageIds) {
+    footprintCache.clear();
+    return;
+  }
+  for (const id of pageIds) footprintCache.delete(id);
 }
 
 function buildPageFootprints(page: PageData): DigFootprint[] {
   const footprints = page.props
     .map((prop, index) => propFootprint(page, prop, index))
     .filter((footprint): footprint is DigFootprint => Boolean(footprint));
+
+  // Pieces the player has put down stand on top of whatever the page seeded.
+  const placed = getGameState().world.pages[page.id]?.placedPieces ?? {};
+  for (const piece of Object.values(placed)) {
+    if (piece.page !== page.id) continue;
+    footprints.push(placedPieceFootprint(piece));
+  }
+
   if (page.id === '0,0') {
     footprints.push(...CLEARING_DETAIL_FOOTPRINTS);
     CLEARING_COZY_TREE_SPOTS.forEach(([x, z], index) => {
@@ -145,6 +184,41 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
       { id: 'wood-mill-sign', label: 'the Wood Mill sign', x: -88.8, z: -3.4, radiusX: 0.5, radiusZ: 0.5, solid: true },
     );
   }
+  if (page.id === pageId(GREENHOUSE_PAGE.px, GREENHOUSE_PAGE.pz)) {
+    // The roof claims the ground for digging but not walking. Raised beds and
+    // the little checkout desk are the only solid pieces, leaving the middle
+    // aisle genuinely traversable from one end to the other.
+    footprints.push({
+      id: 'pips-greenhouse-canopy',
+      label: 'Pip’s greenhouse',
+      x: GREENHOUSE_POSITION.x,
+      z: GREENHOUSE_POSITION.z,
+      radiusX: GREENHOUSE_LENGTH / 2,
+      radiusZ: GREENHOUSE_WIDTH / 2,
+    });
+    for (const planter of GREENHOUSE_PLANTERS) {
+      const world = greenhouseWorldPoint(planter.x, planter.z);
+      footprints.push({
+        id: `pips-planter:${planter.seedId}`,
+        label: 'a greenhouse planter',
+        x: world.x,
+        z: world.z,
+        radiusX: planter.width / 2,
+        radiusZ: planter.depth / 2,
+        solid: true,
+      });
+    }
+    const counter = greenhouseWorldPoint(GREENHOUSE_COUNTER.x, GREENHOUSE_COUNTER.z);
+    footprints.push({
+      id: 'pips-potting-desk',
+      label: 'Pip’s potting desk',
+      x: counter.x,
+      z: counter.z,
+      radiusX: GREENHOUSE_COUNTER.width / 2,
+      radiusZ: GREENHOUSE_COUNTER.depth / 2,
+      solid: true,
+    });
+  }
   return footprints;
 }
 
@@ -166,6 +240,17 @@ function overlaps(footprint: DigFootprint, x: number, z: number, radius: number,
  */
 export function findDigFootprintBlocker(x: number, z: number, radius: number): DigFootprint | null {
   return findFootprint(x, z, radius, () => true, getPage);
+}
+
+/**
+ * Placement blockers excluding other player-built pieces.
+ *
+ * Built pieces use rotated rectangular overlap rules in `buildPieces.ts`;
+ * feeding them through this older ellipse query first would recreate the
+ * broad invisible spacing the build system is deliberately removing.
+ */
+export function findBuildFootprintBlocker(x: number, z: number, radius: number): DigFootprint | null {
+  return findFootprint(x, z, radius, (footprint) => !footprint.id.startsWith('placed:'), getPage);
 }
 
 /**

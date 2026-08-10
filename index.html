@@ -11,6 +11,7 @@
       <div class="hud" aria-label="Prototype status">
         <div class="chip">The Paper Clearing</div>
         <div id="maker-interaction-prompt" class="hint maker-prompt" hidden>Click the Thing Maker or press E</div>
+        <div id="seed-store-interaction-prompt" class="hint maker-prompt" hidden>Visit Pip’s seed counter or press E</div>
         <div id="equipped-tool-chip" class="hint equipped-tool-chip">Hands free</div>
       </div>
       <div id="hud-actions" class="hud-actions">
@@ -38,6 +39,27 @@
           <div id="compass-heading" class="compass-heading">N</div>
         </div>
         <button class="hud-resize-handle" type="button" aria-label="Resize compass" data-hud-resize="compass"></button>
+      </div>
+      <div id="professor-widget" class="professor-widget hud-widget" data-hud-widget="professor">
+        <div class="hud-drag-grip" aria-hidden="true"></div>
+        <button
+          id="professor-open"
+          class="professor-face-button"
+          type="button"
+          aria-label="The Professor. Nothing learning right now. Press to open the knowledge tree."
+        >
+          <span class="professor-face" aria-hidden="true">
+            <canvas id="professor-canvas" class="professor-canvas"></canvas>
+          </span>
+        </button>
+        <span id="professor-learning-status" class="professor-learning-status" hidden></span>
+        <button
+          id="professor-collapse"
+          class="hud-collapse-toggle"
+          type="button"
+          aria-label="Hide the Professor"
+          aria-pressed="false"
+        ></button>
       </div>
       <div id="scrapbook-dock" class="scrapbook-dock" aria-label="Scrapbook">
         <div id="scrapbook-strip" class="scrapbook-strip" aria-hidden="true">
@@ -71,6 +93,34 @@
         </div>
         <div id="maker-output" class="maker-output"></div>
       </div>
+      <aside id="seed-store-panel" class="seed-store-panel" aria-label="Pip’s Seed and Garden shop" aria-hidden="true">
+        <header class="seed-store-header">
+          <div>
+            <p class="panel-kicker">Pip the chipmunk keeps the counter</p>
+            <h1>Pip’s Seed &amp; Garden</h1>
+          </div>
+          <button class="icon-button" type="button" data-close-seed-store aria-label="Close Pip’s Seed and Garden">×</button>
+        </header>
+        <div class="seed-store-ledger">
+          <strong id="seed-store-balance">Your pouch · ₡0</strong>
+          <span>Flat prices. Barter is always welcome.</span>
+        </div>
+        <p id="seed-store-message" class="seed-store-message" aria-live="polite"></p>
+        <section class="seed-store-section">
+          <div class="seed-store-section-heading">
+            <h2>Seed shelf</h2>
+            <span>One seed per packet</span>
+          </div>
+          <div id="seed-store-stock" class="seed-store-stock"></div>
+        </section>
+        <section class="seed-store-section seed-store-basket">
+          <div class="seed-store-section-heading">
+            <h2>Your basket</h2>
+            <span>Pip buys gathered things and garden harvests</span>
+          </div>
+          <div id="seed-store-basket"></div>
+        </section>
+      </aside>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

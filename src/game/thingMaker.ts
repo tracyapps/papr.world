@@ -13,6 +13,7 @@ import {
   type RecipeDefinition,
   type RecipeId,
 } from '../sim/catalogs/recipes';
+import { techNodeGrantingRecipe } from '../sim/catalogs/techTree';
 import { TOOL_DEFS, TOOL_FAMILIES, TOOL_FAMILY_ORDER, type ToolFamilyId } from '../sim/catalogs/tools';
 import {
   craftBlockersFor,
@@ -28,6 +29,7 @@ import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
 import { showPetToast } from './petting';
 import { camera } from '../render/context';
+import { openTechTreeView } from '../ui/techTreeView';
 
 // The Manual Thing Maker: rig, idle/working animation, crafting simulation,
 // and its DOM console panel. Lives on page 0,0.
@@ -287,18 +289,23 @@ function renderIngredientSlots(recipe: RecipeDefinition): string {
  * The plan slot.
  *
  * Called out separately from the materials because it is not consumed and
- * you cannot gather more of it — a plan is found once and kept. Empty it is
+ * you cannot gather more of it — a plan is learned or found once and kept. Empty it is
  * a dashed outline with a ghost mark, the same language as a drop target on
  * a web form; filled it is solid.
  */
 function renderPlanSlot(recipe: RecipeDefinition): string {
   const found = getGameState().player.plans.includes(recipe.id as RecipeId);
+  const comesFromTree = recipe.planSource === 'knowledge-tree';
+  const missingTitle = comesFromTree ? 'Plan not learned yet' : 'Plan not found yet';
+  const missingHint = comesFromTree
+    ? 'The Professor can show you the lesson'
+    : 'Find this plan to unlock the recipe';
   return `
     <div class="craft-plan-slot${found ? ' is-found' : ''}">
       <span class="craft-plan-mark" aria-hidden="true"></span>
       <span class="craft-plan-copy">
-        <strong>${found ? recipe.planName : 'Plan not found yet'}</strong>
-        <small>${found ? 'In your scrapbook' : 'Find this plan to unlock the recipe'}</small>
+        <strong>${found ? recipe.planName : missingTitle}</strong>
+        <small>${found ? 'In your scrapbook' : missingHint}</small>
       </span>
     </div>`;
 }
@@ -325,12 +332,23 @@ function renderRecipeRung(recipeId: RecipeId, makerLevel: number, activeCraft: R
   const duration = getCraftDuration(recipe, makerLevel).toFixed(1);
   const working = activeCraft === recipeId;
   const confirming = confirmingRemake === recipeId;
+  const routeToLesson = recipe.planSource === 'knowledge-tree'
+    && blockers.some((blocker) => blocker.kind === 'no-plan');
 
   const label = working ? 'Making…'
     : confirming ? 'Make another — press again'
       : owned > 0 ? 'Make another'
         : 'Make thing';
   const reason = blockers[0] ? describeCraftBlocker(blockers[0]) : '';
+  const stateLabel = owned > 0 ? `You have ${owned}`
+    : routeToLesson ? `
+      <button
+        class="craft-plan-route"
+        type="button"
+        data-open-plan-lesson="${recipeId}"
+        aria-label="Learn the ${recipe.name} plan with the Professor"
+      >Professor →</button>`
+      : reason || 'Ready to make';
 
   return `
     <details class="craft-rung${owned > 0 ? ' is-owned' : ''}${blockers.length ? ' is-blocked' : ''}">
@@ -339,7 +357,7 @@ function renderRecipeRung(recipeId: RecipeId, makerLevel: number, activeCraft: R
           ${tool ? `<span class="craft-rung-tier">Level ${tool.tier}</span>` : ''}
           <strong>${recipe.name}</strong>
         </span>
-        <span class="craft-rung-state">${owned > 0 ? `You have ${owned}` : reason || 'Ready to make'}</span>
+        <span class="craft-rung-state">${stateLabel}</span>
       </summary>
       <div class="craft-rung-body">
         <p class="craft-rung-description">${recipe.description}</p>
@@ -702,6 +720,19 @@ export function wireThingMakerDom() {
   makerPanel?.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+
+    const lessonButton = target.closest<HTMLButtonElement>('[data-open-plan-lesson]');
+    if (lessonButton?.dataset.openPlanLesson) {
+      event.preventDefault();
+      const recipeId = lessonButton.dataset.openPlanLesson as RecipeId;
+      if (!(recipeId in RECIPE_DEFS)) return;
+      const nodeId = techNodeGrantingRecipe(recipeId);
+      if (!nodeId) return;
+      confirmingRemake = null;
+      setMakerPanelOpen(false);
+      openTechTreeView(nodeId);
+      return;
+    }
 
     const recipeButton = target.closest<HTMLButtonElement>('[data-recipe-id]');
     if (recipeButton?.dataset.recipeId) {

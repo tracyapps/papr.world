@@ -18,6 +18,8 @@ export class AvatarSchema extends Schema {
 
 export class PlayerSchema extends Schema {
   @type('string') id = '';
+  /** Durable account id (or `guest:<sessionId>`); the key for maker credit. */
+  @type('string') accountId = '';
   @type('string') name = 'paper friend';
   @type(AvatarSchema) avatar = new AvatarSchema();
   @type('number') x = 0;
@@ -40,7 +42,8 @@ export class PieceSchema extends Schema {
   @type('number') x = 0;
   @type('number') z = 0;
   @type('number') rotY = 0;
-  @type('string') ownerId = '';
+  /** Durable ACCOUNT id of the maker — stamped server-side, never client-sent. */
+  @type('string') makerId = '';
   @type('string') page = '0,0';
 }
 

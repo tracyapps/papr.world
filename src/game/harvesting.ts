@@ -8,6 +8,7 @@ import { addResource, getResourceCount } from './resourceInventory';
 import { showPetToast } from './petting';
 import { getGameState, updateGameState } from '../sim/state';
 import { getToastStack } from '../ui/hudLayout';
+import { startTimedAction } from './timedAction';
 
 const HARVEST_REACH = 3.4;
 /** Walking across the visible bundle gathers it without another input. */
@@ -25,6 +26,7 @@ type Harvestable = {
 
 const harvestables: Harvestable[] = [];
 const walkOverlaps = new Set<string>();
+const pendingHarvests = new Set<string>();
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const projected = new THREE.Vector3();
@@ -112,7 +114,16 @@ export function tryHarvestAt(clientX: number, clientY: number): boolean {
     return true;
   }
 
-  collectHarvestable(harvestable);
+  pendingHarvests.add(harvestable.id);
+  const started = startTimedAction({
+    steps: [{ kind: 'harvest', durationMs: 1_150 }],
+    onComplete: () => {
+      pendingHarvests.delete(harvestable.id);
+      collectHarvestable(harvestable);
+    },
+    onCancel: () => pendingHarvests.delete(harvestable.id),
+  });
+  if (!started) pendingHarvests.delete(harvestable.id);
   return true;
 }
 
@@ -135,7 +146,12 @@ export function updateHarvestables() {
     harvestable.object.getWorldPosition(projected);
     const distance = Math.hypot(projected.x - avatar.position.x, projected.z - avatar.position.z);
     const isOverlapping = distance <= WALK_PICKUP_RADIUS && harvestable.object.parent?.visible !== false;
-    if (isOverlapping && !walkOverlaps.has(harvestable.id) && harvestable.object.visible) {
+    if (
+      isOverlapping
+      && !walkOverlaps.has(harvestable.id)
+      && harvestable.object.visible
+      && !pendingHarvests.has(harvestable.id)
+    ) {
       collectHarvestable(harvestable);
     }
     if (isOverlapping) walkOverlaps.add(harvestable.id);

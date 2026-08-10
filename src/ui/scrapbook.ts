@@ -34,7 +34,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'map' | 'plans';
+type TabId = ResourceCategoryId | 'tools' | 'map' | 'plans' | 'activity';
 
 type TabDefinition = {
   id: TabId;
@@ -74,6 +74,7 @@ const TABS: TabDefinition[] = [
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
   { id: 'map', label: 'Map', summary: () => null },
   { id: 'plans', label: 'Plans', summary: () => null },
+  { id: 'activity', label: 'Activity', summary: () => null },
 ];
 
 function renderTabs() {
@@ -176,6 +177,33 @@ function renderPlansTab() {
   }).join('')}</ul>`;
 }
 
+function relativeActivityTime(at: number): string {
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - at) / 1000));
+  if (elapsedSeconds < 60) return 'just now';
+  const minutes = Math.floor(elapsedSeconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function renderActivityTab() {
+  const entries = getGameState().player.activityLog;
+  if (entries.length === 0) {
+    return '<p class="scrapbook-empty">Quiet garden and harvest updates will be pressed here.</p>';
+  }
+  return `
+    <p class="scrapbook-panel-note">Things that happened without needing to interrupt you.</p>
+    <ol class="scrapbook-activity-list">
+      ${entries.map((entry) => `
+        <li class="scrapbook-activity-entry" data-activity-kind="${entry.kind}">
+          <span class="scrapbook-activity-mark" aria-hidden="true"></span>
+          <span>${entry.message}</span>
+          <time datetime="${new Date(entry.at).toISOString()}">${relativeActivityTime(entry.at)}</time>
+        </li>`).join('')}
+    </ol>`;
+}
+
 function renderPanel() {
   if (!panelElement) return;
 
@@ -192,6 +220,7 @@ function renderPanel() {
 
   if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
+  else if (activeTab === 'activity') panelElement.innerHTML = renderActivityTab();
   else panelElement.innerHTML = renderMaterialsTab(activeTab);
 }
 
@@ -269,7 +298,17 @@ export function initializeScrapbook() {
     if (toolId && toolId in TOOL_DEFS) {
       const equipped = getGameState().player.equippedTool === toolId;
       dispatchGameCommand({ type: 'equipTool', toolId: equipped ? null : toolId });
-      setActionMode(equipped ? 'interact' : 'dig');
+      const verb = TOOL_DEFS[toolId].verb;
+      const mode = verb === 'dig'
+        ? 'dig'
+        : verb === 'plant'
+          ? 'plant'
+          : verb === 'trim'
+            ? 'trim'
+            : verb === 'build'
+              ? 'place'
+              : 'interact';
+      setActionMode(equipped ? 'interact' : mode);
       render();
     }
   });

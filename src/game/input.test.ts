@@ -4,9 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // is worth testing because getting it wrong presents as "clicking doesn't
 // work" with nothing in the console.
 
+const cameraSpies = vi.hoisted(() => ({ adjustCameraPitch: vi.fn() }));
+
 vi.mock('./camera', () => ({
   addYaw: () => {},
-  adjustCameraPitch: () => {},
+  adjustCameraPitch: cameraSpies.adjustCameraPitch,
   adjustCameraZoom: () => {},
   applyGamepadLook: () => {},
 }));
@@ -17,19 +19,36 @@ const { initializeInput } = await import('./input');
 type Listener = (event: any) => void;
 const listeners = new Map<string, Listener[]>();
 
-function fire(type: string, event: Record<string, unknown>) {
+function fire(type: string, event: Record<string, unknown> = {}) {
   for (const listener of listeners.get(type) ?? []) {
-    listener({ button: 0, buttons: 1, clientX: 0, clientY: 0, target: null, preventDefault: () => {}, ...event });
+    listener({
+      button: 0,
+      buttons: 1,
+      clientX: 0,
+      clientY: 0,
+      pointerId: 1,
+      target: null,
+      preventDefault: () => {},
+      ...event,
+    });
   }
 }
 
 let primaryActions: Array<{ x: number; y: number }>;
 let orbitOnPrimary: boolean;
+/** Stands in for "the pointer is over the canvas, not over HUD chrome". */
+let onWorld: boolean;
+let rotateBuildHandled: boolean;
+let rotateBuildCalls: number;
 
 beforeEach(() => {
   listeners.clear();
   primaryActions = [];
   orbitOnPrimary = false;
+  onWorld = true;
+  rotateBuildHandled = false;
+  rotateBuildCalls = 0;
+  cameraSpies.adjustCameraPitch.mockClear();
 
   const stub = {
     window: {
@@ -48,14 +67,37 @@ beforeEach(() => {
 
   initializeInput({
     onToggleScrapbook: () => {},
-    onToggleMaker: () => {},
+    onToggleNearby: () => {},
     onMarkPlace: () => {},
     onEscape: () => false,
     onPrimaryAction: (event) => primaryActions.push({ x: event.clientX, y: event.clientY }),
     shouldOrbitWithPrimary: () => orbitOnPrimary,
     onSelectToolSlot: () => {},
+    onRotateBuild: () => {
+      rotateBuildCalls += 1;
+      return rotateBuildHandled;
+    },
     isWheelCaptured: () => false,
     isPointerCaptured: () => false,
+    isWorldTarget: () => onWorld,
+  });
+});
+
+describe('build rotation key', () => {
+  it('offers R to building before using it for camera pitch', () => {
+    rotateBuildHandled = true;
+    fire('keydown', { code: 'KeyR' });
+
+    expect(rotateBuildCalls).toBe(1);
+    expect(cameraSpies.adjustCameraPitch).not.toHaveBeenCalled();
+  });
+
+  it('keeps the existing camera-pitch shortcut outside build mode', () => {
+    rotateBuildHandled = false;
+    fire('keydown', { code: 'KeyR' });
+
+    expect(rotateBuildCalls).toBe(1);
+    expect(cameraSpies.adjustCameraPitch).toHaveBeenCalledWith(0.14);
   });
 });
 
@@ -97,5 +139,70 @@ describe('click versus drag', () => {
     fire('pointerdown', { clientX: 100, clientY: 100, target });
     fire('pointerup', { clientX: 100, clientY: 100 });
     expect(primaryActions).toHaveLength(0);
+  });
+});
+
+describe('presses that involve HUD chrome', () => {
+  // These all come from one real bug. HUD panels call stopPropagation on
+  // pointerup, so a press begun on the world and released over a panel used to
+  // leave `pendingPrimary` set forever — which then either swallowed the next
+  // click or got cashed in by an unrelated later release, firing a world
+  // action at coordinates nobody clicked.
+
+  it('does not fire when the release lands on HUD chrome', () => {
+    fire('pointerdown', { clientX: 100, clientY: 100 });
+    onWorld = false;
+    fire('pointerup', { clientX: 100, clientY: 100 });
+    expect(primaryActions).toHaveLength(0);
+  });
+
+  it('leaves nothing pending after a release on HUD chrome', () => {
+    // The regression that mattered most: the *next* click has to still work.
+    fire('pointerdown', { clientX: 100, clientY: 100 });
+    onWorld = false;
+    fire('pointerup', { clientX: 100, clientY: 100 });
+
+    onWorld = true;
+    press([]);
+    expect(primaryActions).toHaveLength(1);
+  });
+
+  it('never lets a HUD press become a world click', () => {
+    onWorld = false;
+    fire('pointerdown', { clientX: 40, clientY: 40 });
+    onWorld = true;
+    fire('pointerup', { clientX: 40, clientY: 40 });
+    expect(primaryActions).toHaveLength(0);
+  });
+
+  it('does not let one pointer cash in another pointer\'s press', () => {
+    fire('pointerdown', { clientX: 100, clientY: 100, pointerId: 1 });
+    fire('pointerup', { clientX: 300, clientY: 300, pointerId: 7 });
+    expect(primaryActions).toHaveLength(0);
+  });
+
+  it('drops a press once the button is no longer held', () => {
+    // Self-heal for a release we never heard about at all.
+    fire('pointerdown', { clientX: 100, clientY: 100 });
+    fire('pointermove', { clientX: 101, clientY: 100, buttons: 0 });
+    fire('pointerup', { clientX: 101, clientY: 100 });
+    expect(primaryActions).toHaveLength(0);
+  });
+
+  it('drops a press when a HUD widget takes the capture', () => {
+    fire('pointerdown', { clientX: 100, clientY: 100 });
+    fire('lostpointercapture', {});
+    fire('pointerup', { clientX: 100, clientY: 100 });
+    expect(primaryActions).toHaveLength(0);
+  });
+
+  it('recovers after the window loses focus mid-press', () => {
+    fire('pointerdown', { clientX: 100, clientY: 100 });
+    fire('blur', {});
+    fire('pointerup', { clientX: 100, clientY: 100 });
+    expect(primaryActions).toHaveLength(0);
+
+    press([]);
+    expect(primaryActions).toHaveLength(1);
   });
 });

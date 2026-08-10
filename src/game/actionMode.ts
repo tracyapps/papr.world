@@ -1,4 +1,6 @@
-export type ActionMode = 'interact' | 'dig' | 'plant' | 'trim';
+import { cancelTimedAction } from './timedAction';
+
+export type ActionMode = 'interact' | 'dig' | 'plant' | 'place' | 'trim';
 
 type ActionModeListener = (mode: ActionMode) => void;
 
@@ -11,6 +13,7 @@ export function getActionMode() {
 
 export function setActionMode(mode: ActionMode) {
   if (mode === activeActionMode) return;
+  cancelTimedAction('tool-changed');
   activeActionMode = mode;
   for (const listener of listeners) listener(mode);
 }

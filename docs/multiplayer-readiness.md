@@ -9,6 +9,15 @@ Guiding idea: don't finish the whole game and then bolt on networking. Get a
 minimal authoritative loop live — position, chat, placed pieces — then grow
 features on top of a network that already exists.
 
+> **See also:** `communal-multiplayer.md` (2026-08-10) — the communal/social
+> layer on top of this plumbing: what made Glitch/Second Life work, locked
+> decisions (real accounts phased, invite-only first, cozy→commons), the
+> conflict list, and the phased plan. Its **Phase A landed**: paper passports
+> (durable `accountId`, minted at `POST /account`, scrypt-hashed secrets),
+> JSON room persistence (pieces + nodes survive restarts), `makerId` on
+> placed pieces, per-player piece caps, and `src/net/passport.ts` on the
+> client. `PROTOCOL_VERSION` is now **2**.
+
 ## Can it live on any web server?
 
 Two halves, two answers:
@@ -55,10 +64,10 @@ These are the things that are painful to add later, in rough order:
 3. **Renderer hooks for remote entities.** Functions to spawn/despawn a remote
    avatar mesh and to add/remove a placed build piece from network callbacks.
    These reuse existing builders; they're new call sites, not new systems.
-4. **Server-side persistence.** Today saves go to `localStorage` (per-browser,
-   unshareable). Room state — placed pieces, ownership, node changes — moves
-   server-side as JSON or SQLite. The shared `RoomSnapshot` type is the target
-   save shape.
+4. **Server-side persistence.** ✅ *Done 2026-08-10* — rooms save
+   pieces + nodes to `server/data/room-*.json` (atomic, debounced; chat and
+   positions deliberately transient). Accounts persist alongside. SQLite is a
+   later swap behind the same `RoomStore` seam.
 5. **Identity + rooms UI.** Display name entry, and a minimal room browser /
    host controls (solo local, LAN address, hosted).
 
@@ -71,6 +80,17 @@ design them twice under network constraints. Polish can come after.
   task — the right call.
 - **One gatherable material** (`ResourceNode` + the inventory grant on gather).
 - **Avatar drawing → `AvatarRef`** (see load-bearing #1).
+- **Author identity on anything a player makes.** Added 2026-08-06 from
+  `land-and-dwellings.md`: a planted garden must know who planted it, because
+  harvesting it mails the same yield to them. Retrofitting a maker id onto
+  already-placed entities is exactly the kind of migration this list exists to
+  avoid. It also pays for maker-crediting, which `game-design-plan.md` wants
+  anyway.
+- **House spacing as a placement validation rule.** Also from
+  `land-and-dwellings.md`: houses may not be placed too close to other houses,
+  shops, landmarks, or water. It belongs in `shared/` with the other rules both
+  sides enforce — client for a responsive refusal, server as the authority —
+  which means it wants to exist before placement goes over the wire.
 
 You do **not** need the full scrapbook, critters, gifting, or helping rewards
 before multiplayer. Those layer on afterward through the same intent/validate

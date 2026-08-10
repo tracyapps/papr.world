@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 import { scene } from '../render/context';
 import { RENDER_ORDER } from '../render/renderOrder';
-import { SEED_DEFS, plantStageAt } from '../sim/catalogs/seeds';
-import { getGameState } from '../sim/state';
+import { SEED_DEFS, plantStageAt, type SeedId } from '../sim/catalogs/seeds';
+import { getGameState, onGameStateChanged } from '../sim/state';
+import { TERRAIN_CELL_SIZE, terrainCellAt } from '../sim/terrainCells';
 import { sampleTerrainHeight } from '../world/terrain';
 import { buildPlantStageVisual } from '../world/plantRuntime';
 import { getActionMode, onActionModeChanged } from './actionMode';
-import { resolveGardenAction, selectedSeed, type GardenAction } from './gardenActions';
+import { GARDEN_REACH, resolveGardenAction, selectedSeed, type GardenAction } from './gardenActions';
 import { getKeyLight, getAmbientLight } from '../render/lighting';
+import { pageId, pageOfPosition } from '../world/types';
 
 // The plant-mode overlay.
 //
@@ -41,14 +43,67 @@ let ghost: THREE.Group | null = null;
 let ghostHost: THREE.Group | null = null;
 let targetRing: THREE.Mesh | null = null;
 let claimedRings: THREE.Group | null = null;
+let cellField: THREE.Group | null = null;
 let ghostKey = '';
+let fieldDirty = true;
+let fieldCenterKey = '';
+
+const cellGeometry = new THREE.PlaneGeometry(TERRAIN_CELL_SIZE * 0.88, TERRAIN_CELL_SIZE * 0.88);
+cellGeometry.rotateX(-Math.PI / 2);
+
+function stripeTexture(base: string, stripe: string): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 48;
+  canvas.height = 48;
+  const context = canvas.getContext('2d')!;
+  context.fillStyle = base;
+  context.fillRect(0, 0, 48, 48);
+  context.strokeStyle = stripe;
+  context.lineWidth = 7;
+  for (let offset = -48; offset <= 96; offset += 18) {
+    context.beginPath();
+    context.moveTo(offset, 48);
+    context.lineTo(offset + 48, 0);
+    context.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+const validCellMaterial = new THREE.MeshBasicMaterial({
+  color: VALID_COLOR,
+  depthWrite: false,
+  opacity: 0.44,
+  side: THREE.DoubleSide,
+  transparent: true,
+});
+const blockedCellMaterial = new THREE.MeshBasicMaterial({
+  color: '#ffffff',
+  depthWrite: false,
+  map: stripeTexture('#9b553f', '#6f382d'),
+  opacity: 0.42,
+  side: THREE.DoubleSide,
+  transparent: true,
+});
+const unavailableCellMaterial = new THREE.MeshBasicMaterial({
+  color: '#ffffff',
+  depthWrite: false,
+  map: stripeTexture('#746f68', '#4f4b47'),
+  opacity: 0.23,
+  side: THREE.DoubleSide,
+  transparent: true,
+});
 
 let dimBlend = 0;
 let baseKeyIntensity = -1;
 let baseAmbientIntensity = -1;
 
-/** Flat ring lying on the ground, used for every spacing circle. */
-function createRing(radius: number, color: THREE.Color, opacity: number): THREE.Mesh {
+/**
+ * Flat ring lying on the ground, used for every spacing circle — the garden's
+ * claimed-space rings and the build overlay's alike.
+ */
+export function createGroundRing(radius: number, color: THREE.Color, opacity: number): THREE.Mesh {
   const geometry = new THREE.RingGeometry(Math.max(0.02, radius - 0.045), radius, 40);
   geometry.rotateX(-Math.PI / 2);
   const material = new THREE.MeshBasicMaterial({
@@ -65,7 +120,12 @@ function createRing(radius: number, color: THREE.Color, opacity: number): THREE.
   return mesh;
 }
 
-function setGhostAppearance(group: THREE.Group, color: THREE.Color, opacity: number) {
+/**
+ * Tint a preview mesh into a translucent ghost. Clones materials once so the
+ * cached world materials are never recoloured, then eases colour and opacity
+ * on every call so the ghost can shift between valid and invalid cheaply.
+ */
+export function setGhostAppearance(group: THREE.Group, color: THREE.Color, opacity: number) {
   group.traverse((child) => {
     if (!(child instanceof THREE.Mesh)) return;
     const material = child.material as THREE.Material;
@@ -95,13 +155,16 @@ export function initializeGardenOverlay() {
   root.visible = false;
   ghostHost = new THREE.Group();
   claimedRings = new THREE.Group();
-  targetRing = createRing(0.5, VALID_COLOR, 0.75);
-  root.add(ghostHost, claimedRings, targetRing);
+  cellField = new THREE.Group();
+  targetRing = createGroundRing(0.5, VALID_COLOR, 0.75);
+  root.add(cellField, claimedRings, targetRing, ghostHost);
   scene.add(root);
 
   onActionModeChanged((mode) => {
+    fieldDirty = true;
     if (mode !== 'plant') hideGardenOverlay();
   });
+  onGameStateChanged(() => { fieldDirty = true; });
 }
 
 export function hideGardenOverlay() {
@@ -109,9 +172,9 @@ export function hideGardenOverlay() {
 }
 
 /** Rebuild the ghost only when the plant it represents actually changes. */
-function syncGhost(seedId: string | null, mending: boolean) {
+function syncGhost(seedId: string | null) {
   if (!ghostHost) return;
-  const key = seedId ? `${seedId}:${mending}` : '';
+  const key = seedId ?? '';
   if (key === ghostKey) return;
   ghostKey = key;
 
@@ -122,7 +185,7 @@ function syncGhost(seedId: string | null, mending: boolean) {
   // Preview the plant at full bloom, not as a seed: the player is choosing
   // where a grown plant will sit, and a preview of a bare mound of soil tells
   // them nothing about the space it will fill.
-  ghost = buildPlantStageVisual('bloom', 1, mending);
+  ghost = buildPlantStageVisual(seedId as SeedId, 'bloom', 1);
   ghostHost.add(ghost);
 }
 
@@ -138,9 +201,71 @@ function syncClaimedRings(avatarPosition: THREE.Vector3) {
       const distance = Math.hypot(edit.x - avatarPosition.x, edit.z - avatarPosition.z);
       if (distance > RING_VIEW_RADIUS) continue;
 
-      const ring = createRing(SEED_DEFS[edit.plantedSeedId].spacing, CLAIMED_COLOR, 0.4);
+      const ring = createGroundRing(SEED_DEFS[edit.plantedSeedId].spacing, CLAIMED_COLOR, 0.4);
       ring.position.set(edit.x, sampleTerrainHeight(edit.x, edit.z) + 0.03, edit.z);
       claimedRings.add(ring);
+    }
+  }
+}
+
+function pageIdAt(x: number, z: number) {
+  const page = pageOfPosition(x, z);
+  return pageId(page.px, page.pz);
+}
+
+/** Bend one overlay tile along the sampled paper ground instead of letting a
+ * flat square disappear into the folds at its corners. */
+function conformedCellGeometry(x: number, z: number): THREE.PlaneGeometry {
+  const geometry = cellGeometry.clone();
+  const positions = geometry.getAttribute('position');
+  const centerY = sampleTerrainHeight(x, z);
+  for (let index = 0; index < positions.count; index += 1) {
+    const localX = positions.getX(index);
+    const localZ = positions.getZ(index);
+    positions.setY(index, sampleTerrainHeight(x + localX, z + localZ) - centerY + 0.04);
+  }
+  positions.needsUpdate = true;
+  return geometry;
+}
+
+/**
+ * Draw the whole reachable planting lattice, not merely the hovered cell.
+ * Solid green means a seed can go down now. Slash texture means it cannot:
+ * grey is untouched ground, red is a bed blocked by occupancy or spacing.
+ */
+function syncCellField(avatarPosition: THREE.Vector3) {
+  if (!cellField) return;
+  const gridX = Math.round(avatarPosition.x / TERRAIN_CELL_SIZE);
+  const gridZ = Math.round(avatarPosition.z / TERRAIN_CELL_SIZE);
+  const centerKey = `${gridX},${gridZ}`;
+  if (!fieldDirty && centerKey === fieldCenterKey) return;
+  fieldDirty = false;
+  fieldCenterKey = centerKey;
+  cellField.traverse((child) => {
+    if (child instanceof THREE.Mesh) child.geometry.dispose();
+  });
+  cellField.clear();
+
+  const state = getGameState();
+  const reachInCells = Math.ceil(GARDEN_REACH / TERRAIN_CELL_SIZE);
+  for (let offsetX = -reachInCells; offsetX <= reachInCells; offsetX += 1) {
+    for (let offsetZ = -reachInCells; offsetZ <= reachInCells; offsetZ += 1) {
+      const x = (gridX + offsetX) * TERRAIN_CELL_SIZE;
+      const z = (gridZ + offsetZ) * TERRAIN_CELL_SIZE;
+      if (Math.hypot(x - avatarPosition.x, z - avatarPosition.z) > GARDEN_REACH) continue;
+
+      const target = terrainCellAt(x, z, pageIdAt);
+      const action = resolveGardenAction(target, { inReach: true, state });
+      const edit = state.world.pages[target.pageId]?.terrainEdits[target.cellKey];
+      const material = action.kind === 'plant' && action.ok
+        ? validCellMaterial
+        : edit
+          ? blockedCellMaterial
+          : unavailableCellMaterial;
+      const tile = new THREE.Mesh(conformedCellGeometry(x, z), material);
+      tile.position.set(x, sampleTerrainHeight(x, z), z);
+      tile.renderOrder = RENDER_ORDER.gardenRing;
+      cellField.add(tile);
     }
   }
 }
@@ -188,12 +313,12 @@ export function updateGardenOverlay(
   }
   root.visible = true;
 
+  syncCellField(avatarPosition);
   syncClaimedRings(avatarPosition);
 
   const seedId = selectedSeed();
-  const mending = seedId ? SEED_DEFS[seedId].effect === 'mending' : false;
   const showGhost = Boolean(hover && action && action.kind === 'plant' && seedId);
-  syncGhost(showGhost ? seedId : null, mending);
+  syncGhost(showGhost ? seedId : null);
 
   if (!hover || !action || action.kind === 'none') {
     targetRing.visible = false;

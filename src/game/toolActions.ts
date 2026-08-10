@@ -189,6 +189,14 @@ function renderEquippedTool() {
     equippedToolChip.textContent = `${TOOL_DEFS[toolId].name} · click a nearby tree to trim it back`;
     return;
   }
+  if (actionMode === 'place') {
+    equippedToolChip.classList.add('has-tool');
+    const hammer = owned && toolId && TOOL_DEFS[toolId].verb === 'build' ? TOOL_DEFS[toolId] : null;
+    equippedToolChip.textContent = hammer
+      ? `${hammer.name} · pick a piece, then click the ground to place it`
+      : 'Building · pick a piece, then click the ground to place it';
+    return;
+  }
   equippedToolChip.classList.toggle('has-tool', actionMode === 'dig' && owned);
   equippedToolChip.textContent = actionMode === 'dig' && owned && toolId
     ? `${TOOL_DEFS[toolId].name} · click nearby open ground to ${TOOL_DEFS[toolId].verb}`

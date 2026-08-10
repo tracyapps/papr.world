@@ -31,6 +31,14 @@
 // into the scrapbook's Map tab and settings moved behind the cog. The rail
 // stays because it is the correct home for any future persistent panel, and
 // re-deriving it later would just recreate the collisions above.
+//
+// Widget collapse (knowledge-tree.md → "Collapsing the HUD") lives here too:
+// every persistent widget should be able to get out of the way, for players
+// who want the world without the furniture, and the whole HUD should be able
+// to go at once. `settings.ts` only remembers *which* ids are collapsed —
+// this module is what makes that mean something.
+
+import { getSetting, setSetting } from '../game/settings';
 
 /** Screen margin shared by every edge-anchored element. */
 const EDGE = 16;
@@ -51,8 +59,17 @@ function dockReserve() {
   const open = document.querySelector('#scrapbook-dock')?.classList.contains('is-open');
   return open ? DOCK_RESERVE_OPEN : DOCK_RESERVE_CLOSED;
 }
-/** Never shrink the tool rail past the point where the art reads clearly. */
-const MIN_RAIL_SCALE = 0.66;
+/**
+ * Never shrink the tool rail past the point where the art reads clearly.
+ *
+ * Low enough to fit five slots above the closed dock on the smallest tested
+ * viewport (1024×680 needs ~0.56) — the rail's whole purpose is to clear the
+ * dock rather than be covered by it. Any lower and a 140px slot becomes
+ * unclickable; below ~0.55 the remaining cramped states are the open dock on
+ * short screens, which is a "close the scrapbook" instruction, not a layout
+ * bug.
+ */
+const MIN_RAIL_SCALE = 0.55;
 
 /**
  * Left tool-rail width. Mirrored into `--hud-rail-width` so CSS and TS can
@@ -219,6 +236,76 @@ export function getToastStack(): HTMLElement {
  */
 export function setToastStackRaised(raised: boolean) {
   getToastStack().classList.toggle('is-raised', raised);
+}
+
+// --- Widget collapse ---------------------------------------------------
+
+type CollapsibleWidget = {
+  id: string;
+  element: HTMLElement;
+  /** Human-readable name, for a future "show all HUD widgets" summary. */
+  label: string;
+};
+
+const collapsibleWidgets: CollapsibleWidget[] = [];
+
+function applyCollapsedState(widget: CollapsibleWidget) {
+  const collapsed = isHudWidgetCollapsed(widget.id);
+  // Collapsed widgets keep a small on-screen affordance to bring them back —
+  // see .is-hud-collapsed in styles.css — so this is a class toggle, never
+  // `hidden`. A widget that hides its own way back is a dead end, not a
+  // preference.
+  widget.element.classList.toggle('is-hud-collapsed', collapsed);
+}
+
+/**
+ * Register a widget as collapsible. Safe to call once per widget id; a
+ * second registration is a no-op rather than a duplicate entry, the same
+ * defensiveness `registerRailPanel` uses.
+ */
+export function registerCollapsibleWidget(id: string, element: HTMLElement, label: string) {
+  if (collapsibleWidgets.some((widget) => widget.id === id)) return;
+  const widget = { id, element, label };
+  collapsibleWidgets.push(widget);
+  applyCollapsedState(widget);
+}
+
+export function isHudWidgetCollapsed(id: string): boolean {
+  return getSetting('collapsedHudWidgets').includes(id);
+}
+
+/**
+ * Persists the choice and reapplies it. Never called from anywhere that
+ * fires automatically — a widget that springs back open because "something
+ * happened" is a notification wearing a layout costume, which is exactly
+ * what knowledge-tree.md rules out.
+ */
+export function setHudWidgetCollapsed(id: string, collapsed: boolean) {
+  const current = getSetting('collapsedHudWidgets');
+  const alreadyCollapsed = current.includes(id);
+  if (collapsed === alreadyCollapsed) return;
+  setSetting('collapsedHudWidgets', collapsed
+    ? [...current, id]
+    : current.filter((existing) => existing !== id));
+
+  const widget = collapsibleWidgets.find((entry) => entry.id === id);
+  if (widget) applyCollapsedState(widget);
+  requestHudLayout();
+}
+
+export function toggleHudWidgetCollapsed(id: string) {
+  setHudWidgetCollapsed(id, !isHudWidgetCollapsed(id));
+}
+
+/** True only once every registered widget is collapsed, and there is at least one. */
+export function areAllHudWidgetsCollapsed(): boolean {
+  return collapsibleWidgets.length > 0 && collapsibleWidgets.every((widget) => isHudWidgetCollapsed(widget.id));
+}
+
+/** The "world without the furniture" gesture: every widget at once. */
+export function toggleAllHudWidgets() {
+  const collapseAll = !areAllHudWidgetsCollapsed();
+  for (const widget of collapsibleWidgets) setHudWidgetCollapsed(widget.id, collapseAll);
 }
 
 export function initializeHudLayout() {

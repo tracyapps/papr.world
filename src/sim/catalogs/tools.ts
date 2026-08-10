@@ -1,4 +1,25 @@
-export type ToolVerb = 'bind' | 'dig' | 'peel' | 'plant' | 'polish' | 'stamp' | 'trim';
+/**
+ * Every distinct world interaction a tool can own.
+ *
+ * A verb earns its place by being a *different thing you do to the world*, not
+ * by wanting an inventory slot. `plant` and `harvest` are split because sowing
+ * edits a bed and gathering empties one, and gardening is expected to grow.
+ * `build` and `disassemble` are a pair on purpose: anything assembled can be
+ * taken back apart for its materials.
+ *
+ * `dig`, `plant`, `trim`, and `build` are implemented. The rest are declared so
+ * the catalog can be extended without widening this type under pressure —
+ * see docs/tool-and-supply-progression.md.
+ */
+export type ToolVerb =
+  | 'affix'
+  | 'build'
+  | 'dig'
+  | 'disassemble'
+  | 'harvest'
+  | 'mine'
+  | 'plant'
+  | 'trim';
 
 /**
  * Families group a tool with its own upgrade ladder.
@@ -14,7 +35,7 @@ export type ToolVerb = 'bind' | 'dig' | 'peel' | 'plant' | 'polish' | 'stamp' | 
  * progression from a string, or renaming a drawing would silently reorder a
  * ladder.
  */
-export type ToolFamilyId = 'shovel' | 'hoe' | 'scissors';
+export type ToolFamilyId = 'shovel' | 'hoe' | 'scissors' | 'hammer';
 
 export const TOOL_FAMILIES = {
   shovel: {
@@ -35,6 +56,12 @@ export const TOOL_FAMILIES = {
     verb: 'trim',
     summary: 'Cut renewable growth from trees without harming them.',
   },
+  hammer: {
+    id: 'hammer',
+    label: 'Hammers',
+    verb: 'build',
+    summary: 'Place, assemble, and improve things in the paper world.',
+  },
 } as const satisfies Record<string, {
   id: ToolFamilyId;
   label: string;
@@ -42,7 +69,7 @@ export const TOOL_FAMILIES = {
   summary: string;
 }>;
 
-export const TOOL_FAMILY_ORDER: ToolFamilyId[] = ['shovel', 'hoe', 'scissors'];
+export const TOOL_FAMILY_ORDER: ToolFamilyId[] = ['shovel', 'hoe', 'scissors', 'hammer'];
 
 export const TOOL_DEFS = {
   'flimsy-shovel': {
@@ -78,8 +105,11 @@ export const TOOL_DEFS = {
     verb: 'dig',
   },
   'creased-hoe': {
+    // Id stays `creased-hoe` deliberately: ids are save data, names are
+    // flavour that follows the artwork. Renaming a drawing must never
+    // invalidate a player's tools.
     id: 'creased-hoe',
-    name: 'Creased Hoe',
+    name: 'Basic Garden Hoe',
     // The split of labour: the shovel takes ground apart, the hoe puts it
     // back together. Everything that isn't breaking new soil lives here —
     // sowing, lifting a plant back out, and raking a hole closed.
@@ -92,7 +122,7 @@ export const TOOL_DEFS = {
   },
   'kids-scissors': {
     id: 'kids-scissors',
-    name: 'Kids Scissors',
+    name: "Kid's Scissors",
     description: 'Rounded safety scissors. Snips shoots and soft new growth.',
     limitation: 'Takes a small cut from ordinary trees. Will not get through redwood bark.',
     iconKey: 'tool.kids-scissors',
@@ -109,6 +139,36 @@ export const TOOL_DEFS = {
     family: 'scissors',
     tier: 2,
     verb: 'trim',
+  },
+  'squeaky-hammer': {
+    id: 'squeaky-hammer',
+    name: 'Squeaky Hammer',
+    description: 'A cheerful first hammer that makes every little build feel official.',
+    limitation: 'Places the small paper pieces you already know how to make.',
+    iconKey: 'tool.squeaky-hammer',
+    family: 'hammer',
+    tier: 1,
+    verb: 'build',
+  },
+  'basic-mallet': {
+    id: 'basic-mallet',
+    name: 'Basic Mallet',
+    description: 'A broad folded head for persuading sturdier joins into place.',
+    limitation: 'A steadier building tool, ready for larger construction plans as they arrive.',
+    iconKey: 'tool.basic-mallet',
+    family: 'hammer',
+    tier: 2,
+    verb: 'build',
+  },
+  'standard-hammer': {
+    id: 'standard-hammer',
+    name: 'Standard Hammer',
+    description: 'A proper claw hammer made for careful assembly and taking work apart again.',
+    limitation: 'The strongest building tool currently available. Nothing is gated above it yet.',
+    iconKey: 'tool.standard-hammer',
+    family: 'hammer',
+    tier: 3,
+    verb: 'build',
   },
 } as const satisfies Record<string, {
   id: string;
@@ -133,6 +193,14 @@ export function toolsInFamily(family: ToolFamilyId): ToolId[] {
   return (Object.keys(TOOL_DEFS) as ToolId[])
     .filter((toolId) => TOOL_DEFS[toolId].family === family)
     .sort((a, b) => TOOL_DEFS[a].tier - TOOL_DEFS[b].tier);
+}
+
+/** The strongest rung currently owned in a family, or null for an empty tool roll. */
+export function highestOwnedTool(
+  family: ToolFamilyId,
+  inventory: Readonly<Partial<Record<ToolId, number>>>,
+): ToolId | null {
+  return toolsInFamily(family).reverse().find((toolId) => (inventory[toolId] ?? 0) > 0) ?? null;
 }
 
 /**

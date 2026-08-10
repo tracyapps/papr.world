@@ -63,7 +63,7 @@ function describe(action: GardenAction): CardContent | null {
     case 'no-tool':
       return {
         title: 'You need a hoe for that',
-        body: 'Make a Creased Hoe at the Thing Maker to sow, lift, and fill.',
+        body: 'Make a Basic Garden Hoe at the Thing Maker to sow, lift, and fill.',
       };
 
     case 'no-seed':

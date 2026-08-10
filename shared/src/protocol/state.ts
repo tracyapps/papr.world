@@ -22,8 +22,14 @@ export type AvatarRef = {
 };
 
 export type PlayerState = {
-  /** Server-assigned session id. */
+  /** Server-assigned session id (transport-only — never store in world data). */
   id: string;
+  /**
+   * Durable account id ("paper passport"). This — not the session id — is the
+   * key for maker credit, mailboxes, and block lists. Guests get a
+   * `guest:<sessionId>` id that is real for the visit but not durable.
+   */
+  accountId: string;
   name: string;
   avatar: AvatarRef;
   x: number;
@@ -52,9 +58,32 @@ export type PlacedPiece = {
   z: number;
   /** Yaw in radians. */
   rotY: number;
-  /** Session id of who placed it — used for permissions/credit. */
-  ownerId: string;
+  /**
+   * Durable ACCOUNT id of who placed it — permissions, maker credit, and
+   * mailed harvests all key off this. Stamped by the server from the
+   * authenticated join; never taken from the client intent.
+   */
+  makerId: string;
   page: string;
+};
+
+/**
+ * One item waiting in an account's mailbox — the offline half of gifting and
+ * mailed garden harvests. Shape only for now; delivery lands in Phase F
+ * (docs/communal-multiplayer.md §6).
+ */
+export type MailItem = {
+  id: string;
+  /** Account id of the sender, or "world" for system mail. */
+  fromAccountId: string;
+  /** Denormalized display name so mail survives the sender's absence. */
+  fromName: string;
+  /** e.g. "gift", "harvest", "note". */
+  kind: string;
+  /** Renderer-free payload (item key + count, note text, ...). */
+  payload: Record<string, string | number>;
+  /** Server epoch ms when queued. */
+  at: number;
 };
 
 export type ResourceNode = {
@@ -74,6 +103,22 @@ export type ResourceNode = {
 export type RoomSnapshot = {
   players: PlayerState[];
   chat: ChatMessage[];
+  pieces: PlacedPiece[];
+  nodes: ResourceNode[];
+};
+
+/**
+ * What the server persists per neighborhood — "the world remembers".
+ *
+ * Deliberately durable: pieces and nodes. Deliberately NOT durable: player
+ * positions (transient) and chat (a privacy default — invite-only friends
+ * shouldn't find their conversations archived; revisit knowingly, if ever).
+ */
+export type RoomSave = {
+  /** Bump SAVE_VERSION and migrate on shape changes. */
+  version: number;
+  /** Server epoch ms of the write. */
+  savedAt: number;
   pieces: PlacedPiece[];
   nodes: ResourceNode[];
 };

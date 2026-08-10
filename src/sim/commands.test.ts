@@ -1,4 +1,10 @@
-import { SEED_DEFS, bloomSeconds, plantStageAt, plantStageProgress } from './catalogs/seeds';
+import {
+  SEED_DEFS,
+  bloomSeconds,
+  plantHarvest,
+  plantStageAt,
+  plantStageProgress,
+} from './catalogs/seeds';
 import { describe, expect, it } from 'vitest';
 import { applyGameCommand, refillCost, resolveIngredientAllocation } from './commands';
 import { createDefaultGameState, migrateLegacyState } from './state';
@@ -14,6 +20,24 @@ const SHALLOW_DISCOVERY = {
   resource: 'ochre-paperclay' as const,
   quantity: 2,
 };
+
+function gardenStateForSelectionTest() {
+  const state = createDefaultGameState();
+  state.player.tools['flimsy-shovel'] = 1;
+  state.player.equippedTool = 'flimsy-shovel';
+  return state;
+}
+
+function digGardenCellForSelectionTest(
+  state: ReturnType<typeof createDefaultGameState>,
+  cellKey: string,
+  x: number,
+  z: number,
+) {
+  const target = { pageId: '0,0', cellKey, x, z };
+  applyGameCommand(state, { type: 'digTerrain', target, discovery: SHALLOW_DISCOVERY, now: 1000 });
+  return target;
+}
 
 class MemoryStorage {
   private values = new Map<string, string>();
@@ -175,6 +199,12 @@ describe('crafting commands', () => {
 });
 
 describe('terrain commands', () => {
+  it('gives every plant its own extended maturation time', () => {
+    const bloomTimes = Object.keys(SEED_DEFS).map((seedId) => bloomSeconds(seedId as keyof typeof SEED_DEFS));
+    expect(new Set(bloomTimes).size).toBe(bloomTimes.length);
+    expect(Math.min(...bloomTimes)).toBeGreaterThanOrEqual(240);
+  });
+
   it('snaps the same world position to a stable cross-page terrain address', () => {
     // Derived from TERRAIN_CELL_SIZE rather than hardcoded, so retuning the
     // lattice is a one-line change instead of a test rewrite.
@@ -188,6 +218,51 @@ describe('terrain commands', () => {
     // Snapping must be idempotent, or a cell's identity depends on where the
     // player happened to click inside it.
     expect(terrainCellAt(address.x, address.z, () => '0,0')).toEqual(address);
+  });
+
+  it('keeps the selected seed until its packet empties, then advances in catalog order', () => {
+    const state = gardenStateForSelectionTest();
+    const firstTarget = digGardenCellForSelectionTest(state, '0,0', 0, 0);
+    const lastTarget = digGardenCellForSelectionTest(state, '2,0', 1, 0);
+    state.player.inventory['buttonbloom-seeds'] = 2;
+    state.player.inventory['raspberry-bush-seeds'] = 2;
+    state.player.selectedSeed = 'buttonbloom-seeds';
+
+    const first = applyGameCommand(state, {
+      type: 'plantTerrain',
+      target: firstTarget,
+      seedId: 'buttonbloom-seeds',
+      now: 2000,
+    });
+    expect(first.ok).toBe(true);
+    expect(state.player.selectedSeed).toBe('buttonbloom-seeds');
+
+    const last = applyGameCommand(state, {
+      type: 'plantTerrain',
+      target: lastTarget,
+      seedId: 'buttonbloom-seeds',
+      now: 2100,
+    });
+
+    expect(last.ok).toBe(true);
+    expect(state.player.inventory['buttonbloom-seeds']).toBe(0);
+    expect(state.player.selectedSeed).toBe('raspberry-bush-seeds');
+  });
+
+  it('wraps to an earlier carried seed and clears selection only when all packets are empty', () => {
+    const state = gardenStateForSelectionTest();
+    state.player.inventory['buttonbloom-seeds'] = 2;
+    state.player.inventory['mend-me-seeds'] = 1;
+    state.player.selectedSeed = 'mend-me-seeds';
+    const first = digGardenCellForSelectionTest(state, '0,0', 0, 0);
+
+    applyGameCommand(state, { type: 'plantTerrain', target: first, seedId: 'mend-me-seeds', now: 2000 });
+    expect(state.player.selectedSeed).toBe('buttonbloom-seeds');
+
+    state.player.inventory['buttonbloom-seeds'] = 1;
+    const second = digGardenCellForSelectionTest(state, '2,0', 1, 0);
+    applyGameCommand(state, { type: 'plantTerrain', target: second, seedId: 'buttonbloom-seeds', now: 2100 });
+    expect(state.player.selectedSeed).toBeNull();
   });
 
   it('keeps one scoop small enough to overlap its neighbours', () => {
@@ -296,6 +371,57 @@ describe('terrain commands', () => {
     expect(state.world.pages['0,0'].terrainEdits['6,6'].seedDrops).toBe(1);
   });
 
+  it('records a mature crop quietly once, even when growth is observed repeatedly', () => {
+    const state = gardenStateForSelectionTest();
+    state.player.inventory['raspberry-bush-seeds'] = 1;
+    const target = digGardenCellForSelectionTest(state, '4,0', 2, 0);
+    applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'raspberry-bush-seeds', now: 2000 });
+    const bloomAt = 2000 + bloomSeconds('raspberry-bush-seeds') * 1000;
+
+    const first = applyGameCommand(state, { type: 'observePlantGrowth', target, now: bloomAt });
+    const duplicate = applyGameCommand(state, { type: 'observePlantGrowth', target, now: bloomAt + 1000 });
+
+    expect(first.ok).toBe(true);
+    expect(duplicate.ok).toBe(false);
+    expect(state.player.activityLog).toHaveLength(1);
+    expect(state.player.activityLog[0]?.message).toContain('Raspberry Bush');
+    expect(state.player.activityLog[0]?.message).toContain('ready to harvest');
+  });
+
+  it('harvests several fruit from a repeat crop and leaves the plant growing', () => {
+    const state = gardenStateForSelectionTest();
+    state.player.inventory['raspberry-bush-seeds'] = 1;
+    const target = digGardenCellForSelectionTest(state, '4,0', 2, 0);
+    applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'raspberry-bush-seeds', now: 2000 });
+    const ripeAt = 2000 + bloomSeconds('raspberry-bush-seeds') * 1000;
+    applyGameCommand(state, { type: 'updatePlantSeedDrop', target, now: ripeAt });
+
+    const result = applyGameCommand(state, { type: 'collectPlantSeed', target, now: ripeAt + 1 });
+    const harvest = plantHarvest('raspberry-bush-seeds');
+
+    expect(result.ok).toBe(true);
+    expect(state.player.inventory.raspberries).toBe(harvest?.quantity);
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey].state).toBe('planted');
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey].nextSeedDropAt).toBeGreaterThan(ripeAt);
+  });
+
+  it('harvests a whole root crop into food and leaves a ready dug bed', () => {
+    const state = gardenStateForSelectionTest();
+    state.player.inventory['crinkle-carrot-seeds'] = 1;
+    const target = digGardenCellForSelectionTest(state, '4,0', 2, 0);
+    applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'crinkle-carrot-seeds', now: 2000 });
+    const ripeAt = 2000 + bloomSeconds('crinkle-carrot-seeds') * 1000;
+    applyGameCommand(state, { type: 'updatePlantSeedDrop', target, now: ripeAt });
+
+    const result = applyGameCommand(state, { type: 'collectPlantSeed', target, now: ripeAt + 1 });
+    const edit = state.world.pages['0,0'].terrainEdits[target.cellKey];
+
+    expect(result.ok).toBe(true);
+    expect(state.player.inventory['crinkle-carrots']).toBe(plantHarvest('crinkle-carrot-seeds')?.quantity);
+    expect(edit.state).toBe('dug');
+    expect(edit.plantedSeedId).toBeUndefined();
+  });
+
   it('lets a mending seed intentionally restore a dug cell', () => {
     const state = createDefaultGameState();
     state.player.tools['flimsy-shovel'] = 1;
@@ -304,7 +430,11 @@ describe('terrain commands', () => {
     applyGameCommand(state, { type: 'digTerrain', target, discovery: SHALLOW_DISCOVERY, now: 1000 });
     const planted = applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'mend-me-seeds', now: 2000 });
     const tooSoon = applyGameCommand(state, { type: 'completeMending', target, now: 2001 });
-    const complete = applyGameCommand(state, { type: 'completeMending', target, now: 32000 });
+    const complete = applyGameCommand(state, {
+      type: 'completeMending',
+      target,
+      now: 2000 + bloomSeconds('mend-me-seeds') * 1000,
+    });
 
     expect(planted.ok).toBe(true);
     expect(tooSoon.ok).toBe(false);
@@ -647,5 +777,148 @@ describe('plant spacing', () => {
     const second = applyGameCommand(state, { type: 'plantTerrain', target: distant, seedId: 'buttonbloom-seeds', now: 2100 });
 
     expect(second.ok).toBe(true);
+  });
+});
+
+describe('placing build pieces', () => {
+  function place(
+    state: ReturnType<typeof createDefaultGameState>,
+    templateKey: string,
+    x: number,
+    z: number,
+    now: number,
+    pageId = '0,0',
+    rotY = 0,
+  ) {
+    return applyGameCommand(state, { type: 'placePiece', templateKey, x, z, rotY, pageId, now });
+  }
+
+  it('records a piece on the page and says what was placed', () => {
+    const state = createDefaultGameState();
+
+    const result = place(state, 'paper-bench', 6.5, -2.2, 1000);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.message).toBe('Placed the Paper bench.');
+    const pieces = Object.values(state.world.pages['0,0'].placedPieces);
+    expect(pieces).toHaveLength(1);
+    expect(pieces[0]).toMatchObject({
+      templateKey: 'paper-bench', x: 6.5, z: -2.2, page: '0,0',
+    });
+    expect(pieces[0]?.ownerId).toBeTruthy();
+  });
+
+  it('creates the page state on demand', () => {
+    const state = createDefaultGameState();
+
+    const result = place(state, 'path-plank', 25.5, 18.25, 1000, '1,1');
+
+    expect(result.ok).toBe(true);
+    expect(Object.values(state.world.pages['1,1'].placedPieces)).toHaveLength(1);
+  });
+
+  it('refuses a template the player does not have', () => {
+    const state = createDefaultGameState();
+
+    const result = place(state, 'floating-castle', 6.5, -2.2, 1000);
+
+    expect(result.ok).toBe(false);
+    expect(state.world.pages['0,0']).toBeUndefined();
+  });
+
+  it('enforces physical overlap room-wide, not just on the target page', () => {
+    const state = createDefaultGameState();
+    place(state, 'paper-bench', 0, 0, 1000);
+
+    // Their actual rectangles overlap even if the caller writes another page.
+    const crowded = place(state, 'paper-lamp', 0.5, 0, 2000);
+
+    expect(crowded.ok).toBe(false);
+    expect(Object.values(state.world.pages['0,0'].placedPieces)).toHaveLength(1);
+  });
+
+  it('allows edge contact but refuses real footprint overlap', () => {
+    const state = createDefaultGameState();
+    place(state, 'paper-bench', 0, 0, 1000);
+
+    // Bench and plank half-widths total 1.47. A small overlap is refused, while
+    // exact edge contact is deliberately legal.
+    const tooClose = place(state, 'path-plank', 1.42, 0, 2000);
+    expect(tooClose.ok).toBe(false);
+
+    const clear = place(state, 'path-plank', 1.47, 0, 3000);
+    expect(clear.ok).toBe(true);
+  });
+
+  it('lets path planks overlap their own kind without accepting a duplicate click', () => {
+    const state = createDefaultGameState();
+    place(state, 'path-plank', 0, 0, 1000);
+
+    expect(place(state, 'path-plank', 1.2, 0, 2000).ok).toBe(true);
+    expect(place(state, 'path-plank', 0.02, 0, 3000).ok).toBe(false);
+  });
+
+  it('saves the rotation used by the placement preview', () => {
+    const state = createDefaultGameState();
+
+    expect(place(state, 'path-plank', 2, 3, 1000, '0,0', Math.PI / 2).ok).toBe(true);
+    const piece = Object.values(state.world.pages['0,0'].placedPieces)[0];
+    expect(piece.rotY).toBe(Math.PI / 2);
+  });
+
+  it('allows an independent piece far from the rest', () => {
+    const state = createDefaultGameState();
+    place(state, 'paper-bench', 0, 0, 1000);
+
+    const far = place(state, 'paper-lamp', 10, 10, 2000, '1,1');
+
+    expect(far.ok).toBe(true);
+  });
+
+  it('finishes a catalogued build step only with an equipped capable hammer', () => {
+    const state = createDefaultGameState();
+    const command = {
+      type: 'completeBuildStep' as const,
+      templateKey: 'path-plank',
+      stepId: 'build',
+      x: 6.5,
+      z: -2.2,
+      rotY: 0,
+      pageId: '0,0',
+      now: 1000,
+    };
+
+    const bareHands = applyGameCommand(state, command);
+    expect(bareHands.ok).toBe(false);
+    expect(state.world.pages['0,0']).toBeUndefined();
+
+    state.player.tools['squeaky-hammer'] = 1;
+    state.player.equippedTool = 'squeaky-hammer';
+    const built = applyGameCommand(state, command);
+
+    expect(built.ok).toBe(true);
+    expect(Object.values(state.world.pages['0,0'].placedPieces)).toHaveLength(1);
+    expect(Object.values(state.world.pages['0,0'].buildSites)).toHaveLength(0);
+  });
+
+  it('refuses an out-of-order or invented assembly step without creating a site', () => {
+    const state = createDefaultGameState();
+    state.player.tools['squeaky-hammer'] = 1;
+    state.player.equippedTool = 'squeaky-hammer';
+
+    const result = applyGameCommand(state, {
+      type: 'completeBuildStep',
+      templateKey: 'paper-bench',
+      stepId: 'attach-roof',
+      x: 4,
+      z: 4,
+      rotY: 0,
+      pageId: '0,0',
+      now: 1000,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(Object.values(state.world.pages['0,0'].buildSites)).toHaveLength(0);
+    expect(Object.values(state.world.pages['0,0'].placedPieces)).toHaveLength(0);
   });
 });

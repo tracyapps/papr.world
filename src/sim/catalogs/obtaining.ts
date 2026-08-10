@@ -50,11 +50,23 @@ const SCATTERED_IN: Partial<Record<ResourceId, Biome[]>> = {
   'graphite-cardstone': ['forest', 'scrapflats'],
   'bluefold-pebbles': ['meadow', 'dunes'],
   'sunbaked-cardboard': ['dunes', 'scrapflats'],
+  // Seed packets lie about near the kind of ground they want to grow in —
+  // the farm finds the player almost as often as the player finds the farm.
+  'raspberry-bush-seeds': ['clearing', 'meadow'],
+  'crinkle-carrot-seeds': ['clearing', 'meadow'],
+  'ribbon-corn-seeds': ['meadow', 'scrapflats'],
+  'folded-cabbage-seeds': ['clearing', 'forest'],
+  'paper-tomato-seeds': ['meadow', 'dunes'],
 };
 
 /** Seeds you can gather from a plant you grew. */
 const GROWN_FROM: Partial<Record<ResourceId, ResourceId>> = {
   'buttonbloom-seeds': 'buttonbloom-seeds',
+  'raspberries': 'raspberry-bush-seeds',
+  'crinkle-carrots': 'crinkle-carrot-seeds',
+  'ribbon-corn': 'ribbon-corn-seeds',
+  'folded-cabbage': 'folded-cabbage-seeds',
+  'paper-tomato': 'paper-tomato-seeds',
 };
 
 const DIG_LAYERS: Array<1 | 2 | 3> = [1, 2, 3];

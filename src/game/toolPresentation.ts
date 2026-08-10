@@ -82,6 +82,21 @@ export const TOOL_ART = {
     sourceUrl: new URL('../../assets/source/tools/sturdy-scissors.svg', import.meta.url).href,
     frame: { width: 205, left: 6, top: -4, rotate: -18 },
   },
+  'squeaky-hammer': {
+    aspectRatio: 495 / 327,
+    sourceUrl: new URL('../../assets/source/tools/squeaky-hammer.svg', import.meta.url).href,
+    frame: { width: 205, left: -2, top: -1, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
+  },
+  'basic-mallet': {
+    aspectRatio: 464 / 323,
+    sourceUrl: new URL('../../assets/source/tools/basic-mallet.svg', import.meta.url).href,
+    frame: { width: 206, left: -2, top: -1, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
+  },
+  'standard-hammer': {
+    aspectRatio: 559 / 382,
+    sourceUrl: new URL('../../assets/source/tools/standard-hammer.svg', import.meta.url).href,
+    frame: { width: 208, left: -3, top: -2, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
+  },
 } as const satisfies Partial<Record<ToolId, {
   aspectRatio: number;
   sourceUrl: string;

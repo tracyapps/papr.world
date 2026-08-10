@@ -21,11 +21,14 @@ export type RecipeOutput =
  * **Crafting something you cannot then use is worse than not seeing it.**
  */
 export type RecipeStatus = 'ready' | 'planned';
+export type PlanSource = 'starter' | 'knowledge-tree' | 'world';
 
 export type RecipeDefinition = {
   id: string;
   name: string;
   planName: string;
+  /** The one route allowed to grant this plan. */
+  planSource: PlanSource;
   description: string;
   status: RecipeStatus;
   durationSeconds: number;
@@ -39,6 +42,7 @@ export const RECIPE_DEFS = {
     id: 'flimsy-shovel',
     name: 'Flimsy Shovel',
     planName: 'Plan: one optimistic folded scoop',
+    planSource: 'starter',
     description: 'Opens shallow soil layers without pretending to be indestructible.',
     status: 'ready',
     durationSeconds: 6,
@@ -54,6 +58,7 @@ export const RECIPE_DEFS = {
     id: 'okayish-shovel',
     name: 'Okayish Shovel',
     planName: 'Plan: a scoop with a folded spine',
+    planSource: 'knowledge-tree',
     description: 'Reaches the compact layer under a bed you have already opened.',
     status: 'ready',
     durationSeconds: 10,
@@ -69,6 +74,7 @@ export const RECIPE_DEFS = {
     id: 'heavy-duty-shovel',
     name: 'Heavy-duty Shovel',
     planName: 'Plan: layered board and a bound handle',
+    planSource: 'knowledge-tree',
     description: 'Opens deep seams where the local geology has one to give.',
     status: 'ready',
     durationSeconds: 16,
@@ -83,8 +89,9 @@ export const RECIPE_DEFS = {
   },
   'creased-hoe': {
     id: 'creased-hoe',
-    name: 'Creased Hoe',
+    name: 'Basic Garden Hoe',
     planName: 'Plan: one well-creased garden blade',
+    planSource: 'starter',
     description: 'Sows seeds, lifts plants back out, and rakes soil into an open hole.',
     status: 'ready',
     durationSeconds: 7,
@@ -94,12 +101,13 @@ export const RECIPE_DEFS = {
       { kind: 'family', family: 'cardboard', quantity: 2 },
       { kind: 'family', family: 'fiber', quantity: 2 },
     ],
-    output: { kind: 'tool', toolId: 'creased-hoe', label: 'Creased Hoe' },
+    output: { kind: 'tool', toolId: 'creased-hoe', label: 'Basic Garden Hoe' },
   },
   'kids-scissors': {
     id: 'kids-scissors',
-    name: 'Kids Scissors',
+    name: "Kid's Scissors",
     planName: 'Plan: round-tipped snippers',
+    planSource: 'starter',
     description: 'Trims renewable shoots and soft growth without hurting the tree.',
     status: 'ready',
     durationSeconds: 6,
@@ -109,12 +117,13 @@ export const RECIPE_DEFS = {
       { kind: 'family', family: 'stones', quantity: 3 },
       { kind: 'family', family: 'fiber', quantity: 2 },
     ],
-    output: { kind: 'tool', toolId: 'kids-scissors', label: 'Kids Scissors' },
+    output: { kind: 'tool', toolId: 'kids-scissors', label: "Kid's Scissors" },
   },
   'sturdy-scissors': {
     id: 'sturdy-scissors',
     name: 'Sturdy Scissors',
     planName: 'Plan: shears with a serious hinge',
+    planSource: 'knowledge-tree',
     description: 'Collects bark curls and structural branches from grown trees.',
     status: 'ready',
     durationSeconds: 11,
@@ -126,6 +135,55 @@ export const RECIPE_DEFS = {
     ],
     output: { kind: 'tool', toolId: 'sturdy-scissors', label: 'Sturdy Scissors' },
   },
+  'squeaky-hammer': {
+    id: 'squeaky-hammer',
+    name: 'Squeaky Hammer',
+    planName: 'Plan: a hammer with a very confident squeak',
+    planSource: 'starter',
+    description: 'Places the small build pieces you already know how to assemble.',
+    status: 'ready',
+    durationSeconds: 6,
+    minimumMakerLevel: 1,
+    ingredients: [
+      { kind: 'family', family: 'sticks', quantity: 3 },
+      { kind: 'family', family: 'cardboard', quantity: 2 },
+      { kind: 'family', family: 'fiber', quantity: 2 },
+    ],
+    output: { kind: 'tool', toolId: 'squeaky-hammer', label: 'Squeaky Hammer' },
+  },
+  'basic-mallet': {
+    id: 'basic-mallet',
+    name: 'Basic Mallet',
+    planName: 'Plan: a broad head for stubborn folds',
+    planSource: 'knowledge-tree',
+    description: 'A steadier mallet for the next scale of paper construction.',
+    status: 'ready',
+    durationSeconds: 10,
+    minimumMakerLevel: 2,
+    ingredients: [
+      { kind: 'family', family: 'sticks', quantity: 5 },
+      { kind: 'family', family: 'cardboard', quantity: 4 },
+      { kind: 'family', family: 'fiber', quantity: 3 },
+    ],
+    output: { kind: 'tool', toolId: 'basic-mallet', label: 'Basic Mallet' },
+  },
+  'standard-hammer': {
+    id: 'standard-hammer',
+    name: 'Standard Hammer',
+    planName: 'Plan: a proper head, claw, and bound handle',
+    planSource: 'knowledge-tree',
+    description: 'The current top rung for careful assembly and future disassembly work.',
+    status: 'ready',
+    durationSeconds: 16,
+    minimumMakerLevel: 3,
+    ingredients: [
+      { kind: 'family', family: 'sticks', quantity: 6 },
+      { kind: 'family', family: 'cardboard', quantity: 6 },
+      { kind: 'exact', resource: 'graphite-cardstone', quantity: 3 },
+      { kind: 'family', family: 'fiber', quantity: 4 },
+    ],
+    output: { kind: 'tool', toolId: 'standard-hammer', label: 'Standard Hammer' },
+  },
   // --- Not playable yet ----------------------------------------------------
   // Kept for their costs and artwork; hidden everywhere by `status`.
   // `folding-hook` was deleted outright — nobody could say what it did, and a
@@ -134,6 +192,7 @@ export const RECIPE_DEFS = {
     id: 'tape-tapper',
     name: 'Tape Tapper',
     planName: 'Plan: sticky percussion wand',
+    planSource: 'world',
     description: 'Pokes, stamps, and convinces stubborn tabs to behave.',
     // Waiting on tape existing as a material and a `stamp` interaction.
     status: 'planned',
@@ -149,6 +208,7 @@ export const RECIPE_DEFS = {
     id: 'crease-scout',
     name: 'Crease Scout',
     planName: 'Plan: folded finder',
+    planSource: 'world',
     description: 'Sniffs out promising seams in the paper terrain.',
     // Nothing surfaces seams yet, so this would sit inert in the scrapbook.
     // Same reasoning as the scissors before trimming landed: it comes back
@@ -172,22 +232,18 @@ export function isRecipeAvailable(recipeId: RecipeId): boolean {
 }
 
 /**
- * Plans you begin with: the first rung of every ladder, nothing more.
+ * Plans you begin with: the explicitly authored starter set, nothing more.
  *
- * Derived rather than listed, so adding a tool cannot leave a starter list
- * silently out of date — which is exactly how the scissors ended up
- * craftable in the catalog and invisible in the machine.
- *
- * Everything above tier 1 is a plan you have to find. Until those sources
- * exist, higher rungs show with an empty plan slot, which is the honest
- * state: you can see what it will cost and that you cannot make it yet.
+ * The source lives on each recipe so a higher tool rung cannot quietly drift
+ * back into world siting, shops, or gifts. Tool plans above the starter set
+ * are learned from the knowledge tree; world plans are everything else.
  */
 export const STARTER_PLAN_IDS: RecipeId[] = (Object.keys(RECIPE_DEFS) as RecipeId[])
-  .filter((recipeId) => {
-    const recipe = RECIPE_DEFS[recipeId];
-    if (recipe.status !== 'ready' || recipe.output.kind !== 'tool') return false;
-    return TOOL_DEFS[recipe.output.toolId].tier === 1;
-  });
+  .filter((recipeId) => isRecipeAvailable(recipeId) && RECIPE_DEFS[recipeId].planSource === 'starter');
+
+export function isWorldPlan(recipeId: RecipeId): boolean {
+  return RECIPE_DEFS[recipeId].planSource === 'world';
+}
 
 /** The recipe that makes a given tool, if one exists. */
 export function recipeForTool(toolId: ToolId): RecipeId | null {

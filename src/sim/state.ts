@@ -2,11 +2,22 @@ import { RECIPE_DEFS, STARTER_PLAN_IDS, type RecipeId } from './catalogs/recipes
 import { TOOL_DEFS, type ToolId } from './catalogs/tools';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import type { DigDiscovery } from './catalogs/geology';
-import { SEED_DEFS, type SeedId } from './catalogs/seeds';
+import { PLANT_STAGE_ORDER, SEED_DEFS, type PlantStage, type SeedId } from './catalogs/seeds';
 import { MAX_TREE_GROWTH, type TreeGrowthState } from './catalogs/trees';
+import type { PlacedPiece } from '../../shared/src/index';
+import { buildAssemblyDef } from './catalogs/building';
 
 export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
+
+/**
+ * Owner id for pieces placed in solo play.
+ *
+ * The server assigns real session ids to remote owners; a solo save has no
+ * session, so pieces carry this stable stand-in. It is also a convenient
+ * sentinel: anything that is not this string came from another player.
+ */
+export const LOCAL_PLAYER_ID = 'local-player';
 
 export type ConversationMemoryState = {
   flags: string[];
@@ -28,6 +39,22 @@ export type ActiveCraftState = {
   completesAt: number;
 };
 
+/**
+ * The one lesson currently moving forward in real-world time.
+ *
+ * Node ids stay strings at the save boundary so this foundational state
+ * module does not import the tech catalog that already depends on GameState.
+ * The learning system validates the id against TECH_DEFS before using it.
+ */
+export type ActiveLearningState = {
+  nodeId: string;
+  startedAt: number;
+  /** Completed-output counts at start, aligned with the node's task list. */
+  taskBaselineCounts: number[];
+  /** Once earned, a task stays earned even if the player gives its tool away. */
+  completedTaskIndexes: number[];
+};
+
 export type PageModificationState = {
   terrainEdits: Record<string, TerrainEditCellState>;
   /**
@@ -38,6 +65,23 @@ export type PageModificationState = {
   treeGrowth: Record<string, TreeGrowthState>;
   plantedCells: Record<string, unknown>;
   placedEntities: Record<string, unknown>;
+  /** Build pieces standing on this page, keyed by piece id. */
+  placedPieces: Record<string, PlacedPiece>;
+  /** Incomplete multi-step builds, kept so a player can leave and resume. */
+  buildSites: Record<string, BuildSiteState>;
+};
+
+export type BuildSiteState = {
+  id: string;
+  templateKey: string;
+  x: number;
+  z: number;
+  rotY: number;
+  ownerId: string;
+  page: string;
+  completedStepIds: string[];
+  startedAt: number;
+  changedAt: number;
 };
 
 export type TerrainEditCellState = {
@@ -58,12 +102,23 @@ export type TerrainEditCellState = {
   nextSeedDropAt?: number;
   seedDropReady?: boolean;
   seedDrops?: number;
+  /** Last growth stage settled into the quiet activity log. */
+  observedStage?: PlantStage;
   changedAt: number;
+};
+
+export type ActivityEntry = {
+  id: string;
+  kind: 'garden' | 'harvest';
+  message: string;
+  at: number;
 };
 
 export type GameState = {
   schemaVersion: typeof SAVE_SCHEMA_VERSION;
   player: {
+    /** Quiet trade currency. It is never treated as a score. */
+    chips: number;
     inventory: Partial<Record<ResourceId, number>>;
     tools: Partial<Record<ToolId, number>>;
     items: Record<string, number>;
@@ -74,6 +129,9 @@ export type GameState = {
     conversations: Record<string, ConversationMemoryState>;
     places: SavedPlaceState[];
     nextPlaceNumber: number;
+    activeLearning: ActiveLearningState | null;
+    /** Newest first; quiet world updates the player can inspect when ready. */
+    activityLog: ActivityEntry[];
   };
   world: {
     harvestRespawns: Record<string, number>;
@@ -103,6 +161,7 @@ export function createDefaultGameState(): GameState {
   return {
     schemaVersion: SAVE_SCHEMA_VERSION,
     player: {
+      chips: 0,
       inventory: { 'buttonbloom-seeds': 2, 'mend-me-seeds': 1 },
       tools: {},
       items: {},
@@ -113,6 +172,8 @@ export function createDefaultGameState(): GameState {
       conversations: {},
       places: [],
       nextPlaceNumber: 2,
+      activeLearning: null,
+      activityLog: [],
     },
     world: {
       harvestRespawns: {},
@@ -182,6 +243,8 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
       seedDropReady: Boolean(cell.seedDropReady),
       seedDrops: typeof cell.seedDrops === 'number' && Number.isFinite(cell.seedDrops)
         ? Math.max(0, Math.floor(cell.seedDrops)) : 0,
+      observedStage: typeof cell.observedStage === 'string' && PLANT_STAGE_ORDER.includes(cell.observedStage as PlantStage)
+        ? cell.observedStage as PlantStage : undefined,
       changedAt: typeof cell.changedAt === 'number' && Number.isFinite(cell.changedAt) ? cell.changedAt : 0,
     };
   }
@@ -210,6 +273,65 @@ function normalizeTreeGrowth(value: unknown): Record<string, TreeGrowthState> {
   return result;
 }
 
+/**
+ * Placed pieces are dropped when malformed, the same way tree records are:
+ * a corrupt record is invisible until the player places over its spot, which
+ * is the safe direction to fail (a ghost obstruction can never be fixed).
+ */
+function normalizePlacedPieces(value: unknown): Record<string, PlacedPiece> {
+  const result: Record<string, PlacedPiece> = {};
+  for (const [id, rawPiece] of Object.entries(safeObject(value))) {
+    const piece = safeObject(rawPiece);
+    if (typeof piece.templateKey !== 'string' || piece.templateKey.length === 0) continue;
+    if (typeof piece.x !== 'number' || !Number.isFinite(piece.x)) continue;
+    if (typeof piece.z !== 'number' || !Number.isFinite(piece.z)) continue;
+    result[id] = {
+      id,
+      templateKey: piece.templateKey.slice(0, 64),
+      x: piece.x,
+      z: piece.z,
+      rotY: typeof piece.rotY === 'number' && Number.isFinite(piece.rotY) ? piece.rotY : 0,
+      ownerId: typeof piece.ownerId === 'string' ? piece.ownerId : LOCAL_PLAYER_ID,
+      page: typeof piece.page === 'string' ? piece.page : '',
+    };
+  }
+  return result;
+}
+
+function normalizeBuildSites(value: unknown): Record<string, BuildSiteState> {
+  const result: Record<string, BuildSiteState> = {};
+  for (const [id, rawSite] of Object.entries(safeObject(value))) {
+    const site = safeObject(rawSite);
+    if (typeof site.templateKey !== 'string' || !buildAssemblyDef(site.templateKey)) continue;
+    if (typeof site.x !== 'number' || !Number.isFinite(site.x)) continue;
+    if (typeof site.z !== 'number' || !Number.isFinite(site.z)) continue;
+    const definition = buildAssemblyDef(site.templateKey)!;
+    const savedSteps = new Set(Array.isArray(site.completedStepIds)
+      ? site.completedStepIds.filter((step): step is string => typeof step === 'string')
+      : []);
+    // Only a completed prefix is trustworthy. Keeping a later id while an
+    // earlier part is missing would let a malformed save jump assembly order.
+    const completedStepIds: string[] = [];
+    for (const step of definition.steps) {
+      if (!savedSteps.has(step.id)) break;
+      completedStepIds.push(step.id);
+    }
+    result[id] = {
+      id,
+      templateKey: site.templateKey,
+      x: site.x,
+      z: site.z,
+      rotY: typeof site.rotY === 'number' && Number.isFinite(site.rotY) ? site.rotY : 0,
+      ownerId: typeof site.ownerId === 'string' ? site.ownerId : LOCAL_PLAYER_ID,
+      page: typeof site.page === 'string' ? site.page : '',
+      completedStepIds,
+      startedAt: typeof site.startedAt === 'number' && Number.isFinite(site.startedAt) ? site.startedAt : 0,
+      changedAt: typeof site.changedAt === 'number' && Number.isFinite(site.changedAt) ? site.changedAt : 0,
+    };
+  }
+  return result;
+}
+
 function normalizePageModifications(value: unknown): Record<string, PageModificationState> {
   const result: Record<string, PageModificationState> = {};
   for (const [pageId, rawPage] of Object.entries(safeObject(value))) {
@@ -219,6 +341,8 @@ function normalizePageModifications(value: unknown): Record<string, PageModifica
       treeGrowth: normalizeTreeGrowth(page.treeGrowth),
       plantedCells: safeObject(page.plantedCells),
       placedEntities: safeObject(page.placedEntities),
+      placedPieces: normalizePlacedPieces(page.placedPieces),
+      buildSites: normalizeBuildSites(page.buildSites),
     };
   }
   return result;
@@ -240,6 +364,10 @@ function normalizeState(value: unknown): GameState | null {
   const world = safeObject(raw.world);
   const maker = safeObject(world.thingMaker);
   const state = createDefaultGameState();
+
+  state.player.chips = typeof player.chips === 'number' && Number.isFinite(player.chips)
+    ? Math.max(0, Math.floor(player.chips))
+    : 0;
 
   const inventory = finiteCounts(player.inventory);
   for (const resource of Object.keys(RESOURCE_CORE_DEFS) as ResourceId[]) {
@@ -277,6 +405,45 @@ function normalizeState(value: unknown): GameState | null {
     : [];
   state.player.nextPlaceNumber = typeof player.nextPlaceNumber === 'number'
     ? Math.max(2, Math.floor(player.nextPlaceNumber)) : 2;
+  state.player.activityLog = Array.isArray(player.activityLog)
+    ? player.activityLog.flatMap((rawEntry) => {
+      const entry = safeObject(rawEntry);
+      if (typeof entry.id !== 'string' || typeof entry.message !== 'string') return [];
+      if (entry.kind !== 'garden' && entry.kind !== 'harvest') return [];
+      if (typeof entry.at !== 'number' || !Number.isFinite(entry.at)) return [];
+      return [{
+        id: entry.id,
+        kind: entry.kind as ActivityEntry['kind'],
+        message: entry.message.slice(0, 240),
+        at: Math.max(0, entry.at),
+      }];
+    }).slice(0, 80)
+    : [];
+  const learning = safeObject(player.activeLearning);
+  if (
+    typeof learning.nodeId === 'string'
+    && typeof learning.startedAt === 'number'
+    && Number.isFinite(learning.startedAt)
+    && learning.startedAt >= 0
+  ) {
+    const baselines = Array.isArray(learning.taskBaselineCounts)
+      ? learning.taskBaselineCounts.slice(0, 16).map((value) => (
+        typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
+      ))
+      : [];
+    const completed = Array.isArray(learning.completedTaskIndexes)
+      ? learning.completedTaskIndexes.flatMap((value) => (
+        typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 16
+          ? [Math.floor(value)] : []
+      ))
+      : [];
+    state.player.activeLearning = {
+      nodeId: learning.nodeId,
+      startedAt: learning.startedAt,
+      taskBaselineCounts: baselines,
+      completedTaskIndexes: [...new Set(completed)],
+    };
+  }
 
   state.world.harvestRespawns = finiteCounts(world.harvestRespawns);
   state.world.pages = normalizePageModifications(world.pages);

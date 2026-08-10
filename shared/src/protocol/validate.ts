@@ -6,6 +6,7 @@
 
 import { LIMITS } from './constants';
 import type { AvatarRef } from './state';
+import type { AccountCredentials, PlacePieceIntent } from './messages';
 
 const AVATAR_PRESETS: AvatarRef['preset'][] = [
   'small',
@@ -56,6 +57,22 @@ export function sanitizeAvatar(raw: unknown): AvatarRef {
   return { preset, drawingKey, edgeColor };
 }
 
+/**
+ * Shape-check untrusted passport credentials before the server looks them up.
+ * Returns null rather than throwing so a malformed join can fall back to
+ * guest handling (or be refused) by policy, not by accident.
+ */
+export function sanitizeAccountCredentials(raw: unknown): AccountCredentials | null {
+  const value = (raw ?? {}) as Partial<AccountCredentials>;
+  if (typeof value.id !== 'string' || typeof value.secret !== 'string') return null;
+  const id = value.id.trim();
+  const secret = value.secret.trim();
+  // UUIDs are 36 chars; allow a little slack but refuse anything silly.
+  if (id.length < 8 || id.length > 64) return null;
+  if (secret.length < 16 || secret.length > 128) return null;
+  return { id, secret };
+}
+
 function isHexColor(value: unknown): boolean {
   return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
 }
@@ -64,6 +81,51 @@ export function distance2D(ax: number, az: number, bx: number, bz: number): numb
   const dx = ax - bx;
   const dz = az - bz;
   return Math.sqrt(dx * dx + dz * dz);
+}
+
+/**
+ * A point on the ground plus how much personal space it claims.
+ *
+ * `spacing` is the minimum centre-to-centre distance two pieces may have.
+ * The land-and-dwellings design rule is "spacing, not ownership": a new piece
+ * simply cannot be too close to something already standing, so the rule can
+ * run deterministically on any client and on the authoritative server alike.
+ */
+export type SpacedPoint = { x: number; z: number; spacing: number };
+
+/**
+ * Whether two spaced points are too close to one another.
+ *
+ * Each side contributes half of its own spacing, so a tidy piece may sit
+ * closer to a tidy neighbour than to a sprawling one — the same "the larger
+ * of the two wins" spirit the plant-crowding rule uses.
+ */
+export function piecesOverlap(a: SpacedPoint, b: SpacedPoint): boolean {
+  return distance2D(a.x, a.z, b.x, b.z) < (a.spacing + b.spacing) / 2;
+}
+
+/**
+ * Normalize an untrusted place-piece intent into a complete, safe one.
+ *
+ * Returns null when the intent is fundamentally unusable (no template or a
+ * non-finite coordinate). The server MUST run this before trusting the
+ * intent; the client may run the same helper so the two can never disagree.
+ */
+export function sanitizePlacePiece(raw: unknown): PlacePieceIntent | null {
+  const value = (raw ?? {}) as Partial<PlacePieceIntent>;
+  if (typeof value.templateKey !== 'string' || value.templateKey.length === 0) {
+    return null;
+  }
+  if (!isFiniteNumber(value.x) || !isFiniteNumber(value.z)) {
+    return null;
+  }
+  return {
+    templateKey: value.templateKey.slice(0, 64),
+    x: value.x,
+    z: value.z,
+    rotY: isFiniteNumber(value.rotY) ? value.rotY : 0,
+    page: typeof value.page === 'string' ? value.page.slice(0, 32) : '',
+  };
 }
 
 /** True when a finite number came through. Guards against NaN/Infinity spoofs. */

@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import { camera, scene } from '../render/context';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState } from '../sim/state';
+import { plantHarvest, plantProduce } from '../sim/catalogs/seeds';
+import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
 import { showResourceGain } from './harvesting';
 import { showPetToast } from './petting';
+import { refreshBuiltTerrainNear } from '../world/streaming';
+import { startTimedAction } from './timedAction';
 
 type PlantEntry = TerrainCellAddress & {
   id: string;
@@ -21,6 +25,7 @@ const WALK_PICKUP_RADIUS = 0.72;
 const PICK_SLOP_PX = 36;
 const plants = new Map<string, PlantEntry>();
 const seedWalkOverlaps = new Set<string>();
+const pendingPlantHarvests = new Set<string>();
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const projected = new THREE.Vector3();
@@ -96,12 +101,31 @@ export function hasPlantInteractionAt(clientX: number, clientY: number) {
   return pickPlantAt(clientX, clientY) !== null;
 }
 
-function collectSeed(entry: PlantEntry) {
+function collectDrop(entry: PlantEntry) {
+  const editBefore = stateFor(entry);
+  const seedId = editBefore?.plantedSeedId;
+  const harvest = seedId ? plantHarvest(seedId) : null;
   const result = dispatchGameCommand({ type: 'collectPlantSeed', target: entry, now: Date.now() });
   if (!result.ok) return false;
   entry.seedPickup.visible = false;
   playCozySound('rustle');
-  showResourceGain('buttonbloom-seeds', 1);
+  const produced = seedId ? plantProduce(seedId) : null;
+  showResourceGain(produced ?? 'buttonbloom-seeds', harvest?.quantity ?? 1);
+  refreshBuiltTerrainNear(entry.x, entry.z);
+  return true;
+}
+
+function startPlantHarvest(entry: PlantEntry) {
+  pendingPlantHarvests.add(entry.id);
+  const started = startTimedAction({
+    steps: [{ kind: 'harvest', durationMs: 1_350 }],
+    onComplete: () => {
+      pendingPlantHarvests.delete(entry.id);
+      collectDrop(entry);
+    },
+    onCancel: () => pendingPlantHarvests.delete(entry.id),
+  });
+  if (!started) pendingPlantHarvests.delete(entry.id);
   return true;
 }
 
@@ -110,10 +134,12 @@ export function tryPlantInteractionAt(clientX: number, clientY: number) {
   if (!picked) return false;
   picked.entry.object.getWorldPosition(projected);
   if (Math.hypot(projected.x - avatar.position.x, projected.z - avatar.position.z) > INTERACT_REACH) {
-    showPetToast(`${picked.target === 'seed' ? 'That loose seed' : 'The Buttonbloom'} is over there — walk closer`);
+    showPetToast(
+      `${picked.target === 'seed' ? 'That drop' : 'The plant'} is over there — walk closer`,
+    );
     return true;
   }
-  if (picked.target === 'seed') return collectSeed(picked.entry);
+  if (picked.target === 'seed') return startPlantHarvest(picked.entry);
 
   const result = dispatchGameCommand({ type: 'tendPlant', target: picked.entry, now: Date.now() });
   if (!result.ok) return true;
@@ -140,11 +166,6 @@ export function updatePlantInteractions(delta: number, elapsed: number) {
       edit = stateFor(entry);
       if (result.ok && edit?.seedDropReady) {
         entry.activeFor = 1;
-        entry.object.getWorldPosition(projected);
-        if (Math.hypot(projected.x - avatar.position.x, projected.z - avatar.position.z) <= 7) {
-          playCozySound('rustle');
-          showPetToast(result.message);
-        }
       }
     }
     entry.seedPickup.visible = Boolean(edit?.seedDropReady);
@@ -152,7 +173,16 @@ export function updatePlantInteractions(delta: number, elapsed: number) {
     if (entry.seedPickup.visible) {
       entry.seedPickup.getWorldPosition(projected);
       const isOverlapping = Math.hypot(projected.x - avatar.position.x, projected.z - avatar.position.z) <= WALK_PICKUP_RADIUS;
-      if (isOverlapping && !seedWalkOverlaps.has(entry.id)) collectSeed(entry);
+      const produced = edit?.plantedSeedId ? plantProduce(edit.plantedSeedId) : null;
+      const isFoodHarvest = produced ? RESOURCE_CORE_DEFS[produced].category === 'food' : false;
+      // Loose flower seeds still behave like walk-over pickups. Food stays on
+      // the plant until the player deliberately performs the harvest action.
+      if (
+        isOverlapping
+        && !seedWalkOverlaps.has(entry.id)
+        && !isFoodHarvest
+        && !pendingPlantHarvests.has(entry.id)
+      ) collectDrop(entry);
       if (isOverlapping) seedWalkOverlaps.add(entry.id);
       else seedWalkOverlaps.delete(entry.id);
     } else {

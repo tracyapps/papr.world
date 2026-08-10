@@ -93,14 +93,81 @@ Wording can still be authored — the *shape* of the line and its variants per
 species and personality — with the material, biome, and tool substituted in.
 That is what `fillTemplate` already does.
 
-## Open questions
+## Settled design
 
-- Does a critter volunteer its fact once, or is it a topic you can ask about
-  again? (Flags support either; repeating on request seems kinder.)
-- Does friendship gate the good hints? Tempting, but it risks making the
-  world's knowledge feel withheld rather than shared.
-- Do critters know about materials in *other* biomes — "my cousin says
-  there's something in the dunes" — as a nudge to travel? That is the piece
-  that would make exploration feel prompted rather than stumbled into.
-- Should the scrapbook record what you have been told, so the knowledge
-  survives forgetting which squirrel said it?
+Decided 2026-08-04.
+
+### "Tell me about this place" is the entry point
+
+Not an unprompted blurt, and not a fact dispensed once and gone. It is a
+**conversation option** that keeps giving, drawing from a pool of things this
+critter could say about where you are standing. Multiple responses, randomised
+order, and available every time you ask.
+
+The pool holds several *kinds* of knowledge, all scoped to the current biome
+or region:
+
+| Kind | Example | Read from |
+| --- | --- | --- |
+| Harvesting | *"Did you know the trees here grow a hand's width a day?"* | growth-rate and yield tables |
+| Material | *"Bark curls, right here. Only place you'll find them."* | `obtainedBy` |
+| Tool gating | *"You'll want a heavier pair of shears than those."* | `obtainedBy` + `TOOL_DEFS` |
+| Wayfinding | *"We're close to the owl-itect's studio — just the other side of this forest."* | places / landmark registry |
+| Fun fact | *"Lots of birds here. Ask one to sing you a song."* | authored, per biome |
+
+The fun-fact kind is the one that is allowed to be hand-written, because it is
+not asserting a mechanic. Everything else is generated from the table that
+owns it, for the reason already stated above: a hand-written hint goes stale
+silently.
+
+**Hidden gifts.** Some of these lines point at an action — asking a bird to
+sing, visiting the studio — and doing the thing can produce a small unearned
+gift. Not a quest, not a checklist entry, not tracked in a UI. A reward for
+following a suggestion that felt like conversation rather than instruction.
+
+### Friendship does not gate knowledge, personality shapes it
+
+Knowledge is shared, not withheld. Any critter will tell you what it knows,
+at any friendship level.
+
+What *does* vary is **which kind of thing they lead with**, by personality: a
+friendly critter opens with a joke it heard, a practical one with a harvesting
+tip, a wanderer with somewhere else you should go. That is characterisation,
+not a lock.
+
+And in every case, the conversation can continue. Asking more questions is
+always available, so one critter can yield several pieces of knowledge in one
+threaded exchange rather than one fact per visit. This is the design
+constraint on the storylet shape: these are **threads**, not one-shots, and
+`addFlags` is for "already said this one" bookkeeping inside a thread, never
+for closing the topic.
+
+### Critters know about elsewhere
+
+Yes — and this is the piece that makes exploration prompted rather than
+stumbled into. Beyond their own biome, a critter can offer:
+
+- **Nearby biomes** and what is worth going there for.
+- **Shops, stores, and landmarks**, with a rough direction.
+
+Scope it to *nearby* rather than global. A squirrel who knows the whole world
+map is an index; one who knows the next valley over is a neighbour.
+
+### The scrapbook records it — as a searchable diary
+
+Everything you are told gets written down, so the knowledge survives
+forgetting which squirrel said it. But not as a wiki page: as a **diary**,
+formatted like something the player kept rather than something the game
+generated. Searchable.
+
+Later: the player can add their own notes to entries, and highlight or mark up
+anything auto-recorded. That ambition matters now only in one way — entries
+need stable ids and room for player-authored fields from the start, so
+annotation is added rather than retrofitted.
+
+## Still open
+
+- What the diary entry *looks like* — this is design work, not a decision
+  waiting on code.
+- Whether the hidden gift is per-suggestion (one bird song, one gift) or a
+  low-probability roll each time. The first is warmer; the second is cheaper.

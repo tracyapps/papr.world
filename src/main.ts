@@ -1,5 +1,5 @@
 import './styles.css';
-import { clock, renderer, resizeRenderer, scene, camera } from './render/context';
+import { canvas, clock, renderer, resizeRenderer, scene, camera } from './render/context';
 import { addLighting, updateLighting } from './render/lighting';
 import { buildBackdrop, updateBackdrop } from './render/backdrop';
 import { buildClouds, updateClouds } from './render/clouds';
@@ -46,6 +46,13 @@ import { initializeGameState } from './sim/state';
 import { hasToolActionAt, initializeToolActions, tryToolActionAt } from './game/toolActions';
 import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } from './game/planting';
 import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverlay';
+import {
+  initializePlacement,
+  rotateSelectedBuildPiece,
+  tryPlaceAt,
+  updateBuildOverlay,
+} from './game/placement';
+import { initializeBuildPalette } from './ui/buildPalette';
 import { initializeWading } from './game/wading';
 import { updateWaterSurfaces } from './world/water';
 import { pickTerrainAtScreen } from './game/toolActions';
@@ -54,17 +61,40 @@ import { initializeToolToolbar, selectToolSlot } from './ui/toolToolbar';
 import { hasPlantInteractionAt, tryPlantInteractionAt, updatePlantInteractions } from './game/plantInteractions';
 import { describeTrimRegistry, hasTrimActionAt, tryTrimAt, updateTrimmableTrees } from './game/treeInteractions';
 import { initializeHudLayout, requestHudLayout } from './ui/hudLayout';
+import { initializeProfessor } from './ui/professor';
+import { closeTechTreeView, initializeTechTreeView } from './ui/techTreeView';
+import { initializeTechLearning } from './sim/learning';
+import {
+  closeSeedStorePanel,
+  isNearSeedStore,
+  isSeedStorePanelOpen,
+  isWheelInsideSeedStorePanel,
+  renderSeedStorePanel,
+  setSeedStorePanelOpen,
+  updateSeedStore,
+  updateSeedStorePrompt,
+  wireSeedStoreDom,
+} from './game/seedStore';
+import { GREENHOUSE_PAGE } from './world/seedStoreLayout';
+import {
+  cancelTimedAction,
+  initializeTimedAction,
+  isTimedActionActive,
+  updateTimedAction,
+} from './game/timedAction';
 
 // Bootstrap: build the world, wire the UI, run the frame loop.
 // World construction happens through the page system; page 0,0 is the
 // original clearing and streams in around the spawn point.
 
 const CLEARING_PAGE = pageId(0, 0);
+const SEED_STORE_PAGE = pageId(GREENHOUSE_PAGE.px, GREENHOUSE_PAGE.pz);
 
 const SPAWN_X = -1.5;
 const SPAWN_Z = -2.2;
 
 initializeGameState();
+initializeTechLearning();
 addLighting();
 buildSky();
 buildBackdrop();
@@ -78,12 +108,17 @@ initializeGuidance();
 // and owns the shared toast stack, so it must come before any UI that
 // registers into a rail or appends a toast.
 initializeHudLayout();
+initializeTimedAction();
 
 wireThingMakerDom();
 renderThingMakerPanel();
+wireSeedStoreDom();
+renderSeedStorePanel();
 initializeScrapbook();
 initializeHudWidgets();
 initializeHudMenus();
+initializeProfessor();
+initializeTechTreeView();
 initializePetting();
 initializeCritterDialogue();
 initializeCozyInteractions();
@@ -92,6 +127,8 @@ initializeToolActions();
 initializeToolToolbar();
 initializeInteractionCursor();
 initializeGardenOverlay();
+initializePlacement();
+initializeBuildPalette();
 initializeWading();
 initializeRegionBanner();
 registerScreenInteraction({
@@ -113,7 +150,10 @@ registerScreenInteraction({
   priority: 90,
   hitTest: (x, y) => isThingMakerAtScreen(x, y, camera),
   interact: () => {
-    if (isNearThingMaker(avatar.position)) setMakerPanelOpen(true);
+    if (isNearThingMaker(avatar.position)) {
+      closeSeedStorePanel();
+      setMakerPanelOpen(true);
+    }
     else showPetToast('The Thing Maker is over there — walk closer to use it');
     return true;
   },
@@ -157,26 +197,48 @@ registerScreenInteraction({
   hitTest: hasToolActionAt,
   interact: tryToolActionAt,
 });
+// Mode-gated like the tool verbs, and placed just under them: in build mode a
+// click on empty ground is a placement (consumed either way so the player gets
+// an explanation, never a silent miss), while clicks on real objects still
+// reach their own interactions.
+registerScreenInteraction({
+  id: 'build-placement',
+  priority: 15,
+  hitTest: (x, y) => getActionMode() === 'place' && pickTerrainAtScreen(x, y) !== null,
+  interact: tryPlaceAt,
+});
 initializeInput({
   onToggleScrapbook: () => setScrapbookOpen(!isScrapbookOpen()),
-  onToggleMaker: () => {
+  onToggleNearby: () => {
+    if (isNearSeedStore(avatar.position)) {
+      setSeedStorePanelOpen(!isSeedStorePanelOpen());
+      return;
+    }
     if (isNearThingMaker(avatar.position)) {
+      closeSeedStorePanel();
       setMakerPanelOpen(!isMakerPanelOpen());
     }
   },
   onMarkPlace: markCurrentSpot,
   onSelectToolSlot: selectToolSlot,
+  onRotateBuild: rotateSelectedBuildPiece,
   onPrimaryAction: (event) => {
+    if (isTimedActionActive()) return;
     if (tryScreenInteractionAt(event.clientX, event.clientY)) return;
     tryPetAt(event.clientX, event.clientY);
   },
   shouldOrbitWithPrimary: (event) => (
+    !isTimedActionActive()
+    &&
     getActionMode() === 'interact'
     && !hasScreenInteractionAt(event.clientX, event.clientY)
   ),
   onEscape: () => {
+    if (cancelTimedAction('escape')) return true;
+    if (closeTechTreeView()) return true;
     if (closeHudMenu()) return true;
     if (closeCritterDialogue()) return true;
+    if (closeSeedStorePanel()) return true;
     if (isMakerPanelOpen()) {
       setMakerPanelOpen(false);
       return true;
@@ -191,8 +253,17 @@ initializeInput({
     }
     return false;
   },
-  isWheelCaptured: isWheelInsideMakerPanel,
+  isWheelCaptured: (event) => isWheelInsideMakerPanel(event) || isWheelInsideSeedStorePanel(event),
   isPointerCaptured: isHudWidgetInteractionActive,
+  /**
+   * The world is the canvas and nothing else.
+   *
+   * Tested by identity rather than by asking each panel whether the pointer is
+   * inside it: the canvas is one element that cannot drift out of date, while a
+   * list of HUD containers grows every time a panel is added and fails
+   * silently when someone forgets one.
+   */
+  isWorldTarget: (event) => event.target === canvas,
 });
 
 // The overlay previews whatever the pointer is over, so the bootstrap keeps
@@ -234,6 +305,7 @@ function animate(animationTime = 0) {
   const delta = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
 
+  updateTimedAction(animationTime);
   updateGamepadCamera(delta);
   updateAvatar(delta);
   updateStreaming(avatar.position);
@@ -246,9 +318,12 @@ function animate(animationTime = 0) {
   }
 
   const clearingActive = isPageActive(CLEARING_PAGE);
+  const seedStoreActive = isPageActive(SEED_STORE_PAGE);
   updateThingMaker(delta, elapsed, avatar.position, clearingActive);
+  updateSeedStore(delta, elapsed, seedStoreActive);
   updateCritters(delta, elapsed, avatar.position);
   updateMakerPrompt(avatar.position);
+  updateSeedStorePrompt(avatar.position);
 
   updateGuidance(avatar.position, elapsed);
   updatePetEffects(delta);
@@ -266,6 +341,13 @@ function animate(animationTime = 0) {
     updateGardenOverlay(delta, elapsed, avatar.position, hovered, action);
   } else {
     updateGardenOverlay(delta, elapsed, avatar.position, null, null);
+  }
+
+  if (getActionMode() === 'place') {
+    const hovered = pickTerrainAtScreen(pointerX, pointerY);
+    updateBuildOverlay(delta, elapsed, avatar.position, hovered);
+  } else {
+    updateBuildOverlay(delta, elapsed, avatar.position, null);
   }
 
   updateLighting(avatar.position);

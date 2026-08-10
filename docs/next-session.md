@@ -1,34 +1,122 @@
 # Next Session
 
-Written 2026-08-04. Start here.
+Written 2026-08-07, updated 2026-08-08 after the learning flow landed.
+Start here.
+
+> **Roadmap 1.1 through 1.4 and the 1.6 deadlock guard are built and
+> play-tested.** The seven-branch
+> shared timeline now has its first visual design pass, compact visible
+> requirements, selectable cards, and the complete one-at-a-time learning
+> flow: persisted real-world clock, finite task jumps, Professor state, and
+> tool-plan grants on completion. Tool plans now have one explicit source,
+> cannot leak into world siting, and locked Thing Maker rungs link directly
+> to their Professor lesson.
+>
+> **One inference to confirm or correct:** the merge from 10 branches to 7
+> included folding Woodworking + Building & Tinkering + Structures &
+> Architecture into one "Building & Construction" branch. The owner only
+> explicitly asked for the Fiber Arts + Art & Design merge — this second one
+> was read from the mockup PDF showing exactly seven colour bands with no
+> separate Woodworking label. If that's not what was meant, it's a branch
+> reassignment away from being split back out.
 
 ## Where things stand
 
-Everything typechecks, 179 tests pass, the build is clean. Under git now.
+Everything typechecks; the full tests, stylesheet/content checks, production
+build, and direct browser check of the progression handoff are clean.
 
-Landed today:
+Landed:
 
-- **Renewable trees.** `trim` is live. Growth is derived from time, never
-  ticked; a tree is never destroyed. Kids scissors refuse redwoods, which is
-  what sturdy scissors are for. See `prototype-progress.md` → "Renewable
-  Trees".
-- **Tool ladders.** Tier and family are data, never parsed from a name — so
-  tools can be renamed to follow their artwork without reordering anything.
-  Shovels now have three rungs (the dig system has exactly three geology
-  layers, so that ladder is complete).
-- **Plans are real.** `STARTER_PLAN_IDS` is derived from tier-1 recipes
-  rather than hand-written. The Thing Maker shows every rung of every ladder
-  with a plan slot on each — dashed when unfound, solid when held.
-- **One rung at a time.** Tier N needs tier N-1 in hand.
-- **Folding Hook deleted**; Tape Tapper and Crease Scout hidden behind
-  `status: 'unimplemented'`, which is now the single readiness switch.
+- **The knowledge tree and learning flow.** Six playable nodes (one per
+  existing tool), one persisted active lesson, real-world progress, finite
+  task credit, automatic completion, and tool-plan grants.
+- **The Thing Maker now closes the loop.** Missing advanced tool plans say
+  they are learned with the Professor and route directly to the matching
+  lesson. Tool plans are rejected by the world-siting route at both the
+  catalog filter and direct-call boundary.
+- **Progression deadlocks are catalog failures.** Tests reject a tool recipe
+  or lesson task that depends on the tool it is meant to unlock.
+- **The tree redesigned twice more, same day (2026-08-07):** first to 10
+  branches, then to 7 branches on one shared-timeline grid (column position
+  derived from the prerequisite graph, not hand-positioned) with
+  requirement text moved to `.sr-only`.
+- **The Professor is now a small 3D character (2026-08-08)**, not CSS
+  shapes — his own tiny Three.js scene rendered into a canvas inside the
+  HUD widget, blinking on his own clock. See `professorRig.ts`.
+- **Every HUD widget can be nudged by keyboard** (Alt+Arrow, Alt+Shift+Arrow
+  for finer) and **collapsed away**, not just dragged. Built for the
+  Professor; minimap and compass got it for free.
+- A small `hud.ts` fix so a widget's own buttons (the Professor's open/
+  collapse controls) behave like buttons instead of starting a drag.
 
 ## Do this first
 
-### 1. Play-test trimming (still unverified on screen)
+### 0. Play-test the 3D Professor (also unverified — no browser in this sandbox)
 
-Nothing below has been seen running. Make Kids Scissors, press 4, walk into
-the treeline.
+`npm run dev`, look for him top-centre of the HUD.
+
+- Does he actually blink, and does the rest state (not mid-blink) look calm
+  rather than shocked? That was the whole point of this pass.
+- Do the paperclip loops behind him read as a paperclip at 56px, or as an
+  unclear grey smear? This is the piece most likely to need a second pass —
+  it's the least literal translation from the SVG.
+- Does the graduation cap read as a cap? It's a flat diamond facing the
+  camera dead-on (matching the SVG, which draws it the same way) rather
+  than a perspective-correct board — worth checking that reads as
+  intentional and not as a floating black tile.
+- Watch him for 10+ seconds. Does the idle sway feel alive without being
+  distracting at icon size? Is the blink interval (~4.4s) too frequent, too
+  rare, or about right?
+- Click the collapse toggle, wait a few seconds, bring him back. Does he
+  resume cleanly, still blinking, still sized correctly? (The canvas
+  measures zero while `display: none`, then re-measures on the first frame
+  back — that's the part most likely to misbehave if it's going to.)
+- Two live WebGL contexts now exist on this page — his and the world's.
+  Does anything else feel like it dropped frames?
+
+### 1. Re-check the knowledge tree and learning flow
+
+`npm run dev`, then look for the paperclip at top-centre of the HUD.
+
+- Click the Professor. Does the tree open full-screen with seven stacked
+  branch rows (Caring for the Land, Materials, Building & Construction,
+  Interior Design, Fine Arts & Textiles, Cooking, Transportation), each on
+  the *same* shared set of timeline columns? Scroll right — do all seven
+  rows' columns move together, staying lined up?
+- Find two cards in different branches sitting in the same column (started
+  together) and one card pushed further right than its branch-mates because
+  it needs something from another branch first. Does that read as
+  intentional timeline structure, or just as ragged spacing?
+- Only 6 cards across the whole tree are real ("Learned"/"Ready to
+  start"/"Locked"); everything else reads "Not yet in the game" in a
+  visibly different, dotted-border card. Does that distinction land, or does
+  it read as broken/unfinished rather than intentional?
+- The requirement sentence is now screen-reader-only — nothing shows on
+  screen for a locked card except an empty indicator hook. With a screen
+  reader (or the accessibility tree in devtools), does the requirement
+  sentence still read correctly, still naming the source branch for a
+  cross-branch requirement (e.g. "Needs: Growing Food (Caring for the
+  Land)")?
+- On a fresh save the tier-1 real nodes should read "Learned" already
+  (starter plans already grant those tools) — is that legible, or does it
+  read as a bug?
+- Focus the Professor (Tab to it, or click then don't drag) and try
+  Alt+Arrow. Does he nudge smoothly? Try Alt+Shift+Arrow for the finer step.
+  Same on the minimap and compass.
+- Click the small tab at his bottom-right corner. Does he shrink to a dot and
+  come back cleanly?
+- Open the tree, then press Escape with focus on the close button, then again
+  with focus elsewhere in the card. Does it close from anywhere?
+- Read a locked card (Digging 2, Digging 3, Trimming 2) end to end as if you
+  had never seen the design doc. With no visible requirement text now, is it
+  still clear *why* it's locked, or does it need that visual indicator
+  before it makes sense at a glance?
+- The paperclip, cap, and glasses are placeholder CSS shapes, not art — is
+  the silhouette readable at a glance regardless?
+
+### 2. Play-test trimming (still unverified on screen)
+
+Make Kids Scissors, press 4, walk into the treeline.
 
 - Does clicking a tree feel like it hits the tree you meant? Picking is
   reach-filtered raycast with a 48px screen-space fallback — the fallback may
@@ -39,7 +127,7 @@ the treeline.
 - The `chop` cursor was one of the four broken before the cursor fix; this is
   the first thing to use it.
 
-### 2. Look at the new Thing Maker panel
+### 3. Look at the Thing Maker panel
 
 It is functional but has had no design pass — that was the agreed split.
 
@@ -51,7 +139,7 @@ It is functional but has had no design pass — that was the agreed split.
   rise on select like slots 2 and 3.
 - The two new shovels borrow the flimsy shovel's exact art framing.
 
-### 3. Player collision (critter pathing is signed off)
+### 4. Player collision (critter pathing is signed off)
 
 **Critter pathing was play-tested across 2026-08-03/04 and is working.** Done.
 
@@ -61,14 +149,14 @@ Player collision has still not been deliberately tested.
 
 ## The real gap
 
-Two of the four day-one things are still unstarted. Harvest and regrowth is
-now done.
+One of the four day-one things is now a playable first slice. Harvest and
+regrowth is done, and exchange has a seed-shop foundation.
 
-- **Exchange / economy.** Only the Wood Mill exists and it does not trade.
-  This now also blocks the owl who sells plans — see
-  `plans-and-blueprints.md`. The open question is what she wants in exchange;
-  "a rare paper she cannot get herself" needs no currency type at all, which
-  makes it the cheapest way in.
+- **Exchange / economy.** Pip’s Seed & Garden now persists shiny chips, names
+  explicit buy/sell stock, and supports flat-price buying, selling, and equal
+  barter. The next economy work is generalising the first catalog beyond seeds
+  and giving another shop the same commands. The owl is still waiting on that
+  broader stock/plan layer — see `plans-and-blueprints.md`.
 - **Building placement.** The footprint system knows what is solid, which is
   most of what placement needs. The owl's easel would be its first real test.
 

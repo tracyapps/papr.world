@@ -2,13 +2,28 @@
 
 A running log for "omg, log this" moments. Not commitments — a place where ideas can't escape. Newest at the top.
 
+## 2026-08-08
+
+### Pip’s Seed & Garden
+
+- The garden shop’s proprietor is now Pip, a striped chipmunk, replacing the
+  older rabbit placeholder.
+- First slice: every seed on a visible shelf, ₡2 per packet, two paper fibers
+  as equal barter, and a basket where Pip buys anything gathered or grown.
+- The kiosk moved out of the home clearing into a walk-through east-meadow
+  greenhouse. Two catalog-derived planter rows show every plant fully grown;
+  the open center aisle and roof frame expand as more seeds are added.
+- Later warmth belongs in character work: garden favors, soil opinions,
+  pollinator requests, and friendship-shaped stock — not more checkout chrome.
+
 ## 2026-07-30
 
 ### Animal Shopkeepers
 
 - Woodchuck lumber yard built around the giant school paper cutter. Working names: Wouldchuck Yard, The Grain & Guillotine, Chuck's Cut & Crease.
 - Crow junk yard for salvage, duplicate-material trades, oddments, and Thing Maker parts. Working names: Crow & Found, The Re-Nest, Odds & Caws.
-- Rabbit garden shop for seeds, fiber, dyes, soil blends, and planting plans. Working names: Bun & Bloom, The Root Fold, Hareloom Garden.
+- Garden shop for seeds, fiber, dyes, soil blends, and planting plans. The
+  original rabbit pitch became Pip the chipmunk on 2026-08-08.
 - Shops are ongoing characters with conversations and favors, not vending machines. The complete economic role for each is in `docs/tool-and-supply-progression.md`.
 
 ## 2026-07-16

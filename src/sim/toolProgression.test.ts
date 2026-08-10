@@ -8,9 +8,16 @@ import {
   recipesInFamily,
   type RecipeId,
 } from './catalogs/recipes';
-import { TOOL_DEFS, TOOL_FAMILY_ORDER, toolsInFamily, type ToolId } from './catalogs/tools';
-import { craftBlockers } from './commands';
+import {
+  TOOL_DEFS,
+  TOOL_FAMILY_ORDER,
+  highestOwnedTool,
+  toolsInFamily,
+  type ToolId,
+} from './catalogs/tools';
+import { craftBlockers, describeCraftBlocker } from './commands';
 import { createDefaultGameState, setGameStateForTests, type GameState } from './state';
+import { getToolArt } from '../game/toolPresentation';
 
 afterEach(() => setGameStateForTests(null));
 
@@ -44,6 +51,32 @@ describe('tool ladders', () => {
     expect(new Set(laddered).size).toBe(laddered.length);
   });
 
+  it('orders the hammer artwork ladder from playful starter to standard tool', () => {
+    expect(toolsInFamily('hammer')).toEqual([
+      'squeaky-hammer',
+      'basic-mallet',
+      'standard-hammer',
+    ]);
+  });
+
+  it('chooses the highest hammer tier the player has actually made', () => {
+    expect(highestOwnedTool('hammer', {
+      'squeaky-hammer': 1,
+      'basic-mallet': 1,
+      'standard-hammer': 0,
+    })).toBe('basic-mallet');
+    expect(highestOwnedTool('hammer', { 'standard-hammer': 1 })).toBe('standard-hammer');
+    expect(highestOwnedTool('hammer', {})).toBeNull();
+  });
+
+  it('wires original artwork to every hammer rung', () => {
+    for (const toolId of toolsInFamily('hammer')) {
+      const art = getToolArt(toolId);
+      expect(art).not.toBeNull();
+      expect(art?.sourceUrl).toContain(`${toolId}.svg`);
+    }
+  });
+
   it('gives every ready tool recipe a plan and every tool a recipe', () => {
     for (const toolId of Object.keys(TOOL_DEFS) as ToolId[]) {
       expect(recipeForTool(toolId)).not.toBeNull();
@@ -67,6 +100,13 @@ describe('tool ladders', () => {
 
   it('never offers a plan for something that is not playable', () => {
     for (const recipeId of STARTER_PLAN_IDS) expect(isRecipeAvailable(recipeId)).toBe(true);
+  });
+
+  it('assigns every ready tool plan to the starter set or the knowledge tree, never the world', () => {
+    for (const recipe of Object.values(RECIPE_DEFS)) {
+      if (recipe.status !== 'ready' || recipe.output.kind !== 'tool') continue;
+      expect(['starter', 'knowledge-tree']).toContain(recipe.planSource);
+    }
   });
 
   it('hides unimplemented recipes from every family ladder', () => {
@@ -114,6 +154,13 @@ describe('climbing one rung at a time', () => {
     const state = stocked();
     state.player.tools['flimsy-shovel'] = 1;
     expect(kinds(state, 'okayish-shovel')).toContain('no-plan');
+  });
+
+  it('points a missing knowledge-tree plan back to the Professor', () => {
+    const state = stocked();
+    state.player.tools['flimsy-shovel'] = 1;
+    const blocker = craftBlockers(state, 'okayish-shovel').find((entry) => entry.kind === 'no-plan');
+    expect(blocker && describeCraftBlocker(blocker)).toBe('Learn this plan with the Professor.');
   });
 
   it('lets a fully qualified craft through', () => {

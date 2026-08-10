@@ -1,4 +1,9 @@
-import { getSetting, setSetting } from '../game/settings';
+import {
+  CAMERA_SENSITIVITY_MAX,
+  CAMERA_SENSITIVITY_MIN,
+  getSetting,
+  setSetting,
+} from '../game/settings';
 
 // The two top-right icon buttons and the overlays they open.
 //
@@ -84,9 +89,38 @@ function buildSettingsOverlay(): HTMLElement {
           <small>Off: drag moves the camera instead (classic orbit)</small>
         </span>
       </label>
+      <div class="hud-setting hud-setting-slider">
+        <label for="setting-camera-sensitivity">
+          <strong>Looking-around speed</strong>
+          <small id="setting-camera-sensitivity-hint">
+            How far the world turns for the same amount of drag or stick
+          </small>
+        </label>
+        <div class="hud-slider-row">
+          <span class="hud-slider-end" aria-hidden="true">Calm</span>
+          <input
+            type="range"
+            id="setting-camera-sensitivity"
+            min="${CAMERA_SENSITIVITY_MIN}"
+            max="${CAMERA_SENSITIVITY_MAX}"
+            step="0.05"
+            aria-describedby="setting-camera-sensitivity-hint"
+          >
+          <span class="hud-slider-end" aria-hidden="true">Quick</span>
+          <output for="setting-camera-sensitivity" id="setting-camera-sensitivity-value"></output>
+        </div>
+      </div>
+      <h3 class="hud-overlay-subhead">Learning</h3>
+      <label class="hud-setting">
+        <input type="checkbox" id="setting-learning-timer">
+        <span>
+          <strong>Show the Professor's time note</strong>
+          <small>Uses broad phrases like “about 6 hours left,” never a ticking countdown</small>
+        </span>
+      </label>
       <p class="hud-overlay-note">
-        Coming here later: key remapping, gamepad mapping, camera sensitivity,
-        invert stick look, audio, and text size.
+        Coming here later: key remapping, gamepad mapping, invert stick look,
+        audio, and text size.
       </p>
     </div>`;
 
@@ -95,6 +129,40 @@ function buildSettingsOverlay(): HTMLElement {
     dragMode.checked = getSetting('cameraDragMode') === 'grab-world';
     dragMode.addEventListener('change', () => {
       setSetting('cameraDragMode', dragMode.checked ? 'grab-world' : 'move-camera');
+    });
+  }
+
+  const sensitivity = overlay.querySelector<HTMLInputElement>('#setting-camera-sensitivity');
+  const sensitivityValue = overlay.querySelector<HTMLOutputElement>(
+    '#setting-camera-sensitivity-value',
+  );
+  if (sensitivity) {
+    // A raw multiplier ("1.35") means nothing to a player, and a screen reader
+    // announcing it means even less. Percent-of-normal is the same number in
+    // a form you can act on.
+    const describe = (value: number) => `${Math.round(value * 100)}% of normal speed`;
+    const reflect = (value: number) => {
+      sensitivity.setAttribute('aria-valuetext', describe(value));
+      if (sensitivityValue) sensitivityValue.textContent = `${Math.round(value * 100)}%`;
+    };
+
+    sensitivity.value = String(getSetting('cameraSensitivity'));
+    reflect(getSetting('cameraSensitivity'));
+
+    sensitivity.addEventListener('input', () => {
+      const value = Number(sensitivity.value);
+      setSetting('cameraSensitivity', value);
+      reflect(value);
+    });
+    // Arrow keys inside the overlay must not also drive the world.
+    sensitivity.addEventListener('keydown', (event) => event.stopPropagation());
+  }
+
+  const learningTimer = overlay.querySelector<HTMLInputElement>('#setting-learning-timer');
+  if (learningTimer) {
+    learningTimer.checked = getSetting('showLearningTimer');
+    learningTimer.addEventListener('change', () => {
+      setSetting('showLearningTimer', learningTimer.checked);
     });
   }
   return overlay;

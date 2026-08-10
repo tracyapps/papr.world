@@ -14,10 +14,11 @@ export const RESOURCE_CATEGORIES = {
   cardboard: { id: 'cardboard', label: 'Cardboard & Board', singularLabel: 'piece', description: 'Sturdy layered material shaped by the landscape around it.', iconKey: 'resource-category.cardboard', color: '#aa7945' },
   soil: { id: 'soil', label: 'Paper Soil & Clay', singularLabel: 'scoop', description: 'Regional paper earth lifted from shallow beds and folded hills.', iconKey: 'resource-category.soil', color: '#8c6748' },
   seeds: { id: 'seeds', label: 'Seeds & Starts', singularLabel: 'seed', description: 'Tiny folded beginnings for gardens and careful ground-mending.', iconKey: 'resource-category.seeds', color: '#778f4d' },
+  food: { id: 'food', label: 'Harvests & Food', singularLabel: 'harvest', description: 'Paper fruits and vegetables picked from plants you grew.', iconKey: 'resource-category.food', color: '#c45d4a' },
 } as const satisfies Record<string, ResourceCategoryDefinition>;
 
 export type ResourceCategoryId = keyof typeof RESOURCE_CATEGORIES;
-export const RESOURCE_CATEGORY_ORDER: ResourceCategoryId[] = ['sticks', 'stones', 'fiber', 'cardboard', 'soil', 'seeds'];
+export const RESOURCE_CATEGORY_ORDER: ResourceCategoryId[] = ['sticks', 'stones', 'fiber', 'cardboard', 'soil', 'seeds', 'food'];
 
 export type ResourceCoreDefinition = {
   id: string;
@@ -45,6 +46,16 @@ export const RESOURCE_CORE_DEFS = {
   'carbon-copy-shale': { id: 'carbon-copy-shale', label: 'Carbon-copy shale', shortLabel: 'Copy shale', category: 'stones', iconKey: 'resource.carbon-copy-shale' },
   'buttonbloom-seeds': { id: 'buttonbloom-seeds', label: 'Buttonbloom seeds', shortLabel: 'Buttonbloom seeds', category: 'seeds', iconKey: 'resource.buttonbloom-seeds' },
   'mend-me-seeds': { id: 'mend-me-seeds', label: 'Mend-me seeds', shortLabel: 'Mend-me seeds', category: 'seeds', iconKey: 'resource.mend-me-seeds' },
+  'raspberry-bush-seeds': { id: 'raspberry-bush-seeds', label: 'Raspberry bush seeds', shortLabel: 'Raspberry seeds', category: 'seeds', iconKey: 'resource.raspberry-bush-seeds' },
+  'crinkle-carrot-seeds': { id: 'crinkle-carrot-seeds', label: 'Crinkle-carrot seeds', shortLabel: 'Carrot seeds', category: 'seeds', iconKey: 'resource.crinkle-carrot-seeds' },
+  'ribbon-corn-seeds': { id: 'ribbon-corn-seeds', label: 'Ribbon-corn seeds', shortLabel: 'Corn seeds', category: 'seeds', iconKey: 'resource.ribbon-corn-seeds' },
+  'folded-cabbage-seeds': { id: 'folded-cabbage-seeds', label: 'Folded-cabbage seeds', shortLabel: 'Cabbage seeds', category: 'seeds', iconKey: 'resource.folded-cabbage-seeds' },
+  'paper-tomato-seeds': { id: 'paper-tomato-seeds', label: 'Paper-tomato seeds', shortLabel: 'Tomato seeds', category: 'seeds', iconKey: 'resource.paper-tomato-seeds' },
+  'raspberries': { id: 'raspberries', label: 'Paper raspberries', shortLabel: 'Raspberries', category: 'food', iconKey: 'resource.raspberries' },
+  'crinkle-carrots': { id: 'crinkle-carrots', label: 'Crinkle carrots', shortLabel: 'Crinkle carrots', category: 'food', iconKey: 'resource.crinkle-carrots' },
+  'ribbon-corn': { id: 'ribbon-corn', label: 'Ribbon corn', shortLabel: 'Ribbon corn', category: 'food', iconKey: 'resource.ribbon-corn' },
+  'folded-cabbage': { id: 'folded-cabbage', label: 'Folded cabbage', shortLabel: 'Folded cabbage', category: 'food', iconKey: 'resource.folded-cabbage' },
+  'paper-tomato': { id: 'paper-tomato', label: 'Paper tomatoes', shortLabel: 'Paper tomatoes', category: 'food', iconKey: 'resource.paper-tomato' },
 } as const satisfies Record<string, ResourceCoreDefinition>;
 
 export type ResourceId = keyof typeof RESOURCE_CORE_DEFS;

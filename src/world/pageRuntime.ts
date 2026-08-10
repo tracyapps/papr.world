@@ -5,6 +5,7 @@ import { getMaterial } from '../render/materials';
 import { registerHarvestable } from '../game/harvesting';
 import { buildCritters, populatePageCritters } from '../game/critters';
 import { buildThingMaker } from '../game/thingMaker';
+import { buildSeedStore } from '../game/seedStore';
 import { registerMapFeature } from './mapFeatures';
 import { buildClearingHouse, buildCozyClearingDetails, buildDisplayWall } from './setPieces';
 import { buildClearingSignpost, buildForestTrailSignpost } from './signposts';
@@ -25,6 +26,7 @@ import type { Biome, PageData, PropData, TreeKind } from './types';
 import { getGameState } from '../sim/state';
 import { RESOURCE_DEFS } from './resources';
 import { buildTerrainPlantVisual } from './plantRuntime';
+import { buildPlacedPieceVisual } from './buildPieceVisuals';
 import { registerTerrainPlant } from '../game/plantInteractions';
 import { treeSpeciesOf } from './treeRuntime';
 import { registerTrimmableTree } from '../game/treeInteractions';
@@ -272,6 +274,9 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         case 'thingMaker':
           buildThingMaker(group);
           break;
+        case 'seedStore':
+          buildSeedStore(group);
+          break;
         case 'critters':
           buildCritters(group);
           break;
@@ -355,6 +360,7 @@ export function buildPageGroup(page: PageData): THREE.Group {
   });
 
   buildTerrainEditVisuals(page.id, group);
+  buildPlacedPieceVisuals(page.id, group);
 
   // The clearing's residents come from its 'critters' unique prop;
   // every other page gets a seeded population.
@@ -363,6 +369,29 @@ export function buildPageGroup(page: PageData): THREE.Group {
   }
 
   return group;
+}
+
+/**
+ * Rebuild the build pieces standing on a page. Rebuilding from state (rather
+ * than caching a grown list) keeps this correct after any placement, and the
+ * list is tiny — a page costs nothing until someone builds on it.
+ */
+function buildPlacedPieceVisuals(pageId: string, group: THREE.Group) {
+  const previous = group.getObjectByName('placed-piece-visuals');
+  if (previous) group.remove(previous);
+
+  const visuals = new THREE.Group();
+  visuals.name = 'placed-piece-visuals';
+  const pageState = getGameState().world.pages[pageId];
+  if (pageState) {
+    for (const piece of Object.values(pageState.placedPieces)) {
+      if (piece.page !== pageId) continue;
+      const visual = buildPlacedPieceVisual(piece);
+      visual.position.set(piece.x, sampleTerrainHeight(piece.x, piece.z) + 0.01, piece.z);
+      visuals.add(visual);
+    }
+  }
+  group.add(visuals);
 }
 
 function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
@@ -403,6 +432,7 @@ function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
 export function refreshPageTerrain(pageId: string, group: THREE.Group) {
   refreshTerrainSurfaceMeshes(group);
   buildTerrainEditVisuals(pageId, group);
+  buildPlacedPieceVisuals(pageId, group);
 }
 
 export function getGroundMapColor(biome: string) {

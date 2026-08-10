@@ -2,6 +2,11 @@ import { createRng, hashCoords } from '../core/math';
 import { PAGE_SIZE, pageId, type Biome, type PageData, type PropData, type TerrainPatchData, type TreeKind } from './types';
 import { BIOME_RESOURCES, RESOURCE_DEFS } from './resources';
 import { BIOME_GROUND_MATERIALS, biomeConfidenceAt, dominantBiomeAt, elevationBandAt } from './fields';
+import {
+  GREENHOUSE_CLEAR_RADIUS,
+  GREENHOUSE_PAGE,
+  GREENHOUSE_POSITION,
+} from './seedStoreLayout';
 
 // Seeded page generation for pages without authored data.
 // Deterministic from page coordinates, so every client agrees.
@@ -165,6 +170,41 @@ export function generatePage(px: number, pz: number): PageData {
   }
 
   const groundMaterial = BIOME_GROUND_MATERIALS[biome];
+
+  if (px === GREENHOUSE_PAGE.px && pz === GREENHOUSE_PAGE.pz) {
+    // This page stays procedurally meadow-like outside the landmark, but Pip's
+    // long planter house needs a calm clearing. Remove any generated object or
+    // relief whose centre could reach into it, then lay a notebook-paper walk
+    // from the home-side page edge to the west entrance.
+    for (let index = terrain.length - 1; index >= 0; index -= 1) {
+      const patch = terrain[index];
+      if (
+        Math.hypot(patch.x - GREENHOUSE_POSITION.x, patch.z - GREENHOUSE_POSITION.z)
+        < GREENHOUSE_CLEAR_RADIUS + Math.max(patch.radiusX, patch.radiusZ)
+      ) terrain.splice(index, 1);
+    }
+    for (let index = props.length - 1; index >= 0; index -= 1) {
+      const prop = props[index];
+      if (!('x' in prop) || !('z' in prop)) continue;
+      if (Math.hypot(prop.x - GREENHOUSE_POSITION.x, prop.z - GREENHOUSE_POSITION.z) < GREENHOUSE_CLEAR_RADIUS) {
+        props.splice(index, 1);
+      }
+    }
+    const pathEndX = GREENHOUSE_POSITION.x - GREENHOUSE_CLEAR_RADIUS + 1.3;
+    const pathStartX = px * PAGE_SIZE - PAGE_SIZE / 2;
+    props.push(
+      {
+        kind: 'sheet',
+        material: 'paper.notebook',
+        width: pathEndX - pathStartX,
+        depth: 1.7,
+        x: (pathStartX + pathEndX) / 2,
+        z: GREENHOUSE_POSITION.z,
+        map: { kind: 'path', color: '#ece6bd' },
+      },
+      { kind: 'unique', unique: 'seedStore' },
+    );
+  }
 
   return {
     id: pageId(px, pz),

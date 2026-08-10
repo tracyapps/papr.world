@@ -120,6 +120,69 @@ body {
 .harvest-toast span { color: #715a48; font-size: 11px; }
 .harvest-toast.is-visible { opacity: 1; transform: translateY(0) rotate(0.4deg); }
 
+/* Shared short-work treatment. The chunky offset shadows make the verb read
+   like a little cardboard title floating over the work, while the narrow
+   paper strip underneath stays legible without becoming another modal. */
+.timed-action {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 58%;
+  transform: translate(-50%, 10px) scale(0.96) rotate(-1deg);
+  transition: opacity 120ms ease, transform 160ms ease;
+  width: min(280px, calc(100vw - 40px));
+  z-index: 23;
+}
+
+.timed-action.is-active {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1) rotate(-1deg);
+}
+
+.timed-action-word {
+  color: #fff4c9;
+  font: 900 clamp(25px, 3.2vw, 38px)/1 Georgia, serif;
+  letter-spacing: 0.025em;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 1.5px #4d3827;
+  text-shadow:
+    1px 1px 0 #725238,
+    2px 2px 0 #725238,
+    3px 3px 0 #4f3928,
+    0 8px 12px rgb(43 31 23 / 0.28);
+}
+
+.timed-action-track {
+  background: rgb(68 50 35 / 0.34);
+  border: 2px solid rgb(255 248 215 / 0.92);
+  border-radius: 999px;
+  box-shadow: 0 3px 0 rgb(66 47 32 / 0.3);
+  height: 10px;
+  overflow: hidden;
+  width: 172px;
+}
+
+.timed-action-fill {
+  background: linear-gradient(90deg, #e7bd4f, #7da85b);
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.timed-action-step {
+  color: #fff8dd;
+  font: 800 10px/1.1 system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgb(43 31 23 / 0.8);
+  text-transform: uppercase;
+}
+
 /* Garden refusal card. Wider than a toast because it carries a requirement
    and the current value side by side — a one-liner can say "no", but only
    numbers tell the player what "yes" would look like. */
@@ -663,6 +726,182 @@ body {
   outline-offset: 3px;
 }
 
+/* Hoe-mode seed pouch. It lives along the top rather than inside the hoe's
+   rail slot so every carried packet, its count, and the active choice remain
+   visible while planting. */
+.seed-selector {
+  align-items: center;
+  background:
+    linear-gradient(91deg, rgb(255 251 229 / 0.96), rgb(244 235 199 / 0.96)),
+    url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 300px auto;
+  border: 1px solid rgb(70 54 35 / 0.3);
+  border-radius: 8px 12px 10px 7px;
+  box-shadow: 0 10px 26px rgb(44 34 25 / 0.2);
+  display: flex;
+  gap: 10px;
+  left: calc(var(--hud-rail-width) + 34px);
+  max-width: calc(100vw - var(--hud-rail-width) - 250px);
+  padding: 8px 10px;
+  pointer-events: auto;
+  position: fixed;
+  top: calc(var(--hud-top, 16px) + 52px);
+  transform: rotate(-0.25deg);
+  z-index: 12;
+}
+
+.seed-selector[hidden] {
+  display: none;
+}
+
+.seed-selector-heading {
+  color: #69513d;
+  flex: 0 0 auto;
+  font: 800 11px/1 Georgia, serif;
+  letter-spacing: 0.08em;
+  padding: 0 3px;
+  text-transform: uppercase;
+}
+
+.seed-selector-list {
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+}
+
+.seed-choice {
+  align-items: center;
+  background: rgb(255 254 243 / 0.8);
+  border: 1px solid rgb(77 61 43 / 0.27);
+  border-radius: 8px 7px 9px 6px;
+  color: #342a20;
+  cursor: pointer;
+  display: grid;
+  flex: 0 0 auto;
+  gap: 2px 7px;
+  grid-template-columns: 16px minmax(70px, auto) auto;
+  min-height: 42px;
+  padding: 5px 8px;
+  text-align: left;
+  transition: background 130ms ease, border-color 130ms ease, box-shadow 130ms ease, transform 130ms ease;
+}
+
+.seed-choice:hover {
+  background: #fffdf0;
+  border-color: rgb(70 91 47 / 0.52);
+  transform: translateY(-1px);
+}
+
+.seed-choice.is-selected {
+  background: #dcebc3;
+  border-color: #435d2f;
+  box-shadow: inset 0 0 0 2px rgb(80 111 54 / 0.32), 0 3px 8px rgb(55 70 38 / 0.15);
+}
+
+.seed-choice.is-selected::after {
+  color: #2f5128;
+  content: "planting";
+  font: 800 8px/1 system-ui, sans-serif;
+  grid-column: 2 / 4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.seed-choice-mark {
+  background:
+    radial-gradient(circle at 45% 38%, #fff7b3 0 18%, transparent 20%),
+    var(--seed-accent, #79945d);
+  border: 1px solid rgb(51 47 35 / 0.42);
+  border-radius: 50% 46% 52% 43%;
+  box-shadow: inset -2px -2px 0 rgb(44 50 30 / 0.16);
+  grid-row: 1 / 3;
+  height: 16px;
+  transform: rotate(-12deg);
+  width: 16px;
+}
+
+.seed-choice-name {
+  font: 750 11px/1.15 system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.seed-choice-count {
+  background: rgb(73 61 44 / 0.1);
+  border-radius: 999px;
+  font: 800 11px/1 system-ui, sans-serif;
+  padding: 3px 5px;
+}
+
+.seed-choice:focus-visible {
+  outline: 3px solid #2d5f2d;
+  outline-offset: 2px;
+}
+
+.seed-selector-empty {
+  color: #716250;
+  font: 650 12px/1.2 system-ui, sans-serif;
+}
+
+/* Build-mode piece palette. Lives in the right rail while the Build slot is
+   active; when hidden it contributes nothing to the rail's layout. */
+.build-palette {
+  background: rgb(255 249 226 / 0.96) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 300px auto;
+  border: 1px solid rgb(72 54 36 / 0.28);
+  border-radius: 12px 10px 14px 11px;
+  box-shadow: 0 16px 36px rgb(54 39 27 / 0.22);
+  color: #2d261e;
+  padding: 14px 16px 16px;
+  transform: rotate(0.6deg);
+  width: 224px;
+}
+
+.build-palette-heading {
+  color: #6a3d2a;
+  font: 800 11px/1.35 Georgia, serif;
+  letter-spacing: 0.05em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.build-palette-list {
+  display: grid;
+  gap: 8px;
+}
+
+.build-palette-item {
+  background: rgb(255 252 240 / 0.72);
+  border: 1px solid rgb(62 49 35 / 0.18);
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: 8px 11px;
+  text-align: left;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.build-palette-item:hover {
+  background: rgb(255 252 240 / 0.95);
+  transform: translateX(-3px);
+}
+
+.build-palette-item.is-selected {
+  background: rgb(224 238 198 / 0.96);
+  border-color: rgb(67 91 45 / 0.4);
+}
+
+.build-piece-name {
+  font: 700 14px/1.2 Georgia, serif;
+}
+
+.build-piece-summary {
+  color: #6a5a49;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
 .maker-prompt[hidden] {
   display: none;
 }
@@ -869,6 +1108,140 @@ body {
   z-index: 1;
 }
 
+/* ---------------------------------------------------------------------
+   The Professor
+   ---------------------------------------------------------------------
+   A movable, collapsible HUD widget (docs/knowledge-tree.md). His face was
+   flat CSS shapes through 1.1; as of 2026-08-08 he's a small live Three.js
+   character (src/game/professorRig.ts, modelled from the owner's
+   the-prof.svg) rendered into the canvas below, blinking on his own clock.
+   This stylesheet only owns his round paper backdrop and the canvas's
+   size — see professor.ts for everything about how he moves. */
+
+.professor-widget {
+  height: 56px;
+  position: fixed;
+  width: 56px;
+  z-index: 9;
+}
+
+.professor-face-button {
+  background: rgb(255 252 240 / 0.92);
+  border: 1px solid rgb(62 49 35 / 0.22);
+  border-radius: 50%;
+  box-shadow: 0 10px 22px rgb(52 41 31 / 0.18);
+  cursor: pointer;
+  height: 56px;
+  padding: 0;
+  position: relative;
+  width: 56px;
+}
+
+.professor-face-button:hover { background: rgb(255 253 244 / 0.98); }
+
+.professor-face-button:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
+.professor-face {
+  display: block;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+/* The Professor himself now lives in professorRig.ts — a small, separate
+   Three.js scene rendered into this canvas rather than CSS shapes. The
+   canvas has a transparent clear colour (set in professor.ts), so the round
+   paper background from .professor-face-button still shows through behind
+   him. */
+.professor-canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.professor-widget.is-reading .professor-face-button {
+  box-shadow:
+    0 0 0 3px rgb(255 244 170 / 0.72),
+    0 10px 22px rgb(52 41 31 / 0.2);
+}
+
+/* A coarse paper note, deliberately static between state changes: the
+   Professor shows that something is cooking without putting a ticking clock
+   in the player's peripheral vision. */
+.professor-learning-status {
+  background: rgb(255 247 188 / 0.96);
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 3px 5px 5px 4px;
+  box-shadow: 0 4px 10px rgb(43 30 21 / 0.2);
+  color: #453324;
+  font: 650 10px/1.25 system-ui, sans-serif;
+  left: 62px;
+  max-width: 170px;
+  padding: 5px 7px;
+  pointer-events: none;
+  position: absolute;
+  text-align: left;
+  top: 9px;
+  transform: rotate(-1deg);
+  width: max-content;
+}
+
+.professor-learning-status[hidden],
+.hud-widget.is-hud-collapsed .professor-learning-status {
+  display: none;
+}
+
+.hud-collapse-toggle {
+  background: rgb(255 252 240 / 0.92);
+  border: 1px solid rgb(62 49 35 / 0.22);
+  border-radius: 50%;
+  bottom: -4px;
+  box-shadow: 0 3px 8px rgb(52 41 31 / 0.16);
+  cursor: pointer;
+  height: 18px;
+  padding: 0;
+  position: absolute;
+  right: -4px;
+  width: 18px;
+  z-index: 2;
+}
+
+.hud-collapse-toggle::before {
+  border: 1px solid #6d5644;
+  border-width: 0 0 2px 0;
+  content: "";
+  height: 0;
+  left: 4px;
+  position: absolute;
+  top: 8px;
+  width: 8px;
+}
+
+.hud-collapse-toggle:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
+/* Collapsed: the face goes away but the toggle that brings it back never
+   does — a widget that hides its own way back is a dead end, not a
+   preference. See knowledge-tree.md → "Collapsing the HUD". */
+.hud-widget.is-hud-collapsed .professor-face-button {
+  display: none;
+}
+
+.hud-widget.is-hud-collapsed {
+  height: 18px;
+  width: 18px;
+}
+
+.hud-widget.is-hud-collapsed .hud-collapse-toggle {
+  bottom: 0;
+  right: 0;
+}
+
 /* Offset past the tool rail. The dock used to start at left:0 with its cover
 /* ---------------------------------------------------------------------
    Scrapbook strip
@@ -1066,6 +1439,46 @@ body {
 
 .scrapbook-item.is-undiscovered { opacity: 0.5; }
 .scrapbook-item.is-undiscovered .scrapbook-item-icon { filter: grayscale(0.8); }
+
+.scrapbook-activity-list {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 4px 0;
+}
+
+.scrapbook-activity-entry {
+  align-items: center;
+  background: rgb(255 253 241 / 0.72);
+  border: 1px solid rgb(71 55 38 / 0.16);
+  border-radius: 7px 5px 8px 6px;
+  color: #4f4032;
+  display: grid;
+  font: 600 12px/1.35 system-ui, sans-serif;
+  gap: 9px;
+  grid-template-columns: 10px minmax(170px, 1fr) auto;
+  padding: 8px 10px;
+}
+
+.scrapbook-activity-entry time {
+  color: #897562;
+  font: 700 10px/1 system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.scrapbook-activity-mark {
+  background: #7d9a58;
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+}
+
+.scrapbook-activity-entry[data-activity-kind='harvest'] .scrapbook-activity-mark {
+  background: #c45d4a;
+  border-radius: 2px 50% 50%;
+  transform: rotate(45deg);
+}
 
 /* Saved places, hosted by the Map tab. */
 .places-controls {
@@ -1307,10 +1720,825 @@ body {
 .hud-setting strong { display: block; font: 600 14px/1.3 system-ui, sans-serif; }
 .hud-setting small { color: #7d6753; display: block; font-size: 12px; }
 
+.hud-setting-slider {
+  cursor: default;
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.hud-setting-slider label { cursor: pointer; }
+
+.hud-slider-row {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto 1fr auto 3.5em;
+}
+
+.hud-slider-end {
+  color: #8a7460;
+  font: 500 11px/1 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hud-slider-row output {
+  color: #5c4938;
+  font: 600 13px/1 system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.hud-setting-slider input[type='range'] {
+  accent-color: #6d5644;
+  margin: 0;
+  min-height: 24px;
+  width: 100%;
+}
+
+.hud-setting-slider input[type='range']:focus-visible {
+  outline: 2px solid #6d5644;
+  outline-offset: 4px;
+}
+
 .hud-overlay-note {
   color: #8a7460;
   font: italic 12px/1.5 Georgia, serif;
   margin: 18px 0 0;
+}
+
+/* ---------------------------------------------------------------------
+   Screen-reader-only text
+   ---------------------------------------------------------------------
+   The standard clip-not-display technique: present in the accessibility
+   tree, takes no visual space, survives zoom/reflow. `display: none` would
+   remove it from both. */
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* ---------------------------------------------------------------------
+   The knowledge tree
+   ---------------------------------------------------------------------
+   knowledge-tree.md: "The tree renders full-screen... the whole tree
+   visible from the start." Replaces .hud-overlay-card's solid dialog with
+   its own floating layout while keeping the shared chrome (backdrop,
+   open/close transitions, close button) it still wants.
+
+   2026-08-07, second redesign that day, against an owner mockup: one
+   shared horizontal timeline rather than independent per-branch lanes.
+   Every branch is its own flat CSS grid — column 1 is a sticky label,
+   columns 2..N+1 are `techNodeColumn`'s timeline tracks, fixed-width and
+   identical across every branch, which is what makes column 5 in one
+   branch land under column 5 in another. One shared `overflow-x: auto`
+   wraps every branch row so they all scroll together; keyboard Tab still
+   just works, since a browser scrolls a focused card into view on its own.
+
+   The full requirement sentence for each card is screen-reader-only
+   (`.sr-only` above) rather than visible prose — the owner's call, to keep
+   the design from reading as large and wordy while a real visual language
+   for requirements gets designed separately. `.tech-node-requirement-
+   indicator` is an intentionally empty, unstyled hook already sitting on
+   every card that has a requirement, waiting for that design; it is not a
+   guess at what that indicator should look like.
+
+   2026-08-08, the floating sticky-note pass, per the owner's rough draft:
+   `.tech-tree-viewport` is transparent over the dim backdrop instead of a
+   big solid paper panel; the title is its own sticky note, each branch
+   label is a per-branch paper tab, and every node card is a sticky note
+   (tape, tilt, torn corner). The grants tier renders as icon medallions —
+   real tool art via `getToolArt` when the drawing has landed, a monogram
+   chip when it has not — with the tool name always labelled, per
+   knowledge-tree.md's "Named, not just pictured." The derived "Then
+   reaches" tier and concept previews stay as labelled chips.
+
+   What has to survive any redesign regardless of how it ends up looking:
+   structurally a real nested <ol> — branches, then nodes — never a canvas
+   of positioned boxes; status is never colour alone; a concept node is
+   never dressed up to look more finished than it is; and the full
+   requirement text always exists in the DOM even when nothing on screen
+   shows it. */
+
+/* Transparent, full-screen scroll container — the floating notes sit
+   directly over the dimmed, blurred backdrop instead of a solid panel. */
+.tech-tree-viewport {
+  height: 100%;
+  overflow-y: auto;
+  padding: 26px 22px 34px;
+  position: relative;
+  width: 100%;
+}
+
+/* Deeper dim than the shared overlay, so floating paper notes read clearly
+   without any solid panel behind them. */
+.tech-tree-overlay {
+  background: rgb(38 28 20 / 0.55);
+}
+
+/* The close button floats over the backdrop, so it gets its own paper
+   circle to sit on rather than vanishing into the dark. */
+.tech-tree-viewport .hud-overlay-close {
+  background: rgb(255 250 232 / 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(43 30 21 / 0.28);
+  height: 36px;
+  line-height: 32px;
+  padding: 0;
+  right: 18px;
+  text-align: center;
+  top: 18px;
+  width: 36px;
+}
+
+/* The title as its own sticky note, pinned at the top of the tree. */
+.tech-tree-header {
+  background: linear-gradient(rgb(255 251 216 / 0.97), rgb(255 242 168 / 0.97));
+  border: 1px solid rgb(72 54 36 / 0.22);
+  border-radius: 4px 6px 7px 5px;
+  box-shadow: 0 10px 22px rgb(43 30 21 / 0.3);
+  margin: 0 0 14px;
+  padding: 18px 24px 16px;
+  position: relative;
+  transform: rotate(-1deg);
+  width: min(560px, 92%);
+}
+
+.tech-tree-header::before {
+  background: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.18));
+  box-shadow: 0 1px 3px rgb(43 30 21 / 0.28);
+  content: "";
+  height: 20px;
+  left: 50%;
+  position: absolute;
+  top: -10px;
+  transform: translateX(-50%) rotate(1.5deg);
+  width: 92px;
+}
+
+.tech-tree-header .hud-overlay-kicker { margin: 0 0 5px; }
+
+.tech-tree-header h2 {
+  color: #3a2c1e;
+  font: 700 26px/1.1 Georgia, serif;
+  margin: 0 0 6px;
+}
+
+.tech-tree-intro {
+  color: #5c4938;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 68ch;
+}
+
+/* A compact answer to "what should I look at first?" before the player
+   encounters the full roadmap. This stays a summary, not a second tree. */
+.tech-tree-overview {
+  align-items: center;
+  background: rgb(255 250 232 / 0.94);
+  border: 1px solid rgb(72 54 36 / 0.22);
+  border-radius: 6px;
+  box-shadow: 0 7px 16px rgb(43 30 21 / 0.24);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 0 0 10px;
+  padding: 10px 14px;
+  width: fit-content;
+}
+
+.tech-tree-overview-summary {
+  color: #5c4938;
+  display: flex;
+  flex-wrap: wrap;
+  font: 600 11px/1.35 system-ui, sans-serif;
+  gap: 6px 14px;
+}
+
+.tech-tree-overview-summary strong {
+  color: #2f261e;
+  font-size: 13px;
+}
+
+.tech-tree-ready {
+  align-items: center;
+  border-left: 1px solid rgb(72 54 36 / 0.18);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 16px;
+}
+
+.tech-tree-current-learning {
+  align-items: center;
+  border-left: 1px solid rgb(72 54 36 / 0.18);
+  color: #5c4938;
+  display: flex;
+  flex-wrap: wrap;
+  font: 600 11px/1.3 system-ui, sans-serif;
+  gap: 6px;
+  padding-left: 16px;
+}
+
+.tech-tree-action-message {
+  color: #235350;
+  flex-basis: 100%;
+  font: 650 11px/1.3 system-ui, sans-serif;
+  margin: 0;
+}
+
+.tech-tree-action-message:empty { display: none; }
+
+.tech-tree-ready-label,
+.tech-tree-ready-empty {
+  color: #6d5644;
+  font: 700 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tech-tree-ready-link,
+.tech-tree-scroll-actions button {
+  background: rgb(255 253 244 / 0.92);
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 999px;
+  color: #3c3025;
+  cursor: pointer;
+  font: 650 11px/1 system-ui, sans-serif;
+  min-height: 30px;
+  padding: 6px 11px;
+}
+
+.tech-tree-ready-link:hover,
+.tech-tree-scroll-actions button:hover:not(:disabled) {
+  background: #fffdf4;
+  border-color: rgb(49 95 92 / 0.52);
+}
+
+.tech-tree-ready-link:focus-visible,
+.tech-tree-scroll-actions button:focus-visible,
+.tech-node-select:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
+/* The native horizontal scrollbar sits after all seven branch rows, so it
+   is often below the fold. These controls keep timeline movement visible
+   at the top while leaving trackpad and shift-wheel scrolling intact. */
+.tech-tree-timeline-controls {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgb(42 31 22 / 0.76);
+  border: 1px solid rgb(255 250 232 / 0.16);
+  border-radius: 999px;
+  color: #fffaf0;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 0 0 12px;
+  padding: 6px 7px 6px 14px;
+  position: sticky;
+  top: 8px;
+  width: min(640px, calc(100% - 54px));
+  z-index: 5;
+}
+
+.tech-tree-timeline-hint {
+  font: 700 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.tech-tree-scroll-actions {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.tech-tree-scroll-actions button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.tech-tree-scroll-position {
+  font: 600 11px/1 system-ui, sans-serif;
+  min-width: 122px;
+  text-align: center;
+}
+
+/* The one shared horizontal scroll container. Every branch row lives
+   inside this — never inside its own independent scroller — so scrolling
+   right moves every branch's columns together. */
+.tech-tree-grid {
+  --tech-label-width: 168px;
+  --tech-col-width: 172px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.tech-tree-branches {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: max-content;
+}
+
+/* One branch: a flat grid, fixed-width tracks throughout (see the file
+   comment above for why nothing here is `1fr`). `grid-template-columns`
+   and `grid-template-rows` are set per-branch inline, since the column
+   count is shared tree-wide but the row count depends on how many nodes
+   this branch has stacked into the same column. No background of its own —
+   the branch label tab and the node cards float as sticky notes. */
+.tech-branch-row {
+  column-gap: 12px;
+  display: grid;
+  padding: 0 12px 10px;
+  row-gap: 10px;
+}
+
+/* A real <ol> around the cards (valid HTML needs it — an <li> cannot sit
+   directly inside another <li>), but `display: contents` drops its own box
+   so the cards it holds still land as direct grid items of `.tech-branch-row`
+   above, keeping every card on the one shared column/row grid. */
+.tech-branch-nodes {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tech-branch-row[data-branch="caring-for-the-land"] {
+  --branch-card: rgb(233 156 140 / 0.85);
+}
+
+.tech-branch-row[data-branch="materials"] {
+  --branch-card: rgb(233 186 128 / 0.85);
+}
+
+.tech-branch-row[data-branch="building-construction"] {
+  --branch-card: rgb(230 214 130 / 0.85);
+}
+
+.tech-branch-row[data-branch="interior-design"] {
+  --branch-card: rgb(176 206 148 / 0.85);
+}
+
+.tech-branch-row[data-branch="fine-arts-textiles"] {
+  --branch-card: rgb(140 210 220 / 0.85);
+}
+
+.tech-branch-row[data-branch="cooking"] {
+  --branch-card: rgb(196 178 224 / 0.85);
+}
+
+.tech-branch-row[data-branch="transportation"] {
+  --branch-card: rgb(224 156 196 / 0.85);
+}
+
+.tech-branch-label {
+  align-items: center;
+  align-self: start;
+  background: var(--branch-card, rgb(255 250 214 / 0.92));
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -2px 8px rgb(43 30 21 / 0.16);
+  color: #2c2119;
+  display: flex;
+  font: 700 14px/1.2 Georgia, serif;
+  padding: 7px 12px 8px;
+  position: sticky;
+  left: 0;
+  transform: rotate(-0.5deg);
+  z-index: 2;
+}
+
+/* Sticky-note cards: paper tint per branch, a hint of alternating tilt, a
+   torn corner, and a tape strip stuck across the top edge. */
+.tech-node-card {
+  background: var(--branch-card, rgb(255 250 214 / 0.92));
+  border: 1px solid rgb(72 54 36 / 0.24);
+  border-radius: 3px 3px 9px 3px;
+  box-shadow: 0 8px 18px rgb(52 41 31 / 0.22);
+  height: 100%;
+  padding: 10px 12px;
+  position: relative;
+  transform: rotate(-0.6deg);
+}
+
+.tech-node-card.is-selected {
+  border-color: rgb(49 95 92 / 0.78);
+  box-shadow:
+    0 0 0 3px rgb(255 253 244 / 0.72),
+    0 10px 22px rgb(43 30 21 / 0.32);
+  transform: rotate(0deg);
+}
+
+.tech-node-card::before {
+  background: linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.16));
+  box-shadow: 0 1px 3px rgb(43 30 21 / 0.3);
+  content: "";
+  height: 16px;
+  left: 50%;
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%) rotate(2deg);
+  width: 60px;
+}
+
+.tech-node:nth-child(even) .tech-node-card { transform: rotate(0.7deg); }
+.tech-node:nth-child(3n) .tech-node-card { transform: rotate(-1deg); }
+
+.tech-node-card::after {
+  background: linear-gradient(135deg, transparent 50%, rgb(72 54 36 / 0.18) 51%);
+  border-radius: 0 0 8px 0;
+  bottom: 0;
+  content: "";
+  height: 12px;
+  position: absolute;
+  right: 0;
+  width: 12px;
+}
+
+/* Muted, not hidden — shape and (for assistive tech) the stated requirement
+   carry the "locked" meaning, not the dashed border alone. */
+.tech-node-locked .tech-node-card {
+  background: color-mix(in srgb, var(--branch-card) 58%, #ece7dc);
+  border-style: dashed;
+  box-shadow: 0 5px 12px rgb(52 41 31 / 0.14);
+}
+
+.tech-node-owned .tech-node-card {
+  border-color: rgb(91 136 73 / 0.6);
+  border-width: 2px;
+}
+
+.tech-node-learning .tech-node-card {
+  border-color: rgb(49 95 92 / 0.86);
+  border-style: solid;
+}
+
+/* Not-built (concept) nodes get a flattened, desaturated treatment instead
+   of their branch's card tint — visibly a different *kind* of card, not
+   just a locked one, since nothing about it will ever unlock on its own. */
+.tech-node-not-built .tech-node-card {
+  background: rgb(240 236 224 / 0.88);
+  border-style: dotted;
+  box-shadow: 0 4px 10px rgb(52 41 31 / 0.12);
+}
+
+/* The hook for the owner's own requirement-indicator design. Deliberately
+   empty — see the file-header comment. */
+.tech-node-requirement-indicator {
+  display: inline-block;
+}
+
+.tech-node-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.tech-node-heading h4 {
+  font: 700 14px/1.25 Georgia, serif;
+  margin: 0;
+}
+
+.tech-node-select {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 2px 0;
+  text-align: left;
+}
+
+.tech-node-select-state {
+  color: #725c48;
+  display: block;
+  font: 700 8px/1 system-ui, sans-serif;
+  letter-spacing: 0.09em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.tech-node-card.is-selected .tech-node-select-state {
+  color: #235350;
+}
+
+.tech-node-status-badge {
+  border-radius: 999px;
+  flex-shrink: 0;
+  font: 600 9.5px/1 system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  padding: 4px 7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tech-node-status-badge-owned {
+  background: rgb(91 136 73 / 0.18);
+  color: #3f5c34;
+}
+
+.tech-node-status-badge-available {
+  background: rgb(49 95 92 / 0.16);
+  color: #235350;
+}
+
+.tech-node-status-badge-learning {
+  background: #235350;
+  color: #fffdf4;
+}
+
+.tech-node-status-badge-locked {
+  background: rgb(109 86 68 / 0.14);
+  color: #6d5644;
+}
+
+.tech-node-status-badge-not-built {
+  background: rgb(109 86 68 / 0.1);
+  color: #8a7460;
+}
+
+.tech-node-summary {
+  color: #5c4938;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 6px 0;
+}
+
+.tech-node-path {
+  align-items: center;
+  background: rgb(255 253 244 / 0.58);
+  border-left: 3px solid rgb(109 86 68 / 0.38);
+  color: #5c4938;
+  display: flex;
+  font: 650 10px/1.3 system-ui, sans-serif;
+  margin: 7px 0 9px;
+  min-height: 25px;
+  padding: 4px 7px;
+}
+
+.tech-node-path-owned {
+  border-left-color: rgb(91 136 73 / 0.8);
+}
+
+.tech-node-path-available {
+  border-left-color: rgb(49 95 92 / 0.9);
+  color: #234c49;
+}
+
+.tech-node-path-locked {
+  border-left-color: rgb(127 88 63 / 0.84);
+}
+
+.tech-node-details[hidden] {
+  display: none;
+}
+
+.tech-node-unlock-tier {
+  margin: 0 0 8px;
+}
+
+.tech-node-unlock-label {
+  color: #8a7460;
+  display: block;
+  font: 700 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.tech-node-unlock-tier ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Grant medallions: a framed box with the tool's artwork (or a monogram
+   where the drawing has not landed) and the tool's name as a visible
+   label underneath — knowledge-tree.md's "Named, not just pictured." */
+.tech-unlock-icon {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 44px;
+}
+
+.tech-unlock-icon-art {
+  align-items: center;
+  background: rgb(255 253 244 / 0.9);
+  border: 1px solid rgb(72 54 36 / 0.22);
+  border-radius: 7px;
+  display: flex;
+  height: 38px;
+  justify-content: center;
+  overflow: hidden;
+  width: 38px;
+}
+
+.tech-unlock-icon-art img {
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.tech-unlock-icon-mono {
+  color: #8a7460;
+  font: 700 18px/1 Georgia, serif;
+}
+
+.tech-unlock-icon-name {
+  color: #453324;
+  font-size: 9.5px;
+  line-height: 1.15;
+  text-align: center;
+}
+
+/* The derived "Then reaches" tier and concept previews: labelled chips,
+   since nothing behind them has artwork yet. */
+.tech-unlock-chip {
+  align-items: center;
+  background: rgb(72 54 36 / 0.08);
+  border-radius: 999px;
+  color: #453324;
+  display: flex;
+  font-size: 11px;
+  gap: 5px;
+  padding: 2px 8px 2px 4px;
+}
+
+.tech-unlock-chip-mono {
+  align-items: center;
+  background: rgb(255 253 244 / 0.85);
+  border-radius: 50%;
+  color: #8a7460;
+  display: flex;
+  flex-shrink: 0;
+  font: 700 10px/1 Georgia, serif;
+  height: 16px;
+  justify-content: center;
+  width: 16px;
+}
+
+.tech-unlock-chip-label {
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* A concept's preview is explicitly hypothetical — italic says "not real
+   yet" without relying on the flattened card alone. */
+.tech-node-unlock-tier-preview .tech-unlock-chip-label {
+  font-style: italic;
+}
+
+.tech-node-cost {
+  color: #8a7460;
+  font: italic 11px/1.4 Georgia, serif;
+  margin: 8px 0 4px;
+}
+
+.tech-node-tasks {
+  color: #5c4938;
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.tech-learning-start {
+  background: #2f6763;
+  border: 1px solid #214b48;
+  border-radius: 6px;
+  box-shadow: 0 3px 0 #214b48;
+  color: #fffdf4;
+  cursor: pointer;
+  font: 700 12px/1 system-ui, sans-serif;
+  margin-top: 10px;
+  min-height: 34px;
+  padding: 8px 12px;
+  width: 100%;
+}
+
+.tech-learning-start:hover:not(:disabled) { background: #397772; }
+
+.tech-learning-start:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 3px;
+}
+
+.tech-learning-start:disabled {
+  background: rgb(109 86 68 / 0.16);
+  border-color: rgb(109 86 68 / 0.28);
+  box-shadow: none;
+  color: #6d5644;
+  cursor: default;
+}
+
+.tech-learning-start-note,
+.tech-learning-choice {
+  color: #6d5644;
+  font: italic 10.5px/1.4 Georgia, serif;
+  margin: 8px 0 0;
+}
+
+.tech-learning-panel {
+  background: rgb(255 253 244 / 0.72);
+  border: 1px solid rgb(49 95 92 / 0.34);
+  border-radius: 6px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.tech-learning-eyebrow {
+  color: #235350;
+  font: 750 9px/1 system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  margin: 0 0 5px;
+  text-transform: uppercase;
+}
+
+.tech-learning-copy {
+  align-items: baseline;
+  color: #453324;
+  display: flex;
+  flex-wrap: wrap;
+  font: 600 11px/1.3 system-ui, sans-serif;
+  gap: 4px 8px;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.tech-learning-copy strong { font-size: 12px; }
+
+.tech-learning-meter {
+  background: rgb(72 54 36 / 0.14);
+  border-radius: 999px;
+  height: 7px;
+  margin-top: 7px;
+  overflow: hidden;
+}
+
+.tech-learning-meter span {
+  background: #397772;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  min-width: 3px;
+}
+
+.tech-learning-tasks {
+  display: grid;
+  gap: 5px;
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.tech-learning-tasks li {
+  align-items: baseline;
+  color: #5c4938;
+  display: grid;
+  font: 600 10.5px/1.3 system-ui, sans-serif;
+  gap: 3px 6px;
+  grid-template-columns: auto 1fr;
+}
+
+.tech-learning-tasks li.is-complete { color: #3f5c34; }
+
+.tech-learning-task-state {
+  background: rgb(109 86 68 / 0.12);
+  border-radius: 999px;
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  padding: 3px 5px;
+  text-transform: uppercase;
+}
+
+.tech-learning-tasks li.is-complete .tech-learning-task-state {
+  background: rgb(91 136 73 / 0.18);
+}
+
+.tech-learning-tasks small {
+  grid-column: 2;
 }
 
 @media (max-width: 720px) {
@@ -1319,6 +2547,14 @@ body {
   .scrapbook-dock.is-open .scrapbook-cover {
     bottom: calc(var(--scrapbook-strip-height, 188px) - 92px);
   }
+
+  .tech-tree-viewport { padding: 18px 12px 28px; }
+  .tech-tree-header { padding: 16px 18px 14px; width: calc(100% - 42px); }
+  .tech-tree-ready { border-left: 0; padding-left: 0; }
+  .tech-tree-current-learning { border-left: 0; padding-left: 0; }
+  .tech-tree-timeline-controls { border-radius: 8px; width: calc(100% - 42px); }
+  .tech-tree-timeline-hint { display: none; }
+  .tech-tree-scroll-position { min-width: 104px; }
 }
 
 .thing-maker-panel {
@@ -1347,6 +2583,279 @@ body {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+/* ---------------------------------------------------------------------
+   Pip’s Seed & Garden
+   ---------------------------------------------------------------------
+   The shop reads like a clipped seed catalog rather than a commerce
+   dashboard: plant first, price second, with selling kept in a quieter
+   basket section underneath. */
+
+.seed-store-panel {
+  backdrop-filter: blur(16px);
+  background:
+    linear-gradient(rgb(255 250 229 / 0.94), rgb(248 240 204 / 0.94)),
+    url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 300px auto;
+  border: 1px solid rgb(62 49 35 / 0.2);
+  border-radius: 10px 7px 12px 8px;
+  bottom: 18px;
+  box-shadow: 0 18px 42px rgb(52 41 31 / 0.22);
+  color: #34291f;
+  max-height: min(760px, calc(100vh - 36px));
+  opacity: 0;
+  overflow: auto;
+  padding: 16px;
+  pointer-events: none;
+  position: fixed;
+  right: 18px;
+  transform: translateY(12px) rotate(0.25deg);
+  transition: opacity 160ms ease, transform 160ms ease;
+  width: min(480px, calc(100vw - 36px));
+  z-index: 12;
+}
+
+.seed-store-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) rotate(0);
+}
+
+.seed-store-panel[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.seed-store-header,
+.seed-store-section-heading,
+.seed-shop-card-title,
+.seed-shop-basket-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.seed-store-header {
+  align-items: flex-start;
+}
+
+.seed-store-header h1 {
+  font: 800 22px/1.08 Georgia, serif;
+  margin: 0;
+}
+
+.seed-store-ledger {
+  align-items: baseline;
+  background: rgb(89 116 65 / 0.13);
+  border: 1px solid rgb(79 106 58 / 0.28);
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 13px;
+  padding: 9px 10px;
+}
+
+.seed-store-ledger strong {
+  color: #415834;
+  font-size: 13px;
+}
+
+.seed-store-ledger span,
+.seed-store-section-heading span,
+.seed-shop-card-title span,
+.seed-shop-basket-row small {
+  color: #776653;
+  font-size: 11px;
+}
+
+.seed-store-message {
+  background: #fff4c9;
+  border: 1px dashed rgb(114 80 47 / 0.42);
+  border-radius: 6px 9px 7px 5px;
+  font: 600 12px/1.4 Georgia, serif;
+  margin: 10px 0 14px;
+  min-height: 17px;
+  padding: 8px 10px;
+}
+
+.seed-store-section + .seed-store-section {
+  border-top: 1px dashed rgb(86 68 46 / 0.28);
+  margin-top: 15px;
+  padding-top: 13px;
+}
+
+.seed-store-section-heading {
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.seed-store-section-heading h2 {
+  font: 800 14px/1.2 Georgia, serif;
+  margin: 0;
+}
+
+.seed-store-stock,
+#seed-store-basket {
+  display: grid;
+  gap: 7px;
+}
+
+.seed-shop-card {
+  align-items: start;
+  background: rgb(255 255 255 / 0.56);
+  border: 1px solid rgb(62 49 35 / 0.14);
+  border-radius: 8px 6px 9px 7px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 26px minmax(0, 1fr);
+  padding: 9px;
+}
+
+.seed-shop-swatch {
+  background: linear-gradient(135deg, #f7e8b5 0 58%, var(--seed-color) 59% 100%);
+  border: 1px solid rgb(77 56 35 / 0.25);
+  border-radius: 2px;
+  box-shadow: 1px 2px 3px rgb(54 39 26 / 0.12);
+  display: block;
+  height: 32px;
+  transform: rotate(-2deg);
+  width: 24px;
+}
+
+.seed-shop-card-copy {
+  min-width: 0;
+}
+
+.seed-shop-card-title strong {
+  font-size: 13px;
+}
+
+.seed-shop-card p {
+  color: #655645;
+  font-size: 11.5px;
+  line-height: 1.35;
+  margin: 3px 0 7px;
+}
+
+.seed-shop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.seed-shop-grow-time {
+  color: #47613c;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.seed-shop-quantity {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.seed-shop-quantity > span {
+  color: #766552;
+  font: 750 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  margin-right: 2px;
+  text-transform: uppercase;
+}
+
+.seed-shop-quantity button,
+.seed-shop-quantity input {
+  background: rgb(255 253 242 / 0.9);
+  border: 1px solid rgb(70 54 36 / 0.24);
+  border-radius: 6px;
+  color: #443529;
+  font: 750 11px/1 system-ui, sans-serif;
+  min-height: 28px;
+}
+
+.seed-shop-quantity button {
+  cursor: pointer;
+  min-width: 28px;
+  padding: 5px 7px;
+}
+
+.seed-shop-quantity input {
+  padding: 4px;
+  text-align: center;
+  width: 45px;
+}
+
+.seed-shop-quantity .seed-shop-max {
+  border-radius: 999px;
+  color: #47613c;
+  padding-inline: 9px;
+}
+
+.seed-shop-quantity button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.seed-shop-sell-controls {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.seed-shop-sell-controls .seed-shop-quantity {
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+.seed-shop-actions button,
+.seed-shop-basket-row button {
+  background: #4f6e42;
+  border: 0;
+  border-radius: 999px;
+  color: #fffdf2;
+  cursor: pointer;
+  font: 800 11px/1.2 system-ui, sans-serif;
+  min-height: 30px;
+  padding: 6px 10px;
+}
+
+.seed-shop-actions button + button {
+  background: #8a683d;
+}
+
+.seed-shop-actions button:disabled {
+  background: #b7afa0;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.seed-shop-basket-row {
+  background: rgb(255 255 255 / 0.43);
+  border: 1px solid rgb(62 49 35 / 0.12);
+  border-radius: 7px;
+  padding: 7px 8px;
+}
+
+.seed-shop-basket-row > span {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  min-width: 0;
+}
+
+.seed-shop-basket-row button {
+  background: #76583a;
+  flex: none;
+}
+
+.seed-shop-empty {
+  color: #756653;
+  font-size: 12px;
+  margin: 0;
 }
 
 .maker-panel-header {
@@ -1612,6 +3121,24 @@ body {
   min-width: 0;
 }
 
+.craft-plan-route {
+  background: #f6efcf;
+  border: 1px solid rgb(62 49 35 / 0.28);
+  border-radius: 999px;
+  color: #433729;
+  flex: none;
+  font: 700 10.5px/1.1 Georgia, serif;
+  margin-left: auto;
+  padding: 6px 9px;
+}
+
+.craft-plan-route:hover,
+.craft-plan-route:focus-visible {
+  background: #fff8d9;
+  border-color: #58749e;
+  outline: none;
+}
+
 .craft-plan-copy strong {
   font-size: 11.5px;
 }
@@ -1774,6 +3301,20 @@ body {
     left: 10px;
     right: 10px;
     width: auto;
+  }
+
+  .seed-store-panel {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+
+  .seed-store-ledger,
+  .seed-store-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .maker-grid {

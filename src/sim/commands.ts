@@ -5,6 +5,7 @@ import {
   isRecipeAvailable,
   previousTierTool,
   type IngredientRequirement,
+  type PlanSource,
   type RecipeId,
 } from './catalogs/recipes';
 import type { ToolId } from './catalogs/tools';
@@ -13,7 +14,22 @@ import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import { TOOL_DEFS } from './catalogs/tools';
 import { TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
 import type { DigDiscovery } from './catalogs/geology';
-import { SEED_DEFS, bloomSeconds, plantStageAt, type SeedId } from './catalogs/seeds';
+import {
+  SEED_DEFS,
+  availableSeedSelection,
+  bloomSeconds,
+  plantHarvest,
+  plantProduce,
+  plantStageAt,
+  type SeedId,
+} from './catalogs/seeds';
+import {
+  SEED_STORE,
+  SEED_STORE_BARTER,
+  seedStoreBuyPrice,
+  seedStoreSellPrice,
+  type ShopId,
+} from './catalogs/shops';
 import {
   TRIM_STAGE_RESPONSES,
   describeTrimYield,
@@ -23,21 +39,30 @@ import {
   trimProfileForTier,
   type TreeAddress,
 } from './catalogs/trees';
+import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict } from '../world/buildPieces';
+import { buildAssemblyDef, nextBuildStep } from './catalogs/building';
+import { LOCAL_PLAYER_ID } from './state';
+import { reconcileTechLearningState } from './learning';
 
 export type ResourceAllocation = Partial<Record<ResourceId, number>>;
 
 export type GameCommand =
+  | { type: 'buySeed'; shopId: ShopId; seedId: SeedId; payment: 'chips' | 'barter'; quantity?: number }
   | { type: 'collectResource'; resource: ResourceId; amount: number }
   | { type: 'collectPlantSeed'; target: TerrainCellAddress; now: number }
   | { type: 'collectOutput'; index: number }
   | { type: 'completeCraft'; now: number }
   | { type: 'completeMending'; target: TerrainCellAddress; now: number }
+  | { type: 'completeBuildStep'; templateKey: string; stepId: string; x: number; z: number; rotY: number; pageId: string; now: number }
   | { type: 'digTerrain'; target: TerrainCellAddress; discovery: DigDiscovery; now: number }
   | { type: 'equipTool'; toolId: ToolId | null }
   | { type: 'liftPlant'; target: TerrainCellAddress; now: number }
+  | { type: 'observePlantGrowth'; target: TerrainCellAddress; now: number }
+  | { type: 'placePiece'; templateKey: string; x: number; z: number; rotY: number; pageId: string; now: number }
   | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number }
   | { type: 'refillTerrain'; target: TerrainCellAddress; now: number }
   | { type: 'selectSeed'; seedId: SeedId | null }
+  | { type: 'sellResource'; shopId: ShopId; resource: ResourceId; quantity: number }
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
   | { type: 'tendPlant'; target: TerrainCellAddress; now: number }
   | { type: 'trimTree'; target: TreeAddress; now: number }
@@ -99,15 +124,60 @@ const TEND_COOLDOWN_MS = 12_000;
 const TEND_SEED_BONUS_MS = 20_000;
 
 /** Stable pseudo-random drop timing: saves and future multiplayer clients agree. */
-function nextSeedDropAt(target: TerrainCellAddress, geologySeed: number, dropIndex: number, now: number) {
+function nextSeedDropAt(
+  target: TerrainCellAddress,
+  seedId: SeedId,
+  geologySeed: number,
+  dropIndex: number,
+  now: number,
+) {
   let hash = 2166136261;
   const value = `${target.pageId}:${target.cellKey}:${geologySeed}:${dropIndex}`;
   for (let index = 0; index < value.length; index += 1) {
     hash ^= value.charCodeAt(index);
     hash = Math.imul(hash, 16777619);
   }
-  const seconds = 45 + (hash >>> 0) % 46;
+  const repeatSeconds = plantHarvest(seedId)?.repeatSeconds ?? bloomSeconds(seedId);
+  const spread = Math.max(1, Math.round(repeatSeconds * 0.12));
+  const seconds = repeatSeconds - spread + (hash >>> 0) % (spread * 2 + 1);
   return now + seconds * 1000;
+}
+
+const ACTIVITY_LOG_LIMIT = 80;
+
+function emptyPageState() {
+  return {
+    terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
+  };
+}
+
+function piecePlacementBlocker(
+  state: GameState,
+  candidate: { templateKey: string; x: number; z: number; rotY: number },
+  ignoreBuildSiteId?: string,
+) {
+  for (const page of Object.values(state.world.pages)) {
+    for (const piece of Object.values(page.placedPieces)) {
+      if (buildPiecesConflict(candidate, piece)) return true;
+    }
+    for (const site of Object.values(page.buildSites)) {
+      if (site.id === ignoreBuildSiteId) continue;
+      if (buildPiecesConflict(candidate, site)) return true;
+    }
+  }
+  return false;
+}
+
+function appendActivity(
+  state: GameState,
+  entry: GameState['player']['activityLog'][number],
+): boolean {
+  if (state.player.activityLog.some((existing) => existing.id === entry.id)) return false;
+  state.player.activityLog.unshift(entry);
+  if (state.player.activityLog.length > ACTIVITY_LOG_LIMIT) {
+    state.player.activityLog.length = ACTIVITY_LOG_LIMIT;
+  }
+  return true;
 }
 
 /**
@@ -173,11 +243,75 @@ export function findCrowdingPlant(
 
 function gardenEdit(state: GameState, target: TerrainCellAddress) {
   const edit = state.world.pages[target.pageId]?.terrainEdits[target.cellKey];
-  return edit?.state === 'planted' && edit.plantedSeedId === 'buttonbloom-seeds' ? edit : null;
+  // Any seed that has taken root can be tended and can leave a drop, not just
+  // the Buttonbloom — the drop loop is the same for every garden plant, only
+  // what it leaves on the ground changes.
+  return edit?.state === 'planted' && edit.plantedSeedId ? edit : null;
+}
+
+/** The short plant name, e.g. "Raspberry Bush" from "Raspberry Bush Seeds". */
+function gardenPlantName(seedId: SeedId): string {
+  return SEED_DEFS[seedId].name.replace(/ Seeds$/, '');
 }
 
 export function applyGameCommand(state: GameState, command: GameCommand): CommandResult {
   switch (command.type) {
+    case 'buySeed': {
+      if (command.shopId !== SEED_STORE.id || !SEED_STORE.sells.includes(command.seedId)) {
+        return { ok: false, reason: 'Pip does not have that seed packet on the shelf.' };
+      }
+      const quantity = command.quantity ?? 1;
+      if (!Number.isSafeInteger(quantity) || quantity < 1) {
+        return { ok: false, reason: 'Choose a whole number of seed packets.' };
+      }
+      if (command.payment === 'chips') {
+        const price = seedStoreSellPrice(command.seedId);
+        const total = price * quantity;
+        if (state.player.chips < total) {
+          return { ok: false, reason: `${quantity} packets cost ₡${total}. Pip is happy to barter, too.` };
+        }
+        state.player.chips -= total;
+      } else {
+        const { resource, quantity: fiberPerPacket } = SEED_STORE_BARTER;
+        const total = fiberPerPacket * quantity;
+        if ((state.player.inventory[resource] ?? 0) < total) {
+          return { ok: false, reason: `Pip needs ${total} paper fibers for ${quantity} packets.` };
+        }
+        state.player.inventory[resource] = (state.player.inventory[resource] ?? 0) - total;
+      }
+      state.player.inventory[command.seedId] = (state.player.inventory[command.seedId] ?? 0) + quantity;
+      // A packet bought to plant should be ready in hand. The toolbar and
+      // garden overlay already react to this single shared field.
+      state.player.selectedSeed = command.seedId;
+      return {
+        ok: true,
+        message: `${quantity} ${SEED_DEFS[command.seedId].name} tucked into your seed pouch — ready to plant.`,
+      };
+    }
+
+    case 'sellResource': {
+      if (command.shopId !== SEED_STORE.id || !SEED_STORE.buys.includes(command.resource)) {
+        return { ok: false, reason: 'Pip is not taking that today.' };
+      }
+      if (!Number.isSafeInteger(command.quantity) || command.quantity <= 0) {
+        return { ok: false, reason: 'Choose something from your basket to sell.' };
+      }
+      const quantity = command.quantity;
+      if ((state.player.inventory[command.resource] ?? 0) < quantity) {
+        return { ok: false, reason: `You do not have that many ${RESOURCE_CORE_DEFS[command.resource].shortLabel}.` };
+      }
+      const payment = seedStoreBuyPrice(command.resource) * quantity;
+      state.player.inventory[command.resource] = (state.player.inventory[command.resource] ?? 0) - quantity;
+      state.player.chips += payment;
+      if (command.resource === state.player.selectedSeed && (state.player.inventory[command.resource] ?? 0) <= 0) {
+        state.player.selectedSeed = availableSeedSelection(state.player.selectedSeed, state.player.inventory);
+      }
+      return {
+        ok: true,
+        message: `Pip adds ₡${payment} to your pouch for ${quantity} ${RESOURCE_CORE_DEFS[command.resource].shortLabel}.`,
+      };
+    }
+
     case 'collectResource': {
       if (!Number.isFinite(command.amount) || command.amount <= 0 || !(command.resource in RESOURCE_CORE_DEFS)) {
         return { ok: false, reason: 'Invalid resource collection.' };
@@ -263,9 +397,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       ) {
         return { ok: false, reason: 'That underground find did not match the terrain layer.' };
       }
-      const page = state.world.pages[target.pageId] ??= {
-        terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {},
-      };
+      const page = state.world.pages[target.pageId] ??= emptyPageState();
       const existing = page.terrainEdits[target.cellKey];
       if (existing && existing.toolTier >= tool.tier) {
         return { ok: false, reason: 'This little patch is already as deep as that shovel can manage.' };
@@ -290,6 +422,114 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         grants: { [discovery.resource]: discovery.quantity },
         message: `Found ${discovery.quantity} ${RESOURCE_CORE_DEFS[discovery.resource].shortLabel}. The shallow bed is ready for planting.`,
       };
+    }
+
+    case 'placePiece': {
+      if (!(command.templateKey in BUILD_PIECE_DEFS)) {
+        return { ok: false, reason: 'That piece is not in the scrapbook yet.' };
+      }
+      if (
+        !Number.isFinite(command.x) || !Number.isFinite(command.z)
+        || !Number.isFinite(command.rotY) || !command.pageId
+      ) {
+        return { ok: false, reason: 'That spot could not be measured.' };
+      }
+      const def = buildPieceDef(command.templateKey);
+      // The command re-checks physical overlap, room-wide rather than only on
+      // the page the overlay happened to look at — the same resolver-agrees-
+      // with-command arrangement the garden uses, so a click that looked fine
+      // can never be silently refused.
+      if (piecePlacementBlocker(state, command)) {
+        return { ok: false, reason: 'That is too close to something you have already placed.' };
+      }
+      const page = state.world.pages[command.pageId] ??= emptyPageState();
+      const id = `piece-${command.now.toString(36)}-${Math.floor(Math.random() * 0xffffff).toString(36)}`;
+      page.placedPieces[id] = {
+        id,
+        templateKey: command.templateKey,
+        x: command.x,
+        z: command.z,
+        rotY: command.rotY || 0,
+        ownerId: LOCAL_PLAYER_ID,
+        page: command.pageId,
+      };
+      return { ok: true, message: `Placed the ${def.label}.` };
+    }
+
+    case 'completeBuildStep': {
+      const definition = buildAssemblyDef(command.templateKey);
+      if (!definition || !(command.templateKey in BUILD_PIECE_DEFS)) {
+        return { ok: false, reason: 'That piece is not in the scrapbook yet.' };
+      }
+      if (
+        !command.stepId || !command.pageId
+        || !Number.isFinite(command.x) || !Number.isFinite(command.z) || !Number.isFinite(command.rotY)
+      ) {
+        return { ok: false, reason: 'That build step could not be measured.' };
+      }
+      const equipped = state.player.equippedTool;
+      const tool = equipped ? TOOL_DEFS[equipped] : null;
+      if (!tool || tool.verb !== 'build' || (state.player.tools[equipped!] ?? 0) <= 0) {
+        return { ok: false, reason: 'Hold a hammer to build that.' };
+      }
+      if (tool.tier < definition.minimumToolTier) {
+        return { ok: false, reason: `That plan needs a level ${definition.minimumToolTier} hammer.` };
+      }
+
+      const page = state.world.pages[command.pageId] ??= emptyPageState();
+      const site = Object.values(page.buildSites).find((candidate) => (
+        candidate.templateKey === command.templateKey
+        && Math.hypot(candidate.x - command.x, candidate.z - command.z) < 0.2
+      ));
+      const completedStepIds = site?.completedStepIds ?? [];
+      const step = nextBuildStep(definition, completedStepIds);
+      if (!step || step.id !== command.stepId) {
+        return { ok: false, reason: 'That is not the next step in this build.' };
+      }
+      if (piecePlacementBlocker(state, command, site?.id)) {
+        return { ok: false, reason: 'That is too close to something you have already placed.' };
+      }
+      const allocation = resolveIngredientAllocation(state.player.inventory, step.materials);
+      if (!allocation) return { ok: false, reason: `More materials are needed for ${step.label.toLowerCase()}.` };
+      spendAllocation(state, allocation);
+
+      const activeSite = site ?? {
+        id: `build-${command.now.toString(36)}-${Math.floor(Math.random() * 0xffffff).toString(36)}`,
+        templateKey: command.templateKey,
+        x: command.x,
+        z: command.z,
+        rotY: command.rotY || 0,
+        ownerId: LOCAL_PLAYER_ID,
+        page: command.pageId,
+        completedStepIds: [],
+        startedAt: command.now,
+        changedAt: command.now,
+      };
+      activeSite.completedStepIds.push(step.id);
+      activeSite.changedAt = command.now;
+      page.buildSites[activeSite.id] = activeSite;
+
+      const next = nextBuildStep(definition, activeSite.completedStepIds);
+      if (next) {
+        return {
+          ok: true,
+          allocation,
+          message: `${step.label} complete. ${definition.steps.length - activeSite.completedStepIds.length} step${definition.steps.length - activeSite.completedStepIds.length === 1 ? '' : 's'} left.`,
+        };
+      }
+
+      const def = buildPieceDef(command.templateKey);
+      page.placedPieces[activeSite.id.replace(/^build-/, 'piece-')] = {
+        id: activeSite.id.replace(/^build-/, 'piece-'),
+        templateKey: command.templateKey,
+        x: activeSite.x,
+        z: activeSite.z,
+        rotY: activeSite.rotY,
+        ownerId: activeSite.ownerId,
+        page: activeSite.page,
+      };
+      delete page.buildSites[activeSite.id];
+      return { ok: true, allocation, message: `Built the ${def.label}.` };
     }
 
     case 'selectSeed': {
@@ -317,7 +557,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         };
       }
       state.player.inventory[command.seedId] = (state.player.inventory[command.seedId] ?? 0) - 1;
-      if ((state.player.inventory[command.seedId] ?? 0) <= 0) state.player.selectedSeed = null;
+      state.player.selectedSeed = availableSeedSelection(command.seedId, state.player.inventory);
       edit.state = seed.effect === 'mending' ? 'mending' : 'planted';
       edit.plantedSeedId = command.seedId;
       edit.plantedAt = command.now;
@@ -326,15 +566,16 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       edit.tendCount = 0;
       edit.seedDropReady = false;
       edit.seedDrops = 0;
+      edit.observedStage = 'seeded';
       edit.nextSeedDropAt = seed.effect === 'garden'
-        ? nextSeedDropAt(command.target, edit.geologySeed, 0, command.now)
+        ? command.now + bloomSeconds(command.seedId) * 1000
         : undefined;
       edit.changedAt = command.now;
       return {
         ok: true,
         message: seed.effect === 'mending'
           ? 'The Mend-me seed begins stitching the paper ground together.'
-          : 'A Buttonbloom settles into its new garden bed.',
+          : `A ${gardenPlantName(command.seedId)} settles into its new garden bed.`,
       };
     }
 
@@ -405,11 +646,16 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         const itemId = `plant:${seedId}`;
         state.player.items[itemId] = (state.player.items[itemId] ?? 0) + 1;
       }
-      // A loose seed lying beside the plant is not lost just because the
-      // plant was lifted — the player already earned it.
+      // A loose drop beside the plant is not lost just because the plant was
+      // lifted — the player already earned it. What comes along is whatever
+      // the plant produces: a Buttonbloom returns its seed, a food plant its
+      // fruit.
       if (edit.seedDropReady) {
-        state.player.inventory[seedId] = (state.player.inventory[seedId] ?? 0) + 1;
-        grants[seedId] = (grants[seedId] ?? 0) + 1;
+        const harvest = plantHarvest(seedId);
+        const reward = harvest?.resource ?? seedId;
+        const quantity = harvest?.quantity ?? 1;
+        state.player.inventory[reward] = (state.player.inventory[reward] ?? 0) + quantity;
+        grants[reward] = (grants[reward] ?? 0) + quantity;
       }
 
       // The bed itself stays: lifting a plant leaves ready soil, not a scar.
@@ -422,9 +668,10 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       edit.seedDropReady = false;
       edit.nextSeedDropAt = undefined;
       edit.seedDrops = 0;
+      edit.observedStage = undefined;
       edit.changedAt = command.now;
 
-      const name = SEED_DEFS[seedId].name.replace(/ Seeds$/, '');
+      const name = gardenPlantName(seedId);
       return {
         ok: true,
         grants,
@@ -436,17 +683,17 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
 
     case 'tendPlant': {
       const edit = gardenEdit(state, command.target);
-      if (!edit) return { ok: false, reason: 'Only a growing garden flower can be tended.' };
+      if (!edit) return { ok: false, reason: 'Only a growing garden plant can be tended.' };
       if (edit.lastTendedAt && command.now - edit.lastTendedAt < TEND_COOLDOWN_MS) {
-        return { ok: true, message: 'The Buttonbloom is still perky from your recent attention.' };
+        return { ok: true, message: `The ${gardenPlantName(edit.plantedSeedId!)} is still perky from your recent attention.` };
       }
       edit.lastTendedAt = command.now;
       edit.tendCount = (edit.tendCount ?? 0) + 1;
       const scheduled = edit.nextSeedDropAt
-        ?? nextSeedDropAt(command.target, edit.geologySeed, edit.seedDrops ?? 0, command.now);
+        ?? nextSeedDropAt(command.target, edit.plantedSeedId!, edit.geologySeed, edit.seedDrops ?? 0, command.now);
       edit.nextSeedDropAt = Math.max(command.now + 8_000, scheduled - TEND_SEED_BONUS_MS);
       edit.changedAt = command.now;
-      return { ok: true, message: 'You smooth the leaves and fluff the paper soil. The Buttonbloom perks up.' };
+      return { ok: true, message: `You smooth the leaves and fluff the paper soil. The ${gardenPlantName(edit.plantedSeedId!)} perks up.` };
     }
 
     case 'trimTree': {
@@ -467,9 +714,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         };
       }
 
-      const page = state.world.pages[target.pageId] ??= {
-        terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {},
-      };
+      const page = state.world.pages[target.pageId] ??= emptyPageState();
       const record = page.treeGrowth[target.treeKey];
       const stage = treeStageFor(treeGrowthAt(record, command.now));
       if (stage === 'resting') {
@@ -504,36 +749,99 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       };
     }
 
+    case 'observePlantGrowth': {
+      const edit = gardenEdit(state, command.target);
+      if (!edit?.plantedSeedId) return { ok: false, reason: 'Nothing is growing there.' };
+      const stage = plantStageAt(edit.plantedSeedId, edit.plantedAt ?? edit.changedAt, command.now);
+      if (edit.observedStage === stage) return { ok: false, reason: 'That growth stage is already recorded.' };
+      edit.observedStage = stage;
+      edit.changedAt = command.now;
+      if (stage === 'bloom') {
+        const name = gardenPlantName(edit.plantedSeedId);
+        appendActivity(state, {
+          id: `plant-ready:${command.target.pageId}:${command.target.cellKey}:${edit.plantedAt ?? 0}:${edit.seedDrops ?? 0}`,
+          kind: 'garden',
+          message: `${name} is ready to harvest.`,
+          at: command.now,
+        });
+      }
+      return { ok: true, message: `${gardenPlantName(edit.plantedSeedId)} reached its ${stage} stage.` };
+    }
+
     case 'updatePlantSeedDrop': {
       const edit = gardenEdit(state, command.target);
-      if (!edit) return { ok: false, reason: 'That flower cannot make seeds.' };
-      // Only a plant in full bloom sets seed. Previously a freshly sown bed
+      if (!edit) return { ok: false, reason: 'Nothing growing here can leave a drop.' };
+      // Only a plant in full bloom sets a drop. Previously a freshly sown bed
       // could drop one, which skipped the growth it was meant to reward.
-      if (!edit.plantedSeedId) return { ok: false, reason: 'That flower cannot make seeds.' };
+      if (!edit.plantedSeedId) return { ok: false, reason: 'Nothing growing here can leave a drop.' };
       if (plantStageAt(edit.plantedSeedId, edit.plantedAt ?? edit.changedAt, command.now) !== 'bloom') {
         return { ok: false, reason: 'It is still growing.' };
       }
-      if (edit.seedDropReady) return { ok: true, message: 'A seed is already waiting beside the flower.' };
+      if (edit.seedDropReady) return { ok: true, message: 'A drop is already waiting beside the plant.' };
       if (!edit.nextSeedDropAt) {
-        edit.nextSeedDropAt = nextSeedDropAt(command.target, edit.geologySeed, edit.seedDrops ?? 0, command.now);
-        return { ok: true, message: 'The Buttonbloom begins preparing its next seed.' };
+        edit.nextSeedDropAt = nextSeedDropAt(
+          command.target,
+          edit.plantedSeedId,
+          edit.geologySeed,
+          edit.seedDrops ?? 0,
+          command.now,
+        );
+        return { ok: true, message: `The ${gardenPlantName(edit.plantedSeedId)} begins preparing its next drop.` };
       }
-      if (command.now < edit.nextSeedDropAt) return { ok: false, reason: 'The seed is still forming.' };
+      if (command.now < edit.nextSeedDropAt) return { ok: false, reason: 'The drop is still forming.' };
       edit.seedDropReady = true;
       edit.nextSeedDropAt = undefined;
       edit.changedAt = command.now;
-      return { ok: true, message: 'A Buttonbloom seed has fluttered onto the ground.' };
+      const produced = plantProduce(edit.plantedSeedId);
+      appendActivity(state, {
+        id: `plant-ready:${command.target.pageId}:${command.target.cellKey}:${edit.plantedAt ?? 0}:${edit.seedDrops ?? 0}`,
+        kind: 'garden',
+        message: `${gardenPlantName(edit.plantedSeedId)} is ready to harvest.`,
+        at: command.now,
+      });
+      return {
+        ok: true,
+        message: produced
+          ? produced === edit.plantedSeedId
+            ? `A ${gardenPlantName(edit.plantedSeedId)} seed has fluttered onto the ground.`
+            : `${RESOURCE_CORE_DEFS[produced].label} have ripened beside the ${gardenPlantName(edit.plantedSeedId)}.`
+          : `A ${gardenPlantName(edit.plantedSeedId)} drop is waiting beside the plant.`,
+      };
     }
 
     case 'collectPlantSeed': {
       const edit = gardenEdit(state, command.target);
-      if (!edit?.seedDropReady) return { ok: false, reason: 'There is no loose seed here.' };
+      if (!edit?.seedDropReady) return { ok: false, reason: 'There is nothing loose here to pick up.' };
+      const produced = edit.plantedSeedId ? plantProduce(edit.plantedSeedId) : null;
+      const harvest = edit.plantedSeedId ? plantHarvest(edit.plantedSeedId) : null;
+      if (!produced || !harvest) return { ok: false, reason: 'There is nothing here to pick up.' };
+      const seedId = edit.plantedSeedId!;
       edit.seedDropReady = false;
       edit.seedDrops = (edit.seedDrops ?? 0) + 1;
-      edit.nextSeedDropAt = nextSeedDropAt(command.target, edit.geologySeed, edit.seedDrops, command.now);
       edit.changedAt = command.now;
-      state.player.inventory['buttonbloom-seeds'] = (state.player.inventory['buttonbloom-seeds'] ?? 0) + 1;
-      return { ok: true, grants: { 'buttonbloom-seeds': 1 }, message: 'Collected 1 Buttonbloom seed.' };
+      state.player.inventory[produced] = (state.player.inventory[produced] ?? 0) + harvest.quantity;
+      if (harvest.mode === 'repeat') {
+        edit.nextSeedDropAt = nextSeedDropAt(command.target, seedId, edit.geologySeed, edit.seedDrops, command.now);
+      } else {
+        edit.state = 'dug';
+        edit.plantedSeedId = undefined;
+        edit.plantedAt = undefined;
+        edit.nextSeedDropAt = undefined;
+        edit.lastTendedAt = undefined;
+        edit.tendCount = 0;
+        edit.observedStage = undefined;
+      }
+      appendActivity(state, {
+        id: `harvest:${command.target.pageId}:${command.target.cellKey}:${command.now}`,
+        kind: 'harvest',
+        message: `Harvested ${harvest.quantity} ${RESOURCE_CORE_DEFS[produced].shortLabel}.`,
+        at: command.now,
+      });
+      return {
+        ok: true,
+        grants: { [produced]: harvest.quantity },
+        message: `Harvested ${harvest.quantity} ${RESOURCE_CORE_DEFS[produced].shortLabel}.`,
+      };
     }
 
     case 'completeMending': {
@@ -543,6 +851,12 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'That ground is not mending.' };
       }
       if (command.now < edit.mendsAt) return { ok: false, reason: 'The paper roots are still stitching.' };
+      appendActivity(state, {
+        id: `mended:${command.target.pageId}:${command.target.cellKey}:${edit.mendsAt}`,
+        kind: 'garden',
+        message: 'A patch of paper ground finished mending.',
+        at: command.now,
+      });
       delete page.terrainEdits[command.target.cellKey];
       return { ok: true, message: 'The paper sheet has mended smooth again.' };
     }
@@ -574,6 +888,10 @@ export function dispatchGameCommand(command: GameCommand): CommandResult {
   let result: CommandResult = { ok: false, reason: 'Command did not run.' };
   updateGameState((state) => {
     result = applyGameCommand(state, command);
+    if (result.ok) {
+      const now = 'now' in command ? command.now : Date.now();
+      reconcileTechLearningState(state, now);
+    }
   });
   return result;
 }
@@ -589,7 +907,7 @@ export function dispatchGameCommand(command: GameCommand): CommandResult {
  */
 export type CraftBlocker =
   | { kind: 'unimplemented' }
-  | { kind: 'no-plan' }
+  | { kind: 'no-plan'; source: PlanSource }
   | { kind: 'maker-level'; required: number }
   | { kind: 'previous-tier'; toolId: ToolId }
   | { kind: 'materials' }
@@ -601,7 +919,7 @@ export function craftBlockers(state: GameState, recipeId: RecipeId): CraftBlocke
   const blockers: CraftBlocker[] = [];
 
   if (!isRecipeAvailable(recipeId)) blockers.push({ kind: 'unimplemented' });
-  if (!state.player.plans.includes(recipeId)) blockers.push({ kind: 'no-plan' });
+  if (!state.player.plans.includes(recipeId)) blockers.push({ kind: 'no-plan', source: recipe.planSource });
   if (state.world.thingMaker.level < recipe.minimumMakerLevel) {
     blockers.push({ kind: 'maker-level', required: recipe.minimumMakerLevel });
   }
@@ -628,7 +946,10 @@ export function craftBlockersFor(recipeId: RecipeId): CraftBlocker[] {
 export function describeCraftBlocker(blocker: CraftBlocker): string {
   switch (blocker.kind) {
     case 'unimplemented': return 'That one is not finished yet.';
-    case 'no-plan': return 'You have not found this plan yet.';
+    case 'no-plan':
+      if (blocker.source === 'knowledge-tree') return 'Learn this plan with the Professor.';
+      if (blocker.source === 'starter') return 'This starter plan belongs in your scrapbook.';
+      return 'You have not found this plan yet.';
     case 'maker-level': return `Needs a level ${blocker.required} Thing Maker.`;
     case 'previous-tier': return `Make a ${TOOL_DEFS[blocker.toolId].name} first.`;
     case 'materials': return 'Not enough suitable materials.';

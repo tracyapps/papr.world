@@ -22,14 +22,20 @@ import {
   sanitizeAvatar,
   sanitizeChat,
   sanitizeName,
+  sanitizePlacePiece,
+  sanitizeAccountCredentials,
   isFiniteNumber,
   type ChatIntent,
   type GatherIntent,
   type JoinOptions,
   type MoveIntent,
   type PlacePieceIntent,
+  type PlacedPiece,
   type RejectionReason,
+  type ResourceNode,
+  type RoomSave,
 } from '../../../shared/src/index';
+import { accounts, roomStore } from '../stores';
 import {
   ChatSchema,
   NodeSchema,
@@ -52,7 +58,12 @@ export class PaperRoom extends Room<PaperRoomState> {
     this.setState(new PaperRoomState());
     this.setPatchRate(1000 / SERVER_TICK_HZ);
 
-    this.seedResourceNodes();
+    // The world remembers: restore pieces/nodes if this neighborhood has a
+    // save; otherwise seed it fresh. (Player positions and chat are transient
+    // on purpose — see RoomSave in shared/.)
+    const save = roomStore.load(this.roomName);
+    if (save) this.hydrate(save);
+    else this.seedResourceNodes();
 
     this.onMessage(ClientMessage.Move, (client, msg: MoveIntent) =>
       this.handleMove(client, msg),
@@ -71,14 +82,33 @@ export class PaperRoom extends Room<PaperRoomState> {
     this.setSimulationInterval(() => this.refillNodes(), 1000);
   }
 
-  /** Deny the join outright if the client speaks a different protocol. */
-  override onJoin(client: Client, options: JoinOptions): void {
+  /**
+   * Gate the join: protocol check, then passport verification.
+   *
+   * Returns the durable accountId, which Colyseus hands to onJoin as `auth`.
+   * No credentials = guest (`guest:<sessionId>` — real for the visit, not
+   * durable). Bad credentials = refused outright, NOT downgraded to guest:
+   * silently becoming a guest would let someone build a week of work onto an
+   * identity they think is durable.
+   */
+  override onAuth(client: Client, options: JoinOptions): string {
     if (!options || options.protocol !== PROTOCOL_VERSION) {
       throw new Error('bad-protocol');
     }
+    if (options.account !== undefined) {
+      const creds = sanitizeAccountCredentials(options.account);
+      if (!creds || !accounts.verify(creds.id, creds.secret, sanitizeName(options.name))) {
+        throw new Error('bad-auth');
+      }
+      return creds.id;
+    }
+    return `guest:${client.sessionId}`;
+  }
 
+  override onJoin(client: Client, options: JoinOptions, auth?: string): void {
     const player = new PlayerSchema();
     player.id = client.sessionId;
+    player.accountId = auth ?? `guest:${client.sessionId}`;
     player.name = sanitizeName(options.name);
     const avatar = sanitizeAvatar(options.avatar);
     player.avatar.preset = avatar.preset;
@@ -164,25 +194,31 @@ export class PaperRoom extends Room<PaperRoomState> {
       this.reject(client, ClientMessage.PlacePiece, 'not-allowed');
       return;
     }
-    if (
-      typeof msg.templateKey !== 'string' ||
-      !isFiniteNumber(msg.x) ||
-      !isFiniteNumber(msg.z)
-    ) {
+    let mine = 0;
+    this.state.pieces.forEach((p) => {
+      if (p.makerId === player.accountId) mine += 1;
+    });
+    if (mine >= LIMITS.placedPiecesPerPlayer) {
+      this.reject(client, ClientMessage.PlacePiece, 'not-allowed');
+      return;
+    }
+    const intent = sanitizePlacePiece(msg);
+    if (!intent) {
       this.reject(client, ClientMessage.PlacePiece, 'invalid');
       return;
     }
 
     const piece = new PieceSchema();
     piece.id = randomUUID();
-    piece.templateKey = msg.templateKey.slice(0, 64);
-    piece.x = msg.x;
-    piece.z = msg.z;
-    piece.rotY = isFiniteNumber(msg.rotY) ? msg.rotY : 0;
-    piece.ownerId = player.id;
-    piece.page = typeof msg.page === 'string' ? msg.page : player.page;
+    piece.templateKey = intent.templateKey;
+    piece.x = intent.x;
+    piece.z = intent.z;
+    piece.rotY = intent.rotY;
+    piece.makerId = player.accountId; // durable credit, never the session id
+    piece.page = intent.page || player.page;
 
     this.state.pieces.set(piece.id, piece);
+    this.persist();
   }
 
   private handleGather(client: Client, msg: GatherIntent): void {
@@ -200,6 +236,7 @@ export class PaperRoom extends Room<PaperRoomState> {
       // Spent: hide until it refills 30s later.
       node.respawnAt = Date.now() + 30_000;
     }
+    this.persist();
     // Inventory grant lands here once the scrapbook data model exists.
   }
 
@@ -229,11 +266,80 @@ export class PaperRoom extends Room<PaperRoomState> {
 
   private refillNodes(): void {
     const now = Date.now();
+    let changed = false;
     this.state.nodes.forEach((node) => {
       if (node.respawnAt !== 0 && now >= node.respawnAt) {
         node.remaining = 3;
         node.respawnAt = 0;
+        changed = true;
       }
     });
+    if (changed) this.persist();
+  }
+
+  // ---- Persistence ----------------------------------------------------------
+
+  override onDispose(): void {
+    roomStore.saveNow(this.roomName, () => this.snapshot());
+    accounts.flush();
+  }
+
+  /** Debounced write of the durable half of room state. */
+  private persist(): void {
+    roomStore.scheduleSave(this.roomName, () => this.snapshot());
+  }
+
+  private snapshot(): Omit<RoomSave, 'version' | 'savedAt'> {
+    const pieces: PlacedPiece[] = [];
+    this.state.pieces.forEach((p) => {
+      pieces.push({
+        id: p.id,
+        templateKey: p.templateKey,
+        x: p.x,
+        z: p.z,
+        rotY: p.rotY,
+        makerId: p.makerId,
+        page: p.page,
+      });
+    });
+    const nodes: ResourceNode[] = [];
+    this.state.nodes.forEach((n) => {
+      nodes.push({
+        id: n.id,
+        kind: n.kind,
+        x: n.x,
+        z: n.z,
+        page: n.page,
+        remaining: n.remaining,
+        // Schema uses 0 for "available now"; the plain type uses null.
+        respawnAt: n.respawnAt === 0 ? null : n.respawnAt,
+      });
+    });
+    return { pieces, nodes };
+  }
+
+  private hydrate(save: RoomSave): void {
+    for (const p of save.pieces) {
+      const piece = new PieceSchema();
+      piece.id = p.id;
+      piece.templateKey = p.templateKey;
+      piece.x = p.x;
+      piece.z = p.z;
+      piece.rotY = p.rotY;
+      piece.makerId = p.makerId;
+      piece.page = p.page;
+      this.state.pieces.set(piece.id, piece);
+    }
+    for (const n of save.nodes) {
+      const node = new NodeSchema();
+      node.id = n.id;
+      node.kind = n.kind;
+      node.x = n.x;
+      node.z = n.z;
+      node.page = n.page;
+      node.remaining = n.remaining;
+      node.respawnAt = n.respawnAt ?? 0;
+      this.state.nodes.set(node.id, node);
+    }
   }
 }

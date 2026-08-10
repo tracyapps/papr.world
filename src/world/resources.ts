@@ -85,6 +85,48 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'l
     material: 'paper.green', visual: 'fiberTuft', mapColor: '#759457',
     biomes: ['clearing', 'forest', 'meadow', 'dunes', 'scrapflats'],
   },
+  'raspberry-bush-seeds': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#c75a6a',
+    biomes: ['clearing', 'meadow'],
+  },
+  'crinkle-carrot-seeds': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d98a52',
+    biomes: ['clearing', 'meadow'],
+  },
+  'ribbon-corn-seeds': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d3b454',
+    biomes: ['meadow', 'scrapflats'],
+  },
+  'folded-cabbage-seeds': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#8aa86f',
+    biomes: ['clearing', 'forest'],
+  },
+  'paper-tomato-seeds': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d2654f',
+    biomes: ['meadow', 'dunes'],
+  },
+  // The harvests themselves never lie loose on the ground — they come off a
+  // plant you grew. These entries exist so the scrapbook has a swatch.
+  'raspberries': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#c73e52',
+    biomes: [],
+  },
+  'crinkle-carrots': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#e07b3a',
+    biomes: [],
+  },
+  'ribbon-corn': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#e3bd45',
+    biomes: [],
+  },
+  'folded-cabbage': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#7fa06a',
+    biomes: [],
+  },
+  'paper-tomato': {
+    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d14a35',
+    biomes: [],
+  },
 };
 
 export const RESOURCE_DEFS = Object.fromEntries(

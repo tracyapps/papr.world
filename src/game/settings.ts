@@ -1,9 +1,14 @@
 // Player settings: typed, persisted, observable.
 // This store is the permanent foundation; the temp DOM panel showing it
 // is not. Planned residents (see technical-plan.md → Controls/Settings):
-// keyboard remapping, gamepad remapping, camera sensitivity, invert
-// camera X/Y for stick look, movement mode (camera- vs character-
-// relative), and hold/toggle options for tools.
+// keyboard remapping, gamepad remapping, invert camera X/Y for stick
+// look, movement mode (camera- vs character-relative), and hold/toggle
+// options for tools.
+//
+// `collapsedHudWidgets`, below. hudLayout.ts owns the
+// collapse *capability* (what it means for a widget to be collapsed, and
+// the collapse-all gesture); this store only remembers which ids are
+// collapsed, the same division of labour as every other setting here.
 
 export type CameraDragMode = 'grab-world' | 'move-camera';
 
@@ -16,10 +21,34 @@ export type Settings = {
    *   (classic orbit-controls feel).
    */
   cameraDragMode: CameraDragMode;
+  /**
+   * Multiplier on every look gesture — pointer drag and gamepad stick alike.
+   * 1 is the tuned baseline; the range exists because "how much world should
+   * move per inch of hand" is a body question, not a taste question. Motion
+   * sensitivity, trackpad versus mouse, and tremor all want different numbers.
+   */
+  cameraSensitivity: number;
+  /**
+   * Ids of HUD widgets the player has collapsed away. Empty by default —
+   * every widget starts expanded. See knowledge-tree.md → "Collapsing the
+   * HUD": every persistent widget should offer this, for players who want
+   * the world without the furniture, and a collapsed widget must never
+   * silently re-expand on its own.
+   */
+  collapsedHudWidgets: string[];
+  /** Hide the Professor's coarse time label without hiding reading/idle state. */
+  showLearningTimer: boolean;
 };
+
+/** Slider bounds. Wide enough to matter at both ends, never zero. */
+export const CAMERA_SENSITIVITY_MIN = 0.3;
+export const CAMERA_SENSITIVITY_MAX = 2;
 
 const DEFAULTS: Settings = {
   cameraDragMode: 'grab-world',
+  cameraSensitivity: 1,
+  collapsedHudWidgets: [],
+  showLearningTimer: true,
 };
 
 const STORAGE_KEY = 'pencil-and-paper.settings.v1';
@@ -36,6 +65,20 @@ function load(): Settings {
       const parsed = JSON.parse(stored) as Partial<Settings>;
       if (parsed.cameraDragMode === 'grab-world' || parsed.cameraDragMode === 'move-camera') {
         settings.cameraDragMode = parsed.cameraDragMode;
+      }
+      if (typeof parsed.cameraSensitivity === 'number' && Number.isFinite(parsed.cameraSensitivity)) {
+        settings.cameraSensitivity = Math.min(
+          CAMERA_SENSITIVITY_MAX,
+          Math.max(CAMERA_SENSITIVITY_MIN, parsed.cameraSensitivity),
+        );
+      }
+      if (Array.isArray(parsed.collapsedHudWidgets)) {
+        settings.collapsedHudWidgets = parsed.collapsedHudWidgets.filter(
+          (id): id is string => typeof id === 'string',
+        );
+      }
+      if (typeof parsed.showLearningTimer === 'boolean') {
+        settings.showLearningTimer = parsed.showLearningTimer;
       }
     }
   } catch {

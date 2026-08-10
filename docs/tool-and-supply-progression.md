@@ -125,21 +125,54 @@ exist.
 | Tier | Working name | Access | Player-facing difference |
 | --- | --- | --- | --- |
 | 0 | Hands | fallen twigs and leaves | Collect what the tree has already shed. |
-| 1 | Snippy Scissors | shoots and small branches | Trims renewable stick and fiber growth. |
-| 2 | Cardstock Shears | bark curls and structural branches | Collects regional wood and better branch bundles. |
-| 3 | Pattern Shears | rare canopy and heartwood offerings | Makes precise cuts that preserve special patterns. |
+| 1 | Kid's Scissors | shoots and small branches | Trims renewable stick and fiber growth. |
+| 2 | Sturdy Scissors | bark curls and structural branches | Collects regional wood and better branch bundles. |
+| 3 | Professional Shears | rare canopy and heartwood offerings | Makes precise cuts that preserve special patterns. |
 
 Scissors replace the conventional saw fantasy. Trees are never killed for
 lumber. Raw branches go to the woodchuck's giant school paper cutter, where they
 become planks, strips, shingles, dowels, and decorative edging.
 
-### Future Verbs
+### The Verb Set
 
-- `scoop` or `plant`: trowels and garden tools
-- `peel`: lifting tape, bark, wallpaper, and hidden flaps
-- `stamp`: applying discovered patterns to builds
-- `bind`: tape, glue, and fiber assembly
-- `polish`: revealing stone patterns and reflective papers
+Declared in `ToolVerb` (`sim/catalogs/tools.ts`) so the catalog can grow without
+widening the type under pressure. Only `dig`, `plant`, and `trim` are
+implemented.
+
+| Verb | Tool | What it does to the world | Status |
+| --- | --- | --- | --- |
+| `dig` | shovels | Opens soil, reveals geology layers | Built |
+| `plant` | garden hoe | Sows, tends, lifts, refills, levels ground | Built |
+| `trim` | scissors | Cuts renewable growth from trees | Built |
+| `harvest` | *tbd* | Gathers food once fully grown | Declared |
+| `mine` | pickaxes, multi-tier | Takes rock from cave walls and formations | Declared |
+| `build` | *tbd* | Turns materials into structures and vehicles | Declared |
+| `affix` | tape, glue, fiber | Assembles clothing, decoration, curtains, flags | Declared |
+| `disassemble` | *tbd* | Returns a built or mended item to its materials | Declared |
+
+**Why `harvest` is separate from `plant`.** Gathering food currently falls under
+`plant`, and should not stay there. Sowing edits a bed; gathering empties one.
+They are different interactions with different tools, and gardening is expected
+to grow enough that the split will be needed. Splitting it later means
+retagging every garden action; splitting the *type* now costs nothing.
+
+**Why `build` and `disassemble` are a pair.** Anything assembled can be taken
+back apart for its materials. Building without disassembly makes every
+placement permanent and every mistake a loss — which is the opposite of a game
+where you can always fill a hole back in.
+
+`build` covers structures — walls, roofs, stairs, decks — and transportation:
+boats, skateboards, scooters. (Jet packs remain aspirational.)
+
+#### Possible, undecided
+
+- `mix` / `cook` — food, smoothies, charcuterie boards, snacks for having
+  friends over. Wants a party to be worth catering, so it wants multiplayer.
+- `paint` — walls, murals, canvases for the future player art shows. Open
+  question: whether this splits into *decorate* (applying a finish) and *art
+  creation* (making an original). Those are different enough that one verb may
+  be doing two jobs. See the mural rules in `mining-and-caves.md`, which already
+  need a "this surface is canvas, not material" distinction.
 
 Do not create a new tool family merely to add another inventory slot. Each verb
 needs a distinct world interaction.
@@ -291,7 +324,7 @@ The shovel takes ground apart; the hoe puts it back together.
 | Tool | Verb | Owns |
 | --- | --- | --- |
 | Flimsy Shovel | `dig` | Opening new soil, revealing geology layers |
-| Creased Hoe | `plant` | Sowing, lifting plants, refilling holes |
+| Basic Garden Hoe | `plant` | Sowing, lifting plants, refilling holes, leveling earth (for flat building surface) |
 
 The hoe's action at a cell is resolved by a single pure query
 (`game/gardenActions.ts`) that the preview overlay, the cursor, and the click
@@ -482,8 +515,10 @@ quantities merely to manufacture a longer grind.
 
 ## Thing Maker Progression
 
-The Thing Maker is the main complexity gate. Tool plans may be found earlier,
-but the machine needs suitable modules before it can fold them accurately.
+The Thing Maker is the main complexity gate. A tool plan may be **learned**
+earlier (`knowledge-tree.md` — tool plans come from the knowledge tree and
+nowhere else), but the machine needs suitable modules before it can fold them
+accurately.
 
 ### Level 1 — Hand Crank
 
@@ -515,9 +550,10 @@ paper labels to the existing machine.
 ## Animal-Run Shops
 
 Shops should be characters first and vending menus second. Friendship, favors,
-local discoveries, and conversation can change their stock or services. Early
-shops can use barter and work orders; the game does not need a full currency
-economy yet.
+local discoveries, and conversation can change their stock or services. Every
+shop supports the quiet shiny-chip currency and can also use barter or work
+orders; Pip’s shop establishes that shared transaction seam without turning it
+into a score.
 
 ### Woodchuck Lumber Yard
 
@@ -528,8 +564,9 @@ Working names: **Wouldchuck Yard**, **The Grain & Guillotine**, or **Chuck's Cut
 - Landmark: an enormous school paper cutter with a ruled cutting bed.
 - Service: turns renewable branch bundles into planks, shingles, strips, dowels,
   and patterned trim.
-- Sells/trades: scissor plans, structural building plans, offcuts, and bark
-  samples.
+- Sells/trades: structural building plans, offcuts, and bark samples. **Not
+  scissor plans** — tool plans are learned in the knowledge tree and are not
+  sold anywhere (amended 2026-08-06).
 - Requests: bring wood from different tree families, repair the cutter's guide,
   or identify a mysterious patterned branch.
 
@@ -547,32 +584,61 @@ Working names: **Crow & Found**, **The Re-Nest**, or **Odds & Caws**.
 - Requests: recover labeled junk, sort a collection, or trace an item's former
   owner through conversations.
 
-### Rabbit Garden Shop
+### Chipmunk Garden Shop — first slice built 2026-08-08
 
-Working names: **Bun & Bloom**, **The Root Fold**, or **Hareloom Garden**.
+Current name: **Pip’s Seed & Garden**.
 
-- Proprietor: a rabbit with strong opinions about paper soil.
-- Landmark: folded seed packets, tissue-paper flowers, ribbon irrigation, and
-  raised cardboard beds.
+- Proprietor: Pip, a striped chipmunk who keeps the good packets sorted behind
+  a cork-paper counter.
+- Landmark: an open-rafter walk-through greenhouse on the east meadow, with a
+  notebook-paper center aisle and two rows of oversized raised planters.
 - Service: seeds, plant starts, dyes, fibers, soil blending, and garden plans.
 - Sells/trades: region-adapted seeds, decorative flowers, food-shaped crafts,
   compost card, and gentle tree-growth helpers.
 - Requests: test soil from a new biome, bring unusual fiber, help pollinating
   critters, or design a garden display.
 
+The first playable service sells one of any seed for ₡2 or two paper fibers,
+buys every gathered/grown core resource, and puts a purchased seed directly in
+the player’s hand. Every stocked seed also derives one full-grown display bed
+from the catalog, so adding a plant expands the greenhouse instead of leaving
+its prop list behind. Starts, dyes, soil blending, requests, and
+friendship-driven stock remain later layers on this same storefront.
+
 ### Later Possibilities
 
-- Mole surveyor/excavation desk for deep-dig plans and geological maps.
-- Beaver bridgeworks for large shared construction projects.
-- Spider thread shop for binding, weaving, and hanging decorations.
+- Mole surveyor/excavation desk for deep-dig plans and geological maps. Lives
+  underground; see `mining-and-caves.md`.
+- Beaver bridgeworks for large shared construction projects — and the natural
+  seller of boats (`water-and-waterways.md`).
+- Sheep yarn shop for binding, weaving, clothing, curtains, and hanging
+  decorations. Owns the `affix` verb.
 - Magpie gallery for player-made art and rotating community exhibits.
+- The owl-itect's studio, which sells plans for furniture, clothing, structures,
+  and decoration (`plans-and-blueprints.md`). Never tool plans.
+
+### Every shop buys as well as sells
+
+Settled 2026-08-04, in `economy.md`. Restated here because it constrains the
+shop data shape rather than the economy alone:
+
+- Anything findable, harvestable, or growable can be sold to a shop.
+- Every shop needs an explicit **`sells`** list and an explicit **`buys`** list
+  from the first implementation, even while both are "everything". Whether
+  specialty shops differ from general shops is undecided, and those two fields
+  are the difference between tuning it later and restructuring later.
+- Markup over buy price is minimal, and prices are comparable shop to shop.
+  Nobody should price-shop.
 
 ## Required Data Shape
 
 These are design-facing fields; names can change during implementation.
 
 ```ts
-type ToolVerb = 'dig' | 'trim' | 'plant' | 'peel' | 'stamp' | 'bind' | 'polish';
+// Matches sim/catalogs/tools.ts as of 2026-08-04.
+type ToolVerb =
+  | 'affix' | 'build' | 'dig' | 'disassemble'
+  | 'harvest' | 'mine' | 'plant' | 'trim';
 
 type ToolDefinition = {
   id: string;

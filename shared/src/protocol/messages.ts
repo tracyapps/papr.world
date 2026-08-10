@@ -11,11 +11,22 @@
 
 import type { AvatarRef } from './state';
 
+/** Credentials for a durable "paper passport" account (see server /account). */
+export type AccountCredentials = {
+  id: string;
+  secret: string;
+};
+
 /** Sent as Colyseus room join options, validated on the server. */
 export type JoinOptions = {
   protocol: number;
   name: string;
   avatar: AvatarRef;
+  /**
+   * Omitted = join as a guest (`guest:<sessionId>` identity, not durable).
+   * Present = the server verifies and stamps the durable accountId.
+   */
+  account?: AccountCredentials;
 };
 
 // ---- Client -> Server -------------------------------------------------------
@@ -78,6 +89,7 @@ export type ChatBroadcast = {
 
 export type RejectionReason =
   | 'bad-protocol'
+  | 'bad-auth'
   | 'rate-limited'
   | 'too-far'
   | 'not-allowed'

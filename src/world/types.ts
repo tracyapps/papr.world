@@ -128,7 +128,7 @@ export type PropData = { id?: string } & (
   | {
       /** Hand-built one-off set pieces that live on authored pages. */
       kind: 'unique';
-      unique: 'clearingHouse' | 'thingMaker' | 'critters' | 'displayWall' | 'cozyDetails' | 'clearingSignpost' | 'forestTrailSign' | 'woodMill';
+      unique: 'clearingHouse' | 'thingMaker' | 'seedStore' | 'critters' | 'displayWall' | 'cozyDetails' | 'clearingSignpost' | 'forestTrailSign' | 'woodMill';
     }
 );
 

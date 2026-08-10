@@ -9,10 +9,11 @@ import { playCozySound } from './cozyAudio';
 import { showPetToast } from './petting';
 import { pickTerrainAtScreen } from './toolActions';
 import { getActionMode } from './actionMode';
-import { resolveGardenAction, selectedSeed, type GardenAction } from './gardenActions';
+import { GARDEN_REACH, resolveGardenAction, selectedSeed, type GardenAction } from './gardenActions';
 import { showGardenRefusal } from '../ui/gardenHint';
+import { startTimedAction } from './timedAction';
 
-export const PLANT_REACH = 3.1;
+export const PLANT_REACH = GARDEN_REACH;
 let nextMendingRefresh = 0;
 
 function pageIdAt(x: number, z: number) {
@@ -63,38 +64,53 @@ export function tryPlantAt(clientX: number, clientY: number) {
     case 'plant': {
       const seedId = selectedSeed();
       if (!seedId) return false;
-      const result = dispatchGameCommand({ type: 'plantTerrain', target, seedId, now: Date.now() });
-      if (!result.ok) {
-        showPetToast(result.reason);
-        return true;
-      }
-      refreshBuiltTerrainNear(target.x, target.z);
-      playCozySound(SEED_DEFS[seedId].effect === 'mending' ? 'rustle' : 'chime');
-      showPetToast(result.message);
+      startTimedAction({
+        steps: [{ kind: 'plant', durationMs: 1_500 }],
+        onComplete: () => {
+          const result = dispatchGameCommand({ type: 'plantTerrain', target, seedId, now: Date.now() });
+          if (!result.ok) {
+            showPetToast(result.reason);
+            return;
+          }
+          refreshBuiltTerrainNear(target.x, target.z);
+          playCozySound(SEED_DEFS[seedId].effect === 'mending' ? 'rustle' : 'chime');
+          showPetToast(result.message);
+        },
+      });
       return true;
     }
 
     case 'lift': {
-      const result = dispatchGameCommand({ type: 'liftPlant', target, now: Date.now() });
-      if (!result.ok) {
-        showPetToast(result.reason);
-        return true;
-      }
-      refreshBuiltTerrainNear(target.x, target.z);
-      playCozySound('rustle');
-      showPetToast(result.message);
+      startTimedAction({
+        steps: [{ kind: 'plant', label: 'Lifting', durationMs: 1_200 }],
+        onComplete: () => {
+          const result = dispatchGameCommand({ type: 'liftPlant', target, now: Date.now() });
+          if (!result.ok) {
+            showPetToast(result.reason);
+            return;
+          }
+          refreshBuiltTerrainNear(target.x, target.z);
+          playCozySound('rustle');
+          showPetToast(result.message);
+        },
+      });
       return true;
     }
 
     case 'refill': {
-      const result = dispatchGameCommand({ type: 'refillTerrain', target, now: Date.now() });
-      if (!result.ok) {
-        showPetToast(result.reason);
-        return true;
-      }
-      refreshBuiltTerrainNear(target.x, target.z);
-      playCozySound('plop');
-      showPetToast(result.message);
+      startTimedAction({
+        steps: [{ kind: 'plant', label: 'Refilling', durationMs: 1_300 }],
+        onComplete: () => {
+          const result = dispatchGameCommand({ type: 'refillTerrain', target, now: Date.now() });
+          if (!result.ok) {
+            showPetToast(result.reason);
+            return;
+          }
+          refreshBuiltTerrainNear(target.x, target.z);
+          playCozySound('plop');
+          showPetToast(result.message);
+        },
+      });
       return true;
     }
 
@@ -129,8 +145,7 @@ export function updatePlanting() {
 
       if (edit.state === 'mending' && edit.mendsAt) {
         if (now >= edit.mendsAt) {
-          const result = dispatchGameCommand({ type: 'completeMending', target, now });
-          if (result.ok) showPetToast(result.message);
+          dispatchGameCommand({ type: 'completeMending', target, now });
           builtStages.delete(id);
         }
         refreshBuiltTerrainNear(edit.x, edit.z);
@@ -147,14 +162,10 @@ export function updatePlanting() {
       const previous = builtStages.get(id);
       builtStages.set(id, stage);
       refreshBuiltTerrainNear(edit.x, edit.z);
-      // Announce real growth, but not the initial build — a plant that was
-      // already grown when its page streamed in has not just grown.
-      if (previous && previous !== stage) {
-        playCozySound('chime');
-        showPetToast(stage === 'bloom'
-          ? `The ${SEED_DEFS[edit.plantedSeedId].name.replace(/ Seeds$/, '')} has opened.`
-          : 'Something in the garden has grown a little.');
-      }
+      // Passive growth belongs in the scrapbook's Activity page. The command
+      // records each stage once in persistent state; no chime or toast pulls
+      // the player away from what they are doing.
+      if (previous !== stage) dispatchGameCommand({ type: 'observePlantGrowth', target, now });
     }
   }
 }

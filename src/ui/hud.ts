@@ -2,10 +2,16 @@ import * as THREE from 'three';
 import { clamp } from '../core/math';
 import { resizeMiniMapCanvas } from './minimap';
 
-// Draggable/resizable HUD widgets (minimap, compass) with localStorage
-// persistence, plus the compass rose readout.
+// Draggable/resizable HUD widgets (minimap, compass, the Professor) with
+// localStorage persistence, plus the compass rose readout.
+//
+// Repositioning here was pointer-drag-only until the Professor needed a
+// keyboard path too (knowledge-tree.md: "Repositioning needs a keyboard
+// path, not drag-only"). The nudge below is generic across every widget in
+// `hudWidgetConfigs`, so minimap and compass get it for free rather than the
+// Professor quietly being the one accessible widget among three.
 
-type HudWidgetId = 'compass' | 'miniMap';
+type HudWidgetId = 'compass' | 'miniMap' | 'professor';
 
 type HudWidgetState = {
   scale: number;
@@ -38,6 +44,14 @@ const miniMapWidget = document.querySelector<HTMLElement>('#mini-map-widget');
 const compassWidget = document.querySelector<HTMLElement>('#compass-widget');
 const compassRoseElement = document.querySelector<HTMLElement>('#compass-rose');
 const compassHeadingElement = document.querySelector<HTMLElement>('#compass-heading');
+const professorWidget = document.querySelector<HTMLElement>('#professor-widget');
+
+/** Screen-edge margin used by every widget's default position. */
+const HUD_WIDGET_MARGIN = 16;
+/** Pointer-drag / keyboard-nudge step, in CSS pixels. */
+const HUD_NUDGE_STEP = 24;
+/** Finer step for Alt+Shift+Arrow, for pixel-level adjustment. */
+const HUD_NUDGE_STEP_FINE = 4;
 
 const hudWidgetStoragePrefix = 'paper-clearing.hud-widget.v1';
 const hudWidgetStates = new Map<HudWidgetId, HudWidgetState>();
@@ -72,6 +86,21 @@ const hudWidgetConfigs: HudWidgetConfig[] = [
     defaultPosition: () => ({
       x: window.innerWidth - ((compassWidget?.offsetWidth ?? 76) + 16),
       y: 16 + (miniMapWidget?.offsetHeight ?? 156) + 12,
+    }),
+  },
+  {
+    id: 'professor',
+    element: professorWidget,
+    // A small icon button, not a content panel — nothing to resize.
+    minScale: 1,
+    maxScale: 1,
+    defaultScale: 1,
+    // "Top centre by default" per knowledge-tree.md. Centred rather than
+    // edge-anchored, and clear of the region banner band the top-centre
+    // strip already reserves (see hudLayout.ts's zone diagram).
+    defaultPosition: () => ({
+      x: (window.innerWidth - (professorWidget?.offsetWidth ?? 56)) / 2,
+      y: HUD_WIDGET_MARGIN,
     }),
   },
 ];
@@ -227,6 +256,14 @@ export function initializeHudWidgets() {
       const target = event.target;
       if (!(target instanceof Element)) return;
 
+      // An ordinary button inside the widget (the Professor's open/collapse
+      // controls; minimap and compass have none) wants its own click, not a
+      // drag start. Only the resize handle is a button that should still
+      // begin an interaction — everything else falls through to native
+      // button behaviour, and dragging stays reachable via the grip.
+      const interactiveButton = target.closest('button:not([data-hud-resize])');
+      if (interactiveButton) return;
+
       event.stopPropagation();
       event.preventDefault();
 
@@ -250,11 +287,57 @@ export function initializeHudWidgets() {
     element.addEventListener('wheel', (event) => {
       event.stopPropagation();
     });
+
+    // Keyboard reposition: Alt+Arrow nudges, Alt+Shift+Arrow nudges finer.
+    // Plain arrow keys are left alone, since inside an open widget (the
+    // Professor's tree view, a future minimap detail) they belong to that
+    // content, not to moving the widget's own frame around the screen.
+    element.addEventListener('keydown', (event) => {
+      if (!event.altKey) return;
+      const delta: Record<string, [number, number]> = {
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+      };
+      const direction = delta[event.key];
+      if (!direction) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const step = event.shiftKey ? HUD_NUDGE_STEP_FINE : HUD_NUDGE_STEP;
+      const current = hudWidgetStates.get(config.id) ?? getDefaultHudWidgetState(config);
+      applyHudWidgetState(config, {
+        scale: current.scale,
+        x: current.x + direction[0] * step,
+        y: current.y + direction[1] * step,
+      });
+      saveHudWidgetState(config.id);
+    });
   }
 
   window.addEventListener('pointermove', handleHudWidgetPointerMove);
   window.addEventListener('pointerup', finishHudWidgetInteraction);
   window.addEventListener('pointercancel', finishHudWidgetInteraction);
+
+  /**
+   * Last resort: the browser dropped the capture without a pointerup we
+   * matched.
+   *
+   * `isHudWidgetInteractionActive` gates pointer input for the whole game, so a
+   * stranded `hudWidgetInteraction` does not just leave a widget stuck — it
+   * silently swallows camera drags and clicks everywhere, with nothing on
+   * screen to explain why. Cheap insurance against an expensive-to-diagnose
+   * state.
+   */
+  window.addEventListener('lostpointercapture', (event) => {
+    if (!hudWidgetInteraction) return;
+    if (event.pointerId !== hudWidgetInteraction.pointerId) return;
+    const config = getHudWidgetConfig(hudWidgetInteraction.id);
+    config?.element?.classList.remove('is-dragging', 'is-resizing');
+    saveHudWidgetState(hudWidgetInteraction.id);
+    hudWidgetInteraction = null;
+  });
 }
 
 function normalizeDegrees(degrees: number) {

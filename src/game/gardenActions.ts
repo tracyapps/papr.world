@@ -20,6 +20,9 @@ import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
 
 export type GardenActionKind = 'plant' | 'lift' | 'refill' | 'none';
 
+/** Shared reach for input and the always-visible hoe overlay. */
+export const GARDEN_REACH = 3.1;
+
 export type GardenBlocker =
   | { kind: 'no-tool' }
   | { kind: 'out-of-reach' }

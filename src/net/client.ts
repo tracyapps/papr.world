@@ -21,6 +21,7 @@ import {
   DEFAULT_ROOM,
   PROTOCOL_VERSION,
   ServerMessage,
+  type AccountCredentials,
   type AvatarRef,
   type ChatBroadcast,
   type ChatIntent,
@@ -71,6 +72,11 @@ export type ConnectOptions = {
   name: string;
   avatar: AvatarRef;
   room?: string;
+  /**
+   * Paper passport from src/net/passport.ts. Omit to join as a guest —
+   * fine for a first look, but nothing made will be credited durably.
+   */
+  account?: AccountCredentials;
 };
 
 /**
@@ -87,6 +93,7 @@ export async function connect(
     protocol: PROTOCOL_VERSION,
     name: options.name,
     avatar: options.avatar,
+    account: options.account,
   };
 
   const room: Room = await client.joinOrCreate(options.room ?? DEFAULT_ROOM, joinOptions);
@@ -134,6 +141,7 @@ export async function connect(
 function readPlayer(id: string, raw: any): PlayerState {
   return {
     id,
+    accountId: raw.accountId ?? '',
     name: raw.name,
     avatar: {
       preset: raw.avatar?.preset ?? 'medium',
@@ -154,7 +162,7 @@ function readPiece(id: string, raw: any): PlacedPiece {
     x: raw.x,
     z: raw.z,
     rotY: raw.rotY,
-    ownerId: raw.ownerId,
+    makerId: raw.makerId,
     page: raw.page,
   };
 }

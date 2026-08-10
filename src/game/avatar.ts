@@ -7,6 +7,7 @@ import { getViewCloseness, getYaw } from './camera';
 import { getMovementInput, type MovementInput } from './input';
 import { isSolidAt } from '../world/footprints';
 import { slideMove } from '../core/placement';
+import { isTimedActionActive } from './timedAction';
 
 /**
  * How much room the player keeps around a wall.
@@ -79,7 +80,10 @@ function desiredDirection(movement: MovementInput): THREE.Vector3 {
 }
 
 export function updateAvatar(delta: number) {
-  const movement = getMovementInput();
+  // Short work actions are intentionally planted in place. Input is not
+  // discarded globally (Esc still cancels); only locomotion pauses while the
+  // shared progress treatment is visible.
+  const movement = isTimedActionActive() ? { x: 0, y: 0 } : getMovementInput();
   const direction = desiredDirection(movement);
   const wantsToMove = direction.lengthSq() > 0.0001;
 

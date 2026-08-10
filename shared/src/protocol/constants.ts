@@ -10,7 +10,10 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2; // v2: durable accountId/makerId + passport auth
+
+/** Bump when RoomSave's shape changes; persistence migrates on load. */
+export const SAVE_VERSION = 1;
 
 /** Server simulation/broadcast rate. 20 Hz is plenty for a cozy walking game. */
 export const SERVER_TICK_HZ = 20;
@@ -36,6 +39,12 @@ export const LIMITS = {
   maxMoveSpeed: 12,
   /** Build pieces a single room can hold in the prototype. */
   placedPiecesPerRoom: 500,
+  /** Build pieces any one account may have standing in a room. */
+  placedPiecesPerPlayer: 100,
+  /** Passport secret length in characters (base64url of 32 random bytes). */
+  accountSecretLength: 43,
+  /** Mail items retained per account before oldest drop off. */
+  mailboxMax: 200,
 } as const;
 
 /** Default room name / neighborhood the first slice joins. */

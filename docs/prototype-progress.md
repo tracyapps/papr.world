@@ -1,5 +1,385 @@
 # Prototype Progress
 
+## The Professor Gets a Body — and Blinks (2026-08-08)
+
+The owner uploaded `the-prof.svg` (now kept for reference at
+`designs/the-prof.svg`): a flat paperclip-professor mockup — gray paperclip
+body, big goggle eyes, round glasses, graduation cap with a tassel and gem —
+and asked for a 3D version that could actually blink, since a perfect,
+permanently-open circle is the one shape a flat vector eye can't help but
+be, and it reads as shocked.
+
+### Why 3D fixes it almost for free
+
+Every character already in this game (the critters) is built the same way:
+primitives and flat colour, assembled in code — no imported model file, no
+Blender/glTF pipeline, none of that infrastructure exists here. And
+critters already blink, by squashing a sphere-shaped eye flat on its Y axis
+for an instant and letting it spring back
+(`Math.sin(t * 1.7 + o) > 0.97 ? 0.25 : 1` in `critterRigs.ts`). The
+"shocked" problem was never really about 3D vs. 2D — it was that the SVG's
+eyes are stuck at `scale.y = 1` forever. The actual fix is two small moves,
+both in `src/game/professorRig.ts`:
+
+- **Rest state isn't a full circle.** The eyes sit at `scale.y = 0.78`, not
+  1 — a full circle is what reads as startled, so simply never resting
+  there removes most of the "shocked" read on its own, before any animation
+  happens.
+- **He blinks.** A `blinkOpenness(t)` function on a ~4.4s interval closes
+  and reopens both eyes over ~0.22s — tuned to read as a person's blink
+  rate, deliberately slower and less twitchy than the critters', since he's
+  meant to be calm rather than alert.
+
+### The rig
+
+`buildProfessorRig()` assembles him from primitives, matching the SVG's
+silhouette and palette without chasing pixel fidelity at HUD-icon scale: two
+open-arc tori for the nested paperclip loops, a grey sphere + coloured iris
+sphere per eye (the SVG's eye is genuinely a grey-gradient ball with a
+green/teal iris disc laid over it — there's no separate black pupil in the
+source art, and the rig doesn't invent one), two flattened tori + a bridge
+box for the glasses, and a flat diamond board (a box rotated 45° in the
+screen plane, matching the SVG's literal rhombus rather than inventing
+perspective) with a dome, a cylinder tassel, and a small purple gem sphere.
+A slow whole-body sway and bob keep him from looking like a static prop.
+
+### Where he lives
+
+He's not part of the game world — he's a second, tiny, self-contained
+Three.js scene (its own `WebGLRenderer`, `Scene`, camera, and lights)
+rendered into `<canvas id="professor-canvas">` inside the existing HUD
+widget, with a transparent clear colour so the widget's round paper button
+still shows through behind him. `professor.ts` runs its own
+`requestAnimationFrame` loop for this, deliberately separate from the main
+game loop in `main.ts` — he keeps blinking regardless of what the world
+scene is doing — and skips the actual render call while the widget is
+collapsed (`.professor-face-button` goes `display: none`, so the canvas
+would measure zero size anyway). The old CSS-shape version
+(`.professor-clip-body`, `.professor-cap`, `.professor-glasses`,
+`.professor-eye`, and their pseudo-elements) is gone from `styles.css`.
+
+### Verified
+
+`npx tsc` (strict), all 258 tests, `styles:check` (290 rules — down from 302
+now that the CSS-shape face rules are gone), `content:check`, and
+`npm run build` all pass from `~/pp-build`.
+
+**Not verified visually**, and this time more than usual: this sandbox has
+no way to run a browser at all (tried installing Playwright's Chromium
+specifically to screenshot this — it downloaded fine but needs system
+libraries this sandbox has no `sudo` to install, so that path is closed
+here). `npm run dev` and an actual look at him is the only way to know
+whether the blink timing feels right, whether the paperclip loops read
+correctly at 56px, and whether the flat diamond cap looks like a cap and
+not a floating tile from face-on.
+
+## The Knowledge Tree Becomes One Shared Timeline (2026-08-07, third pass)
+
+Same day, third pass. The owner sent a PDF mockup (`tech-tree-roughdrarft.pdf`)
+of a hand-drawn layout: branches as horizontal colour bands sharing one set
+of timeline columns, some cards lined up in the same column across branches
+(start together), some pushed later (gated on a different branch first).
+Two explicit instructions came with it: merge Fiber Arts and Art & Design
+into one branch, and make each card's requirement sentence
+screen-reader-only so a compact visual indicator can be designed on top
+without the card reading as large and wordy.
+
+### Ten branches become seven
+
+`TechBranchId` collapsed from ten to seven: `caring-for-the-land`,
+`materials`, `building-construction`, `interior-design`,
+`fine-arts-textiles`, `cooking`, `transportation`. Two merges happened:
+
+- **Fiber Arts + Art & Design → Fine Arts & Textiles.** Explicitly
+  requested.
+- **Woodworking + Building & Tinkering + Structures & Architecture →
+  Building & Construction.** *Not* explicitly stated in the owner's prose —
+  read from the PDF, which shows exactly seven colour bands and no separate
+  "Woodworking" label. **Flagging this inference** in case the mockup meant
+  something narrower; easy to split back out if so.
+
+Every node's `branch:` field was reassigned to the new seven, all through
+`replace_all`, no node content changed.
+
+### Column position is computed, not eyeballed
+
+The PDF's own text layer was too garbled (OCR duplicating lines, e.g. five
+copies of "Digging 1" in a row) to safely hand-transcribe exact card
+positions from it. Rather than risk mis-reading a tiny label and encoding a
+wrong dependency, column position is now **derived** from the existing
+`requires` graph — `techNodeColumn(nodeId)`, a memoized longest-path depth
+(a node with no prerequisites is column 0; otherwise one past the deepest
+prerequisite). `techTreeColumnCount()` is the tree-wide column total every
+branch's grid sizes against. This is the real version of what the owner
+eyeballed by hand — self-consistent by construction, and it matches the
+project's existing "derive, don't hand-author" instinct
+(`obtainedBy`, `toolRequiredFor`).
+
+### Layout: one shared grid, not independent lanes
+
+`techTreeView.ts` was rewritten again. Each branch is now one flat CSS grid:
+column 1 is a sticky label, columns 2..N+1 are `techTreeColumnCount()`'s
+timeline tracks — fixed-width and identical across every branch, which is
+what makes column 5 in one branch land under column 5 in another. All
+branch rows sit inside one shared `overflow-x: auto` container so they
+scroll together.
+
+Deliberately **one flat grid per branch**, not a label sidebar plus a
+nested grid for the cards: mixing a `1fr` track next to fixed-width
+timeline columns makes the overflow-scroll width math ambiguous, which
+isn't something worth reasoning about blind in a sandbox with no browser to
+check it in. Every fixed-width track keeps that math unambiguous.
+
+Cards still needed a real `<ol>` wrapper around them for valid HTML (an
+`<li>` can't sit directly inside another `<li>`), which would normally break
+the flat-grid trick — solved with `display: contents` on the `<ol>`, which
+drops its own box so the `<li>` cards inside still land as direct grid items
+of the branch row. Semantic list, flat grid, both at once.
+
+### Requirement text moves to `.sr-only`
+
+The full requirement sentence per card ("Needs: Growing Food (Caring for
+the Land).") now renders into a paragraph carrying a new `.sr-only` utility
+class (the standard clip-not-`display:none` pattern, so it stays in the
+accessibility tree) instead of visible prose. An empty, unstyled
+`.tech-node-requirement-indicator` hook sits on every card that has a
+requirement — not a guess at what the owner's visual indicator should look
+like, just a place for it to attach later.
+
+One CSS bug caught in review before it shipped: a leftover
+`.tech-node-requirement { margin: 0 0 8px; ... }` rule from the old visible-
+prose version, later in the file than `.sr-only`, would have overridden
+`.sr-only`'s `margin: -1px` by cascade order since the element now carries
+both classes. Deleted the dead rule outright — `.sr-only` is the only thing
+that ever needs to style that element now.
+
+### Verified
+
+`npx tsc` (strict), 258 tests across 18 files (`techTree.test.ts` grew to
+32 — the two branch-specific assertions that named old ids like
+`'woodworking'`/`'structures'` were updated to `'building-construction'`,
+and four new tests cover `techNodeColumn`/`techTreeColumnCount`: roots at
+column 0, one-past-prerequisite, longest-path-wins when a node has two
+prerequisite chains, and the tree-wide count), `styles:check` (302 rules,
+no shadowed declarations), `content:check`, and `npm run build` all pass
+from `~/pp-build`.
+
+**Not verified visually** — same caveat as both passes before it, now with
+a materially different layout: open the tree and check that columns
+actually line up across branches, that the shared horizontal scroll moves
+every branch together, and that a screen reader announces each card's
+requirement sentence even though nothing on screen shows it.
+
+## The Knowledge Tree Grows Ten Branches (2026-08-07, second pass)
+
+Same day, right after the first knowledge-tree pass below — the owner
+brought a brainstorm list of ~10 subject branches (cooking, fiber arts,
+structures, transportation, and more) with a horizontally-scrolling,
+sticky-note-styled layout in mind, and a visual design pass still to come
+separately. This pass is the data model and the layout scaffolding, not the
+final look.
+
+### `readiness`, not a fake grant
+
+Almost none of the brainstorm content has a game system behind it yet — no
+recipe for a "Chef's Knife," no `ToolId` for a bicycle. Rather than invent
+one to satisfy the existing `TechNodeDef` shape, every node now declares a
+`readiness`:
+
+- `'ready'` — the original 6 nodes. Real grant, real tasks, exactly as
+  before.
+- `'concept'` — everything from the brainstorm. A name, a branch, a
+  one-line summary, and prerequisite edges. No `learningHours`, no `tasks`,
+  no `grants` — TypeScript enforces this as a discriminated union, and
+  `techTree.test.ts` asserts a concept node never has those fields at all,
+  not even empty ones. An optional `previewGrants: string[]` exists for the
+  rare node where a freeform hint ("will eventually grant...") is worth
+  writing before the real thing does.
+
+This is the same instinct as `RecipeStatus: 'planned'` in `recipes.ts`:
+settled shape stays in the catalog, but nothing pretends to be more
+finished than it is. The player-facing status gained a fourth value,
+`'not-built'`, which beats locked/available/owned regardless of
+prerequisites — a locked node promises "learn the prerequisite and this
+unlocks," which isn't true of something with no system behind it yet.
+
+### Branches replace the 3 tool families
+
+`TechBranchId` now has ten members (`caring-for-the-land` through
+`transportation`), each with a label and a summary in a new `TECH_BRANCHES`
+catalog. The original 6 real nodes were folded into their natural homes
+rather than living apart: the shovel ladder and the hoe into **Caring for
+the Land**, both scissors tiers into **Woodworking** (renamed "Trimming
+1/2" → "Tree Trimming Basics" / "Advanced Tree Trimming" to read naturally
+next to "Lumber Types").
+
+### Cross-branch prerequisites, on purpose
+
+The brainstorm asked for this directly: "some techs should require early/
+basic tech branches to be completed first." Nothing about the data model
+needed to change — `requires: TechNodeId[]` was never scoped to one branch —
+so this is purely content: Materials requires a Woodworking node, Cooking
+requires Caring for the Land's `growing-food`, Transportation requires
+Materials and Structures, and Rocket Science (the fun capstone) requires
+both Automotive and Auto CAD. `techTree.test.ts` covers a few of these by
+name and asserts the one real invariant that matters: **a `'ready'` node
+may never require a `'concept'` node** — that would be a permanent deadlock,
+since a concept node can never become owned.
+
+### Layout: one scrolling lane per branch
+
+`techTreeView.ts` now renders `TECH_BRANCH_ORDER` as stacked `<li>` lanes,
+each an `<ol class="tech-branch-nodes">` with native `overflow-x: auto`
+rather than a JS carousel — Tab/Shift+Tab through the cards and the browser
+scrolls the focused one into view for free. A cross-branch requirement
+names its source branch in the sentence ("Needs: Growing Food (Caring for
+the Land)") since there's no connecting line to look at across a lane gap.
+
+CSS styling is a deliberately light placeholder — paper colour, a per-card
+tilt, a torn corner — flagged in a comment as expected to be replaced once
+the owner's sticky-note design is ready. Concept nodes get a visibly
+different card treatment (dotted border, cooler paper tone, "Not yet in the
+game" badge) so they read as a different *kind* of thing, not just a locked
+one.
+
+### Verified
+
+`npx tsc` (strict), 254 tests across 18 files (`techTree.test.ts` grew from
+22 to 28 — branch grouping, the ready-never-requires-concept invariant,
+concept nodes never carrying a fake field, three named cross-branch edges),
+`styles:check` (293 rules), and `npm run build` all pass from `~/pp-build`.
+
+**Not verified visually.** Same caveat as the first pass today, now larger:
+open the tree and look at all ten lanes, check that a long lane (Caring for
+the Land, 16 cards) actually scrolls instead of overflowing the dialog, and
+sanity-check that the placeholder sticky-note tilt doesn't make text hard to
+read before the real design replaces it.
+
+## The Knowledge Tree, Read-Only (2026-08-07)
+
+Roadmap Phase 1.1, designed in `docs/knowledge-tree.md`: the catalog and a
+read-only full-screen view of it, opened from a new HUD widget, the
+Professor. Nothing here starts a node, spends a task, or writes to
+`player.plans` — that is 1.2 and 1.3, not built this pass. This is the map,
+not the machinery.
+
+### `TECH_DEFS`
+
+`src/sim/catalogs/techTree.ts` holds six nodes — one per existing tool —
+grouped into the three families the tool ladder already has: Digging
+(shovels), Gardening (hoes), Trimming (scissors). Each tier-2+ node's tasks
+lean on a detail from `knowledge-tree.md` worth keeping visible: "own the
+previous tool" plus "make two more of it" — a spare to gift, which is the
+tree's own answer to the game's generosity rule (`economy.md`, and the "gift
+the made tool instead" line for tool plans specifically).
+
+Nothing about a resource, an ingredient, or a tool name is restated. The
+two-tier unlock icons (`techNodeUnlocks`) are derived straight out of
+`obtaining.ts` — `resourcesUnlockedByTool` is one filter over
+`toolRequiredFor`, the same function `biome-knowledge.md`'s critter lines
+already trust. A node's status (`owned` / `available` / `locked`) only ever
+*reads* `player.plans`; today that means every tier-1 node shows as already
+learned on a fresh save, because the starter plans already grant those
+tools. That is the honest answer for where the game actually is right now,
+not a bug — 1.4 ("retire tool plans from the other routes") is what changes
+it later.
+
+### The Professor
+
+A movable, collapsible HUD paperclip (top-centre by default), built on the
+same drag/scale/persistence system minimap and compass already use
+(`hud.ts`'s `hudWidgetConfigs`) rather than a new one. Placeholder art only —
+cap, clip, glasses, googly eyes, all CSS shapes — the same "no asset yet,
+still fully usable" convention the hoe followed before its artwork existed.
+
+Two things `knowledge-tree.md` asked for that nothing in the HUD had before:
+
+- **A keyboard path to reposition, not drag-only.** `hud.ts` gained a generic
+  Alt+Arrow nudge (Alt+Shift+Arrow for a finer step) across every widget in
+  `hudWidgetConfigs` — minimap and compass get it for free, not just the
+  Professor.
+- **Every widget collapsible**, and the whole HUD at once. `hudLayout.ts` now
+  owns a small collapse registry (`registerCollapsibleWidget`,
+  `setHudWidgetCollapsed`, `toggleAllHudWidgets`); `settings.ts` only
+  remembers which ids are collapsed, the same division of labour as every
+  other setting there. A collapsed widget keeps a small tab to bring it back
+  — nothing hides its own way out.
+
+He is idle-only for now: there is no learning clock yet, so
+`professorIsReading()` in `src/ui/professor.ts` always returns false. It is
+written as a single function with one call site specifically so 1.2 only has
+to change what feeds it.
+
+Getting his buttons to be ordinary buttons took one small fix in `hud.ts`:
+the shared pointerdown handler used to start a drag from *anywhere* in a
+widget, which is fine when the widget is just a canvas (minimap) or a
+readout (compass) but would have swallowed every click on the Professor's
+open/collapse buttons into a drag-start instead. It now skips drag-start for
+any `<button>` that isn't the resize handle, so dragging stays reachable from
+the grip and the buttons behave normally — a fix that also just quietly
+benefits any future widget with its own controls.
+
+### The tree view
+
+`src/ui/techTreeView.ts`, opened by clicking the Professor. Built to the
+accessibility notes in `knowledge-tree.md` specifically, not as an
+afterthought:
+
+- A real nested `<ol>` — families, then nodes — never a canvas of positioned
+  boxes.
+- Locked nodes are muted (`opacity` + dashed border) *and* say in a full
+  sentence what they are still waiting on
+  (`missingTechPrerequisites`); colour is never the only signal.
+- Status is a text badge ("Learned" / "Ready to start" / "Locked"), not a
+  border treatment alone.
+- Every unlock — grants and the derived "then reaches" tier — is a labelled
+  list item, not an unlabelled icon.
+- Cost is worded and coarse (`formatLearningDuration`): "about 6 hours", never
+  a countdown or a timestamp.
+
+One deliberate omission: there is no "start learning" button anywhere on this
+screen. That machinery doesn't exist yet, and a button that does nothing
+would be worse than an honest map — the intro line says so directly ("This
+map shows what is ahead — starting a skill is not open yet").
+
+Escape closes it through the game's existing `onEscape` chain in `main.ts`
+(the same one `closeHudMenu` uses) rather than a second document-level
+listener — two independent Escape handlers is exactly the kind of thing that
+double-fires or eats a keypress the world was also waiting on.
+
+### Verified
+
+`npx tsc` (strict), 248 tests across 18 files including new
+`techTree.test.ts` (22 tests: catalog shape, no cycles, status derivation,
+derived unlocks, presentation text), `styles:check` (286 rules, no shadowed
+declarations), `content:check`, and `npm run build` all pass — run from
+`~/pp-build` per the sandbox note below, since this sandbox's mounted
+`node_modules` is mac-native.
+
+**Not verified visually — no browser in this sandbox.** Play-test before
+trusting the following on screen:
+
+- Click the Professor (top-centre). The tree should open full-screen with
+  three family columns, six cards, all Digging/Gardening/Trimming tier-1
+  nodes reading "Learned" on a fresh save.
+- Alt+Arrow (focus the Professor first) should nudge him around the screen;
+  Alt+Shift+Arrow should nudge finer. Try it on the minimap and compass too —
+  they got the same capability for free.
+- The small collapse tab (bottom-right corner of the Professor) should
+  shrink him to a tiny dot and bring him back.
+- Escape should close the tree view from anywhere inside it, including with
+  the close button focused.
+
+### Sandbox build note
+
+This project's mounted `node_modules` was installed on macOS and fails
+`vite build` in this Linux sandbox (missing
+`@rollup/rollup-linux-arm64-gnu`). Verification for this pass copied
+`package.json`, `tsconfig.json`, `index.html`, `src/`, `tools/`, and `shared/`
+(imported by `src/net/client.ts` via `../../shared/src/index`, easy to miss)
+into `~/pp-build`, ran `npm install` there, and checked from there. Nothing
+in the user's real `node_modules` was touched.
+
 ## The Magnet Cursor (2026-08-03, eleventh pass)
 
 Reported as "my cursor is a magnet — anytime it gets close to the centre it is
