@@ -4,6 +4,7 @@ import {
   getSetting,
   setSetting,
 } from '../game/settings';
+import { openAvatarLookEditor } from '../game/avatarLook';
 
 // The two top-right icon buttons and the overlays they open.
 //
@@ -110,6 +111,16 @@ function buildSettingsOverlay(): HTMLElement {
           <output for="setting-camera-sensitivity" id="setting-camera-sensitivity-value"></output>
         </div>
       </div>
+      <h3 class="hud-overlay-subhead">You</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-change-look">
+          Change how you look…
+        </button>
+        <small>
+          Pick a paper cutout shape, choose your paper, draw on yourself.
+          Nothing is lost — old looks stay in your wardrobe.
+        </small>
+      </div>
       <h3 class="hud-overlay-subhead">Learning</h3>
       <label class="hud-setting">
         <input type="checkbox" id="setting-learning-timer">
@@ -157,6 +168,14 @@ function buildSettingsOverlay(): HTMLElement {
     // Arrow keys inside the overlay must not also drive the world.
     sensitivity.addEventListener('keydown', (event) => event.stopPropagation());
   }
+
+  const changeLook = overlay.querySelector<HTMLButtonElement>('#setting-change-look');
+  changeLook?.addEventListener('click', () => {
+    // The editor is its own modal; leaving settings open behind it would give
+    // two dialogs and one Escape key. Close first, then hand over.
+    closeHudMenu();
+    openAvatarLookEditor();
+  });
 
   const learningTimer = overlay.querySelector<HTMLInputElement>('#setting-learning-timer');
   if (learningTimer) {

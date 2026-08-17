@@ -5,6 +5,8 @@ import { buildBackdrop, updateBackdrop } from './render/backdrop';
 import { buildClouds, updateClouds } from './render/clouds';
 import { buildSky, updateSky } from './render/sky';
 import { avatar, spawnAvatar, updateAvatar } from './game/avatar';
+import { initializeAvatarLook } from './game/avatarLook';
+import { isAvatarStudioOpen } from './ui/avatarEditor/editor';
 import { initializeGuidance, updateGuidance } from './game/guidance';
 import { getCameraDebug, getYaw, updateCamera } from './game/camera';
 import { initializeInput, updateGamepadCamera } from './game/input';
@@ -117,6 +119,9 @@ renderSeedStorePanel();
 initializeScrapbook();
 initializeHudWidgets();
 initializeHudMenus();
+// Wear the saved cutout (or, for a brand-new player, offer the editor once).
+// After the HUD so the world is already there behind the overlay.
+initializeAvatarLook();
 initializeProfessor();
 initializeTechTreeView();
 initializePetting();
@@ -301,6 +306,16 @@ function animate(animationTime = 0) {
   }
   if (animationTime + 0.5 < nextAnimationTime) return;
   nextAnimationTime += TARGET_FRAME_INTERVAL_MS;
+
+  // The avatar studio is an opaque, full-screen room: nothing of the world is
+  // visible behind it, so simulating and rendering it is pure waste — and
+  // letting it run means the clock, the critters and the weather all drift
+  // while you are choosing eyebrows. Draining the delta each frame keeps the
+  // first frame after closing from arriving as one enormous step.
+  if (isAvatarStudioOpen()) {
+    clock.getDelta();
+    return;
+  }
 
   const delta = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;

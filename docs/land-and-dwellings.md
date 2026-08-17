@@ -82,6 +82,11 @@ everything shared:
 - Water access someone dug or piped (`water-and-waterways.md`).
 - Decoration and landscaping — which cost the passer-by nothing already, and
   should never become damageable.
+- Furniture that displays a player rather than yielding anything — the
+  wardrobe closet (`avatar-and-identity.md` §2.3) is the first of these.
+  Its upgrades change style and how much is on show, never how much can be
+  stored, precisely so the piece stays expression and never becomes a
+  capacity ladder other players can read as rank.
 
 **Nothing a player builds may be destroyed or degraded by another player.** Not
 as a permission setting — as a fact about the world. This is what makes the

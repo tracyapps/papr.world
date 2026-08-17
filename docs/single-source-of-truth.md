@@ -124,6 +124,35 @@ Point a Vercel project at the repo, add `docs.papr.world` as a domain, and
 every push regenerates the site from that commit's catalogs. The published
 reference is a function of the code, not a thing anyone maintains.
 
+## Avatar shapes follow the same arrow
+
+Added 2026-08-10. The avatar cutout library is another instance of the rule:
+
+- **Authored**: `assets/avatar-shapes/` — one SVG per shape + `shapes.json`
+  (label, category, spoken description, search keywords, body preset).
+  Any viewBox, any size: the fit into the 100 × 140 sheet is *derived*
+  (compiler measures the ink and bakes a uniform transform), which is why
+  the artist never hand-fits a shape and why the sheet size lives in one
+  place — `DESIGN_SHEET` in `shared/`.
+- **Derived**: `src/ui/avatarEditor/shapes.generated.ts`, written by
+  `npm run shapes:compile` (or `shapes:watch`). Never hand-edited — the
+  header says so, and the compiler will overwrite you.
+- **Consumed**: the editor, renderer, and the in-world avatar texture all
+  import the generated module via `catalog.ts`.
+
+Stamps (added 2026-08-15) follow the identical arrow: **authored** in
+`assets/avatar-stamps/` (SVG + `stamps.json`), **derived** into
+`src/ui/avatarEditor/stamps.generated.ts` by `npm run stamps:compile`,
+**consumed** through `catalog.ts`. The coordinate space they all share —
+`DESIGN_SHEET`, `DESIGN_CUTOUT`, `DESIGN_GROUND_Y` — is authored once in
+`shared/`, and the avatar plane's size and height in `game/avatar.ts` are
+derived from it rather than typed in again.
+
+Same test as below: if adding a shape required editing TypeScript, the shape
+went in the wrong place. The compiler also regenerates the review sheet at
+`designs/avatar-template-contact-sheet.html`; player-drawn data never enters
+this pipeline (it lives in `AvatarDesign` in `shared/`, validated at load).
+
 ## Adding a feature to this system
 
 1. Put the facts in a catalog under `src/sim/catalogs/`.

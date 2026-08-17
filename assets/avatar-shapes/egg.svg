@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="78" height="116" viewBox="0 0 78 116">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-egg">
+<g class="layer-path">
+<path d="M 39 4 C 63 4 79.91 35.54 77.91 71.54 C 75.91 105.54 60.05 115.72 40.05 115.72 C 20.05 115.72 1.9 112.19 -0.1 78.19 C -2.1 42.19 15 4 39 4 C 39 4 39 4 39 4 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

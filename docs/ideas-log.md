@@ -2,6 +2,25 @@
 
 A running log for "omg, log this" moments. Not commitments — a place where ideas can't escape. Newest at the top.
 
+## 2026-08-15
+
+### The wardrobe as an actual closet
+
+Promoted straight into the plan (`avatar-and-identity.md` §2.3, Phase C2),
+so this entry is a pointer, not a parking spot. The idea: your saved looks
+live in a closet you build and stand in front of, buildable in styles —
+upscale-boutique rail, rotating bowtie-holder carousel — with the looks you
+choose to share on display for visitors.
+
+Two guardrails came out of it and are now decisions: tiers change
+presentation only (never how many looks you can save), and displaying reuses
+the existing per-design `sharedOnCard` flag rather than inventing a second
+toggle that can disagree with the first.
+
+Still unclaimed, in case it wants to grow: what a *closet* implies that a
+menu doesn't — hanging looks up wrinkled or fresh, lending a look to a
+friend (careful: §6.9), seasonal rotation, a mirror.
+
 ## 2026-08-08
 
 ### Pip’s Seed & Garden

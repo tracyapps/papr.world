@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="97" height="116" viewBox="0 0 97 116">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-heart">
+<g class="layer-path">
+<path d="M 49 25 C 57 3 91 1 93 33 C 95 61 65 89 49 111 C 33 89 3 61 5 33 C 7 1 41 3 49 25 C 49 25 49 25 49 25 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

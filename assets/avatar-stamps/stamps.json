@@ -1,0 +1,623 @@
+{
+  "_readme": "Stamp metadata. One SVG per stamp, drawn at any size in any viewBox. Paths carry data-role=\"ink|paper|shadow\" (or class=, or an inferred role from the fill lightness): ink takes the player's crayon colour, paper and shadow come from the paper stock the cutout is made of. \"layer\" is \"on\" (clipped to the cutout) or \"behind\" (glued behind, may hang outside it). Then: npm run stamps:compile.",
+  "stamps": [
+    {
+      "key": "eyes-dots",
+      "label": "dot eyes",
+      "category": "eyes",
+      "spoken": "two small solid dots, the simplest possible pair of eyes",
+      "keywords": [
+        "eyes",
+        "dots",
+        "simple",
+        "beady"
+      ],
+      "layer": "on",
+      "defaultScale": 0.8,
+      "file": "eyes-dots.svg"
+    },
+    {
+      "key": "eyes-googly",
+      "label": "googly eyes",
+      "category": "eyes",
+      "spoken": "two big round eyes with pale whites and dark pupils looking slightly up",
+      "keywords": [
+        "eyes",
+        "googly",
+        "wide",
+        "round",
+        "cartoon"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-googly.svg"
+    },
+    {
+      "key": "eyes-happy",
+      "label": "happy eyes",
+      "category": "eyes",
+      "spoken": "two upward arches, the squinting eyes of a big smile",
+      "keywords": [
+        "eyes",
+        "happy",
+        "smile",
+        "squint",
+        "arch"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-happy.svg"
+    },
+    {
+      "key": "eyes-sleepy",
+      "label": "sleepy eyes",
+      "category": "eyes",
+      "spoken": "two heavy half-closed lids drooping downward",
+      "keywords": [
+        "eyes",
+        "sleepy",
+        "tired",
+        "lids",
+        "calm"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-sleepy.svg"
+    },
+    {
+      "key": "eyes-wink",
+      "label": "winking eyes",
+      "category": "eyes",
+      "spoken": "one open round eye and one closed in a wink",
+      "keywords": [
+        "eyes",
+        "wink",
+        "cheeky",
+        "one eye"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-wink.svg"
+    },
+    {
+      "key": "eyes-lashes",
+      "label": "lashed eyes",
+      "category": "eyes",
+      "spoken": "two round eyes with a sweep of lashes above each",
+      "keywords": [
+        "eyes",
+        "lashes",
+        "fancy",
+        "round"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-lashes.svg"
+    },
+    {
+      "key": "eye-single",
+      "label": "one big eye",
+      "category": "eyes",
+      "spoken": "a single large eye with a pale white and a dark pupil, monster style",
+      "keywords": [
+        "eye",
+        "one",
+        "cyclops",
+        "monster",
+        "single"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eye-single.svg"
+    },
+    {
+      "key": "eyes-spiral",
+      "label": "dizzy eyes",
+      "category": "eyes",
+      "spoken": "two spirals winding inward, the dizzy or dazzled look",
+      "keywords": [
+        "eyes",
+        "dizzy",
+        "spiral",
+        "swirl",
+        "dazed"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-spiral.svg"
+    },
+    {
+      "key": "brows-worried",
+      "label": "worried brows",
+      "category": "faces",
+      "spoken": "two short bars tilted up toward the middle, a worried look",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "worried",
+        "concerned"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-worried.svg"
+    },
+    {
+      "key": "brows-bold",
+      "label": "bold brows",
+      "category": "faces",
+      "spoken": "two thick straight bars, a strong flat brow",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "bold",
+        "thick",
+        "serious"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-bold.svg"
+    },
+    {
+      "key": "nose-button",
+      "label": "button nose",
+      "category": "faces",
+      "spoken": "a small rounded nose, a single soft blob",
+      "keywords": [
+        "nose",
+        "button",
+        "small",
+        "round"
+      ],
+      "layer": "on",
+      "defaultScale": 0.5,
+      "file": "nose-button.svg"
+    },
+    {
+      "key": "nose-beak",
+      "label": "beak nose",
+      "category": "faces",
+      "spoken": "a downward triangle, a small sharp beak",
+      "keywords": [
+        "nose",
+        "beak",
+        "bird",
+        "triangle",
+        "point"
+      ],
+      "layer": "on",
+      "defaultScale": 0.6,
+      "file": "nose-beak.svg"
+    },
+    {
+      "key": "nose-snout",
+      "label": "snout",
+      "category": "faces",
+      "spoken": "a wide rounded snout with two nostrils",
+      "keywords": [
+        "nose",
+        "snout",
+        "pig",
+        "muzzle",
+        "nostrils"
+      ],
+      "layer": "on",
+      "defaultScale": 0.8,
+      "file": "nose-snout.svg"
+    },
+    {
+      "key": "mouth-smile",
+      "label": "smile",
+      "category": "faces",
+      "spoken": "a wide upturned crescent smile",
+      "keywords": [
+        "mouth",
+        "smile",
+        "happy",
+        "grin",
+        "crescent"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-smile.svg"
+    },
+    {
+      "key": "mouth-frown",
+      "label": "frown",
+      "category": "faces",
+      "spoken": "a downturned crescent, a small sad mouth",
+      "keywords": [
+        "mouth",
+        "frown",
+        "sad",
+        "unhappy"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-frown.svg"
+    },
+    {
+      "key": "mouth-teeth",
+      "label": "toothy grin",
+      "category": "faces",
+      "spoken": "a wide open grin with a row of pale square teeth",
+      "keywords": [
+        "mouth",
+        "teeth",
+        "grin",
+        "smile",
+        "toothy"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "mouth-teeth.svg"
+    },
+    {
+      "key": "mouth-o",
+      "label": "surprised mouth",
+      "category": "faces",
+      "spoken": "a small round open mouth, mid-oh",
+      "keywords": [
+        "mouth",
+        "surprised",
+        "oh",
+        "round",
+        "shock"
+      ],
+      "layer": "on",
+      "defaultScale": 0.6,
+      "file": "mouth-o.svg"
+    },
+    {
+      "key": "mouth-wiggle",
+      "label": "wiggly mouth",
+      "category": "faces",
+      "spoken": "a wavy line for a mouth, unsure or making a face",
+      "keywords": [
+        "mouth",
+        "wiggle",
+        "wavy",
+        "unsure",
+        "squiggle"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-wiggle.svg"
+    },
+    {
+      "key": "cheeks-blush",
+      "label": "blushing cheeks",
+      "category": "faces",
+      "spoken": "two soft oval patches of colour, one on each cheek",
+      "keywords": [
+        "cheeks",
+        "blush",
+        "rosy",
+        "shy",
+        "warm"
+      ],
+      "layer": "on",
+      "defaultScale": 1.1,
+      "file": "cheeks-blush.svg"
+    },
+    {
+      "key": "freckles",
+      "label": "freckles",
+      "category": "faces",
+      "spoken": "a scatter of small dots across the middle of the face",
+      "keywords": [
+        "freckles",
+        "dots",
+        "spots",
+        "scatter"
+      ],
+      "layer": "on",
+      "defaultScale": 1.1,
+      "file": "freckles.svg"
+    },
+    {
+      "key": "whiskers",
+      "label": "whiskers",
+      "category": "faces",
+      "spoken": "three long thin whiskers sweeping out from each side",
+      "keywords": [
+        "whiskers",
+        "cat",
+        "mouse",
+        "animal",
+        "face"
+      ],
+      "layer": "on",
+      "defaultScale": 1.3,
+      "file": "whiskers.svg"
+    },
+    {
+      "key": "hair-tuft",
+      "label": "hair tuft",
+      "category": "hair",
+      "spoken": "a single curl of hair sticking up from the top",
+      "keywords": [
+        "hair",
+        "tuft",
+        "curl",
+        "sprout",
+        "cowlick"
+      ],
+      "layer": "behind",
+      "defaultScale": 0.7,
+      "file": "hair-tuft.svg"
+    },
+    {
+      "key": "hair-curls",
+      "label": "curly hair",
+      "category": "hair",
+      "spoken": "a wide bank of round curls, like a cloud of hair",
+      "keywords": [
+        "hair",
+        "curly",
+        "curls",
+        "afro",
+        "cloud",
+        "big"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.6,
+      "file": "hair-curls.svg"
+    },
+    {
+      "key": "hair-bob",
+      "label": "bobbed hair",
+      "category": "hair",
+      "spoken": "a smooth rounded bob framing both sides of the head",
+      "keywords": [
+        "hair",
+        "bob",
+        "straight",
+        "fringe",
+        "framed"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.6,
+      "file": "hair-bob.svg"
+    },
+    {
+      "key": "hair-pigtails",
+      "label": "pigtails",
+      "category": "hair",
+      "spoken": "two bunches of hair tied out to either side",
+      "keywords": [
+        "hair",
+        "pigtails",
+        "bunches",
+        "tied",
+        "two"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.5,
+      "file": "hair-pigtails.svg"
+    },
+    {
+      "key": "hair-mohawk",
+      "label": "mohawk",
+      "category": "hair",
+      "spoken": "a row of tall spikes running across the top",
+      "keywords": [
+        "hair",
+        "mohawk",
+        "spikes",
+        "punk",
+        "crest"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "hair-mohawk.svg"
+    },
+    {
+      "key": "hair-long",
+      "label": "long hair",
+      "category": "hair",
+      "spoken": "two long straight lengths of hair falling down either side",
+      "keywords": [
+        "hair",
+        "long",
+        "straight",
+        "strands",
+        "down"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.8,
+      "file": "hair-long.svg"
+    },
+    {
+      "key": "arm-stick",
+      "label": "stick arm",
+      "category": "limbs",
+      "spoken": "a thin bent arm with a small round hand at the end",
+      "keywords": [
+        "arm",
+        "stick",
+        "thin",
+        "hand",
+        "limb"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.2,
+      "file": "arm-stick.svg"
+    },
+    {
+      "key": "arm-noodle",
+      "label": "noodle arm",
+      "category": "limbs",
+      "spoken": "a soft wavy arm that curls out and up, ending in a round hand",
+      "keywords": [
+        "arm",
+        "noodle",
+        "wavy",
+        "floppy",
+        "limb"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "arm-noodle.svg"
+    },
+    {
+      "key": "arm-wave",
+      "label": "waving arm",
+      "category": "limbs",
+      "spoken": "an arm raised up with an open hand, waving",
+      "keywords": [
+        "arm",
+        "wave",
+        "hello",
+        "raised",
+        "hand"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "arm-wave.svg"
+    },
+    {
+      "key": "legs-stick",
+      "label": "stick legs",
+      "category": "limbs",
+      "spoken": "two thin straight legs with small flat feet",
+      "keywords": [
+        "legs",
+        "stick",
+        "thin",
+        "feet",
+        "limbs"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.2,
+      "file": "legs-stick.svg"
+    },
+    {
+      "key": "legs-boots",
+      "label": "booted legs",
+      "category": "limbs",
+      "spoken": "two sturdy legs ending in chunky boots",
+      "keywords": [
+        "legs",
+        "boots",
+        "chunky",
+        "feet",
+        "stomp"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "legs-boots.svg"
+    },
+    {
+      "key": "feet-flat",
+      "label": "little feet",
+      "category": "limbs",
+      "spoken": "two small oval feet peeking out at the bottom",
+      "keywords": [
+        "feet",
+        "little",
+        "oval",
+        "toes",
+        "peeking"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.0,
+      "file": "feet-flat.svg"
+    },
+    {
+      "key": "wings-small",
+      "label": "little wings",
+      "category": "limbs",
+      "spoken": "a pair of small pointed wings, one out each side",
+      "keywords": [
+        "wings",
+        "fly",
+        "fairy",
+        "pair",
+        "small"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.5,
+      "file": "wings-small.svg"
+    },
+    {
+      "key": "antennae",
+      "label": "antennae",
+      "category": "extras",
+      "spoken": "two bendy stalks with a round bead on the end of each",
+      "keywords": [
+        "antenna",
+        "antennae",
+        "bug",
+        "alien",
+        "stalks"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.1,
+      "file": "antennae.svg"
+    },
+    {
+      "key": "bow",
+      "label": "bow",
+      "category": "extras",
+      "spoken": "a ribbon bow with two loops and a knot in the middle",
+      "keywords": [
+        "bow",
+        "ribbon",
+        "tie",
+        "pretty",
+        "knot"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "bow.svg"
+    },
+    {
+      "key": "sparkles",
+      "label": "sparkles",
+      "category": "extras",
+      "spoken": "three four-pointed sparkles of different sizes",
+      "keywords": [
+        "sparkle",
+        "shine",
+        "stars",
+        "magic",
+        "twinkle"
+      ],
+      "layer": "on",
+      "defaultScale": 1.2,
+      "file": "sparkles.svg"
+    },
+    {
+      "key": "heart-token",
+      "label": "little heart",
+      "category": "extras",
+      "spoken": "a small solid heart, good as a badge or a cheek mark",
+      "keywords": [
+        "heart",
+        "love",
+        "badge",
+        "small",
+        "cute"
+      ],
+      "layer": "on",
+      "defaultScale": 0.7,
+      "file": "heart-token.svg"
+    },
+    {
+      "key": "patch",
+      "label": "stitched patch",
+      "category": "extras",
+      "spoken": "a square patch with a dashed stitch line around its edge",
+      "keywords": [
+        "patch",
+        "stitch",
+        "mend",
+        "square",
+        "repair"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "patch.svg"
+    }
+  ]
+}

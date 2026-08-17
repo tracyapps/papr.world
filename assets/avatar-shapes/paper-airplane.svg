@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="87" height="115" viewBox="0 0 87 115">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-paper-airplane">
+<g class="layer-path">
+<path d="M 83 1 C 83 1 1 69 1 69 C 1 69 33 75 33 75 C 33 75 29 113 29 113 C 29 113 45 81 45 81 C 45 81 69 91 69 91 C 69 91 83 1 83 1 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

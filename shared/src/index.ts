@@ -5,3 +5,4 @@ export * from './protocol/constants';
 export * from './protocol/state';
 export * from './protocol/messages';
 export * from './protocol/validate';
+export * from './protocol/avatarDesign';

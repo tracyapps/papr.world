@@ -472,6 +472,39 @@ Steps 1 and 2 are the real work; everything after is content on top of them.
 
 ---
 
+## Phase 6 — Becoming someone: avatars, identity, multiplayer
+
+**Tracked in their own docs to avoid double-maintenance — this section is a
+pointer, not the plan.** Both docs carry locked decisions up top, a
+conflicts-with-fixes list, and lettered phases with acceptance criteria, in
+this roadmap's spirit.
+
+- `communal-multiplayer.md` — the communal layer (what made Glitch/Second
+  Life work), identity plumbing, persistence, moderation phases, directory.
+  **Phase A shipped 2026-08-10**: paper passports (`accountId`), JSON room
+  persistence, `makerId` on placed pieces, protocol v2.
+- `avatar-and-identity.md` — the avatar editor, wardrobe, player cards,
+  discoverability permissions. **Phase A shipped 2026-08-10**: the full
+  step-flow editor (shape → paper → pattern → draw, custom outlines,
+  keyword search), shape compile pipeline (`npm run shapes:compile` /
+  `shapes:watch` from `assets/avatar-shapes/`), wardrobe store.
+  **Phase B shipped 2026-08-15**: designs rasterize onto the avatar plane
+  via `src/game/avatarLook.ts`, settings cog → "Change how you look…",
+  first-run pass for new players; the shape pipeline now fits artwork from
+  any viewBox (58 shapes), and **stamps** landed — 39 pre-drawn details a
+  player places, including arms, legs and hair that hang outside the cutout
+  (the sheet grew to 130 × 180 around a 100 × 140 cutout box to make room). Next up is **Phase C — wardrobe UI, then the
+  closet**: C1 is the panel (save slots, rename, duplicate, wear, delete,
+  per-design share toggle); C2 makes the wardrobe a **buildable closet in
+  your house** that displays the looks you chose to share. Tiers are style
+  and display only — never capacity (decision 2026-08-15, §2.3).
+- `multiplayer-readiness.md` — the wiring checklist for the first two-player
+  slice; still accurate, item 4 (persistence) now done.
+
+The cross-dependency to keep in mind: avatar Phase D (designs over the
+wire) needs multiplayer Phase B (wire the slice) first; everything else in
+the two docs proceeds independently of this file's Phases 1–5.
+
 ## Parking lot
 
 Good ideas. Not now. Each one has a reason it is parked — the reason is the

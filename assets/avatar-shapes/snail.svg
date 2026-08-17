@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="89" height="110" viewBox="0 0 89 110">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-snail">
+<g class="layer-path">
+<path d="M 17 29 C 17 29 13 7 13 7 C 13 7 21 9 21 9 C 21 9 25 29 25 29 C 25 29 33 29 33 29 C 33 29 37 9 37 9 C 37 9 45 7 45 7 C 45 7 41 31 41 31 C 49 35 53 43 51 51 C 69 45 87 57 87 77 C 87 97 69 109 51 105 C 51 105 7 105 7 105 C -3 97 -1 81 9 77 C 3 61 7 39 17 29 C 17 29 17 29 17 29 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

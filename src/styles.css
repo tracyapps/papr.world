@@ -1720,6 +1720,26 @@ body {
 .hud-setting strong { display: block; font: 600 14px/1.3 system-ui, sans-serif; }
 .hud-setting small { color: #7d6753; display: block; font-size: 12px; }
 
+/* A setting that opens something rather than toggling something: the button
+   stacks over its explanation instead of sitting beside it like a checkbox. */
+.hud-setting-action {
+  cursor: default;
+  display: block;
+}
+
+.hud-setting-button {
+  background: #f0e7d4;
+  border: 1px solid rgba(74, 69, 60, 0.35);
+  border-radius: 8px;
+  color: #453324;
+  cursor: pointer;
+  font: 600 14px/1.3 system-ui, sans-serif;
+  margin-bottom: 4px;
+  padding: 8px 14px;
+}
+
+.hud-setting-button:hover { background: #f6f1e3; }
+
 .hud-setting-slider {
   cursor: default;
   display: grid;
@@ -3320,4 +3340,818 @@ body {
   .maker-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---- Avatar editor (src/ui/avatarEditor/) --------------------------------
+   A hud-overlay-family modal. Layout only — zone logic stays in hudLayout,
+   which this overlay deliberately never touches (it is modal, not a panel). */
+
+/* ---- The studio ----------------------------------------------------------
+   Changing how you look happens in its own room, not in a panel floating over
+   the world. Two reasons, both practical: a modal card the size of a postage
+   stamp forced every palette into one scrolling column, and that scroll was
+   competing with the game's own wheel-zoom underneath. A full-screen room
+   gives the palettes an artist's table to spread out on, and makes it
+   obvious that the world is not listening. */
+
+.avatar-studio {
+  padding: 0;
+  /* Opaque: the world behind is paused and hidden, not dimmed. */
+  background: #6d5f4d;
+}
+
+.avatar-studio .avatar-editor-card {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px clamp(12px, 2.5vw, 34px) 16px;
+  overflow: hidden;
+  /* A workshop, drawn in gradients so it costs nothing to load and stays
+     readable behind the panels: a plaster wall, tall windows with winter
+     light, and a scuffed board floor along the bottom. Deliberately low
+     contrast — this is a room to work in, not a picture to look at. */
+  background-color: #cfc7b8;
+  background-image:
+    /* paint flecks on the floor */
+    radial-gradient(circle at 22% 93%, rgba(179, 64, 46, 0.1) 0 0.7%, transparent 1%),
+    radial-gradient(circle at 61% 96%, rgba(63, 110, 166, 0.1) 0 0.6%, transparent 0.9%),
+    radial-gradient(circle at 78% 91%, rgba(217, 177, 59, 0.1) 0 0.5%, transparent 0.8%),
+    /* window light spilling across the room */
+    radial-gradient(ellipse 60% 45% at 72% 26%, rgba(255, 252, 240, 0.55), transparent 70%),
+    /* window panes */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 62.5%,
+      rgba(120, 112, 98, 0.5) 62.5% 63%,
+      rgba(236, 240, 236, 0.5) 63% 70.5%,
+      rgba(120, 112, 98, 0.5) 70.5% 71%,
+      transparent 71% 100%
+    ),
+    linear-gradient(180deg, rgba(214, 219, 214, 0.45) 0 52%, transparent 52%),
+    /* floorboards */
+    repeating-linear-gradient(
+      90deg,
+      rgba(92, 80, 64, 0.16) 0 1px,
+      transparent 1px 46px
+    ),
+    linear-gradient(180deg, transparent 0 68%, rgba(150, 137, 120, 0.55) 68% 100%),
+    /* plaster wall */
+    linear-gradient(180deg, #ded7c8 0%, #d2cabb 60%, #bcb2a2 100%);
+}
+
+.avatar-studio .hud-overlay-close {
+  top: 12px;
+  right: 14px;
+}
+
+/* The card itself never scrolls — the step inside it does.
+   Two different shapes of content share this frame: the shape picker is one
+   long grid that must scroll as a whole, while the studio is a fixed-height
+   room whose three surfaces scroll independently. Putting the scroll here
+   serves both: the picker overflows and scrolls, the studio fits and doesn't.
+   (The card was `overflow: hidden` on its own for a moment, which clipped the
+   shape grid with no way to reach the rest of it.) */
+.avatar-studio [data-role='step'] {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  /* Room for the scrollbar so it never sits on top of a tile. */
+  padding-right: 4px;
+}
+
+/* The top rail: who you are making, and the way out. */
+.studio-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.studio-bar-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.studio-bar-right {
+  display: flex;
+  gap: 8px;
+  padding-right: 46px;
+}
+
+.studio-cutout {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  margin: 0;
+}
+
+/* Three surfaces: the paper shelf, the work table, the tool bench. */
+.studio-room {
+  display: grid;
+  gap: clamp(10px, 1.6vw, 20px);
+  grid-template-columns: minmax(210px, 1fr) minmax(300px, 1.7fr) minmax(280px, 1.25fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.studio-shelf { grid-area: 1 / 1; }
+.studio-layers { grid-area: 2 / 1; }
+.studio-table { grid-area: 1 / 2 / span 2; }
+.studio-bench { grid-area: 1 / 3 / span 2; }
+
+.studio-shelf,
+.studio-bench,
+.studio-layers {
+  background: rgba(255, 253, 246, 0.82);
+  border: 1px solid rgba(74, 69, 60, 0.25);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+
+.studio-heading {
+  font: 700 14px/1.2 Georgia, serif;
+  margin: 0 0 4px;
+}
+
+/* The table: a wooden surface with the cutout laid out on it. */
+.studio-table {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(154, 124, 80, 0.35), rgba(122, 96, 60, 0.45));
+  border: 1px solid rgba(74, 69, 60, 0.3);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+/* The sheet is portrait, the table is wide: size it by HEIGHT and let the
+   width follow, or a wide column stretches the cutout down past the fold. */
+.studio-table .avatar-editor-sheet {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 0;
+}
+
+.studio-table .avatar-editor-svg {
+  height: 100%;
+  margin: 0 auto;
+  max-width: 100%;
+  width: auto;
+  /* Crosshair is a promise that a press will draw. It only holds on the
+     Draw tab, so it only appears there. */
+  cursor: default;
+}
+
+.studio-table .avatar-editor-sheet.is-drawing-tool .avatar-editor-svg {
+  cursor: crosshair;
+}
+
+.studio-sheet-hint {
+  color: #4a3c2c;
+  font-size: 12.5px;
+  margin: 0;
+  text-align: center;
+}
+
+.studio-selected {
+  align-self: stretch;
+  background: rgba(255, 253, 246, 0.82);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+/* The tool tabs. Not decoration: the active tab decides which pointer
+   interactions exist at all, so a drag can never become a stray stroke. */
+.studio-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.studio-tabs button {
+  background: rgba(240, 231, 212, 0.9);
+  border: 1px solid rgba(74, 69, 60, 0.3);
+  border-radius: 9px 9px 0 0;
+  color: #5b4a36;
+  cursor: pointer;
+  flex: 1;
+  font: 600 13px/1.2 system-ui, sans-serif;
+  padding: 9px 6px;
+}
+
+.studio-tabs button[aria-selected='true'] {
+  background: #fffdf6;
+  border-bottom-color: #fffdf6;
+  color: #2d261e;
+  /* Never colour alone: the active tab is also the raised one. */
+  box-shadow: inset 0 3px 0 rgba(179, 64, 46, 0.65);
+}
+
+.studio-tabs button:focus-visible {
+  outline: 2px solid #b3402e;
+  outline-offset: 2px;
+}
+
+/* Each panel fills the bench rather than sitting at its own natural height —
+   otherwise the two stamp trays inherit whatever the shortest panel needs and
+   the tray gets a stubby scroll box with acres of empty bench beneath it. */
+.studio-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.studio-panel[hidden] { display: none; }
+
+/* The tray takes the leftover height and scrolls inside it. */
+.studio-panel .avatar-editor-stamp-tray {
+  flex: 1;
+  min-height: 120px;
+}
+
+/* The Draw panel's palettes keep their natural height — nothing there wants
+   to stretch — so its groups sit at the top and the panel simply ends. */
+.studio-panel[data-panel='draw'] { justify-content: flex-start; }
+
+@media (max-width: 900px) {
+  .studio-room {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .studio-table .avatar-editor-sheet { max-height: 40vh; }
+}
+
+.avatar-editor-status {
+  min-height: 1.2em;
+  margin: 0 0 10px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.avatar-editor-columns {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(240px, 320px);
+  gap: 18px;
+  align-items: start;
+}
+
+.avatar-editor-group {
+  border: 1px dashed rgba(74, 69, 60, 0.35);
+  border-radius: 10px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+}
+
+.avatar-editor-group legend {
+  font: 700 13px/1 Georgia, serif;
+  padding: 0 6px;
+}
+
+.avatar-editor-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.avatar-editor-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid rgba(74, 69, 60, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.85);
+  padding: 5px 9px;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.avatar-editor-swatch[aria-pressed='true'] {
+  border-color: #4a453c;
+  box-shadow: 0 0 0 2px rgba(74, 69, 60, 0.25);
+  font-weight: 700;
+}
+
+.avatar-editor-swatch[aria-pressed='true']::after {
+  content: ' ✓';
+}
+
+.avatar-editor-swatch-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--swatch, #ccc);
+  border: 1px solid rgba(43, 38, 32, 0.35);
+}
+
+.avatar-editor-name-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.avatar-editor-name {
+  border: 1.5px solid rgba(74, 69, 60, 0.4);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font: inherit;
+  background: rgba(255, 253, 246, 0.9);
+}
+
+.avatar-editor-sheet-wrap {
+  position: sticky;
+  top: 0;
+}
+
+.avatar-editor-sheet {
+  background:
+    repeating-linear-gradient(0deg, rgba(74, 69, 60, 0.05) 0 1px, transparent 1px 24px),
+    #efe9da;
+  border: 1.5px solid rgba(74, 69, 60, 0.35);
+  border-radius: 12px;
+  padding: 10px;
+  touch-action: none;
+}
+
+.avatar-editor-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.avatar-editor-svg polyline.is-erasable {
+  cursor: pointer;
+}
+
+.avatar-editor-sheet-hint {
+  margin: 8px 2px 0;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.avatar-editor-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.avatar-editor-actions button {
+  border: 1.5px solid rgba(74, 69, 60, 0.5);
+  border-radius: 9px;
+  background: rgba(255, 253, 246, 0.9);
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.avatar-editor-actions .avatar-editor-save {
+  background: #5d8a45;
+  border-color: #4d7338;
+  color: #fdfbf2;
+}
+
+@media (max-width: 720px) {
+  .avatar-editor-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar-editor-sheet-wrap {
+    position: static;
+    order: -1;
+  }
+}
+
+/* Avatar editor — step flow additions (shape grid, outline step, warning). */
+
+.avatar-editor-lead {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.avatar-editor-search-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.avatar-editor-search {
+  border: 1.5px solid rgba(74, 69, 60, 0.4);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: rgba(255, 253, 246, 0.9);
+  max-width: 380px;
+}
+
+/* ---- Stamps: the tray you pick from, and the list of what's stuck on ---- */
+
+.avatar-editor-hint {
+  color: #7d6753;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 4px 0;
+}
+
+.avatar-editor-stamp-tray {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.avatar-editor-stamp-tile {
+  align-items: center;
+  background: #f6f1e3;
+  border: 1px solid rgba(74, 69, 60, 0.3);
+  border-radius: 8px;
+  color: #453324;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: 500 10px/1.2 system-ui, sans-serif;
+  gap: 3px;
+  padding: 5px 3px;
+  text-align: center;
+}
+
+.avatar-editor-stamp-tile:hover { background: #fffaf0; }
+
+.avatar-editor-stamp-tile svg {
+  /* The paper tile behind the thumb: pale stamps (eye whites, wings) are
+     invisible on a white background, and a stamp you cannot see is a stamp
+     you cannot choose. */
+  background: #c9a876;
+  border-radius: 5px;
+  display: block;
+  height: 34px;
+  width: 34px;
+}
+
+.avatar-editor-stamp-placed { margin-top: 8px; }
+
+.avatar-editor-stamp-controls button {
+  background: #f0e7d4;
+  border: 1px solid rgba(74, 69, 60, 0.3);
+  border-radius: 7px;
+  color: #453324;
+  cursor: pointer;
+  font: 500 12px/1.2 system-ui, sans-serif;
+  padding: 5px 8px;
+}
+
+.avatar-editor-stamp-controls button:hover { background: #fffaf0; }
+
+/* ---- Transform handles on the selected stamp ---------------------------
+   The Adobe grammar: corners resize, the band just outside rotates. Drawn in
+   sheet space so they keep a usable size on a tiny stamp — a handle you
+   cannot hit is not a handle. */
+
+.stamp-handle-box {
+  fill: none;
+  stroke: rgba(43, 38, 32, 0.85);
+  stroke-dasharray: 3 2;
+  stroke-width: 0.7;
+  pointer-events: none;
+}
+
+.stamp-handle {
+  fill: #fffdf6;
+  stroke: rgba(43, 38, 32, 0.9);
+  stroke-width: 0.7;
+  cursor: nwse-resize;
+}
+
+/* Transparent, not `fill: none` — a band with no fill cannot be clicked. */
+.stamp-handle-ring {
+  fill: transparent;
+  cursor: grab;
+}
+
+/* Selected stamp on the sheet: a dashed halo, not a colour change — the
+   stamp's own colours are the player's choice and must not be overridden. */
+.avatar-editor-svg .is-stamp { cursor: grab; }
+
+.avatar-editor-svg .is-selected {
+  outline: 1.5px dashed rgba(43, 38, 32, 0.85);
+  outline-offset: 2px;
+}
+
+.avatar-editor-shape-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.avatar-editor-shape-category {
+  grid-column: 1 / -1;
+  margin: 8px 0 0;
+  font: 700 13px/1 Georgia, serif;
+  text-transform: capitalize;
+  opacity: 0.7;
+}
+
+.avatar-editor-shape-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid rgba(74, 69, 60, 0.4);
+  border-radius: 10px;
+  background: rgba(255, 253, 246, 0.85);
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+.avatar-editor-shape-tile:hover,
+.avatar-editor-shape-tile:focus-visible {
+  border-color: #4a453c;
+  box-shadow: 0 0 0 2px rgba(74, 69, 60, 0.25);
+}
+
+.avatar-editor-shape-tile svg {
+  width: 64px;
+  height: 90px;
+  display: block;
+}
+
+.avatar-editor-shape-label {
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.avatar-editor-shape-tile-draw {
+  border-style: dashed;
+  border-width: 2px;
+}
+
+.avatar-editor-draw-mark {
+  font: 700 56px/90px Georgia, serif;
+  height: 90px;
+  opacity: 0.7;
+}
+
+.avatar-editor-shape-none {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.avatar-editor-shape-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.avatar-editor-shape-row button {
+  border: 1.5px solid rgba(74, 69, 60, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.9);
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.avatar-editor-warning {
+  border: 2px solid #b3402e;
+  border-radius: 10px;
+  background: rgba(217, 123, 42, 0.12);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  font-size: 13.5px;
+}
+
+.avatar-editor-warning p {
+  margin: 0 0 8px;
+}
+
+/* ---- Studio: paper swatches, palette dots, layers -----------------------
+   Three different jobs, three different shapes. Paper is a stack of sheets
+   you pick from, so it looks like sheets. Colour is a paint palette, so it
+   is dots. A brush shows the mark it makes. Nothing here needs a word to be
+   understood, but every one of them still carries its name for screen
+   readers and hover. */
+
+.studio-shelf [data-role='papers'],
+.studio-shelf [data-role='patterns'] {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}
+
+.studio-shelf [data-role='papers'] .avatar-editor-swatch,
+.studio-shelf [data-role='patterns'] .avatar-editor-swatch {
+  align-items: stretch;
+  background: #fffdf6;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.studio-shelf .avatar-editor-swatch-chip {
+  border: 0;
+  border-radius: 0;
+  display: block;
+  height: 42px;
+  width: 100%;
+}
+
+.studio-shelf .swatch-label {
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 4px 5px;
+  text-align: center;
+}
+
+/* Selected paper is a big tick over the sheet — the swatch is the checkbox. */
+.studio-shelf .avatar-editor-swatch[aria-pressed='true'] {
+  border-color: #2b2620;
+  border-width: 2px;
+}
+
+.studio-shelf .avatar-editor-swatch[aria-pressed='true']::after {
+  color: #2b2620;
+  content: '✓';
+  font: 700 26px/1 system-ui, sans-serif;
+  left: 50%;
+  position: absolute;
+  text-shadow: 0 0 6px rgba(255, 253, 246, 0.95);
+  top: 21px;
+  transform: translate(-50%, -50%);
+}
+
+/* Colour: a paint palette. The name lives in the tooltip and the a11y name. */
+.studio-bench [data-role='crayons'],
+.studio-layers [data-role='stamp-colors'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.studio-bench [data-role='crayons'] .avatar-editor-swatch,
+.avatar-editor-dot {
+  background: var(--swatch, #4a453c);
+  border: 2px solid rgba(74, 69, 60, 0.35);
+  border-radius: 50%;
+  cursor: pointer;
+  height: 26px;
+  padding: 0;
+  width: 26px;
+}
+
+.studio-bench [data-role='crayons'] .avatar-editor-swatch-chip { display: none; }
+
+.studio-bench [data-role='crayons'] .avatar-editor-swatch[aria-pressed='true'],
+.avatar-editor-dot[aria-pressed='true'] {
+  border-color: #2b2620;
+  box-shadow: 0 0 0 2px #fffdf6 inset;
+}
+
+/* Visually hidden, still read aloud and still the button's accessible name. */
+.studio-bench [data-role='crayons'] .swatch-label,
+.avatar-editor-dot .swatch-label {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.brush-preview {
+  color: #4a453c;
+  display: block;
+  height: 16px;
+  width: 40px;
+}
+
+/* ---- Layers panel ------------------------------------------------------
+   Photoshop's arrangement, for Photoshop's reason: the order you see is the
+   order it stacks, and the controls that act on a layer sit on that layer's
+   own row rather than in a toolbar somewhere else. */
+
+.layer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  list-style: none;
+  margin: 6px 0 10px;
+  padding: 0;
+}
+
+.layer-row {
+  align-items: center;
+  background: #fffdf6;
+  border: 1px solid rgba(74, 69, 60, 0.22);
+  border-radius: 8px;
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  padding: 3px 5px;
+}
+
+.layer-row.is-selected {
+  border-color: #2b2620;
+  box-shadow: inset 3px 0 0 #b3402e;
+}
+
+.layer-row.is-hidden .layer-name { opacity: 0.45; }
+
+.layer-name {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  flex: 1;
+  font: 500 12px/1.3 system-ui, sans-serif;
+  overflow: hidden;
+  padding: 3px 2px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layer-controls {
+  display: flex;
+  gap: 1px;
+}
+
+.layer-controls button {
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  color: #5b4a36;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 3px;
+}
+
+.layer-controls button:hover { background: #efe6d2; }
+
+.layer-delete:hover { color: #b3402e; }
+
+.layer-fixed {
+  color: #8b7c68;
+  font-size: 11px;
+  font-style: italic;
+  padding-right: 4px;
+}
+
+/* Rotate has to look different from move, or the two cursors say the same
+   thing about very different drags. */
+.stamp-handle-ring {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cg fill='none' stroke='%23fffdf6' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M6 13a7 7 0 0 1 12-5'/%3E%3Cpath d='M20 13a7 7 0 0 1-12 5'/%3E%3C/g%3E%3Cg fill='none' stroke='%232b2620' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 13a7 7 0 0 1 12-5'/%3E%3Cpath d='M20 13a7 7 0 0 1-12 5'/%3E%3C/g%3E%3Cpath d='M18 4v5h-5z' fill='%232b2620'/%3E%3Cpath d='M8 22v-5h5z' fill='%232b2620'/%3E%3C/svg%3E")
+      13 13,
+    grab;
+}
+
+/* Trays are top-aligned: a two-row grid of tiles should not stretch each tile
+   to fill the column. */
+.avatar-editor-stamp-tray {
+  align-content: start;
+  align-items: start;
 }

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<path data-role="shadow" d="M14 14 L86 14 L86 86 L14 86 Z"/>
+<path data-role="ink" d="M24 19 L31 19 L31 25 L24 25 Z"/>
+<path data-role="ink" d="M24 75 L31 75 L31 81 L24 81 Z"/>
+<path data-role="ink" d="M36 19 L43 19 L43 25 L36 25 Z"/>
+<path data-role="ink" d="M36 75 L43 75 L43 81 L36 81 Z"/>
+<path data-role="ink" d="M48 19 L55 19 L55 25 L48 25 Z"/>
+<path data-role="ink" d="M48 75 L55 75 L55 81 L48 81 Z"/>
+<path data-role="ink" d="M60 19 L67 19 L67 25 L60 25 Z"/>
+<path data-role="ink" d="M60 75 L67 75 L67 81 L60 81 Z"/>
+<path data-role="ink" d="M72 19 L79 19 L79 25 L72 25 Z"/>
+<path data-role="ink" d="M72 75 L79 75 L79 81 L72 81 Z"/>
+<path data-role="ink" d="M19 24 L25 24 L25 31 L19 31 Z"/>
+<path data-role="ink" d="M75 24 L81 24 L81 31 L75 31 Z"/>
+<path data-role="ink" d="M19 36 L25 36 L25 43 L19 43 Z"/>
+<path data-role="ink" d="M75 36 L81 36 L81 43 L75 43 Z"/>
+<path data-role="ink" d="M19 48 L25 48 L25 55 L19 55 Z"/>
+<path data-role="ink" d="M75 48 L81 48 L81 55 L75 55 Z"/>
+<path data-role="ink" d="M19 60 L25 60 L25 67 L19 67 Z"/>
+<path data-role="ink" d="M75 60 L81 60 L81 67 L75 67 Z"/>
+<path data-role="ink" d="M19 72 L25 72 L25 79 L19 79 Z"/>
+<path data-role="ink" d="M75 72 L81 72 L81 79 L75 79 Z"/>
+</svg>

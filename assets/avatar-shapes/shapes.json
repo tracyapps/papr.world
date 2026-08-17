@@ -1,0 +1,531 @@
+{
+  "_readme": "Shape metadata. Each entry pairs with an SVG in this folder. Draw at ANY size in ANY viewBox — the compiler measures the artwork, scales it uniformly into the 100 × 140 design sheet, and stands it on a shared ground line. <path> is native; rect/circle/ellipse/polygon/polyline are converted; <line> is skipped (no area to fill). Add or edit shapes here, then: npm run shapes:compile (or shapes:watch). npm run shapes:preview renders a PNG contact sheet with no browser. Order here = order in the picker within each category.",
+  "shapes": [
+    {
+      "key": "round-pal",
+      "label": "round blob pal",
+      "category": "folks",
+      "spoken": "a friendly round blob, slightly pear shaped, with two little feet",
+      "keywords": ["blob", "round", "simple", "friend", "starter"],
+      "preset": "small",
+      "file": "round-pal.svg"
+    },
+    {
+      "key": "gingerbread-pal",
+      "label": "gingerbread pal",
+      "category": "folks",
+      "spoken": "a gingerbread-cookie person with round arms and legs spread wide",
+      "keywords": ["cookie", "gingerbread", "person", "baking", "sweet"],
+      "preset": "wide",
+      "file": "gingerbread-pal.svg"
+    },
+    {
+      "key": "strong-pal",
+      "label": "strong pal",
+      "category": "folks",
+      "spoken": "a round-headed person with both arms raised, flexing",
+      "keywords": ["strong", "flex", "muscle", "person", "arms", "cheer"],
+      "preset": "medium",
+      "file": "strong.svg"
+    },
+
+    {
+      "key": "star",
+      "label": "five-point star",
+      "category": "shapes",
+      "spoken": "a plump five-pointed star, the kind stuck on good homework",
+      "keywords": ["star", "sticker", "sky", "shine", "gold"],
+      "preset": "medium",
+      "file": "star.svg"
+    },
+    {
+      "key": "heart",
+      "label": "valentine heart",
+      "category": "shapes",
+      "spoken": "a wide folded-paper heart with a deep notch on top",
+      "keywords": ["heart", "love", "valentine", "card", "fold"],
+      "preset": "small",
+      "file": "heart.svg"
+    },
+    {
+      "key": "real-heart",
+      "label": "anatomical heart",
+      "category": "shapes",
+      "spoken": "a real heart with its vessels curling off the top, biology-textbook style",
+      "keywords": ["heart", "anatomy", "organ", "biology", "valve", "real"],
+      "preset": "medium",
+      "file": "real-heart.svg"
+    },
+    {
+      "key": "diamond",
+      "label": "cut diamond",
+      "category": "shapes",
+      "spoken": "a gemstone: flat top with angled facets tapering to a sharp point",
+      "keywords": ["diamond", "gem", "jewel", "facet", "treasure"],
+      "preset": "medium",
+      "file": "diamond.svg"
+    },
+    {
+      "key": "flame",
+      "label": "flame",
+      "category": "shapes",
+      "spoken": "a single tall flame with a curling tip and a smaller tongue beside it",
+      "keywords": ["flame", "fire", "candle", "burn", "hot"],
+      "preset": "tall",
+      "file": "flame.svg"
+    },
+    {
+      "key": "lightning",
+      "label": "storm cloud and bolt",
+      "category": "shapes",
+      "spoken": "a puffy cloud with a zigzag lightning bolt striking down from it",
+      "keywords": ["lightning", "bolt", "cloud", "storm", "weather", "zap"],
+      "preset": "tall",
+      "file": "lightning.svg"
+    },
+    {
+      "key": "hourglass",
+      "label": "hourglass",
+      "category": "shapes",
+      "spoken": "an hourglass: two wide bowls pinched together at a narrow waist",
+      "keywords": ["hourglass", "timer", "sand", "time", "wait"],
+      "preset": "tall",
+      "file": "hourglass.svg"
+    },
+    {
+      "key": "open-hand",
+      "label": "open hand",
+      "category": "shapes",
+      "spoken": "an open hand held up palm forward, fingers spread, waving hello",
+      "keywords": ["hand", "palm", "wave", "hello", "five", "stop"],
+      "preset": "medium",
+      "file": "hand.svg"
+    },
+    {
+      "key": "raised-fist",
+      "label": "raised fist",
+      "category": "shapes",
+      "spoken": "a fist raised with the forearm below it, held up in solidarity",
+      "keywords": ["fist", "power", "solidarity", "protest", "hand", "raised"],
+      "preset": "medium",
+      "file": "power.svg"
+    },
+    {
+      "key": "hamsa",
+      "label": "hamsa hand",
+      "category": "shapes",
+      "spoken": "a hamsa: a symmetrical palm with a thumb curving out from each side",
+      "keywords": ["hamsa", "hand", "symbol", "protection", "charm"],
+      "preset": "medium",
+      "file": "hamsa.svg"
+    },
+    {
+      "key": "palestine",
+      "label": "Palestine",
+      "category": "shapes",
+      "spoken": "the outline of historic Palestine, narrow at the top and tapering to a point",
+      "keywords": ["palestine", "map", "outline", "solidarity", "land"],
+      "preset": "tall",
+      "file": "palestine.svg"
+    },
+    {
+      "key": "squiggle-monster",
+      "label": "squiggle monster",
+      "category": "shapes",
+      "spoken": "a tall wobbling monster drawn in one loose squiggle, with a pointed hat",
+      "keywords": ["monster", "squiggle", "doodle", "wobble", "silly"],
+      "preset": "tall",
+      "file": "squiggle-monster.svg"
+    },
+    {
+      "key": "one-eyed-monster",
+      "label": "one-eyed monster",
+      "category": "shapes",
+      "spoken": "a round monster with two antennae, one big eye, and four stubby legs",
+      "keywords": ["monster", "eye", "alien", "antenna", "friendly"],
+      "preset": "medium",
+      "file": "monster.svg"
+    },
+    {
+      "key": "spikey-monster",
+      "label": "spikey monster",
+      "category": "shapes",
+      "spoken": "a round ball of spikes on two little legs, like a startled burr",
+      "keywords": ["monster", "spikes", "spiky", "burr", "hedgehog", "prickly"],
+      "preset": "wide",
+      "file": "spikey-monster.svg"
+    },
+    {
+      "key": "scribble-1",
+      "label": "scribble one",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: angular shards leaning to one side",
+      "keywords": ["scribble", "abstract", "doodle", "scrap", "shard"],
+      "preset": "medium",
+      "file": "scribble-1.svg"
+    },
+    {
+      "key": "scribble-2",
+      "label": "scribble two",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: a sharp zigzag with a hooked tail",
+      "keywords": ["scribble", "abstract", "doodle", "zigzag", "sharp"],
+      "preset": "medium",
+      "file": "scribble-2.svg"
+    },
+    {
+      "key": "scribble-3",
+      "label": "scribble three",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: two curling blobs meeting in the middle",
+      "keywords": ["scribble", "abstract", "doodle", "curl", "blob"],
+      "preset": "medium",
+      "file": "scribble-3.svg"
+    },
+    {
+      "key": "scribble-4",
+      "label": "scribble four",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: a torn ribbon split down the middle",
+      "keywords": ["scribble", "abstract", "doodle", "torn", "ribbon"],
+      "preset": "medium",
+      "file": "scribble-4.svg"
+    },
+    {
+      "key": "scribble-5",
+      "label": "scribble five",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: jagged folded planes, like crumpled foil",
+      "keywords": ["scribble", "abstract", "doodle", "jagged", "crumpled"],
+      "preset": "medium",
+      "file": "scribble-5.svg"
+    },
+    {
+      "key": "scribble-6",
+      "label": "scribble six",
+      "category": "shapes",
+      "spoken": "an abstract cut-paper scrap: a broad hook curving back on itself",
+      "keywords": ["scribble", "abstract", "doodle", "hook", "curve"],
+      "preset": "medium",
+      "file": "scribble-6.svg"
+    },
+
+    {
+      "key": "cat",
+      "label": "cat",
+      "category": "animals",
+      "spoken": "a cat sitting upright with its tail curling high behind it",
+      "keywords": ["cat", "kitty", "pet", "tail", "whiskers"],
+      "preset": "small",
+      "file": "cat.svg"
+    },
+    {
+      "key": "dog",
+      "label": "dog",
+      "category": "animals",
+      "spoken": "a dog standing side-on, ears up and tail out straight",
+      "keywords": ["dog", "puppy", "pet", "bark", "good boy"],
+      "preset": "small",
+      "file": "dog.svg"
+    },
+    {
+      "key": "bunny",
+      "label": "bunny",
+      "category": "animals",
+      "spoken": "a bunny sitting up, two long ears straight above a round body",
+      "keywords": ["bunny", "rabbit", "ears", "hop", "soft"],
+      "preset": "small",
+      "file": "bunny.svg"
+    },
+    {
+      "key": "duck",
+      "label": "duck",
+      "category": "animals",
+      "spoken": "a duck standing side-on with a flat bill and webbed feet",
+      "keywords": ["duck", "bird", "pond", "quack", "bill"],
+      "preset": "small",
+      "file": "duck.svg"
+    },
+    {
+      "key": "goose",
+      "label": "goose",
+      "category": "animals",
+      "spoken": "a goose with a long low neck stretched forward, mid-honk",
+      "keywords": ["goose", "bird", "honk", "neck", "pond"],
+      "preset": "medium",
+      "file": "goose.svg"
+    },
+    {
+      "key": "chick",
+      "label": "chick",
+      "category": "animals",
+      "spoken": "a fluffy chick with a tiny beak and a wisp of feather on its head",
+      "keywords": ["chick", "chicken", "bird", "baby", "fluff", "egg"],
+      "preset": "small",
+      "file": "chick.svg"
+    },
+    {
+      "key": "penguin",
+      "label": "penguin",
+      "category": "animals",
+      "spoken": "a penguin standing straight up with flippers tucked to its sides",
+      "keywords": ["penguin", "bird", "ice", "waddle", "flipper"],
+      "preset": "small",
+      "file": "penguin.svg"
+    },
+    {
+      "key": "flamingo",
+      "label": "flamingo",
+      "category": "animals",
+      "spoken": "a flamingo balanced on one long leg, its neck curving into an S",
+      "keywords": ["flamingo", "bird", "pink", "leg", "wading", "pelican"],
+      "preset": "tall",
+      "file": "pelicin.svg"
+    },
+    {
+      "key": "snail",
+      "label": "snail",
+      "category": "animals",
+      "spoken": "a snail with a spiral shell and two stalk eyes leaning forward",
+      "keywords": ["snail", "shell", "slow", "spiral", "garden"],
+      "preset": "small",
+      "file": "snail.svg"
+    },
+    {
+      "key": "beetle",
+      "label": "beetle",
+      "category": "animals",
+      "spoken": "a round beetle seen from above, six legs out and two curled antennae",
+      "keywords": ["bug", "beetle", "ladybug", "insect", "antenna"],
+      "preset": "small",
+      "file": "bug.svg"
+    },
+    {
+      "key": "abstract-frog",
+      "label": "frog",
+      "category": "animals",
+      "spoken": "a squat frog seen head-on, two round eyes bulging off the top",
+      "keywords": ["frog", "toad", "eyes", "pond", "ribbit"],
+      "preset": "medium",
+      "file": "abstract-frog.svg"
+    },
+    {
+      "key": "groundhog",
+      "label": "groundhog",
+      "category": "animals",
+      "spoken": "a groundhog sitting up on its haunches, round-backed and alert",
+      "keywords": ["groundhog", "marmot", "burrow", "sit", "chubby"],
+      "preset": "small",
+      "file": "groundhog.svg"
+    },
+    {
+      "key": "prairie-dog",
+      "label": "prairie dog",
+      "category": "animals",
+      "spoken": "a prairie dog standing tall with tiny paws held up at its chest",
+      "keywords": ["prairie dog", "meerkat", "lookout", "stand", "paws"],
+      "preset": "small",
+      "file": "prarie-dog.svg"
+    },
+    {
+      "key": "hydra",
+      "label": "hydra",
+      "category": "animals",
+      "spoken": "a many-headed serpent, three long necks rising over a coiled tail",
+      "keywords": ["hydra", "serpent", "dragon", "myth", "heads", "snake"],
+      "preset": "tall",
+      "file": "hydra.svg"
+    },
+    {
+      "key": "flying-dragon",
+      "label": "flying dragon",
+      "category": "animals",
+      "spoken": "a small dragon in flight, wings spread wide and tail streaming behind",
+      "keywords": ["dragon", "wings", "fly", "myth", "wyvern"],
+      "preset": "hovering",
+      "file": "flying-dragon.svg"
+    },
+
+    {
+      "key": "top-hat",
+      "label": "top hat",
+      "category": "tokens",
+      "spoken": "a tall top hat with a wide flat brim",
+      "keywords": ["hat", "top hat", "fancy", "game piece", "token"],
+      "preset": "small",
+      "file": "top-hat.svg"
+    },
+    {
+      "key": "boot",
+      "label": "boot",
+      "category": "tokens",
+      "spoken": "a sturdy work boot seen from the side, laces up the front",
+      "keywords": ["boot", "shoe", "walk", "game piece", "token"],
+      "preset": "small",
+      "file": "boot.svg"
+    },
+    {
+      "key": "lamp",
+      "label": "table lamp",
+      "category": "tokens",
+      "spoken": "a table lamp: cone shade on a turned stem and a round base",
+      "keywords": ["lamp", "light", "shade", "cozy", "home"],
+      "preset": "medium",
+      "file": "lamp.svg"
+    },
+    {
+      "key": "harp",
+      "label": "harp",
+      "category": "tokens",
+      "spoken": "a tall harp, its curved neck arching over the open frame",
+      "keywords": ["harp", "music", "strings", "instrument", "pluck"],
+      "preset": "tall",
+      "file": "harp.svg"
+    },
+    {
+      "key": "ice-cream",
+      "label": "ice cream cone",
+      "category": "tokens",
+      "spoken": "a swirl of soft-serve ice cream on a pointed cone",
+      "keywords": ["ice cream", "cone", "dessert", "sweet", "summer"],
+      "preset": "tall",
+      "file": "icecream.svg"
+    },
+    {
+      "key": "pineapple",
+      "label": "pineapple",
+      "category": "tokens",
+      "spoken": "a pineapple with a spray of spiky leaves above its body",
+      "keywords": ["pineapple", "fruit", "tropical", "leaves", "spiky"],
+      "preset": "tall",
+      "file": "pineapple.svg"
+    },
+    {
+      "key": "palm-tree",
+      "label": "palm tree",
+      "category": "tokens",
+      "spoken": "a palm tree with a leaning trunk and fronds fanning from the top",
+      "keywords": ["palm", "tree", "tropical", "beach", "island"],
+      "preset": "tall",
+      "file": "palmtree.svg"
+    },
+    {
+      "key": "pint",
+      "label": "pint glass",
+      "category": "tokens",
+      "spoken": "a tall pint glass, narrower at the base than the rim",
+      "keywords": ["pint", "glass", "drink", "pub", "cheers"],
+      "preset": "medium",
+      "file": "pint.svg"
+    },
+    {
+      "key": "fishbowl",
+      "label": "fishbowl",
+      "category": "tokens",
+      "spoken": "a round fishbowl with a turned-out rim, wider than it is tall",
+      "keywords": ["fishbowl", "fish", "bowl", "water", "pet"],
+      "preset": "wide",
+      "file": "fishbowl.svg"
+    },
+    {
+      "key": "egg",
+      "label": "egg",
+      "category": "tokens",
+      "spoken": "a plain egg standing on its rounder end",
+      "keywords": ["egg", "oval", "simple", "hatch", "smooth"],
+      "preset": "small",
+      "file": "egg.svg"
+    },
+    {
+      "key": "postage-stamp",
+      "label": "postage stamp",
+      "category": "tokens",
+      "spoken": "a square postage stamp with perforated scalloped edges all round",
+      "keywords": ["stamp", "post", "mail", "letter", "perforated"],
+      "preset": "medium",
+      "file": "stamp.svg"
+    },
+    {
+      "key": "fire-badge",
+      "label": "fire badge",
+      "category": "tokens",
+      "spoken": "a firefighter's cross-shaped badge with four flared arms",
+      "keywords": ["badge", "fire", "cross", "shield", "emblem"],
+      "preset": "medium",
+      "file": "firef.svg"
+    },
+
+    {
+      "key": "dragon-doodle",
+      "label": "dragon doodle",
+      "category": "nostalgia",
+      "spoken": "a spiky dragon drawn in marker, with one beefy arm and a long neck",
+      "keywords": ["dragon", "doodle", "marker", "spiky", "beefy arm"],
+      "preset": "tall",
+      "file": "dragon-doodle.svg"
+    },
+    {
+      "key": "paper-airplane",
+      "label": "paper airplane",
+      "category": "nostalgia",
+      "spoken": "a folded paper dart seen at an angle, one wing catching the light",
+      "keywords": ["airplane", "paper", "fold", "dart", "fly", "throw"],
+      "preset": "hovering",
+      "file": "paper-airplane.svg"
+    },
+    {
+      "key": "origami-crane",
+      "label": "origami crane",
+      "category": "nostalgia",
+      "spoken": "a folded paper crane with a long beak and two flat wings out either side",
+      "keywords": ["crane", "origami", "fold", "bird", "paper", "wish"],
+      "preset": "hovering",
+      "file": "origami-crane.svg"
+    },
+    {
+      "key": "twenty-sider",
+      "label": "twenty-sider",
+      "category": "nostalgia",
+      "spoken": "a twenty-sided die tipped slightly onto one edge",
+      "keywords": ["dice", "die", "d20", "game", "roll", "twenty"],
+      "preset": "medium",
+      "file": "twenty-sider.svg"
+    },
+    {
+      "key": "cassette",
+      "label": "cassette tape",
+      "category": "nostalgia",
+      "spoken": "a cassette tape lying flat, two toothed reels showing through the front",
+      "keywords": ["cassette", "tape", "mixtape", "music", "rewind"],
+      "preset": "wide",
+      "file": "cassette.svg"
+    },
+    {
+      "key": "rubber-duck",
+      "label": "rubber duck",
+      "category": "nostalgia",
+      "spoken": "a bath-time rubber duck, round-bodied with a stubby upturned tail",
+      "keywords": ["duck", "rubber", "bath", "toy", "squeak"],
+      "preset": "small",
+      "file": "rubber-duck.svg"
+    },
+    {
+      "key": "ghost",
+      "label": "ghost",
+      "category": "nostalgia",
+      "spoken": "a sheet ghost with a domed head and a zigzag torn hem",
+      "keywords": ["ghost", "spooky", "sheet", "boo", "halloween"],
+      "preset": "hovering",
+      "file": "ghost.svg"
+    },
+    {
+      "key": "tin-robot",
+      "label": "tin robot",
+      "category": "nostalgia",
+      "spoken": "a wind-up tin robot: boxy head, square body, and stiff jointed limbs",
+      "keywords": ["robot", "tin", "wind-up", "toy", "retro", "boxy"],
+      "preset": "tall",
+      "file": "robot.svg"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { updateWading, wadeSinkAt, wadeSpeedMultiplier } from './wading';
 import { getViewCloseness, getYaw } from './camera';
 import { getMovementInput, type MovementInput } from './input';
 import { isSolidAt } from '../world/footprints';
+import { DESIGN_CUTOUT, DESIGN_GROUND_Y, DESIGN_SHEET } from '../../shared/src/index';
 import { slideMove } from '../core/placement';
 import { isTimedActionActive } from './timedAction';
 
@@ -29,8 +30,17 @@ const BOB_FREQUENCY = 7.4;
 const BOB_HEIGHT = 0.045;
 const LEAN_AMOUNT = 0.085;
 
-const avatarTexture = textureLoader.load('/assets/runtime/avatars/avatar_placeholder_flat_01.png');
-avatarTexture.colorSpace = THREE.SRGBColorSpace;
+/**
+ * The look you start with. It is a placeholder in the honest sense — a player
+ * who never opens the editor still has a cutout, and one who does replaces
+ * this via `setAvatarTexture` (src/game/avatarLook.ts).
+ */
+const placeholderTexture = textureLoader.load(
+  '/assets/runtime/avatars/avatar_placeholder_flat_01.png',
+);
+placeholderTexture.colorSpace = THREE.SRGBColorSpace;
+
+let avatarTexture: THREE.Texture = placeholderTexture;
 
 const avatarMaterial = new THREE.MeshStandardMaterial({
   alphaTest: 0.03,
@@ -42,9 +52,53 @@ const avatarMaterial = new THREE.MeshStandardMaterial({
   side: THREE.DoubleSide,
 });
 
-export const avatar = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.55), avatarMaterial);
+/**
+ * The cutout is 1.55 units tall in the world, and always has been — that is
+ * the number this whole block is arranged to keep true.
+ *
+ * The design sheet grew larger than the cutout (stamps need somewhere to hang
+ * arms and hair), so the plane grew with it while the cutout itself stayed
+ * put: one sheet unit is a fixed world distance, the plane is the whole sheet
+ * at that scale, and the centre is offset so the cutout's ground line still
+ * meets the terrain exactly where it used to. Derived rather than typed in, so
+ * changing DESIGN_CUTOUT in shared/ moves everything together.
+ */
+const CUTOUT_WORLD_HEIGHT = 1.55;
+const SHEET_UNIT = CUTOUT_WORLD_HEIGHT / DESIGN_CUTOUT.height;
+const PLANE_WIDTH = DESIGN_SHEET.width * SHEET_UNIT;
+const PLANE_HEIGHT = DESIGN_SHEET.height * SHEET_UNIT;
+/** How far the cutout's feet float above the terrain — unchanged, deliberate. */
+const FOOT_CLEARANCE = 0.06;
+/**
+ * Plane centre above the terrain: the ground line sits FOOT_CLEARANCE up, and
+ * the centre sits above that by however many sheet units separate them.
+ */
+const AVATAR_CENTER_Y =
+  FOOT_CLEARANCE + (DESIGN_GROUND_Y - DESIGN_SHEET.height / 2) * SHEET_UNIT;
+
+export const avatar = new THREE.Mesh(
+  new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT),
+  avatarMaterial,
+);
 avatar.castShadow = true;
 applyAlphaShadow(avatar, avatarTexture, 0.03);
+
+/**
+ * Swap the cutout's artwork — the player saved a new design.
+ *
+ * The cast shadow is derived from texture alpha, so it has to be re-derived
+ * with the new texture or a snail would keep throwing a blob-shaped shadow.
+ * The old texture is disposed unless it is the placeholder, which is shared
+ * and may be worn again.
+ */
+export function setAvatarTexture(texture: THREE.Texture): void {
+  const previous = avatarTexture;
+  avatarTexture = texture;
+  avatarMaterial.map = texture;
+  avatarMaterial.needsUpdate = true;
+  applyAlphaShadow(avatar, texture, 0.03);
+  if (previous !== placeholderTexture) previous.dispose();
+}
 
 const avatarShadow = new THREE.Mesh(
   new THREE.CircleGeometry(0.52, 32),
@@ -62,7 +116,7 @@ let walkPhase = 0;
 let currentLean = 0;
 
 export function spawnAvatar(x: number, z: number) {
-  avatar.position.set(x, sampleTerrainHeight(x, z) + 0.78, z);
+  avatar.position.set(x, sampleTerrainHeight(x, z) + AVATAR_CENTER_Y, z);
   avatarShadow.position.set(x, sampleTerrainHeight(x, z) + 0.006, z);
   scene.add(avatar, avatarShadow);
 }
@@ -129,7 +183,7 @@ export function updateAvatar(delta: number) {
   const wetBob = bob * (1 - Math.min(1, sink / 0.26) * 0.6);
   avatar.position.y = THREE.MathUtils.lerp(
     avatar.position.y,
-    terrainHeight + 0.78 + wetBob - sink,
+    terrainHeight + AVATAR_CENTER_Y + wetBob - sink,
     0.28,
   );
   updateWading(delta, avatar.position, speed * wadeScale);

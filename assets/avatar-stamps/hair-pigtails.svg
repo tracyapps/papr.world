@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<circle data-role="ink" cx="18" cy="58" r="18"/>
+<circle data-role="ink" cx="82" cy="58" r="18"/>
+<path data-role="ink" d="M34 44 C46 40 54 40 66 44 L66 56 C54 52 46 52 34 56 Z"/>
+<circle data-role="shadow" cx="36" cy="50" r="7"/>
+<circle data-role="shadow" cx="64" cy="50" r="7"/>
+</svg>
