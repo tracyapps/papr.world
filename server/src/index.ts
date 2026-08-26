@@ -85,19 +85,44 @@ async function readBody(req: IncomingMessage, maxBytes = 4096): Promise<string> 
  * No PII is collected — claiming with email/passkey is a later phase.
  */
 async function handleCreateAccount(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  // Read and validate what the caller sent. Anything wrong here really is
+  // their fault, and 400 is the honest answer.
+  let name = 'paper friend';
   try {
     const raw = await readBody(req);
-    let name = 'paper friend';
     if (raw.length > 0) {
       const parsed = JSON.parse(raw) as { name?: unknown };
       name = sanitizeName(parsed.name);
     }
+  } catch (error) {
+    console.warn('[account] could not read the request body:', error);
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'invalid request' }));
+    return;
+  }
+
+  // Minting is OUR job, and when it fails it is our fault, not the caller's.
+  //
+  // These two used to share one catch, so a server that could not write to
+  // disk answered 400 "invalid request" — telling the browser that a
+  // perfectly good request was malformed, and sending whoever was debugging
+  // it off to inspect their payload. A failure to persist is a 500, and it
+  // gets logged with its real reason.
+  try {
     const { id, secret } = accounts.create(name);
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ accountId: id, secret }));
-  } catch {
-    res.writeHead(400, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ error: 'invalid request' }));
+  } catch (error) {
+    console.error(
+      '[account] could not mint a passport — this is a SERVER problem, '
+      + 'most often the data directory not being writable:',
+      error,
+    );
+    res.writeHead(500, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({
+      error: 'the paper-passport service could not save your passport',
+      hint: 'check the server logs and that its data volume is mounted and writable',
+    }));
   }
 }
 

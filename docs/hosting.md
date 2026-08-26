@@ -4,12 +4,53 @@ Two halves, two hosts, and they only meet over `https://` and `wss://`.
 
 | | Where | What it is |
 | --- | --- | --- |
-| **Site + game** | Vercel | Static. The marketing site, `/play`, `/reference`, and two edge functions (the alpha door and the contact form). |
-| **Neighborhood server** | Railway | A long-lived Node process holding WebSocket connections and the authoritative world. |
+| **Site + game** | Vercel — `papr.world` | Static. The marketing site, `/play`, `/reference`, and two edge functions (the alpha door and the contact form). |
+| **Neighborhood server** | Railway — `paprworld-production.up.railway.app` | A long-lived Node process holding WebSocket connections and the authoritative world. |
 
 The server **cannot** be a Vercel function. It holds open sockets and owns
 state; serverless has neither. That split is the whole reason there are two
 hosts, and it is not going to change.
+
+---
+
+## Every variable, and which host it goes on
+
+Nothing is set on both. If a variable is on the wrong host it does nothing at
+all — there is no error, it is simply ignored, which is why this is worth
+getting right in one pass.
+
+### Railway — the server
+
+| Variable | Value | If it is missing |
+| --- | --- | --- |
+| `PP_CORS_ORIGIN` | `https://papr.world` | The browser blocks every request to the server. No trailing slash. |
+| `PAPR_OWNER_ACCOUNT` | your passport id (step 5) | Nobody can remove anyone, and guests are allowed in. |
+| `PP_REVIEWER_TOKEN` | `openssl rand -base64 32` | The feedback desk at `?review=1` returns 503. |
+| `PP_MODERATION_TOKEN` | a **different** `openssl rand -base64 32` | Safety reports are still recorded, but you cannot read them. |
+
+`PORT` and `PP_DATA_DIR` are handled for you — Railway injects `PORT`, and the
+Dockerfile sets `PP_DATA_DIR=/data`. Do not set either by hand.
+
+**Also on Railway, and not a variable:** a volume mounted at `/data`.
+
+### Vercel — the site and the game
+
+| Variable | Value | If it is missing |
+| --- | --- | --- |
+| `VITE_SHARED_WS_ENDPOINT` | `wss://paprworld-production.up.railway.app` | The game falls back to `ws://localhost:2567` and cannot connect. |
+| `VITE_FEEDBACK_HTTP_ENDPOINT` | `https://paprworld-production.up.railway.app` | In-game feedback posts to the wrong place. |
+| `PAPR_ALPHA_CODES` | `TRUE-65` (comma-separate more) | **The alpha door stands open** — anyone can reach `/play`. |
+| `PAPR_ALPHA_SECRET` | `openssl rand -base64 48` | Nobody can get through the door at all. |
+| `RESEND_API_KEY` | from resend.com | The contact form accepts notes but never delivers them. |
+| `NOTE_TO` | where notes land | As above. |
+| `NOTE_FROM` | a verified sender on your domain | As above. |
+
+Set the Vercel ones for **Production and Preview** both.
+
+> **The two `VITE_` variables are build-time.** Vite bakes them into the
+> bundle, so saving them in the dashboard changes nothing until you
+> **redeploy**. This is the single most common way to end up with a
+> production game stubbornly talking to `localhost`.
 
 ---
 
@@ -63,8 +104,8 @@ Copy the Railway public domain. In the **Vercel** project, for Production
 
 | Variable | Value |
 | --- | --- |
-| `VITE_SHARED_WS_ENDPOINT` | `wss://your-service.up.railway.app` |
-| `VITE_FEEDBACK_HTTP_ENDPOINT` | `https://your-service.up.railway.app` |
+| `VITE_SHARED_WS_ENDPOINT` | `wss://paprworld-production.up.railway.app` |
+| `VITE_FEEDBACK_HTTP_ENDPOINT` | `https://paprworld-production.up.railway.app` |
 
 These are **build-time** variables. Vite bakes them into the bundle, so
 setting them does nothing until you **redeploy**. That is the single most
@@ -147,7 +188,7 @@ Do all of this against the **real** deployment, in two different browsers (or
 one plus a private window — two tabs of the same browser share a passport and
 will look like one person).
 
-- [ ] `https://your-service.up.railway.app/health` returns `ok`
+- [ ] `https://paprworld-production.up.railway.app/health` returns `ok`
 - [ ] `papr.world/play` **redirects to `/enter`** in a browser that has never
       been through the door. If it serves the game, the gate is not on.
 - [ ] A valid code gets you in; a wrong code says so and does not.
@@ -190,11 +231,23 @@ well-formed but nothing answered. Either the Railway service is down (check
 `PP_CORS_ORIGIN` on Railway must exactly match the site origin, with no
 trailing slash.
 
+**`POST /account` returns 500** — the server could not save the passport. The
+Railway log says why on the line beginning `[account] could not mint`. It is
+nearly always the data volume: not mounted at `/data`, or mounted but not
+writable. The server now refuses to start at all in that case, with a FATAL
+line naming the directory — so if it is running and still 500ing, read the
+log, because it is something else.
+
+**`POST /account` returns 400** — genuinely a malformed request. Before the
+fix on 2026-08-26 the server also answered 400 when it could not write to
+disk, which was a lie: the request was fine and the server was broken. If you
+are seeing 400 from an old deploy, redeploy first and read the message again.
+
 **"answered 403"** on joining — the code is not in `PAPR_ALPHA_CODES`, or that
 account is banned from that neighbourhood.
 
 You can also test a server without redeploying anything by appending
-`&server=wss://your-service.up.railway.app` to the `/play` URL. That override
+`&server=wss://paprworld-production.up.railway.app` to the `/play` URL. That override
 beats the baked-in value and is the quickest way to tell a bad build variable
 apart from a bad server.
 
@@ -204,7 +257,7 @@ If Railway is up but the site build is still pointing somewhere wrong, you can
 mint the passport directly and plant it in the browser:
 
 ```bash
-curl -X POST https://your-service.up.railway.app/account \
+curl -X POST https://paprworld-production.up.railway.app/account \
   -H 'content-type: application/json' -d '{"name":"tapps"}'
 ```
 
@@ -231,9 +284,18 @@ build variable — the game still will not connect until step 3 is right.
 somebody bug triage without also handing them "who reported whom". Neither
 queue ever appears in the other's export.
 
-**The volume, again.** It is worth checking twice. A Railway service without a
-mounted volume looks completely healthy and quietly discards the world on
-every deploy.
+**The volume, again.** It is worth checking twice. Two different ways it goes
+wrong: not mounted at all (the service looks completely healthy and discards
+the world on every deploy), or mounted but owned by root while the server runs
+as `node`, so every save fails. `docker-entrypoint.sh` fixes the ownership at
+startup — which is the only moment it *can* be fixed, because the volume mount
+lands on top of anything the image did at build time.
+
+**Art the game loads at runtime must not live in `designs/`.** That folder is
+gitignored working material. Anything under it works perfectly on your machine
+and 404s on every deploy, because it was never committed. Runtime art belongs
+in `assets/` — `assets/ui-art/` holds the cursors, the arrows and the paper
+tear for exactly this reason.
 
 **One replica.** The JSON stores are single-writer by design. Scaling to two
 instances will corrupt saves. If you outgrow one process, that is a real

@@ -12,8 +12,11 @@ import {
 } from '../sim/catalogs/seeds';
 import { requestHudLayout } from './hudLayout';
 
-const interactArtUrl = new URL('../../designs/arrows.svg', import.meta.url).href;
-const tornPaperUrl = new URL('../../designs/paper-tear 2.svg', import.meta.url).href;
+// assets/ui-art, not designs/. The designs/ folder is gitignored working
+// material, so anything the GAME loads at runtime cannot live there — it
+// works locally, where the files are on disk, and 404s everywhere else.
+const interactArtUrl = new URL('../../assets/ui-art/arrows.svg', import.meta.url).href;
+const tornPaperUrl = new URL('../../assets/ui-art/paper-tear-2.svg', import.meta.url).href;
 
 /**
  * Each rail slot is a *family*, not a tool.

@@ -1432,7 +1432,7 @@ body {
 
 .scrapbook-strip {
   background:
-    url('../designs/paper-tear 2.svg') center top / 100% 22px no-repeat,
+    url('../assets/ui-art/paper-tear-2.svg') center top / 100% 22px no-repeat,
     linear-gradient(rgb(255 249 226 / 0.97), rgb(253 245 218 / 0.97)),
     url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 320px auto;
   box-shadow: 0 -12px 30px rgb(46 34 26 / 0.24);

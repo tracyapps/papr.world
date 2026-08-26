@@ -17,13 +17,13 @@ import { placeTargetStatusAtScreen } from './placement';
 type CursorKind = 'attach' | 'build' | 'chop' | 'default' | 'dig' | 'garden' | 'hand';
 
 const CURSOR_ART: Record<CursorKind, string> = {
-  attach: new URL('../../designs/cursor-attach.svg', import.meta.url).href,
-  build: new URL('../../designs/cursor-build.svg', import.meta.url).href,
-  chop: new URL('../../designs/cursor-chop.svg', import.meta.url).href,
-  default: new URL('../../designs/cursor-default.svg', import.meta.url).href,
-  dig: new URL('../../designs/cursor-dig.svg', import.meta.url).href,
-  garden: new URL('../../designs/cursor-garden.svg', import.meta.url).href,
-  hand: new URL('../../designs/cursor-hand.svg', import.meta.url).href,
+  attach: new URL('../../assets/ui-art/cursor-attach.svg', import.meta.url).href,
+  build: new URL('../../assets/ui-art/cursor-build.svg', import.meta.url).href,
+  chop: new URL('../../assets/ui-art/cursor-chop.svg', import.meta.url).href,
+  default: new URL('../../assets/ui-art/cursor-default.svg', import.meta.url).href,
+  dig: new URL('../../assets/ui-art/cursor-dig.svg', import.meta.url).href,
+  garden: new URL('../../assets/ui-art/cursor-garden.svg', import.meta.url).href,
+  hand: new URL('../../assets/ui-art/cursor-hand.svg', import.meta.url).href,
 };
 
 // Hover picking is capped at one check per animation frame. Pointer events can

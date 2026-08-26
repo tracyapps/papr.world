@@ -16,11 +16,11 @@
 
 FROM node:22-slim
 
-# tini reaps zombies and forwards signals, so a Railway redeploy actually
-# stops the process instead of waiting out a timeout. Colyseus has a graceful
-# shutdown; it only runs if SIGTERM reaches it.
+# tini reaps zombies and forwards signals, so a redeploy actually stops the
+# process instead of waiting out a timeout. gosu drops root cleanly once the
+# entrypoint has fixed the data volume's ownership.
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends tini \
+  && apt-get install -y --no-install-recommends tini gosu \
   && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
@@ -39,6 +39,10 @@ COPY server/src/ ./server/src/
 # The world, the passports, the feedback queue and the moderation queue all
 # live here. Mount a persistent volume at /data or every redeploy is an
 # amnesia event.
+#
+# The chown below is for the case where NO volume is mounted. When one is,
+# it lands on top of this and arrives owned by root — docker-entrypoint.sh
+# fixes that at startup, which is the only moment it can be fixed.
 ENV PP_DATA_DIR=/data
 RUN mkdir -p /data && chown -R node:node /data /app
 
@@ -46,8 +50,13 @@ RUN mkdir -p /data && chown -R node:node /data /app
 ENV PORT=2567
 EXPOSE 2567
 
-USER node
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 WORKDIR /app/server
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+# Deliberately still root here: the entrypoint needs root to chown the mounted
+# volume, and then hands over to `node` via gosu. The server itself never runs
+# as root.
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 CMD ["npm", "start"]
