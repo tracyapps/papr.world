@@ -11,13 +11,13 @@ export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
 
 /**
- * Owner id for pieces placed in solo play.
+ * Maker account id for pieces placed in solo play.
  *
- * The server assigns real session ids to remote owners; a solo save has no
- * session, so pieces carry this stable stand-in. It is also a convenient
+ * The server assigns durable account ids to networked makers; a solo save has
+ * no account, so pieces carry this stable stand-in. It is also a convenient
  * sentinel: anything that is not this string came from another player.
  */
-export const LOCAL_PLAYER_ID = 'local-player';
+export const LOCAL_MAKER_ID = 'local-player';
 
 export type ConversationMemoryState = {
   flags: string[];
@@ -77,7 +77,7 @@ export type BuildSiteState = {
   x: number;
   z: number;
   rotY: number;
-  ownerId: string;
+  makerId: string;
   page: string;
   completedStepIds: string[];
   startedAt: number;
@@ -291,7 +291,11 @@ function normalizePlacedPieces(value: unknown): Record<string, PlacedPiece> {
       x: piece.x,
       z: piece.z,
       rotY: typeof piece.rotY === 'number' && Number.isFinite(piece.rotY) ? piece.rotY : 0,
-      ownerId: typeof piece.ownerId === 'string' ? piece.ownerId : LOCAL_PLAYER_ID,
+      // ownerId was the pre-protocol-v2 name. Read it once for old solo saves,
+      // then every subsequent save writes the durable makerId shape.
+      makerId: typeof piece.makerId === 'string'
+        ? piece.makerId
+        : typeof piece.ownerId === 'string' ? piece.ownerId : LOCAL_MAKER_ID,
       page: typeof piece.page === 'string' ? piece.page : '',
     };
   }
@@ -322,7 +326,9 @@ function normalizeBuildSites(value: unknown): Record<string, BuildSiteState> {
       x: site.x,
       z: site.z,
       rotY: typeof site.rotY === 'number' && Number.isFinite(site.rotY) ? site.rotY : 0,
-      ownerId: typeof site.ownerId === 'string' ? site.ownerId : LOCAL_PLAYER_ID,
+      makerId: typeof site.makerId === 'string'
+        ? site.makerId
+        : typeof site.ownerId === 'string' ? site.ownerId : LOCAL_MAKER_ID,
       page: typeof site.page === 'string' ? site.page : '',
       completedStepIds,
       startedAt: typeof site.startedAt === 'number' && Number.isFinite(site.startedAt) ? site.startedAt : 0,

@@ -805,7 +805,7 @@ describe('placing build pieces', () => {
     expect(pieces[0]).toMatchObject({
       templateKey: 'paper-bench', x: 6.5, z: -2.2, page: '0,0',
     });
-    expect(pieces[0]?.ownerId).toBeTruthy();
+    expect(pieces[0]?.makerId).toBeTruthy();
   });
 
   it('creates the page state on demand', () => {

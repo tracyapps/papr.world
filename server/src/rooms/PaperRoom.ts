@@ -16,11 +16,13 @@ import {
   ClientMessage,
   ServerMessage,
   LIMITS,
+  LEGACY_INVITE_CODE,
   PROTOCOL_VERSION,
   SERVER_TICK_HZ,
   clampMove,
   sanitizeAvatar,
   sanitizeChat,
+  sanitizeInviteCode,
   sanitizeName,
   sanitizePlacePiece,
   sanitizeAccountCredentials,
@@ -50,18 +52,31 @@ type Session = {
   lastChatAt: number;
 };
 
-export class PaperRoom extends Room<PaperRoomState> {
-  private sessions = new Map<string, Session>();
+const DEFAULT_PERSISTENCE_ID = 'neighborhood';
 
-  override onCreate(): void {
+type PaperRoomOptions = {
+  state: PaperRoomState;
+  metadata: { inviteCode: string };
+};
+
+export class PaperRoom extends Room<PaperRoomOptions> {
+  override state = new PaperRoomState();
+  private sessions = new Map<string, Session>();
+  private persistenceId = DEFAULT_PERSISTENCE_ID;
+
+  override onCreate(options: JoinOptions): void {
+    const inviteCode = sanitizeInviteCode(options?.inviteCode);
+    if (!inviteCode || inviteCode !== options.inviteCode) throw new Error('bad-invite-code');
+    this.persistenceId = inviteCode === LEGACY_INVITE_CODE
+      ? DEFAULT_PERSISTENCE_ID
+      : `invite-${inviteCode}`;
     this.maxClients = LIMITS.playersPerRoom;
-    this.setState(new PaperRoomState());
     this.setPatchRate(1000 / SERVER_TICK_HZ);
 
     // The world remembers: restore pieces/nodes if this neighborhood has a
     // save; otherwise seed it fresh. (Player positions and chat are transient
     // on purpose — see RoomSave in shared/.)
-    const save = roomStore.load(this.roomName);
+    const save = roomStore.load(this.persistenceId);
     if (save) this.hydrate(save);
     else this.seedResourceNodes();
 
@@ -94,6 +109,9 @@ export class PaperRoom extends Room<PaperRoomState> {
   override onAuth(client: Client, options: JoinOptions): string {
     if (!options || options.protocol !== PROTOCOL_VERSION) {
       throw new Error('bad-protocol');
+    }
+    if (sanitizeInviteCode(options.inviteCode) !== options.inviteCode) {
+      throw new Error('bad-invite-code');
     }
     if (options.account !== undefined) {
       const creds = sanitizeAccountCredentials(options.account);
@@ -280,13 +298,13 @@ export class PaperRoom extends Room<PaperRoomState> {
   // ---- Persistence ----------------------------------------------------------
 
   override onDispose(): void {
-    roomStore.saveNow(this.roomName, () => this.snapshot());
+    roomStore.saveNow(this.persistenceId, () => this.snapshot());
     accounts.flush();
   }
 
   /** Debounced write of the durable half of room state. */
   private persist(): void {
-    roomStore.scheduleSave(this.roomName, () => this.snapshot());
+    roomStore.scheduleSave(this.persistenceId, () => this.snapshot());
   }
 
   private snapshot(): Omit<RoomSave, 'version' | 'savedAt'> {

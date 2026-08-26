@@ -6,8 +6,10 @@
 
 import { AccountStore } from './accounts';
 import { RoomStore } from './persistence';
+import { FeedbackStore } from './feedback';
 
 export const DATA_DIR = process.env.PP_DATA_DIR ?? 'data';
 
 export const accounts = new AccountStore(DATA_DIR);
 export const roomStore = new RoomStore(DATA_DIR);
+export const feedbackStore = new FeedbackStore(DATA_DIR);

@@ -38,6 +38,17 @@ export function sanitizeName(raw: unknown): string {
   return cleaned.length > 0 ? cleaned : 'paper friend';
 }
 
+/**
+ * Normalize a pasted invite into `ABCD-23` form. Ambiguous I/O/0/1 glyphs are
+ * excluded so a spoken or handwritten code has one obvious spelling.
+ */
+export function sanitizeInviteCode(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const compact = raw.toUpperCase().replace(/[\s-]+/g, '');
+  if (!/^[A-HJ-NP-Z]{4}[2-9]{2}$/.test(compact)) return null;
+  return `${compact.slice(0, 4)}-${compact.slice(4)}`;
+}
+
 /** Trim + clamp a chat line. Returns null if there's nothing worth sending. */
 export function sanitizeChat(raw: unknown): string | null {
   const text = typeof raw === 'string' ? raw : '';

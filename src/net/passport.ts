@@ -4,7 +4,7 @@
 // (POST /account), held in localStorage. No email, no PII. It is what makes
 // "made by wren" and mailed harvests survive disconnects and restarts.
 //
-// Renderer-free and not imported by main.ts yet, like the rest of src/net/.
+// Renderer-free; sharedSession.ts calls it only after explicit shared opt-in.
 //
 // The secret is shown to the server only over the join handshake; treat the
 // stored copy like a save file. A future "claim your passport" flow attaches

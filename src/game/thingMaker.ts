@@ -289,17 +289,17 @@ function renderIngredientSlots(recipe: RecipeDefinition): string {
  * The plan slot.
  *
  * Called out separately from the materials because it is not consumed and
- * you cannot gather more of it — a plan is learned or found once and kept. Empty it is
+ * you cannot gather more of it — a plan is learned once and kept. Empty it is
  * a dashed outline with a ghost mark, the same language as a drop target on
  * a web form; filled it is solid.
  */
 function renderPlanSlot(recipe: RecipeDefinition): string {
   const found = getGameState().player.plans.includes(recipe.id as RecipeId);
   const comesFromTree = recipe.planSource === 'knowledge-tree';
-  const missingTitle = comesFromTree ? 'Plan not learned yet' : 'Plan not found yet';
+  const missingTitle = 'Plan not learned yet';
   const missingHint = comesFromTree
     ? 'The Professor can show you the lesson'
-    : 'Find this plan to unlock the recipe';
+    : 'This belongs in the starter scrapbook';
   return `
     <div class="craft-plan-slot${found ? ' is-found' : ''}">
       <span class="craft-plan-mark" aria-hidden="true"></span>

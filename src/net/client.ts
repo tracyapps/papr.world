@@ -1,8 +1,8 @@
-// Client networking layer over colyseus.js.
+// Client networking layer over @colyseus/sdk.
 //
 // This is the ONLY place the client talks to the server. It is deliberately
-// NOT imported by main.ts yet, so solo play is untouched — see src/net/README.md
-// for the ~15-line wiring when you're ready to flip multiplayer on.
+// Imported only through sharedSession.ts, whose URL gate keeps ordinary solo
+// play entirely offline — see src/net/README.md for the local dogfood URL.
 //
 // Shape of the deal (technical-plan.md "Keep the server authoritative"):
 //   * Outbound: we send INTENTS (sendMove/sendChat/...). We never assert truth.
@@ -10,11 +10,11 @@
 //     node changes to callbacks the renderer wires up, and push remote-player
 //     positions into an interpolation buffer for smooth motion.
 //
-// State objects from colyseus.js are dynamically-generated schema instances, so
+// State objects from the SDK are dynamically-generated schema instances, so
 // they're read through small `any`-localized readers here rather than importing
 // the server's Schema classes into the client bundle.
 
-import { Client, type Room } from 'colyseus.js';
+import { Client, getStateCallbacks, type Room } from '@colyseus/sdk';
 import {
   CLIENT_INTENT_HZ,
   ClientMessage,
@@ -72,6 +72,8 @@ export type ConnectOptions = {
   name: string;
   avatar: AvatarRef;
   room?: string;
+  inviteCode: string;
+  intent: 'create' | 'join';
   /**
    * Paper passport from src/net/passport.ts. Omit to join as a guest —
    * fine for a first look, but nothing made will be credited durably.
@@ -93,15 +95,21 @@ export async function connect(
     protocol: PROTOCOL_VERSION,
     name: options.name,
     avatar: options.avatar,
+    inviteCode: options.inviteCode,
     account: options.account,
   };
 
-  const room: Room = await client.joinOrCreate(options.room ?? DEFAULT_ROOM, joinOptions);
+  const room: Room = options.intent === 'join'
+    ? await client.join(options.room ?? DEFAULT_ROOM, joinOptions)
+    : await client.joinOrCreate(options.room ?? DEFAULT_ROOM, joinOptions);
   const buffer = new RemotePlayerBuffer();
   const selfId = room.sessionId;
+  const stateCallbacks = getStateCallbacks(room);
+  if (!stateCallbacks) throw new Error('The neighborhood did not provide schema state.');
 
-  wirePlayers(room, selfId, buffer, callbacks);
-  wirePieces(room, callbacks);
+  wirePlayers(room, stateCallbacks, selfId, buffer, callbacks);
+  wirePieces(room, stateCallbacks, callbacks);
+  wireChat(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
   room.onLeave((code) => callbacks.onLeave?.(code));
 
@@ -134,7 +142,7 @@ export async function connect(
   };
 }
 
-// ---- State readers (colyseus.js instances are dynamically typed) ------------
+// ---- State readers (SDK schema instances are dynamically typed) --------------
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -167,33 +175,70 @@ function readPiece(id: string, raw: any): PlacedPiece {
   };
 }
 
+function readChat(raw: any): ChatBroadcast {
+  return {
+    id: raw.id,
+    playerId: raw.playerId,
+    name: raw.name,
+    text: raw.text,
+    at: raw.at,
+  };
+}
+
 function wirePlayers(
   room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
   selfId: string,
   buffer: RemotePlayerBuffer,
   callbacks: NetCallbacks,
 ): void {
-  const players = (room.state as any).players;
-  players.onAdd((raw: any, id: string) => {
+  // Register through the root proxy. joinOrCreate resolves after the schema
+  // handshake but before the first full ROOM_STATE; binding the handshake's
+  // temporary collection directly would miss that initial collection swap.
+  $(room.state as any).players.onAdd((raw: any, id: string) => {
     if (id === selfId) return; // don't render ourselves as a remote
     buffer.push(id, raw.x, raw.z, raw.facing);
-    raw.onChange(() => buffer.push(id, raw.x, raw.z, raw.facing));
+    $(raw).onChange(() => buffer.push(id, raw.x, raw.z, raw.facing));
     callbacks.onPlayerJoin?.(readPlayer(id, raw));
   });
-  players.onRemove((_raw: any, id: string) => {
+  $(room.state as any).players.onRemove((_raw: any, id: string) => {
     if (id === selfId) return;
     buffer.remove(id);
     callbacks.onPlayerLeave?.(id);
   });
 }
 
-function wirePieces(room: Room, callbacks: NetCallbacks): void {
-  const pieces = (room.state as any).pieces;
-  pieces.onAdd((raw: any, id: string) => callbacks.onPieceAdd?.(readPiece(id, raw)));
-  pieces.onRemove((_raw: any, id: string) => callbacks.onPieceRemove?.(id));
+function wirePieces(
+  room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
+  callbacks: NetCallbacks,
+): void {
+  $(room.state as any).pieces.onAdd((raw: any, id: string) =>
+    callbacks.onPieceAdd?.(readPiece(id, raw)));
+  $(room.state as any).pieces.onRemove((_raw: any, id: string) =>
+    callbacks.onPieceRemove?.(id));
 }
 
 function wireMessages(room: Room, callbacks: NetCallbacks): void {
-  room.onMessage(ServerMessage.Chat, (line: ChatBroadcast) => callbacks.onChat?.(line));
   room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));
+}
+
+/**
+ * Room state supplies late-join history; the broadcast supplies the quickest
+ * live delivery. De-duplicate by the server id because a new line uses both.
+ */
+function wireChat(
+  room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
+  callbacks: NetCallbacks,
+): void {
+  if (!callbacks.onChat) return;
+  const seen = new Set<string>();
+  const deliver = (line: ChatBroadcast) => {
+    if (!line.id || seen.has(line.id)) return;
+    seen.add(line.id);
+    callbacks.onChat?.(line);
+  };
+  $(room.state as any).chat.onAdd((raw: any) => deliver(readChat(raw)));
+  room.onMessage(ServerMessage.Chat, deliver);
 }

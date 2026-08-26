@@ -515,10 +515,10 @@ quantities merely to manufacture a longer grind.
 
 ## Thing Maker Progression
 
-The Thing Maker is the main complexity gate. A tool plan may be **learned**
-earlier (`knowledge-tree.md` — tool plans come from the knowledge tree and
-nowhere else), but the machine needs suitable modules before it can fold them
-accurately.
+The Thing Maker is the main complexity gate. A plan may be **learned** earlier
+(`knowledge-tree.md` — every non-starter plan comes from the knowledge tree and
+nowhere else), but the machine needs suitable modules before it can fold the
+result accurately.
 
 ### Level 1 — Hand Crank
 
@@ -564,9 +564,8 @@ Working names: **Wouldchuck Yard**, **The Grain & Guillotine**, or **Chuck's Cut
 - Landmark: an enormous school paper cutter with a ruled cutting bed.
 - Service: turns renewable branch bundles into planks, shingles, strips, dowels,
   and patterned trim.
-- Sells/trades: structural building plans, offcuts, and bark samples. **Not
-  scissor plans** — tool plans are learned in the knowledge tree and are not
-  sold anywhere (amended 2026-08-06).
+- Sells/trades: finished structural pieces, offcuts, and bark samples. Plans
+  are learned in the knowledge tree and are not sold anywhere.
 - Requests: bring wood from different tree families, repair the cutter's guide,
   or identify a mysterious patterned branch.
 
@@ -592,7 +591,8 @@ Current name: **Pip’s Seed & Garden**.
   a cork-paper counter.
 - Landmark: an open-rafter walk-through greenhouse on the east meadow, with a
   notebook-paper center aisle and two rows of oversized raised planters.
-- Service: seeds, plant starts, dyes, fibers, soil blending, and garden plans.
+- Service: seeds, plant starts, dyes, fibers, soil blending, and finished garden
+  pieces.
 - Sells/trades: region-adapted seeds, decorative flowers, food-shaped crafts,
   compost card, and gentle tree-growth helpers.
 - Requests: test soil from a new biome, bring unusual fiber, help pollinating
@@ -607,15 +607,16 @@ friendship-driven stock remain later layers on this same storefront.
 
 ### Later Possibilities
 
-- Mole surveyor/excavation desk for deep-dig plans and geological maps. Lives
+- Mole surveyor/excavation desk for geological maps and surveying. Lives
   underground; see `mining-and-caves.md`.
 - Beaver bridgeworks for large shared construction projects — and the natural
   seller of boats (`water-and-waterways.md`).
 - Sheep yarn shop for binding, weaving, clothing, curtains, and hanging
   decorations. Owns the `affix` verb.
 - Magpie gallery for player-made art and rotating community exhibits.
-- The owl-itect's studio, which sells plans for furniture, clothing, structures,
-  and decoration (`plans-and-blueprints.md`). Never tool plans.
+- The owl-itect's studio, which sells and commissions finished furniture,
+  clothing, small structures, and decoration. Plans remain in the knowledge
+  tree (`plans-and-blueprints.md`).
 
 ### Every shop buys as well as sells
 

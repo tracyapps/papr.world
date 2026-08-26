@@ -43,7 +43,7 @@ import { markCurrentSpot, updatePlacesPanel } from './ui/placesPanel';
 import { closeHudMenu, initializeHudMenus } from './ui/hudMenus';
 import { initializePlaces } from './world/places';
 import { initializeRegionBanner, updateRegionBanner } from './ui/regionBanner';
-import { hasScreenInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
+import { hasOrbitBlockingInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
 import { initializeGameState } from './sim/state';
 import { hasToolActionAt, initializeToolActions, tryToolActionAt } from './game/toolActions';
 import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } from './game/planting';
@@ -84,6 +84,15 @@ import {
   isTimedActionActive,
   updateTimedAction,
 } from './game/timedAction';
+import {
+  getSharedSessionDebug,
+  initializeSharedSession,
+  publishSharedPlacedPiece,
+  updateSharedSession,
+} from './net/sharedSession';
+import { initializeFeedbackPanel } from './ui/feedbackPanel';
+import { initializeFeedbackReview } from './ui/feedbackReview';
+import { initializeMultiplayerPanel } from './ui/multiplayerPanel';
 
 // Bootstrap: build the world, wire the UI, run the frame loop.
 // World construction happens through the page system; page 0,0 is the
@@ -94,6 +103,7 @@ const SEED_STORE_PAGE = pageId(GREENHOUSE_PAGE.px, GREENHOUSE_PAGE.pz);
 
 const SPAWN_X = -1.5;
 const SPAWN_Z = -2.2;
+let feedbackReviewActive = false;
 
 initializeGameState();
 initializeTechLearning();
@@ -111,6 +121,8 @@ initializeGuidance();
 // registers into a rail or appends a toast.
 initializeHudLayout();
 initializeTimedAction();
+initializeFeedbackPanel();
+initializeMultiplayerPanel();
 
 wireThingMakerDom();
 renderThingMakerPanel();
@@ -136,6 +148,7 @@ initializePlacement();
 initializeBuildPalette();
 initializeWading();
 initializeRegionBanner();
+void initializeSharedSession();
 registerScreenInteraction({
   id: 'critter-conversation',
   priority: 100,
@@ -178,6 +191,7 @@ registerScreenInteraction({
 registerScreenInteraction({
   id: 'cozy-object',
   priority: 70,
+  blocksOrbit: false,
   hitTest: hasCozyInteractionAt,
   interact: tryCozyInteractionAt,
 });
@@ -236,7 +250,7 @@ initializeInput({
     !isTimedActionActive()
     &&
     getActionMode() === 'interact'
-    && !hasScreenInteractionAt(event.clientX, event.clientY)
+    && !hasOrbitBlockingInteractionAt(event.clientX, event.clientY)
   ),
   onEscape: () => {
     if (cancelTimedAction('escape')) return true;
@@ -312,7 +326,7 @@ function animate(animationTime = 0) {
   // letting it run means the clock, the critters and the weather all drift
   // while you are choosing eyebrows. Draining the delta each frame keeps the
   // first frame after closing from arriving as one enormous step.
-  if (isAvatarStudioOpen()) {
+  if (feedbackReviewActive || isAvatarStudioOpen()) {
     clock.getDelta();
     return;
   }
@@ -324,6 +338,7 @@ function animate(animationTime = 0) {
   updateGamepadCamera(delta);
   updateAvatar(delta);
   updateStreaming(avatar.position);
+  updateSharedSession();
   const revealDx = avatar.position.x - lastMiniMapRevealX;
   const revealDz = avatar.position.z - lastMiniMapRevealZ;
   if (revealDx * revealDx + revealDz * revealDz >= MINIMAP_REVEAL_DISTANCE_SQ) {
@@ -391,6 +406,10 @@ declare global {
       teleport: (x: number, z: number) => void;
       /** Console-only: why the trim system can or cannot see a tree. */
       trees: () => ReturnType<typeof describeTrimRegistry>;
+      /** Console-only shared-session visibility for two-browser smoke checks. */
+      shared: () => ReturnType<typeof getSharedSessionDebug>;
+      /** Console-only authoritative piece intent for multiplayer smoke checks. */
+      sharedPlace: (templateKey?: string) => void;
     };
   }
 }
@@ -403,9 +422,20 @@ window.__paperWorld = {
     avatar.position.z = z;
   },
   trees: describeTrimRegistry,
+  shared: getSharedSessionDebug,
+  sharedPlace: (templateKey = 'paper-bench') => publishSharedPlacedPiece({
+    id: 'console-only',
+    templateKey,
+    x: avatar.position.x + 1.2,
+    z: avatar.position.z,
+    rotY: 0,
+    makerId: 'local-player',
+    page: getCurrentPageId(),
+  }),
 };
 
 window.addEventListener('resize', resize);
 
+feedbackReviewActive = initializeFeedbackReview();
 resize();
 requestAnimationFrame(animate);

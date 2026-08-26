@@ -40,12 +40,12 @@ generosity are each load bearing.
 The world's currency is the **shiny chip** — *chips* for short, written ₡.
 They look like poker chips, but shiny.
 
-What chips are for: buying plans, tools, materials, pre-made furniture and
-clothing, and anything a player would rather not make themselves. **Not tool
-plans** — those are learned in the knowledge tree and cannot be bought at any
-price (`knowledge-tree.md`). Nothing converts chips into progression. What chips
-are explicitly *not* for: being the score. Nothing in the UI should invite a
-player to watch the number go up.
+What chips are for: buying tools, materials, pre-made furniture and clothing,
+and anything a player would rather not make themselves. **Not plans** — every
+non-starter plan is learned in the knowledge tree and cannot be bought at any
+price (`knowledge-tree.md`). Nothing converts chips into progression. What
+chips are explicitly *not* for: being the score. Nothing in the UI should
+invite a player to watch the number go up.
 
 ### Where chips come from — and do not
 
@@ -120,15 +120,13 @@ tools you have replaced.
 
 ### Direct giving
 
-All materials, chips, and tools can be given to another player — either handed
-over directly, or sent through the **Papr World Mail System (PWMS)**.
+Materials, chips, tools, and other finished creations can be given to another
+player — either handed over directly, or sent through the **Papr World Mail
+System (PWMS)**.
 
-Plans have their own gifting rule; see `plans-and-blueprints.md`. Short
-version: a plan you already know can only be gifted, never kept twice.
-
-**Tool plans are the exception** (2026-08-06): they are learned in the knowledge
-tree rather than held as objects, so they cannot be gifted at all. Generosity
-with tools takes the better form anyway — you make the tool and give them that.
+**Plans cannot be given or mailed.** They are knowledge learned through the
+tree, not inventory objects. Generosity takes the better form anyway: make the
+tool, furniture, clothing, decoration, or structure and give them that.
 
 ### Mailboxes
 
@@ -197,11 +195,10 @@ knowledge. So what deepening friendship opens is invitation and story — never
 information a player could otherwise be missing.
 
 The primitive still worth building early is **giving a thing to a critter**.
-The owl who draws plans wants a rare paper from a biome she does not fly to.
-That is a need, not a price, and it reuses friendship rather than currency.
-Barter and chips coexist: the owl accepts either (see
-`plans-and-blueprints.md`), and the barter route costs slightly less than the
-chip route, because you spent time instead of money.
+The owl-itect may want a rare paper from a biome she does not fly to for one of
+her finished creations. That is a need, not a price, and it reuses friendship
+rather than currency. When she later sells or commissions finished goods,
+barter and chips can coexist; neither route sells plan knowledge.
 
 ## Things to be careful of
 
@@ -230,10 +227,10 @@ making, and trading are the reward for time and effort.
 
 This mostly falls out of decisions already made — player-made furniture and
 clothing can be sold, everything can be gifted or mailed, and barter is always
-on the table. What it constrains is the **plan engine**, which must generalise
-past tools (`plans-and-blueprints.md`), and eventually player-authored plans,
-which is the version-two ambition that turns "I made a thing" into "I made a
-thing other people want."
+on the table. What it constrains is the **recipe and creation engine**, which
+must generalise past tools (`plans-and-blueprints.md`), and eventually
+player-authored plans, which is the version-two ambition that turns "I made a
+thing" into "I made a thing other people want."
 
 The guardrail is unchanged and is the reason player-to-player *chip* sales stay
 parked for now: peer trade is where communal economies most easily turn into
@@ -248,5 +245,5 @@ risk, so they go first.
 
 ## Blocked on
 
-Nothing technical. The exchange gap blocked the owl, the Wood Mill, and plan
-purchasing — all of which were waiting on this design, which now exists.
+Nothing technical. The exchange gap blocked the owl-itect's finished-goods
+shop and the Wood Mill, both of which now have the economic rules they need.

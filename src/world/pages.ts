@@ -1,6 +1,7 @@
 import { getAuthoredPage } from './authored';
 import { generatePage } from './generate';
 import { pageId, type PageData } from './types';
+import { withWaterways } from './waterways';
 
 // Page registry: authored pages win, everything else is generated on demand.
 // Page data is cached so terrain sampling and streaming agree forever.
@@ -11,7 +12,7 @@ export function getPage(px: number, pz: number): PageData {
   const id = pageId(px, pz);
   let page = pageCache.get(id);
   if (!page) {
-    page = getAuthoredPage(px, pz) ?? generatePage(px, pz);
+    page = withWaterways(getAuthoredPage(px, pz) ?? generatePage(px, pz));
     pageCache.set(id, page);
   }
   return page;

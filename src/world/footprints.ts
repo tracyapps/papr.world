@@ -44,6 +44,7 @@ export type DigFootprint = {
    */
   solidRadiusX?: number;
   solidRadiusZ?: number;
+  rotationY?: number;
 };
 
 const CLEARING_DETAIL_FOOTPRINTS: DigFootprint[] = [
@@ -99,6 +100,10 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
     case 'water':
       // You cannot dig a hole in a pond. Water claims its full footprint.
       return { id, label: 'water', x: prop.x, z: prop.z, radiusX: prop.width / 2, radiusZ: prop.depth / 2 };
+    case 'waterChannel':
+      // Expanded into one short rotated footprint per segment below. A single
+      // ellipse here would block acres of dry land between bends.
+      return null;
     case 'ribbon':
     case 'unique':
       return null;
@@ -147,6 +152,24 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
   const footprints = page.props
     .map((prop, index) => propFootprint(page, prop, index))
     .filter((footprint): footprint is DigFootprint => Boolean(footprint));
+
+  for (let propIndex = 0; propIndex < page.props.length; propIndex += 1) {
+    const prop = page.props[propIndex];
+    if (prop.kind !== 'waterChannel') continue;
+    for (let segment = 0; segment < prop.points.length - 1; segment += 1) {
+      const [ax, az] = prop.points[segment];
+      const [bx, bz] = prop.points[segment + 1];
+      footprints.push({
+        id: `page:${page.id}:prop:${prop.id ?? propIndex}:segment:${segment}`,
+        label: 'running water',
+        x: (ax + bx) / 2,
+        z: (az + bz) / 2,
+        radiusX: Math.hypot(bx - ax, bz - az) / 2 + 0.15,
+        radiusZ: Math.max(prop.widths[segment] ?? 1, prop.widths[segment + 1] ?? 1) / 2,
+        rotationY: Math.atan2(-(bz - az), bx - ax),
+      });
+    }
+  }
 
   // Pieces the player has put down stand on top of whatever the page seeded.
   const placed = getGameState().world.pages[page.id]?.placedPieces ?? {};
@@ -225,8 +248,12 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
 function overlaps(footprint: DigFootprint, x: number, z: number, radius: number, physical = false) {
   const footprintX = physical ? footprint.solidRadiusX ?? footprint.radiusX : footprint.radiusX;
   const footprintZ = physical ? footprint.solidRadiusZ ?? footprint.radiusZ : footprint.radiusZ;
-  const dx = (x - footprint.x) / (footprintX + radius);
-  const dz = (z - footprint.z) / (footprintZ + radius);
+  const worldDx = x - footprint.x;
+  const worldDz = z - footprint.z;
+  const cos = Math.cos(-(footprint.rotationY ?? 0));
+  const sin = Math.sin(-(footprint.rotationY ?? 0));
+  const dx = (worldDx * cos - worldDz * sin) / (footprintX + radius);
+  const dz = (worldDx * sin + worldDz * cos) / (footprintZ + radius);
   return dx * dx + dz * dz < 1;
 }
 

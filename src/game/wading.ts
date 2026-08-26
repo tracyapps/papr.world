@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { scene } from '../render/context';
 import { RENDER_ORDER } from '../render/renderOrder';
 import { sampleTerrainHeight } from '../world/terrain';
-import { submersionAt, waterDepthAt } from '../world/water';
+import { isWaterCrossingAt, submersionAt, waterDepthAt } from '../world/water';
 
 // Wading: what happens when you walk into water.
 //
@@ -68,6 +68,7 @@ export function initializeWading() {
  * reads as fully pressed while the character moves slowly through water.
  */
 export function wadeSpeedMultiplier(x: number, z: number): number {
+  if (isWaterCrossingAt(x, z)) return 1;
   return 1 - (1 - WADE_SPEED_FLOOR) * submersionAt(x, z);
 }
 
@@ -93,7 +94,9 @@ function spawnRipple(x: number, z: number) {
 }
 
 export function updateWading(delta: number, position: THREE.Vector3, speed: number) {
-  const submersion = submersionAt(position.x, position.z);
+  const submersion = isWaterCrossingAt(position.x, position.z)
+    ? 0
+    : submersionAt(position.x, position.z);
   const moving = speed > 0.35;
 
   if (submersion > 0.05 && moving) {

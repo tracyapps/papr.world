@@ -16,7 +16,8 @@ features on top of a network that already exists.
 > (durable `accountId`, minted at `POST /account`, scrypt-hashed secrets),
 > JSON room persistence (pieces + nodes survive restarts), `makerId` on
 > placed pieces, per-player piece caps, and `src/net/passport.ts` on the
-> client. `PROTOCOL_VERSION` is now **2**.
+> client. `PROTOCOL_VERSION` is now **3**; v3 adds validated invite-code
+> matchmaking to the join contract.
 
 ## Can it live on any web server?
 
@@ -43,49 +44,52 @@ Two halves, two answers:
   real Colyseus and passes an end-to-end smoke test: two clients join, move
   (with teleport clamped), chat broadcasts, a piece is placed, a node
   decrements.*
-- **`src/net/`** — client networking layer over `colyseus.js` plus a
-  renderer-free remote-player interpolation buffer. Real and typechecked, but
-  **not imported by `main.ts`**, so solo play is untouched. Wiring guide in
-  `src/net/README.md`.
+- **`src/net/`** — ✅ opt-in shared coordinator over `@colyseus/sdk` 0.17, a tested
+  URL/config gate, renderer-free interpolation, remote paper-cutout and shared
+  piece call sites, plus passport identity. Solo stays the default and opens no
+  socket. Wiring/run guide in `src/net/README.md`.
 
 ## Load-bearing work still remaining
 
 These are the things that are painful to add later, in rough order:
 
-1. **Avatar-as-data.** "See each other" needs the drawn character saved as a
-   durable `AvatarRef` (preset + drawing key + edge color) — the shape is
-   already defined in `shared/`. Until the draw screen produces this, remote
-   players have nothing meaningful to show. **Biggest real prerequisite.**
-2. **A clean simulation seam for the local player.** `game/avatar.ts` currently
-   computes movement client-side. That's fine — but the frame loop needs to
-   (a) send `net.sendMove(...)` each tick and (b) position remote cutouts from
-   `net.sampleRemote(...)`. See the wiring guide. No rewrite required for the
-   first slice; local prediction stays, the server just validates.
-3. **Renderer hooks for remote entities.** Functions to spawn/despawn a remote
-   avatar mesh and to add/remove a placed build piece from network callbacks.
-   These reuse existing builders; they're new call sites, not new systems.
+1. **Avatar-as-data adapter.** ✅ The drawn `AvatarDesign` is durable and
+   validated, and the MP.1 adapter emits `AvatarRef` (preset + design id + edge
+   color). Remote
+   rendering may use the template/edge fallback until designs go over the wire
+   in avatar Phase D; actual drawing sync is not a blocker for two-tab dogfood.
+2. **A clean simulation seam for the local player.** ✅ The frame sends
+   throttled movement intents and samples remote interpolation while local
+   prediction remains responsive and the server clamps impossible movement.
+3. **Renderer hooks for remote entities.** ✅ Named fallback cutouts
+   spawn/despawn at terrain or bridge height; network build pieces reuse the
+   existing piece builder and suppress the local device's duplicate echo.
 4. **Server-side persistence.** ✅ *Done 2026-08-10* — rooms save
    pieces + nodes to `server/data/room-*.json` (atomic, debounced; chat and
    positions deliberately transient). Accounts persist alongside. SQLite is a
    later swap behind the same `RoomStore` seam.
-5. **Identity + rooms UI.** Display name entry, and a minimal room browser /
-   host controls (solo local, LAN address, hosted).
+5. **Identity + rooms UI.** 🚧 Display name entry, invite-code create/join,
+   visible connection/recovery states, and solo return are built. Host controls
+   remain (solo local, LAN address, hosted).
 
 ## Mechanics to settle first — but only their data shapes
 
 Nail down the *data model* of these before wiring the socket, so you don't
 design them twice under network constraints. Polish can come after.
 
-- **Building placement** (local UX + `PlacedPiece` shape). Already your next
-  task — the right call.
+- **Building placement** (local UX + `PlacedPiece` shape). ✅ Built locally.
 - **One gatherable material** (`ResourceNode` + the inventory grant on gather).
-- **Avatar drawing → `AvatarRef`** (see load-bearing #1).
+  ✅ Local gatherables exist; the server stub already proves the intent shape.
+- **Avatar drawing → `AvatarRef`** (see load-bearing #1). ✅ Durable design,
+  preset, and the fallback join adapter now exist.
 - **Author identity on anything a player makes.** Added 2026-08-06 from
   `land-and-dwellings.md`: a planted garden must know who planted it, because
   harvesting it mails the same yield to them. Retrofitting a maker id onto
   already-placed entities is exactly the kind of migration this list exists to
   avoid. It also pays for maker-crediting, which `game-design-plan.md` wants
   anyway.
+  ✅ Protocol, server, completed solo pieces, and in-progress solo builds now
+  use `makerId`; legacy `ownerId` solo saves migrate on read (2026-08-25).
 - **House spacing as a placement validation rule.** Also from
   `land-and-dwellings.md`: houses may not be placed too close to other houses,
   shops, landmarks, or water. It belongs in `shared/` with the other rules both
@@ -109,20 +113,37 @@ Nothing below blocks or is blocked by the networking work:
 
 ## Suggested sequence
 
-1. Local building placement (UX + data). *(mechanic)*
-2. Avatar drawing produces a saved `AvatarRef`. *(load-bearing)*
-3. One gatherable material end-to-end locally. *(mechanic)*
-4. `npm install`, then wire `src/net/` into `main.ts`: send move, render remote
+1. ✅ Local building placement (UX + data). *(mechanic)*
+2. ✅ Durable avatar drawing + preset data; add the `AvatarRef` join adapter as
+   part of step 5. *(load-bearing seam mostly done)*
+3. ✅ One gatherable material end-to-end locally. *(mechanic)*
+4. ✅ Align solo build ownership with protocol-v2 `makerId` and keep an
+   `ownerId` save migration. *(identity)*
+5. ✅ Wire `src/net/` into an explicit shared/development mode in `main.ts`: send
+   move, render remote
    players, render placed pieces. *(load-bearing)*
-5. Prove the slice: two tabs → same room → chat → see each other build.
-6. Add chat UI + rejection hints, then server-side persistence.
-7. Room browser / LAN host controls.
-8. Deploy the server to a Node host; point the client at `wss://`.
+6. ✅ Prove the slice: two tabs → same room → accessible DOM chat → see each
+   other build; restart the server and verify the piece remains.
+7. ✅ Build the in-game product feedback/outbox/receipt path in
+   `alpha-testing.md`: explicit screenshot capture/upload, offline
+   outbox/Retry, receipts, atomic server queue, private reviewer triage, and
+   redacted export are browser-proved.
+8. ✅ Upgrade client/server/schema/transport to Colyseus 0.17, rerun the full
+   two-client/restart slice, and confirm both npm audits are clean.
+9. 🚧 Invite-code room UI, connection/rejection hints, and a clean return to
+   solo play are built and locally browser-proved. Add host controls and
+   personal mute/block before Alpha gate 1.
+10. Deploy the server to a Node host; point the client at `wss://`, then run
+   the roadmap's Alpha gate 1 with 3–5 testers. The recommended accounts and
+   environment settings are recorded in `hosting.md`.
+
+The full game, map, underground, and every biome are explicitly **not** alpha
+prerequisites. A coherent loop and safe, reviewable feedback are.
 
 ## Running it locally
 
 ```bash
-# once, from repo root — installs colyseus.js for the client
+# once, from repo root — installs @colyseus/sdk for the client
 npm install
 
 # terminal 1 — the authoritative server (from repo root)

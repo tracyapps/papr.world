@@ -42,8 +42,9 @@ model is already the right shape.
 **Provenance everywhere.** Both games stamped a creator on everything.
 "Made by wren" turns objects into social objects — conversation starters,
 reputation, gratitude targets. `land-and-dwellings.md` already requires maker
-id (planted gardens mail their harvest to the planter). §4.1 flags that our
-current `ownerId` cannot do this job.
+id (planted gardens mail their harvest to the planter). The §4.1 risk is now
+closed for placed pieces: server and solo builds use durable `makerId`, with a
+legacy solo-save read for the old `ownerId` name.
 
 **Non-zero-sum generosity.** Glitch literally rewarded kindness as a
 mechanic. `economy.md`'s non-fungible generosity decision is *exactly* this —
@@ -216,10 +217,11 @@ play is the most inclusive social mode.
 
 ## 3. Big-picture changes required
 
-1. **`accountId` becomes the universal foreign key.** Every schema that
-   says `ownerId`/`playerId` today means "session" and must mean "account".
-   Do this before real build data accrues — it's the migration all others
-   depend on. *(In progress as of this doc.)*
+1. **`accountId` becomes the universal foreign key.** ✅ Placed pieces and
+   build sites now use `makerId`, stamped from the authenticated account on the
+   server and a stable solo sentinel locally. Continue this rule for gardens,
+   mail, permissions, and every later authored object; `playerId` remains valid
+   only for transient transport/chat references where explicitly documented.
 2. **`shared/` grows into the true shared-sim package.** Spacing catalogs,
    terrain queries, and resource seeding currently live under `src/sim/`
    where the server can't cleanly reach them. Either move the renderer-free
@@ -231,11 +233,9 @@ play is the most inclusive social mode.
 4. **Chat re-architecture** out of synced Schema (see §2.4, §4.2).
 5. **Version discipline**: `PROTOCOL_VERSION` already exists; add
    `SAVE_VERSION` + migration hooks with persistence.
-6. **Put the repo in git.** There is no version control today. Multiplayer
-   work means server + client + shared changing in lockstep, often by
-   different agents; without history, one bad session is unrecoverable.
-   `git init` + commit before/after each work session is the single
-   cheapest risk reduction available.
+6. **Keep server + client + shared changes versioned together.** The repository
+   is now under git. Protocol shape changes still land as one reviewed change
+   with a version bump and migration where durable data is involved.
 7. **Privacy/ToS text** exists before the first invite goes out (even
    friends deserve to know what's stored).
 
@@ -243,11 +243,10 @@ play is the most inclusive social mode.
 
 ## 4. Conflicts and pitfalls (each with its fix)
 
-1. **`ownerId` is a Colyseus `sessionId`** (`PaperRoom.handlePlacePiece`,
-   `PlayerSchema.id`). Evaporates on disconnect; breaks maker-credit,
-   mailed harvests, permissions. **Fix:** authenticated `accountId` stamped
-   server-side (§2.1); `PlacedPiece` gains `makerId`. *Severity: high — the
-   longer it waits, the more world data needs migrating.*
+1. **Historic `ownerId`/session-id confusion.** ✅ Closed for placed pieces and
+   build sites. The server stamps authenticated `accountId` into `makerId`; the
+   solo client uses the same shape and migrates the legacy field on read. Apply
+   this invariant to every new persistent entity.
 2. **Chat history in synced Schema** pushes the full log to every client and
    can't honor blocks. **Fix:** history-on-join message + broadcast appends,
    filtered per recipient (§2.4).
@@ -269,9 +268,9 @@ play is the most inclusive social mode.
 7. **Terrain queries are expensive** (`isSolidAt` ≈ 7µs; it already broke
    frame budget once). Server validation must use precomputed per-page
    masks, not per-check generation.
-8. **Colyseus 0.15 is aging.** Plan the 0.16/schema-v3 upgrade before public
-   launch; `PROTOCOL_VERSION` makes the cutover safe. Don't upgrade
-   mid-phase.
+8. **Colyseus dependency drift.** The 0.15 → 0.17 migration and clean audit
+   landed 2026-08-25. Re-run audits before each hosted alpha/public cut and use
+   `PROTOCOL_VERSION` for any future wire-shape change.
 9. **No git** — see big-picture #6. This is the top process risk.
 10. **Hosting split**: `vercel.json` deploys the *client* only. The server
     needs a Node host (Fly/Railway/Render/VPS) with `wss://`, health checks
@@ -332,6 +331,19 @@ previous one's acceptance criteria pass.
   neighborhood, reports queue, slow-mode, ToS/privacy text, Colyseus
   upgrade, claimable accounts (email/passkey). ✅ when: the §2.6 "rock
   solid" checklist is green.
+
+  **Scheduling note (2026-08-25):** the 0.15 → 0.17 Colyseus upgrade moved
+  forward and is complete; the two-client/restart slice and clean audits were
+  re-proved. Phase G still requires a fresh security audit before public
+  discovery.
+
+### Invite-only alpha checkpoint
+
+Do not wait for Phase G to gather product feedback. After B, build the in-game
+feedback intake in `alpha-testing.md`; after C and D provide accessible chat,
+mute/block, join codes, and host removal, run the roadmap's Alpha gate 1 with a
+small known group. Phase G's reports queue is the stronger **public moderation**
+bar, not the ordinary bug/improvement/idea queue used during invited alpha.
 
 ## 7. What this doc deliberately defers
 

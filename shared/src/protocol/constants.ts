@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 2; // v2: durable accountId/makerId + passport auth
+export const PROTOCOL_VERSION = 3; // v3: invite-code-filtered neighborhood matchmaking
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -49,3 +49,6 @@ export const LIMITS = {
 
 /** Default room name / neighborhood the first slice joins. */
 export const DEFAULT_ROOM = 'neighborhood';
+
+/** Backward-compatible room for old `?shared=1` development links and saves. */
+export const LEGACY_INVITE_CODE = 'PAPR-22';

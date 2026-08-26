@@ -94,11 +94,43 @@ Choices can add memory flags. A later scene can require those flags, creating a 
 
 The next scene would use `"requiresFlags": ["lost-map:promised"]` and usually add another flag. Also add an `excludesFlags` completion flag so a finished scene cannot repeat. Bandit's Moon Button scenes in the content file are a complete five-part example.
 
+## Follow-up threads inside one visit
+
+A choice can open another set of questions without ending the conversation. Add
+`followUps` using the same choice shape:
+
+```json
+{
+  "id": "local-wood",
+  "label": "What wood grows nearby?",
+  "replies": ["“Ribbonwood curls up along the forest floor.”"],
+  "followUps": [
+    {
+      "id": "tool",
+      "label": "What should I bring?",
+      "replies": ["“Bring {{tool-for:redwood-bark-curls}}.”"]
+    },
+    {
+      "id": "use",
+      "label": "What is it useful for?",
+      "replies": ["“It makes a sturdy little frame.”"]
+    }
+  ]
+}
+```
+
+Follow-ups can nest again. The game rotates repeated answers and keeps the
+thread open; `endsScene` is still the explicit way to close it. Generated local
+knowledge also records which exact fact was said, but those memory flags never
+make the topic unavailable.
+
 ## Choice effects
 
 - `friendship`: adds relationship points from 0 to 100.
 - `addFlags`: remembers one or more story facts for that individual animal.
 - `endsScene`: shows “Keep chatting” and “See you soon” after the reply.
+- `followUps`: replaces the current questions with another choice list after the reply.
+- `returnToEveryday`: returns a thread to the standard everyday questions.
 - `action`: currently supports `"pet"` for a choice that also pets the animal.
 - `replyMode`: use `"random"` to pick a randomized reply instead of rotating through the list in order. The default is `"cycle"`.
 

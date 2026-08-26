@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-29T23:13:47.409Z",
+  "generatedAt": "2026-08-25T05:05:05.575Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -66,6 +66,15 @@
       "usage": "material",
       "sourceSize": "1000x800",
       "size": "1000x800"
+    },
+    {
+      "key": "materials.basalt",
+      "source": "assets/source/materials/basalt.svg",
+      "runtime": "assets/runtime/materials/basalt.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "462x663",
+      "size": "462x663"
     },
     {
       "key": "materials.building-blocks-aqua",
@@ -138,6 +147,15 @@
       "usage": "material",
       "sourceSize": "1920x1080",
       "size": "1920x1080"
+    },
+    {
+      "key": "materials.clay-earth",
+      "source": "assets/source/materials/clay-earth.svg",
+      "runtime": "assets/runtime/materials/clay-earth.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "463x462",
+      "size": "463x462"
     },
     {
       "key": "materials.construction-paper-blue-1",
@@ -230,6 +248,15 @@
       "size": "512x512"
     },
     {
+      "key": "materials.cream-city-brick",
+      "source": "assets/source/materials/cream-city-brick.svg",
+      "runtime": "assets/runtime/materials/cream-city-brick.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "407x324",
+      "size": "407x324"
+    },
+    {
       "key": "materials.crosshatch-cubes-yellow-maroon",
       "source": "assets/source/materials/crosshatch-cubes-yellow-maroon.svg",
       "runtime": "assets/runtime/materials/crosshatch-cubes-yellow-maroon.png",
@@ -320,6 +347,24 @@
       "size": "360x200"
     },
     {
+      "key": "materials.grey-brick",
+      "source": "assets/source/materials/grey-brick.svg",
+      "runtime": "assets/runtime/materials/grey-brick.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "407x324",
+      "size": "407x324"
+    },
+    {
+      "key": "materials.iron-rock",
+      "source": "assets/source/materials/iron-rock.svg",
+      "runtime": "assets/runtime/materials/iron-rock.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "463x462",
+      "size": "463x462"
+    },
+    {
       "key": "materials.monstera-patch",
       "source": "assets/source/materials/monstera-patch.svg",
       "runtime": "assets/runtime/materials/monstera-patch.png",
@@ -327,6 +372,15 @@
       "usage": "material",
       "sourceSize": "277x231",
       "size": "277x231"
+    },
+    {
+      "key": "materials.mossy-wall",
+      "source": "assets/source/materials/mossy-wall.svg",
+      "runtime": "assets/runtime/materials/mossy-wall.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "460x460",
+      "size": "460x460"
     },
     {
       "key": "materials.paper-construction-brown-01",
@@ -354,6 +408,24 @@
       "usage": "material",
       "sourceSize": "512x512",
       "size": "512x512"
+    },
+    {
+      "key": "materials.quartz",
+      "source": "assets/source/materials/quartz.svg",
+      "runtime": "assets/runtime/materials/quartz.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "463x463",
+      "size": "463x463"
+    },
+    {
+      "key": "materials.red-brick",
+      "source": "assets/source/materials/red-brick.svg",
+      "runtime": "assets/runtime/materials/red-brick.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "407x324",
+      "size": "407x324"
     },
     {
       "key": "materials.resource-brown-paper-patch-01",
@@ -408,6 +480,24 @@
       "usage": "material",
       "sourceSize": "306x316",
       "size": "306x316"
+    },
+    {
+      "key": "materials.sandstone",
+      "source": "assets/source/materials/sandstone.svg",
+      "runtime": "assets/runtime/materials/sandstone.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "464x463",
+      "size": "464x463"
+    },
+    {
+      "key": "materials.slate",
+      "source": "assets/source/materials/slate.svg",
+      "runtime": "assets/runtime/materials/slate.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "218x462",
+      "size": "218x462"
     },
     {
       "key": "materials.subtle-bubbles-blues",
@@ -534,6 +624,69 @@
       "usage": "prop",
       "sourceSize": "1920x1080",
       "size": "1920x1080"
+    },
+    {
+      "key": "props.cattail-cluster-01",
+      "source": "assets/source/props/cattail-cluster-01.svg",
+      "runtime": "assets/runtime/props/cattail-cluster-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "637x602",
+      "size": "637x602"
+    },
+    {
+      "key": "props.cattail-cluster-02",
+      "source": "assets/source/props/cattail-cluster-02.svg",
+      "runtime": "assets/runtime/props/cattail-cluster-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "488x602",
+      "size": "488x602"
+    },
+    {
+      "key": "props.cattail-cluster-03",
+      "source": "assets/source/props/cattail-cluster-03.svg",
+      "runtime": "assets/runtime/props/cattail-cluster-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "637x602",
+      "size": "637x602"
+    },
+    {
+      "key": "props.cattail-cluster-04",
+      "source": "assets/source/props/cattail-cluster-04.svg",
+      "runtime": "assets/runtime/props/cattail-cluster-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "391x602",
+      "size": "391x602"
+    },
+    {
+      "key": "props.driftwood-01",
+      "source": "assets/source/props/driftwood-01.svg",
+      "runtime": "assets/runtime/props/driftwood-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "907x628",
+      "size": "907x628"
+    },
+    {
+      "key": "props.driftwood-02",
+      "source": "assets/source/props/driftwood-02.svg",
+      "runtime": "assets/runtime/props/driftwood-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "940x443",
+      "size": "940x443"
+    },
+    {
+      "key": "props.driftwood-03",
+      "source": "assets/source/props/driftwood-03.svg",
+      "runtime": "assets/runtime/props/driftwood-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "887x586",
+      "size": "887x586"
     },
     {
       "key": "props.green-hills-01",
@@ -815,6 +968,33 @@
       "size": "624x871"
     },
     {
+      "key": "props.water-lily-01",
+      "source": "assets/source/props/water-lily-01.svg",
+      "runtime": "assets/runtime/props/water-lily-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "978x592",
+      "size": "978x592"
+    },
+    {
+      "key": "props.water-lily-02",
+      "source": "assets/source/props/water-lily-02.svg",
+      "runtime": "assets/runtime/props/water-lily-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "912x456",
+      "size": "912x456"
+    },
+    {
+      "key": "props.water-lily-03",
+      "source": "assets/source/props/water-lily-03.svg",
+      "runtime": "assets/runtime/props/water-lily-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "912x456",
+      "size": "912x456"
+    },
+    {
       "key": "props.window-single-closed-01",
       "source": "assets/source/props/window-single-closed-01.svg",
       "runtime": "assets/runtime/props/window-single-closed-01.png",
@@ -840,6 +1020,105 @@
       "usage": "prop",
       "sourceSize": "241x309",
       "size": "241x309"
+    },
+    {
+      "key": "tools.basic-mallet",
+      "source": "assets/source/tools/basic-mallet.svg",
+      "runtime": "assets/runtime/tools/basic-mallet.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "464x323",
+      "size": "464x323"
+    },
+    {
+      "key": "tools.fancy-shovel",
+      "source": "assets/source/tools/fancy-shovel.svg",
+      "runtime": "assets/runtime/tools/fancy-shovel.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "612x195",
+      "size": "612x195"
+    },
+    {
+      "key": "tools.flimsy-shovel",
+      "source": "assets/source/tools/flimsy-shovel.svg",
+      "runtime": "assets/runtime/tools/flimsy-shovel.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "493x169",
+      "size": "493x169"
+    },
+    {
+      "key": "tools.garden-hoe-alt",
+      "source": "assets/source/tools/garden-hoe-alt.svg",
+      "runtime": "assets/runtime/tools/garden-hoe-alt.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "599x169",
+      "size": "599x169"
+    },
+    {
+      "key": "tools.garden-hoe",
+      "source": "assets/source/tools/garden-hoe.svg",
+      "runtime": "assets/runtime/tools/garden-hoe.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "599x169",
+      "size": "599x169"
+    },
+    {
+      "key": "tools.heavy-duty-shovel",
+      "source": "assets/source/tools/heavy-duty-shovel.svg",
+      "runtime": "assets/runtime/tools/heavy-duty-shovel.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "633x172",
+      "size": "633x172"
+    },
+    {
+      "key": "tools.kids-scissors",
+      "source": "assets/source/tools/kids-scissors.svg",
+      "runtime": "assets/runtime/tools/kids-scissors.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "305x205",
+      "size": "305x205"
+    },
+    {
+      "key": "tools.okayish-shovel",
+      "source": "assets/source/tools/okayish-shovel.svg",
+      "runtime": "assets/runtime/tools/okayish-shovel.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "610x181",
+      "size": "610x181"
+    },
+    {
+      "key": "tools.squeaky-hammer",
+      "source": "assets/source/tools/squeaky-hammer.svg",
+      "runtime": "assets/runtime/tools/squeaky-hammer.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "495x327",
+      "size": "495x327"
+    },
+    {
+      "key": "tools.standard-hammer",
+      "source": "assets/source/tools/standard-hammer.svg",
+      "runtime": "assets/runtime/tools/standard-hammer.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "559x382",
+      "size": "559x382"
+    },
+    {
+      "key": "tools.sturdy-scissors",
+      "source": "assets/source/tools/sturdy-scissors.svg",
+      "runtime": "assets/runtime/tools/sturdy-scissors.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "500x321",
+      "size": "500x321"
     }
   ],
   "skipped": []

@@ -234,8 +234,11 @@ export function getToastStack(): HTMLElement {
  * Raise the toast stack clear of the critter dialogue while it is open, so a
  * harvest toast never lands on top of a conversation card.
  */
-export function setToastStackRaised(raised: boolean) {
-  getToastStack().classList.toggle('is-raised', raised);
+export function setToastStackRaised(raised: boolean, clearancePx = 0) {
+  const stack = getToastStack();
+  stack.classList.toggle('is-raised', raised);
+  if (raised) stack.style.setProperty('--hud-dialogue-clearance', `${Math.max(0, clearancePx)}px`);
+  else stack.style.removeProperty('--hud-dialogue-clearance');
 }
 
 // --- Widget collapse ---------------------------------------------------

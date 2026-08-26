@@ -7,6 +7,15 @@ Written 2026-08-04, from the design decisions settled in `biome-knowledge.md`,
 **Amended 2026-08-06:** Phase 1 re-sequenced around `knowledge-tree.md`, and
 some stale cross-references left over from an earlier phase renumber corrected.
 
+**Amended 2026-08-25:** Plan acquisition is now one model: starter plans begin
+in the scrapbook and every later plan is learned through a suitably placed
+knowledge-tree node. The unused world-siting and detector path was removed.
+
+**Amended 2026-08-25 (new-day pass):** multiplayer is now an explicit parallel
+lane beginning after Critter Knowledge 2.2, not a reward for finishing every
+biome. A small invite-only alpha gate and its in-game feedback system are
+defined below and in `alpha-testing.md`.
+
 ## How to use this
 
 This is ordered by **dependency**, not by enthusiasm. Each item says what it
@@ -37,13 +46,13 @@ This unblocks every critter knowledge line, the "only place you'll find it"
 computation, the tool-name-in-dialogue substitution, and the plan constraint
 check below.
 
-**Remaining scrap — S:** `ResourceDefinition.biomes` in `world/resources.ts` is
-now vestigial and still carries the two-meanings problem. Delete it once nothing
-reads it.
+**Remaining scrap — ✅ built (2026-08-25):** the vestigial
+`ResourceDefinition.biomes` field is gone. World scatter and obtainability now
+have one source of truth in `obtaining.ts`.
 
 ---
 
-## Phase 1 — Plans and the knowledge tree
+## Phase 1 — Plans and the knowledge tree — **DONE**
 
 **Promoted to the front on 2026-08-04.** Reason: progression cannot be tested at
 all until plans can be reached. Advanced materials need advanced tools, advanced
@@ -57,17 +66,19 @@ what a locked slot even wants. A knowledge tree fixes that, grants plans
 directly from some of its nodes, and is a **view over catalog data that already
 exists** rather than a new system.
 
-So the tree goes first, and **1.4–1.6 are no longer blocking** — they become the
-exploration route to plans rather than the only route.
+The tree is now the only progression route for every non-starter plan. Tool
+plans establish the first playable ladder; furniture, clothing, decoration,
+building, and structure plans join later nodes as those creation systems become
+real. They are spread across relevant branches and tiers rather than arriving
+as one catalog dump.
 
 Two rules from that document most likely to get lost in implementation:
 
 1. **A node is paid for in patience or in doing, and either finishes it alone.**
    Real-world clock, one node at a time, no notifications, nothing purchasable.
-2. **Tool plans come from the tree and nowhere else.** Not found, not sold, not
-   gifted — you gift the made tool instead. Everything-else plans (furniture,
-   clothing, structures, decoration) keep the full object design and are now the
-   only kind that gets sited, sold, or detected.
+2. **Every non-starter plan comes from the tree and nowhere else.** Plans are
+   knowledge, not objects: they are not found, sold, gifted, mailed, sited, or
+   detected. Generosity means giving someone the thing you made.
 
 ### 1.1 `TECH_DEFS` and the tree as a read-only view — ✅ built (2026-08-07)
 
@@ -130,47 +141,36 @@ Tasks start with the two answerable from existing player state: *make N of X*
 and *own tool Y*. Finite set per node, jumps priced off one shared value scale
 across the whole tree, nothing ever totalled.
 
-### 1.3 Nodes granting tool plans — ✅ built with 1.2 (2026-08-08)
+### 1.3 Nodes granting plans — ✅ built with 1.2 (2026-08-08)
 
-Depends on 1.2. `player.plans` already accepts an id from any source; a node
-completing is the same write.
+Depends on 1.2. `player.plans` already accepts a recipe id; node completion
+writes each recipe id in that node's grants.
 
-**After this, progression is playable end to end**, which is what the whole
-phase was for.
+The first grants are tool recipes, so tool progression is playable end to end.
+The grant boundary is now `RecipeId[]`, which also accepts later furniture,
+clothing, decoration, building, and structure recipes without a new system.
 
-### 1.4 Retire tool plans from the other routes — ✅ built (2026-08-08)
+### 1.4 One plan-source model — ✅ built (2026-08-25)
 
-Depends on 1.3. World siting, owl stock, and critter gifts become
-everything-else plans only. Mostly data and copy, but do it deliberately rather
-than leaving the old routes as dead paths someone re-enables later.
+Depends on 1.3. Every recipe declares exactly one `planSource`: `starter` or
+`knowledge-tree`. The Thing Maker routes every locked ready recipe to its exact
+Professor lesson. There is no world, shop, critter, gift, mail, or detector
+fallback to drift back into the design later.
 
-Every recipe now declares exactly one `planSource`: starter, knowledge tree,
-or world. World siting filters on that source and refuses direct tool-plan
-siting. The Thing Maker uses the same field to route a locked tool rung to the
-exact Professor lesson instead of telling the player to search the world.
+The unused `planSites` and `planDetector` modules and their tests were removed.
+No save migration was needed because neither system had been wired into player
+state or gameplay.
 
-### 1.5 Deterministic plan siting — **M**
+### 1.5 Non-tool plan grant seam — ✅ built (2026-08-25)
 
-**Everything-else plans only** — no tool plan is ever sited. Every findable plan
-gets **one definite location in the world**, derived from its id — not a random
-roll at dig time.
+`TECH_DEFS` grants recipe ids rather than assuming every grant is a tool id.
+The tree view resolves each recipe's output: tools retain their full tool art,
+while future output kinds have a readable plan fallback. Derived material and
+recipe reachability still runs only for tool outputs.
 
-This is the load-bearing choice in the whole phase, and it is worth being
-explicit about why: **a hot/cold detector is impossible against a random roll.**
-"Warmer" only means something if there is a *there* to be nearer to. Siting
-plans deterministically is what makes the detector buildable, keeps the world
-consistent across sessions and players, and makes the whole thing testable
-headlessly.
-
-Siting is biased into a biome where the plan's own ingredients can be obtained,
-so reaching a region completes the loop there — which is the behaviour
-`plans-and-blueprints.md` asks for.
-
-**Sites are non-exclusive** (settled 2026-08-06): a site yields for every player
-who does not already hold that plan. The first to dig it up takes it from
-nobody. A plan is knowledge, not ore, and an exclusive site would reintroduce
-by geography exactly the hoarding the duplicate rule forecloses. Dug ground
-still stays dug — availability was never a property of the hole.
+This checks off the infrastructure, not the future content. Each creation plan
+should be added with the gameplay slice that can actually make and use it, then
+placed on an appropriate later node. Do not author the whole catalog at once.
 
 ### 1.6 The no-self-gating constraint test — ✅ built (2026-08-08)
 
@@ -187,29 +187,9 @@ can ever use, discovered months later.
 
 The catalog tests now cover both halves: a tool recipe cannot require a material
 behind the tool it makes, and a lesson task cannot ask for its own grant or an
-exact material gated behind that grant.
-
-### 1.7 Plan detector — hot/cold — **M**
-
-Depends on 1.5. Coarse proximity bands, **no direction**. One detector per plan
-hunted, so hunting a different plan means making a different detector.
-
-The coarseness is the design, not a limitation — it converts "somewhere in the
-world" into "somewhere around here" and stops, so finding the plan still means
-walking around.
-
-### 1.8 Finding and picking up a plan — **M**
-
-Depends on 1.5. The world-side half: a plan at its site, visible as blueprint
-stock (distinct paper, readable from a distance), and the pickup interaction.
-
-Includes the gifting rules from 3.6, which are cheap once pickup exists: a plan
-you already own offers only gift-or-mail.
-
-### 1.9 Basic-plan visual hints — **S**
-
-Depends on 1.8. Simpler furniture and decoration plans get something findable if
-you are looking. Rarer ones rely on chance or the detector.
+exact material gated behind that grant. The useful invariant formerly housed in
+the plan-siting test now lives with tool progression, where it applies to the
+actual acquisition route.
 
 ---
 
@@ -218,7 +198,7 @@ you are looking. Rarer ones rely on chance or the detector.
 Reuses the conversation engine almost entirely, and makes the world feel
 inhabited. Independent of Phase 1 — swap the order freely if plans get tiring.
 
-### 2.1 "Tell me about this place" — **M**
+### 2.1 "Tell me about this place" — ✅ built (2026-08-25)
 
 Depends on Phase 0. A conversation option, biome-scoped, drawing from a pool with
 randomised order and repeat availability.
@@ -236,27 +216,42 @@ Build it in this order — each step is playable:
 Personality shapes *which kind leads*, never *what is available*. Friendship
 gates nothing here.
 
-### 2.2 Threaded follow-ups — **M**
+The repeatable option now interleaves four pools in every live biome:
+catalog-derived local materials and tool gates, seed growth and harvest yields,
+nearby registered-place wayfinding, and authored biome fun facts. The order is
+stable but varied by page and personality; personality changes which kind leads
+without hiding anything. Pip’s Seed & Garden is now a registered landmark too.
+
+The dialogue UI shipped with the content pass: replies and questions have
+separate panes, long choice lists scroll without pushing the reply off-screen,
+and interaction toasts clear the measured dialogue height rather than a fixed
+guess.
+
+### 2.2 Threaded follow-ups — ✅ built (2026-08-25)
 
 Depends on 2.1. Keep asking, keep learning. `addFlags` marks "already said this
 one" *inside* a thread; it never closes the topic. One critter should be able to
 yield several things in one exchange.
 
-### 2.3 Nearby-elsewhere knowledge — **S**
+“Tell me about this place” now opens four repeatable follow-up lanes: gathering,
+growing, nearby places, and local character. Each lane rotates through its own
+facts without closing, records the exact fact in that critter's memory, and has
+a route back to everyday questions. The choice shape supports nested
+`followUps`, so authored critter scenes can use the same mechanism rather than
+inventing one-off UI.
+
+### 2.3 Nearby-elsewhere knowledge — ✅ built (2026-08-25)
 
 Depends on 2.1. Critters mention adjacent biomes, shops, and landmarks. Scope to
 *nearby*, not global — a squirrel who knows the whole map is an index, not a
 neighbour.
 
-### 2.4 Critters who bring you plans — **M**
+Wayfinding answers now combine registered landmarks and shops within a short
+walk with the distinct biomes one page north/east/south/west. Asking generates
+only those four deterministic neighboring pages; it never turns a critter into
+a global directory.
 
-Depends on 2.1 and Phase 1. A raccoon who found something on its
-adventures, either handing it over or telling you where it saw one. Reuses the
-conversation engine rather than adding a system.
-
-Everything-else plans only — a critter never carries a tool plan.
-
-### 2.5 The diary — **L**
+### 2.4 The diary — **L**
 
 Depends on 2.1 having something to record. A searchable record of what you have
 been told, formatted like something the player kept.
@@ -264,6 +259,120 @@ been told, formatted like something the player kept.
 **Build the data shape properly on day one**: stable entry ids and room for
 player-authored fields, so annotation and highlighting can be *added* later
 rather than retrofitted. The annotation UI itself is parked.
+
+---
+
+## Parallel lane — Multiplayer and the first invited alpha
+
+**Starts now, after 2.2; it does not wait for the rest of the biomes, the map,
+or the underground.** Deterministic pages, local building, gathering, saved
+avatar designs, an authoritative server scaffold, paper passports, and room
+persistence are enough foundation to learn from two-player play while content
+work continues independently.
+
+The implementation checklist remains in `multiplayer-readiness.md`; communal
+rules remain in `communal-multiplayer.md`; the tester gates and feedback payload
+are in `alpha-testing.md`. This lane only records where they enter the main
+dependency order.
+
+### MP.0 Maker identity contract — ✅ cleaned up (2026-08-25)
+
+The solo client now writes protocol-v2 `makerId` on completed and in-progress
+builds. Old solo saves with `ownerId` migrate on read. Client, shared protocol,
+and server therefore agree before pieces begin crossing the wire.
+
+### MP.1 Two-client vertical slice — ✅ built (2026-08-25)
+
+Wire the existing `src/net/` client into an explicit development/shared mode:
+two tabs join one room, see fallback paper cutouts move, exchange DOM chat, and
+see the same placed piece. Keep solo mode as the default and reuse the same
+intent/validation rules. This is **internal dogfood**, not the tester invite.
+
+Shared play is now an explicit `?shared=1` URL mode; unadorned URLs remain
+socket-free solo play. Paper passports, the worn-design `AvatarRef` adapter,
+interpolated named fallback cutouts, accessible DOM chat with bounded late-join
+history, server pieces, and completed-build publication are wired through one
+coordinator. A two-Firefox smoke proved movement, cross-client chat, a shared
+piece, and piece recovery after a full server restart. Alpha Gate 0 is met.
+
+### Colyseus 0.17 migration — ✅ complete (2026-08-25)
+
+Client and server now run the 0.17 SDK/core/schema/transport line. The migration
+uses the root schema callback proxy so the first full state is not missed after
+the reflection handshake, and the 0.17 server lifecycle owns Express,
+matchmaking, WebSockets, and graceful shutdown. Two clients re-proved presence,
+movement, live and late-join chat, placement, restart persistence, and the
+plain-URL no-socket invariant. Root and server audits report zero advisories.
+
+### MP.2 In-game alpha feedback — ✅ complete locally (2026-08-25) — **M**
+
+Add **Send feedback** to an always-reachable game menu and the scrapbook. It
+must accept Bug / Improvement / New idea / Other, attach safe reproduction
+context automatically, allow an optional screenshot, survive a lost connection
+in a local outbox, and show a receipt when sent. Player/message safety reports
+are a separate contextual action once chat or shared drawings are exposed.
+
+Never attach passport secrets, full saves, private chat, or player drawings.
+The first server queue may be a versioned JSON store behind a small interface,
+matching room persistence; it still needs review/export/status tooling rather
+than becoming an inbox nobody checks.
+
+The complete slice is live from Settings and the Scrapbook: all four
+categories, bug-specific fields, inspectable safe context with removable
+passport identity, explicit fresh-world screenshot capture/preview/removal,
+size-capped upload, a bounded browser outbox, Retry, durable receipts, server
+validation/rate limiting/deduplication, and an atomic versioned JSON queue. The
+token-protected `?review=1` desk filters reports, reads protected screenshots,
+changes status, appends audit notes, and exports JSON with identity and private
+notes redacted. Browser proof covered normal delivery, server-offline
+screenshot retry, triage, export, and full restart recovery.
+
+### MP.3 Invite-only alpha shell — 🚧 underway (2026-08-25) — **M**
+
+Minimal connect/room UI, join codes, clear connection states, host kick/mute,
+personal mute/block, and a clean return to solo play. Deploy the already-audited
+Colyseus 0.17 server over `wss://` using the split in `hosting.md`. This is
+deliberately smaller than the later public commons
+and public-discovery work, but invite-only is not a reason to deploy known
+server debt.
+
+The first load-bearing slice is built locally: the Friends panel can generate
+an invite code, join an existing code, copy a join link, report preparing /
+connecting / online / offline / setup-error states, retry a failed visit, and
+return to a solo URL with all active shared-session parameters removed.
+Matchmaking is filtered by validated code,
+and each code has its own persisted neighborhood id; the old `?shared=1`
+development save remains available as `PAPR-22`. Independent browsers proved
+same-code presence/chat, different-code chat isolation, missing-code recovery,
+and return-to-solo. Feedback context now records the neighborhood code.
+
+Still required before Alpha gate 1: host identity and removal, personal
+mute/block (plus contextual safety reports at the point they become necessary),
+Railway/Vercel deployment configuration, and a hosted `https://`/`wss://`
+restart smoke. Invite codes are an alpha discovery boundary, not a substitute
+for those safety controls.
+
+### Alpha gate 1 — small invited playtest
+
+Invite the first interested testers when all of these are true:
+
+1. A new player can complete one coherent 30–45 minute loop — learn, gather,
+   garden or build, talk to critters, and find the result again after reload —
+   without a developer beside them. Breadth of biomes is not the gate.
+2. Two players can join by code, see one another move, chat, and make one
+   persistent world change; reconnect and server restart preserve ownership.
+3. There is no known save-loss, progression dead end, water-navigation trap,
+   or protocol mismatch in that loop. Alpha may be rough; it may not eat work.
+4. MP.2 is reachable and verified end to end, including offline retry and a
+   reviewable server receipt. The build clearly says it is alpha and that
+   resets may still be necessary.
+5. Mute/block and host removal work before testers can chat. Contextual safety
+   reporting ships before testers can share drawings or meet outside a known
+   invite-only group.
+
+Start with 3–5 testers, one neighborhood, and one or two specific questions per
+build. Expand only after reports can be triaged and resolved reliably. This is
+a feedback milestone, not a claim that the game is content-complete.
 
 ---
 
@@ -303,39 +412,37 @@ Two paper fibers are an equal-value barter for any packet, so the loop is
 playable from a new save with no free currency. A bought packet becomes the
 selected seed immediately, connecting the counter directly to planting.
 
-### 3.4 The owl and plan purchase — **M**
+### 3.4 The owl-itect and finished creations — **M**
 
-Depends on 1.6, 3.3. Two prices per plan: chips, or a barter list that costs
-slightly less. Barter list differs by plan type and never asks for a material
-gated behind that plan's own tool.
+Depends on 3.3 and the first ready furniture or decoration slice. The owl sells
+finished creations and takes commissions for lovely things a player would
+rather not make themselves. Chips, barter, and small material work orders can
+coexist without making her a progression gate.
 
-**She does not sell tool plans** (2026-08-06). Her stock is furniture, clothing,
-structures, and decoration — which suits an owl-itect better anyway, and keeps
-her studio a place you visit because you want something lovely rather than
-because you are stuck.
+**She does not sell plans.** Those are learned through the tree. Her stock can
+include furniture, clothing, small structures, and decoration, which keeps her
+studio a place you visit because you want something lovely rather than because
+you are stuck.
 
 Needs an easel structure and a studio set piece, in the manner of
 `world/woodMill.ts`.
 
 ### 3.5 Mailbox and PWMS — **L**
 
-Depends on 3.1. Every player gets a mailbox; materials, chips, tools, and plans
-can be sent to it.
+Depends on 3.1. Every player gets a mailbox; materials, chips, tools, and made
+creations can be sent to it. Plan knowledge is never transferable.
 
 Open first: **is the mailbox a placed world object or a scrapbook tab?** The
 world object is warmer and pulls in placed-entity persistence — which is also a
 prerequisite for boats (4.11) and buildings, so doing it here means doing it once.
 The scrapbook tab ships in a day and gives that up.
 
-### 3.6 Plan gifting rules — **S**
+### 3.6 Giving made creations — **S**
 
-Depends on 3.5. A plan you already own offers *only* gift or mail. A plan in
-your Thing Maker cannot come back out. Small code, and it is the rule that makes
-hoarding structurally impossible rather than merely discouraged.
-
-Applies to everything-else plans only — tool plans are learned, so there is no
-duplicate to gift. Generosity with tools is **making one and handing it over**,
-which is warmer than passing on a spare blueprint.
+Depends on 3.5 and the relevant creation system. Tools, furniture, clothing,
+decoration, and other finished creations can be handed over or mailed. Plans
+cannot: generosity is **making a thing and giving that thing**, which is warmer
+and cannot bypass another player's chosen learning path.
 
 ### 3.7 Recycling bins — **S**
 
@@ -359,19 +466,25 @@ what everything else is worth.
 Ordered so that the most visible current problem is fixed first and each step
 after is independently playable.
 
-### 4.1 Puddle and ripple materials — **S**
+### 4.1 Puddle and ripple materials — ✅ built (2026-08-25)
 
 No dependencies. The most visible unfinished thing in the current build, and a
 material problem rather than a geometry one. Do it first because it is a good
 mood to start a phase in.
 
-### 4.2 `WaterBody` becomes a shape union — **M**
+`paper.water` supplies the translucent layered surface, and movement through
+registered water produces bounded, reusable ripple rings at the player's feet.
+
+### 4.2 `WaterBody` becomes a shape union — **M** — ◐ pool + channel built
 
 `pool | channel | basin`, with `submersionAt` as a **max over shapes** — take the
 deepest, never the sum, the same rule overlapping digs already follow. Existing
 pools keep working unchanged.
 
 **Unblocks everything else in this phase.**
+
+Pool and curved channel shapes now share max-over-shapes submersion and depth.
+`basin` remains before this item is complete.
 
 ### 4.3 Deterministic flow field with accumulated drainage — **L**
 
@@ -387,11 +500,14 @@ of distance-from-source.
 
 This is the real engineering in the phase. Budget for it.
 
-### 4.4 Surface motion — **M**
+### 4.4 Surface motion — **M** — ◐ river slice built
 
 Depends on 4.3. Current drift on the texture, subtle waves on large water, and
 white caps where a stream runs past rocks. Motion is what communicates depth and
 flow at a glance.
+
+Channel-following UV drift and visible fast-current accents are live. Large
+lake waves and rock-derived whitecaps remain with lakes/flow-field work.
 
 ### 4.5 Fish — **M**
 
@@ -400,13 +516,17 @@ Depends on 4.2. The cheapest thing that makes water feel inhabited. Needs a
 species hardcoding a test. Scatter when you wade in, drift back when you hold
 still.
 
-### 4.6 Shorelines and crossings — **L**
+### 4.6 Shorelines and crossings — **L** — ◐ river slice built
 
 Depends on 4.3. Lakes get a *mix* of border types — beach, rocks, marsh, wooden
 walkways — never a single one uniformly. Cattails, water lilies, lily pads.
 Pre-made docks on lakes and bridges on rivers, so a river is never a wall.
 
 Ponds are exempt; the clearing's pond stays as it is.
+
+Generated rivers now vary bank treatment by page and place rocks, cattails,
+water lilies, driftwood, and arched bridges over deep reaches. Mixed lake
+borders, docks, and lake-specific transitions remain.
 
 ### 4.7 Riverside and lakeside wayfinding — **S**
 
@@ -419,11 +539,15 @@ frustration.
 Depends on 4.5, 4.6. Amphibious: existing hopper gait on land, swimming at the
 shoreline. Worth it once shoreline transitions exist.
 
-### 4.9 Lakes and deep water — **L**
+### 4.9 Lakes and deep water — **L** — ◐ deep-water navigation built
 
 Depends on 4.6. No drowning: you can always wade, and deep water is where a boat
 becomes *necessary*, not where you die. Cheap reflection trick — a flipped,
 faded, offset copy of nearby cutouts — sells a lake more than any shader.
+
+Land critters avoid deep registered water and use bridges; the avatar can still
+wade shallow reaches. Lakes, reflections, and boat-scale deep-water traversal
+remain.
 
 ### 4.10 Wells, pumps, springs — **M**
 
@@ -432,7 +556,7 @@ scattered widely. Upgrades toward less manual fetching, then hoses, then sharing
 water with neighbours — which is the most literal possible expression of this
 game's economics.
 
-### 4.11 Boats — **L**
+### 4.11 Boats — **L** — ◐ platform-height prerequisite built
 
 Depends on 4.9, placed-entity persistence, and platform-height sampling. Round
 one is a canoe or kayak. The houseboat-to-mega-yacht extension is parked until
@@ -441,6 +565,10 @@ lakes are large enough to justify it.
 **The real cost is platform-height sampling** — the avatar's ground sampling
 accepting a platform height instead of always reading the terrain field. That is
 shared with every future building you can stand on, so do it once, properly.
+
+Player and land-critter grounding now consult a shared bridge-deck height before
+terrain, including the bridge's arch. Boats and general placed-entity platform
+persistence remain.
 
 ---
 
@@ -479,6 +607,11 @@ pointer, not the plan.** Both docs carry locked decisions up top, a
 conflicts-with-fixes list, and lettered phases with acceptance criteria, in
 this roadmap's spirit.
 
+**Scheduling correction:** the multiplayer plumbing no longer waits here in
+chronological order. MP.1–MP.3 run in the parallel lane above while Phases 2–5
+continue; Phase 6 remains the home of the broader identity, social, and public
+world work.
+
 - `communal-multiplayer.md` — the communal layer (what made Glitch/Second
   Life work), identity plumbing, persistence, moderation phases, directory.
   **Phase A shipped 2026-08-10**: paper passports (`accountId`), JSON room
@@ -512,7 +645,7 @@ useful part, because it tells you what would have to change for it to move.
 
 | Idea | Parked because |
 | --- | --- |
-| Diary annotation and highlighting UI | Needs a diary with entries in it first (2.5). The *data shape* is not parked. |
+| Diary annotation and highlighting UI | Needs a diary with entries in it first (2.4). The *data shape* is not parked. |
 | Player-authored plans and a marketplace | Version-two at the earliest. Constrains today only in that plan ids, recipe shape, and output type must stay open rather than enumerated. |
 | Clothing, including the light-up mining helmet | Wants the `affix` verb and the plan engine generalised past tools. Delightful, not foundational. |
 | Houses, multi-storey building, furniture | Wants `build`, `disassemble`, and placed-entity persistence. The mailbox (3.5) is the cheapest excuse to build that persistence. Design intent now captured in `land-and-dwellings.md` — read it before starting, since spacing and maker-id are cheap now and expensive later. |
@@ -541,15 +674,13 @@ Small, and each unblocks something specific.
    *Blocks nothing; affects 2.1's warmth.*
 2. **Whether the top-tier pick changes wall shape slightly.** Not at all is
    safer for a shared map. *Blocks Phase 5.*
-3. **Whether the plan detector is itself made from a plan.** Recursive and
-   charming. *Blocks 1.6's recipe.*
-4. **Old-house disposition when a player moves** — leading answer is that it
+3. **Old-house disposition when a player moves** — leading answer is that it
    reverts to a starter house for a new player, avoiding abandoned-lot blight.
    *Blocks moving; see `land-and-dwellings.md`.*
-5. **Whether wild critter friendship is location-bound** — leaning yes, because
+4. **Whether wild critter friendship is location-bound** — leaning yes, because
    home ranges are what make attachments have a place. *Cheap now, and it
    changes what friendship means, so decide before friendship is built out.*
-6. **Whether famous original landmarks become permanent prime real estate**, or
+5. **Whether famous original landmarks become permanent prime real estate**, or
    whether making them reachable-from-anywhere defuses it.
    *See `land-and-dwellings.md`.*
 
@@ -561,24 +692,13 @@ and mail is an **inbox, not an address**.
 
 ## If you only do one thing
 
-**Phase 1.5 — deterministic plan siting for everything-else plans.** Tool-plan
-progression is now end-to-end and guarded: lessons grant those plans, old world
-routes reject them, and catalog tests catch self-gating tasks. The next plan
-work is the exploration route for furniture, clothing, structures, decoration,
-and oddities — never tools.
+**Finish MP.3 — the invite-only alpha shell.** MP.2's player-triggered
+screenshot feedback, offline Retry, private review desk, redacted export, and
+restart recovery are proved. Join codes, honest connection states, failure
+recovery, and clean solo return are now built and locally browser-proved. Next
+add host removal, mute/block, deployment configuration, and the hosted
+`https://`/`wss://` smoke. Colyseus 0.17 and its clean audit are already in place.
 
-*Superseded 2026-08-08.* This used to say Phase 1.4. It landed with an explicit
-`planSource` on every recipe and a direct Thing Maker → Professor lesson route.
-
-*Superseded 2026-08-08.* This used to say Phase 1.2, followed immediately by
-1.3. They landed together because completion without the plan grant would
-have left a finished lesson in an unusable state.
-
-*Superseded 2026-08-07.* This used to say Phase 1.1. See
-`prototype-progress.md` → "The Knowledge Tree, Read-Only" for what shipped
-and what is still unverified on screen.
-
-*Superseded 2026-08-06, before that.* Before 1.1, this said deterministic
-plan siting. Siting is still wanted — it is now 1.5, it applies only to
-furniture-and-decoration plans, and it is an exploration route rather than
-the critical path. See `knowledge-tree.md` for why the swap.
+Phase 1 is complete as infrastructure. Future furniture, decoration, clothing,
+building, and structure plans are content within their respective creation
+slices, not another plan-acquisition phase.

@@ -1,8 +1,23 @@
 import rawContent from '../content/conversations.json';
 import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
-import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
-import { biomesFor, isBiomeExclusive, toolRequiredFor } from '../sim/catalogs/obtaining';
+import {
+  SEED_DEFS,
+  formatGrowthTime,
+  plantHarvest,
+  type SeedId,
+} from '../sim/catalogs/seeds';
+import { TOOL_DEFS, toolsInFamily, type ToolId } from '../sim/catalogs/tools';
+import {
+  BIOME_SCATTER,
+  biomesFor,
+  isBiomeExclusive,
+  obtainRoutesFor,
+  toolRequiredFor,
+  type ObtainRoute,
+} from '../sim/catalogs/obtaining';
+import { formatPageDistance } from '../world/distance';
 import { getPage } from '../world/pages';
+import { BUILTIN_NAVIGATION_PLACES } from '../world/places';
 import { getRegionName } from '../world/regions';
 import { pageOfPosition, type Biome } from '../world/types';
 import type { Critter } from './critterBehavior';
@@ -26,6 +41,12 @@ export type ConversationChoice = {
   addFlags?: string[];
   friendship?: number;
   endsScene?: boolean;
+  /** Replace the current choices after answering, keeping the exchange open. */
+  followUps?: ConversationChoice[];
+  /** Return from a generated thread to the critter's everyday questions. */
+  returnToEveryday?: boolean;
+  /** Record the exact rotating reply without using that memory to close a topic. */
+  rememberReplyAs?: string;
 };
 
 export type ConversationScene = {
@@ -72,7 +93,7 @@ type DialogueContent = {
   version: number;
   everyday: {
     greetings: Record<CritterSpecies, string[]>;
-    placeReplies: Record<CritterSpecies, string[]>;
+    placeFacts: Record<Biome, string[]>;
     selfReplies: Record<CritterSpecies, string[]>;
     traitReplies: Record<PersonalityTrait, string[]>;
     choices: EverydayChoice[];
@@ -85,13 +106,16 @@ export type ChoiceResult = {
   reply: string;
   endsScene: boolean;
   action?: 'pet';
+  nextScene?: ConversationScene;
 };
 
-type ConversationContext = {
+export type ConversationContext = {
   pageId: string;
   biome: Biome;
   biomeLabel: string;
   regionName: string;
+  x: number;
+  z: number;
 };
 
 const CONTENT = rawContent as unknown as DialogueContent;
@@ -121,14 +145,230 @@ function hasNone(memory: ConversationMemory, flags: string[] | undefined) {
 }
 
 function getContext(critter: Critter): ConversationContext {
-  const { px, pz } = pageOfPosition(critter.rig.group.position.x, critter.rig.group.position.z);
+  const x = critter.rig.group.position.x;
+  const z = critter.rig.group.position.z;
+  const { px, pz } = pageOfPosition(x, z);
   const page = getPage(px, pz);
   return {
     pageId: page.id,
     biome: page.biome,
     biomeLabel: BIOME_LABELS[page.biome],
     regionName: getRegionName(px, pz, page.biome),
+    x,
+    z,
   };
+}
+
+type PlaceKnowledgeKind = 'materials' | 'harvest' | 'wayfinding' | 'fun';
+
+const PLACE_KNOWLEDGE_ORDER: PlaceKnowledgeKind[] = [
+  'materials', 'harvest', 'wayfinding', 'fun',
+];
+
+const PLACE_LEAD_BY_TRAIT: Record<PersonalityTrait, PlaceKnowledgeKind> = {
+  bold: 'wayfinding',
+  curious: 'materials',
+  dramatic: 'fun',
+  gentle: 'harvest',
+  mischievous: 'fun',
+  shy: 'materials',
+  sleepy: 'harvest',
+};
+
+function stableHash(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+/** Stable variety: revisiting the same page agrees across saves and clients. */
+function rotateBySeed(lines: string[], seed: string): string[] {
+  if (lines.length < 2) return [...lines];
+  const offset = stableHash(seed) % lines.length;
+  return [...lines.slice(offset), ...lines.slice(0, offset)];
+}
+
+function routeAppliesHere(route: ObtainRoute, biome: Biome): boolean {
+  if (route.kind === 'scattered' || route.kind === 'dug') return route.biomes.includes(biome);
+  if (route.kind !== 'trimmed') return false;
+  return route.species === 'redwood'
+    ? biome === 'forest'
+    : biome === 'clearing' || biome === 'forest' || biome === 'meadow';
+}
+
+function localMaterialReplies(biome: Biome): string[] {
+  const replies: string[] = [];
+  for (const resourceId of Object.keys(RESOURCE_CORE_DEFS) as ResourceId[]) {
+    const resource = RESOURCE_CORE_DEFS[resourceId];
+    if (resource.category === 'seeds' || resource.category === 'food') continue;
+    const localRoutes = obtainRoutesFor(resourceId).filter((route) => routeAppliesHere(route, biome));
+    if (localRoutes.length === 0) continue;
+
+    const trimmed = localRoutes.find((route): route is Extract<ObtainRoute, { kind: 'trimmed' }> => (
+      route.kind === 'trimmed'
+    ));
+    const scattered = localRoutes.find((route) => route.kind === 'scattered');
+    const dug = localRoutes.find((route): route is Extract<ObtainRoute, { kind: 'dug' }> => (
+      route.kind === 'dug'
+    ));
+
+    if (scattered) {
+      replies.push(`“Keep an eye out for ${resource.label} around this ${BIOME_LABELS[biome]}. It lies loose, so walking across a bundle tucks it into your scrapbook.”`);
+    } else if (trimmed) {
+      const toolId = toolsInFamily('scissors')
+        .find((candidate) => TOOL_DEFS[candidate].tier >= trimmed.minimumTier);
+      const treeName = trimmed.species === 'redwood' ? 'a living redwood' : `${trimmed.species} trees`;
+      replies.push(`“To gather ${resource.label} from ${treeName} here, use ${toolId ? TOOL_DEFS[toolId].name : 'scissors'}. It takes new growth without hurting the tree.”`);
+    } else if (dug) {
+      const toolId = toolsInFamily('shovel')
+        .find((candidate) => TOOL_DEFS[candidate].tier >= dug.layer);
+      replies.push(`“There is ${resource.label} under the ${BIOME_LABELS[biome]}. ${toolId ? TOOL_DEFS[toolId].name : `a tier-${dug.layer} shovel`} reaches that paper layer.”`);
+    }
+  }
+  return replies;
+}
+
+function localHarvestReplies(biome: Biome): string[] {
+  return BIOME_SCATTER[biome].flatMap((resourceId): string[] => {
+    if (!(resourceId in SEED_DEFS)) return [];
+    const seedId = resourceId as SeedId;
+    const harvest = plantHarvest(seedId);
+    if (!harvest) return [];
+    const seed = SEED_DEFS[seedId];
+    const produce = RESOURCE_CORE_DEFS[harvest.resource];
+    const after = harvest.mode === 'repeat'
+      ? ` It keeps growing, and another crop takes about ${Math.round((harvest.repeatSeconds ?? 0) / 60)} minutes.`
+      : ' Lifting that harvest leaves the bed ready to plant again.';
+    return [`“${seed.name} turn up around here. They reach full bloom in ${formatGrowthTime(seedId)} and give ${harvest.quantity} ${produce.shortLabel}.${after}”`];
+  });
+}
+
+function compassDirection(dx: number, dz: number): string {
+  const horizontal = dx > 0 ? 'east' : 'west';
+  const vertical = dz > 0 ? 'south' : 'north';
+  if (Math.abs(dx) > Math.abs(dz) * 2) return horizontal;
+  if (Math.abs(dz) > Math.abs(dx) * 2) return vertical;
+  return `${vertical}-${horizontal}`;
+}
+
+function nearbyPlaceReplies(x: number, z: number): string[] {
+  const nearby = BUILTIN_NAVIGATION_PLACES
+    .map((place) => ({
+      ...place,
+      distance: Math.hypot(place.x - x, place.z - z),
+      direction: compassDirection(place.x - x, place.z - z),
+    }))
+    .filter((place) => place.distance >= 8 && place.distance <= 125)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3);
+  if (nearby.length === 0) {
+    return ['“No named landmark is close enough for a short walk from here. Save this place in your scrapbook before you wander farther.”'];
+  }
+  return nearby.map((place) => (
+    `“${place.name} is ${place.direction} from here, about ${formatPageDistance(place.distance)} away. Your saved-places arrow can lead you there.”`
+  ));
+}
+
+function adjacentBiomeReplies(context: ConversationContext): string[] {
+  const { px, pz } = pageOfPosition(context.x, context.z);
+  const directions = [
+    { dx: 0, dz: -1, label: 'north' },
+    { dx: 1, dz: 0, label: 'east' },
+    { dx: 0, dz: 1, label: 'south' },
+    { dx: -1, dz: 0, label: 'west' },
+  ] as const;
+  const mentioned = new Set<Biome>();
+  return directions.flatMap(({ dx, dz, label }): string[] => {
+    const neighbor = getPage(px + dx, pz + dz);
+    if (neighbor.biome === context.biome || mentioned.has(neighbor.biome)) return [];
+    mentioned.add(neighbor.biome);
+    return [`“One paper page ${label}, this ${context.biomeLabel} gives way to ${BIOME_LABELS[neighbor.biome]}. That is near enough to wander over and ask a local critter what grows there.”`];
+  });
+}
+
+function interleavePlaceKnowledge(
+  pools: Record<PlaceKnowledgeKind, string[]>,
+  order: PlaceKnowledgeKind[],
+): string[] {
+  const replies: string[] = [];
+  const longest = Math.max(...order.map((kind) => pools[kind].length));
+  for (let index = 0; index < longest; index += 1) {
+    for (const kind of order) {
+      const reply = pools[kind][index];
+      if (reply) replies.push(reply);
+    }
+  }
+  return replies;
+}
+
+function placeKnowledgePools(
+  context: ConversationContext,
+  primaryTrait: PersonalityTrait,
+): Record<PlaceKnowledgeKind, string[]> {
+  const pools: Record<PlaceKnowledgeKind, string[]> = {
+    materials: localMaterialReplies(context.biome),
+    harvest: localHarvestReplies(context.biome),
+    wayfinding: [
+      ...nearbyPlaceReplies(context.x, context.z),
+      ...adjacentBiomeReplies(context),
+    ],
+    fun: CONTENT.everyday.placeFacts[context.biome].map((line) => (
+      line
+        .replaceAll('{{region}}', context.regionName)
+        .replaceAll('{{biome}}', context.biomeLabel)
+    )),
+  };
+  for (const kind of PLACE_KNOWLEDGE_ORDER) {
+    pools[kind] = rotateBySeed(pools[kind], `${context.pageId}:${primaryTrait}:${kind}`);
+  }
+  return pools;
+}
+
+/** The reusable second level behind “Tell me about this place”. */
+export function placeKnowledgeFollowUps(
+  context: ConversationContext,
+  primaryTrait: PersonalityTrait,
+): ConversationChoice[] {
+  const pools = placeKnowledgePools(context, primaryTrait);
+  const choices: Array<[PlaceKnowledgeKind, string]> = [
+    ['materials', 'What can I gather nearby?'],
+    ['harvest', 'What grows well here?'],
+    ['wayfinding', 'Where could I visit nearby?'],
+    ['fun', 'What makes this place special?'],
+  ];
+  return [
+    ...choices.flatMap(([kind, label]): ConversationChoice[] => (
+      pools[kind].length === 0 ? [] : [{
+        id: kind,
+        label,
+        replies: pools[kind],
+        rememberReplyAs: `place:${context.pageId}:${kind}`,
+      }]
+    )),
+    {
+      id: 'back',
+      label: 'Let’s talk about something else',
+      replies: ['“Of course. What else is on your mind?”'],
+      returnToEveryday: true,
+    },
+  ];
+}
+
+/**
+ * Every repeat of “Tell me about this place” advances through useful local
+ * knowledge. Personality changes the leading kind, never which facts exist.
+ */
+export function placeKnowledgeReplies(
+  context: ConversationContext,
+  primaryTrait: PersonalityTrait,
+): string[] {
+  const lead = PLACE_LEAD_BY_TRAIT[primaryTrait];
+  const order = [lead, ...PLACE_KNOWLEDGE_ORDER.filter((kind) => kind !== lead)];
+  const pools = placeKnowledgePools(context, primaryTrait);
+  return interleavePlaceKnowledge(pools, order);
 }
 
 /**
@@ -192,6 +432,7 @@ function fillChoice(choice: ConversationChoice, critter: Critter, context: Conve
     ...choice,
     label: fillTemplate(choice.label, critter, context),
     replies: choice.replies.map((line) => fillTemplate(line, critter, context)),
+    followUps: choice.followUps?.map((followUp) => fillChoice(followUp, critter, context)),
   };
 }
 
@@ -286,9 +527,12 @@ export function everydayConversation(critter: Critter): ConversationScene {
   const choices = CONTENT.everyday.choices.map((choice): ConversationChoice => {
     let replies = choice.replies;
     if (choice.replyPool === 'trait') replies = CONTENT.everyday.traitReplies[primaryTrait];
-    if (choice.replyPool === 'place') replies = CONTENT.everyday.placeReplies[critter.species];
+    if (choice.replyPool === 'place') replies = placeKnowledgeReplies(context, primaryTrait);
     if (choice.replyPool === 'self') replies = CONTENT.everyday.selfReplies[critter.species];
-    return fillChoice({ ...choice, replies: replies ?? ['...'] }, critter, context);
+    const followUps = choice.replyPool === 'place'
+      ? placeKnowledgeFollowUps(context, primaryTrait)
+      : choice.followUps;
+    return fillChoice({ ...choice, replies: replies ?? ['...'], followUps }, critter, context);
   });
   return {
     id: 'everyday',
@@ -319,14 +563,31 @@ export function resolveConversationChoice(
   const seen = markConversationSeen(critter.id, `${scene.id}:${choice.id}`);
   if (choice.addFlags) addConversationFlags(critter.id, choice.addFlags);
   if (choice.friendship) addFriendshipPoints(critter.id, choice.friendship);
+  const reply = pickConversationLine(
+    choice.replies,
+    seen,
+    choice.replyMode,
+    `${critter.id}:${scene.id}:${choice.id}`,
+  );
+  if (choice.rememberReplyAs) {
+    const replyIndex = choice.replies.indexOf(reply);
+    addConversationFlags(critter.id, [`${choice.rememberReplyAs}:${Math.max(0, replyIndex)}`]);
+  }
+  let nextScene: ConversationScene | undefined;
+  if (choice.followUps?.length) {
+    nextScene = {
+      id: `${scene.id}:${choice.id}`,
+      opening: reply,
+      choices: choice.followUps,
+      storyArc: scene.storyArc,
+    };
+  } else if (choice.returnToEveryday) {
+    nextScene = everydayConversation(critter);
+  }
   return {
     action: choice.action,
     endsScene: choice.endsScene ?? false,
-    reply: pickConversationLine(
-      choice.replies,
-      seen,
-      choice.replyMode,
-      `${critter.id}:${scene.id}:${choice.id}`,
-    ),
+    nextScene,
+    reply,
   };
 }

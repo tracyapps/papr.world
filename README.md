@@ -31,6 +31,9 @@ The first vertical slice should prove six things:
 - [Game Design Plan](docs/game-design-plan.md)
 - [Technical Plan](docs/technical-plan.md)
 - [Multiplayer Readiness](docs/multiplayer-readiness.md)
+- [Roadmap](docs/roadmap.md)
+- [Alpha Testing and Feedback](docs/alpha-testing.md)
+- [Hosting](docs/hosting.md)
 - [Paper Artwork Guide](docs/paper-artwork-guide.md)
 - [Sample Assets](docs/sample-assets.md)
 - [UI and Control Placeholders](docs/ui-control-placeholders.md)
@@ -48,13 +51,18 @@ Done as of 2026-07-16: modular source split, page-based world (clearing is page 
 3. Simple building placement (local UX + `PlacedPiece` data shape).
 4. Critter wander upgrades so critters can live on generated pages too.
 
-The multiplayer foundation is now scaffolded (not yet wired into the client):
+The multiplayer foundation now has a proved opt-in two-client slice:
 
 - `shared/` — renderer-free protocol types + rules shared by client and server.
 - `server/` — authoritative Colyseus room (`PaperRoom`).
-- `src/net/` — client networking layer + remote-player interpolation (unwired;
-  `main.ts` is untouched, so solo play still runs). Wiring guide in
-  `src/net/README.md`.
+- `src/net/` — Colyseus 0.17 client, remote-player interpolation, paper
+  passports, shared pieces/chat, and a URL gate that keeps ordinary solo play
+  socket-free. MP.3 now adds generated invite-code neighborhoods, create/join
+  UI, honest connection/recovery states, and a clean return to solo. Wiring and
+  local run guide in `src/net/README.md`.
+- `src/ui/feedbackPanel.ts` — the MP.2 alpha-feedback form, explicit screenshot
+  capture, and offline outbox; `src/ui/feedbackReview.ts` is the token-protected
+  filter/status/note/export desk at `?review=1`.
 
 See [Multiplayer Readiness](docs/multiplayer-readiness.md) for the full sequence
 and what's load-bearing vs. safe to iterate on in parallel.

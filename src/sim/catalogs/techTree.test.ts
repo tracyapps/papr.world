@@ -87,21 +87,30 @@ describe('tech tree catalog shape', () => {
     }
   });
 
-  it('gives every ready node at least one task and one grant, and a real tool for each', () => {
+  it('gives every ready node at least one task and one real recipe grant', () => {
     for (const nodeId of TECH_NODE_ORDER) {
       const node = TECH_DEFS[nodeId];
       if (node.readiness !== 'ready') continue;
       expect(node.tasks.length).toBeGreaterThan(0);
       expect(node.grants.length).toBeGreaterThan(0);
-      for (const toolId of node.grants) expect(TOOL_DEFS[toolId as ToolId]).toBeDefined();
+      for (const recipeId of node.grants) {
+        expect(RECIPE_DEFS[recipeId]).toBeDefined();
+        expect(RECIPE_DEFS[recipeId].status).toBe('ready');
+      }
     }
   });
 
-  it('maps every knowledge-tree plan back to exactly one real lesson', () => {
+  it('maps every ready knowledge-tree plan back to exactly one real lesson', () => {
     for (const recipeId of Object.keys(RECIPE_DEFS) as RecipeId[]) {
       const recipe = RECIPE_DEFS[recipeId];
-      if (recipe.planSource === 'knowledge-tree') {
+      if (recipe.status === 'ready' && recipe.planSource === 'knowledge-tree') {
         expect(techNodeGrantingRecipe(recipeId)).not.toBeNull();
+        const grantingNodes = TECH_NODE_ORDER.filter((nodeId) => {
+          const node = TECH_DEFS[nodeId];
+          return node.readiness === 'ready'
+            && (node.grants as readonly RecipeId[]).includes(recipeId);
+        });
+        expect(grantingNodes).toHaveLength(1);
       } else {
         expect(techNodeGrantingRecipe(recipeId)).toBeNull();
       }
@@ -125,15 +134,19 @@ describe('tech tree catalog shape', () => {
       // Starter-plan nodes are already learned on every normalized save, so
       // their task metadata is never offered as a progression gate. The
       // deadlock invariant applies to lessons a player can actually start.
-      const isStartableLesson = node.grants.some((toolId) => {
-        const recipeId = recipeForTool(toolId as ToolId);
-        return recipeId !== null && RECIPE_DEFS[recipeId].planSource === 'knowledge-tree';
-      });
+      const isStartableLesson = node.grants.some(
+        (recipeId) => RECIPE_DEFS[recipeId].planSource === 'knowledge-tree',
+      );
       if (!isStartableLesson) continue;
+
+      const grantedTools = node.grants.flatMap((recipeId): ToolId[] => {
+        const output = RECIPE_DEFS[recipeId].output;
+        return output.kind === 'tool' ? [output.toolId] : [];
+      });
 
       for (const task of node.tasks) {
         if (task.kind === 'own-tool') {
-          if ((node.grants as readonly ToolId[]).includes(task.toolId)) {
+          if (grantedTools.includes(task.toolId)) {
             offenders.push(`${nodeId} asks the player to own its own grant: ${task.toolId}`);
           }
           continue;
@@ -141,7 +154,7 @@ describe('tech tree catalog shape', () => {
 
         const taskRecipe = RECIPE_DEFS[task.recipeId];
         if (taskRecipe.output.kind === 'tool'
-          && (node.grants as readonly ToolId[]).includes(taskRecipe.output.toolId)) {
+          && grantedTools.includes(taskRecipe.output.toolId)) {
           offenders.push(`${nodeId} asks the player to make its own grant: ${taskRecipe.output.toolId}`);
         }
 
@@ -150,8 +163,8 @@ describe('tech tree catalog shape', () => {
           const requiredToolId = toolRequiredFor(ingredient.resource);
           if (!requiredToolId) continue;
           const requiredTool = TOOL_DEFS[requiredToolId];
-          for (const grantId of node.grants) {
-            const grant = TOOL_DEFS[grantId as ToolId];
+          for (const grantId of grantedTools) {
+            const grant = TOOL_DEFS[grantId];
             if (requiredTool.family === grant.family && requiredTool.tier >= grant.tier) {
               offenders.push(`${nodeId} task needs ${ingredient.resource}, gated behind ${requiredToolId}`);
             }
@@ -317,8 +330,10 @@ describe('derived unlock icons — never hand-authored', () => {
     for (const nodeId of TECH_NODE_ORDER) {
       const node = TECH_DEFS[nodeId];
       if (node.readiness !== 'ready') continue;
-      for (const toolId of node.grants) {
-        for (const recipeId of recipesUnlockedByTool(toolId)) {
+      for (const grantedRecipeId of node.grants) {
+        const output = RECIPE_DEFS[grantedRecipeId].output;
+        if (output.kind !== 'tool') continue;
+        for (const recipeId of recipesUnlockedByTool(output.toolId)) {
           expect(recipeId).toBeTruthy();
         }
       }

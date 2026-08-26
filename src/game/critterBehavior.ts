@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { sampleTerrainHeight } from '../world/terrain';
-import { isInWater, waterDepthAt } from '../world/water';
+import { bridgeDeckHeightAt, isDeepWater, isInWater, waterDepthAt } from '../world/water';
 import { isSolidAt } from '../world/footprints';
 import { slideMove } from '../core/placement';
 import type { CritterRig } from './critterRigs';
@@ -273,9 +273,13 @@ function clearRunFrom(x: number, z: number, heading: number, distance: number, s
   const dx = -Math.sin(heading);
   const dz = -Math.cos(heading);
   for (let reach = stride; reach <= distance; reach += stride) {
-    if (isSolidAt(x + dx * reach, z + dz * reach, CRITTER_BODY_RADIUS)) return reach - stride;
+    if (isCritterBlocked(x + dx * reach, z + dz * reach)) return reach - stride;
   }
   return distance;
+}
+
+function isCritterBlocked(x: number, z: number): boolean {
+  return isSolidAt(x, z, CRITTER_BODY_RADIUS) || isDeepWater(x, z);
 }
 
 function clearRun(critter: Critter, heading: number, distance: number): number {
@@ -443,7 +447,7 @@ function tryStep(critter: Critter, dx: number, dz: number): boolean {
     group.position.z,
     dx,
     dz,
-    (x, z) => isSolidAt(x, z, CRITTER_BODY_RADIUS),
+    isCritterBlocked,
   );
   const stayedPut = moved.x === group.position.x && moved.z === group.position.z;
   group.position.x = moved.x;
@@ -465,7 +469,9 @@ function settleOnGround(critter: Critter, hopBoost = 0) {
   // appear under a critter that was already there, and standing on the
   // surface reads as a bug rather than as a very confident squirrel.
   const wading = waterDepthAt(group.position.x, group.position.z) * WADE_SINK_RATIO;
-  group.position.y = sampleTerrainHeight(group.position.x, group.position.z)
+  const standingHeight = bridgeDeckHeightAt(group.position.x, group.position.z)
+    ?? sampleTerrainHeight(group.position.x, group.position.z);
+  group.position.y = standingHeight
     + critter.rig.groundOffset * critter.params.scale
     + hopBoost
     - wading;

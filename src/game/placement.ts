@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { scene } from '../render/context';
-import { getGameState, LOCAL_PLAYER_ID } from '../sim/state';
+import { getGameState, LOCAL_MAKER_ID } from '../sim/state';
 import type { BuildSiteState } from '../sim/state';
 import { dispatchGameCommand, resolveIngredientAllocation } from '../sim/commands';
 import { buildAssemblyDef, nextBuildStep } from '../sim/catalogs/building';
@@ -25,6 +25,7 @@ import { playCozySound } from './cozyAudio';
 import { getActionMode, onActionModeChanged, setActionMode } from './actionMode';
 import { createGroundRing, setGhostAppearance } from './gardenOverlay';
 import { startTimedAction } from './timedAction';
+import { publishSharedPlacedPiece } from '../net/sharedSession';
 
 // Build-mode placement: choosing a piece, aiming it at the ground, seeing a
 // translucent ghost plus the footprints it respects, and putting it down.
@@ -235,6 +236,10 @@ export function tryPlaceAt(clientX: number, clientY: number) {
       durationMs: step.durationSeconds * 1000,
     }],
     onComplete: () => {
+      const buildPageId = assessment.site?.page || pageIdAt(x, z);
+      const piecesBefore = new Set(
+        Object.keys(getGameState().world.pages[buildPageId]?.placedPieces ?? {}),
+      );
       const result = dispatchGameCommand({
         type: 'completeBuildStep',
         templateKey: assessment.def!.key,
@@ -242,7 +247,7 @@ export function tryPlaceAt(clientX: number, clientY: number) {
         x,
         z,
         rotY,
-        pageId: assessment.site?.page || pageIdAt(x, z),
+        pageId: buildPageId,
         now: Date.now(),
       });
       if (!result.ok) {
@@ -256,6 +261,10 @@ export function tryPlaceAt(clientX: number, clientY: number) {
       refreshBuiltTerrainNear(x, z);
       playCozySound('rustle');
       showPetToast(result.message);
+      const finishedPiece = Object.values(
+        getGameState().world.pages[buildPageId]?.placedPieces ?? {},
+      ).find((piece) => !piecesBefore.has(piece.id));
+      if (finishedPiece) publishSharedPlacedPiece(finishedPiece);
       activeBuildPreview = null;
     },
     onCancel: () => {
@@ -331,7 +340,7 @@ function syncGhost(key: BuildPieceKey | null) {
     x: 0,
     z: 0,
     rotY: 0,
-    ownerId: LOCAL_PLAYER_ID,
+    makerId: LOCAL_MAKER_ID,
     page: '0,0',
   });
   ghostHost.add(ghost);

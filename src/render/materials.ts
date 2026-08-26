@@ -40,7 +40,14 @@ export type MaterialKey =
   | 'wall.siding1'
   | 'wall.siding2'
   | 'roof.shingle1'
-  | 'roof.shingle2';
+  | 'roof.shingle2'
+  | 'underground.basalt'
+  | 'underground.clay'
+  | 'underground.iron'
+  | 'underground.mossyWall'
+  | 'underground.quartz'
+  | 'underground.sandstone'
+  | 'underground.slate';
 
 const MATERIAL_DEFS: Record<MaterialKey, PaperMaterialOptions> = {
   // Ground repeats are tuned for 50-unit page sheets.
@@ -74,6 +81,16 @@ const MATERIAL_DEFS: Record<MaterialKey, PaperMaterialOptions> = {
   'wall.siding2': { textureUrl: '/assets/runtime/materials/wall-siding-02.png', repeat: [2.6, 1.65] },
   'roof.shingle1': { textureUrl: '/assets/runtime/materials/roof-shingles-01.png', repeat: [2.35, 1.9] },
   'roof.shingle2': { textureUrl: '/assets/runtime/materials/roof-shingles-02.png', repeat: [2.35, 1.9] },
+  // Prepared for cave walls, formations, and mineral seams. Keeping these in
+  // the registry now means the upcoming underground generator can reference
+  // stable serializable keys rather than raw artwork URLs.
+  'underground.basalt': { textureUrl: '/assets/runtime/materials/basalt.png', repeat: [1.5, 2] },
+  'underground.clay': { textureUrl: '/assets/runtime/materials/clay-earth.png', repeat: [2, 2] },
+  'underground.iron': { textureUrl: '/assets/runtime/materials/iron-rock.png', repeat: [2, 2] },
+  'underground.mossyWall': { textureUrl: '/assets/runtime/materials/mossy-wall.png', repeat: [2, 2] },
+  'underground.quartz': { textureUrl: '/assets/runtime/materials/quartz.png', repeat: [1.8, 1.8] },
+  'underground.sandstone': { textureUrl: '/assets/runtime/materials/sandstone.png', repeat: [2, 2] },
+  'underground.slate': { textureUrl: '/assets/runtime/materials/slate.png', repeat: [1.2, 2.2] },
 };
 
 const paperCache = new Map<string, THREE.MeshStandardMaterial>();

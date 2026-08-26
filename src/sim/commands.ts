@@ -41,7 +41,7 @@ import {
 } from './catalogs/trees';
 import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict } from '../world/buildPieces';
 import { buildAssemblyDef, nextBuildStep } from './catalogs/building';
-import { LOCAL_PLAYER_ID } from './state';
+import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
 
 export type ResourceAllocation = Partial<Record<ResourceId, number>>;
@@ -450,7 +450,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: command.x,
         z: command.z,
         rotY: command.rotY || 0,
-        ownerId: LOCAL_PLAYER_ID,
+        makerId: LOCAL_MAKER_ID,
         page: command.pageId,
       };
       return { ok: true, message: `Placed the ${def.label}.` };
@@ -499,7 +499,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: command.x,
         z: command.z,
         rotY: command.rotY || 0,
-        ownerId: LOCAL_PLAYER_ID,
+        makerId: LOCAL_MAKER_ID,
         page: command.pageId,
         completedStepIds: [],
         startedAt: command.now,
@@ -525,7 +525,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: activeSite.x,
         z: activeSite.z,
         rotY: activeSite.rotY,
-        ownerId: activeSite.ownerId,
+        makerId: activeSite.makerId,
         page: activeSite.page,
       };
       delete page.buildSites[activeSite.id];

@@ -32,6 +32,8 @@ let nameElement: HTMLElement | null = null;
 let metaElement: HTMLElement | null = null;
 let arcElement: HTMLElement | null = null;
 let speechElement: HTMLElement | null = null;
+let speakerElement: HTMLElement | null = null;
+let questionPromptElement: HTMLElement | null = null;
 let actionsElement: HTMLElement | null = null;
 let activeCritter: Critter | null = null;
 let activeScene: ConversationScene | null = null;
@@ -45,9 +47,22 @@ function refreshMeta() {
   metaElement.textContent = `${SPECIES_LABELS[activeCritter.species]} · ${personality} · ${level} · ${points}/100 friendship`;
 }
 
-function speak(line: string) {
+function keepToastsClearOfDialogue() {
+  if (!panel?.classList.contains('is-open')) return;
+  requestAnimationFrame(() => {
+    if (!panel?.classList.contains('is-open')) return;
+    setToastStackRaised(true, panel.getBoundingClientRect().height + 40);
+  });
+}
+
+function speak(line: string, isAnswer = false) {
   if (!activeCritter || !speechElement) return;
   speechElement.textContent = line;
+  panel?.classList.toggle('has-answer', isAnswer);
+  if (questionPromptElement) {
+    questionPromptElement.textContent = isAnswer ? 'Ask something else' : 'What would you like to ask?';
+  }
+  keepToastsClearOfDialogue();
   playCozySound(activeCritter.species === 'bird' || activeCritter.species === 'butterfly' ? 'chirp' : 'tap');
 }
 
@@ -84,8 +99,14 @@ function choose(choice: ConversationChoice) {
   const result = resolveConversationChoice(activeCritter, activeScene, choice);
   if (result.action === 'pet') petCritter(activeCritter);
   refreshMeta();
-  speak(result.reply);
-  if (result.endsScene) renderAfterStoryChoice();
+  speak(result.reply, true);
+  if (result.nextScene) {
+    activeScene = result.nextScene;
+    refreshArc();
+    renderChoices(activeScene);
+  } else if (result.endsScene) {
+    renderAfterStoryChoice();
+  }
 }
 
 function renderChoices(scene: ConversationScene) {
@@ -103,6 +124,7 @@ function renderChoices(scene: ConversationScene) {
 function openConversation(critter: Critter) {
   activeCritter = critter;
   if (nameElement) nameElement.textContent = critter.params.name;
+  if (speakerElement) speakerElement.textContent = critter.params.name;
   panel?.classList.add('is-open');
   panel?.setAttribute('aria-hidden', 'false');
   // Hold the critter's attention for as long as its speech bubble is open.
@@ -110,7 +132,6 @@ function openConversation(critter: Critter) {
   // The dialogue card and the toast stack share the bottom-centre band.
   // Lift the toasts so petting or harvesting mid-conversation doesn't drop
   // a card on top of the critter's speech.
-  setToastStackRaised(true);
   if (!talkedThisVisit.has(critter.id)) {
     addFriendshipPoints(critter.id, 2);
     talkedThisVisit.add(critter.id);
@@ -120,6 +141,7 @@ function openConversation(critter: Critter) {
   refreshArc();
   speak(activeScene.opening);
   renderChoices(activeScene);
+  keepToastsClearOfDialogue();
 }
 
 export function closeCritterDialogue(): boolean {
@@ -144,18 +166,30 @@ export function initializeCritterDialogue() {
   panel.innerHTML = `
     <div class="critter-dialogue-tape" aria-hidden="true"></div>
     <button class="critter-dialogue-close" type="button" aria-label="End conversation">×</button>
-    <p class="critter-dialogue-kicker">A little conversation with</p>
-    <h2 class="critter-dialogue-name"></h2>
-    <p class="critter-dialogue-meta"></p>
-    <p class="critter-dialogue-arc" hidden></p>
-    <p class="critter-dialogue-speech"></p>
-    <div class="critter-dialogue-actions"></div>
+    <header class="critter-dialogue-heading">
+      <p class="critter-dialogue-kicker">A little conversation with</p>
+      <h2 class="critter-dialogue-name"></h2>
+      <p class="critter-dialogue-meta"></p>
+      <p class="critter-dialogue-arc" hidden></p>
+    </header>
+    <div class="critter-dialogue-exchange">
+      <section class="critter-dialogue-reply" aria-live="polite" aria-atomic="true">
+        <p class="critter-dialogue-reply-label"><span class="critter-dialogue-speaker"></span> says</p>
+        <p class="critter-dialogue-speech"></p>
+      </section>
+      <section class="critter-dialogue-questions" aria-label="Conversation choices">
+        <p class="critter-dialogue-question-prompt">What would you like to ask?</p>
+        <div class="critter-dialogue-actions"></div>
+      </section>
+    </div>
   `;
   document.body.append(panel);
   nameElement = panel.querySelector('.critter-dialogue-name');
   metaElement = panel.querySelector('.critter-dialogue-meta');
   arcElement = panel.querySelector('.critter-dialogue-arc');
   speechElement = panel.querySelector('.critter-dialogue-speech');
+  speakerElement = panel.querySelector('.critter-dialogue-speaker');
+  questionPromptElement = panel.querySelector('.critter-dialogue-question-prompt');
   actionsElement = panel.querySelector('.critter-dialogue-actions');
   panel.querySelector('.critter-dialogue-close')?.addEventListener('click', closeCritterDialogue);
 }

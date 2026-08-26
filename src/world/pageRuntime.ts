@@ -60,7 +60,7 @@ const GROUND_MAP_COLORS: Record<string, string> = {
 function buildProp(page: PageData, prop: PropData, index: number, group: THREE.Group) {
   const positionalId = 'x' in prop && 'z' in prop
     ? `${prop.kind}:${prop.x.toFixed(3)}:${prop.z.toFixed(3)}`
-    : `unique:${prop.unique}`;
+    : prop.kind === 'unique' ? `unique:${prop.unique}` : prop.kind;
   const featureId = `page:${page.id}:prop:${prop.id ?? positionalId}`;
 
   // Nothing dry belongs in a pond. Loose materials, scrap, and trees are all
@@ -142,6 +142,42 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         x: prop.x,
         z: prop.z,
       });
+      break;
+    }
+
+    case 'waterChannel': {
+      const body = getWaterBody(`${page.id}:prop:${prop.id ?? index}`);
+      if (!body || body.kind !== 'channel') break;
+      group.add(buildWaterSurface(body));
+      for (let segment = 0; segment < prop.points.length - 1; segment += 1) {
+        const [ax, az] = prop.points[segment];
+        const [bx, bz] = prop.points[segment + 1];
+        const width = Math.max(prop.widths[segment] ?? 1, prop.widths[segment + 1] ?? 1);
+        registerMapFeature({
+          color: prop.map?.color ?? '#4e84a4',
+          id: `${featureId}:segment:${segment}`,
+          kind: prop.map?.kind ?? 'terrain',
+          radiusX: Math.hypot(bx - ax, bz - az) / 2,
+          radiusZ: width / 2,
+          rotation: Math.atan2(-(bz - az), bx - ax),
+          shape: 'rect',
+          x: (ax + bx) / 2,
+          z: (az + bz) / 2,
+        });
+      }
+      if (prop.crossing) {
+        registerMapFeature({
+          color: '#9b7149',
+          id: `${featureId}:bridge`,
+          kind: 'landmark',
+          radiusX: prop.crossing.length / 2,
+          radiusZ: prop.crossing.width / 2,
+          rotation: prop.crossing.rotationY,
+          shape: 'rect',
+          x: prop.crossing.x,
+          z: prop.crossing.z,
+        });
+      }
       break;
     }
 
@@ -353,7 +389,7 @@ export function buildPageGroup(page: PageData): THREE.Group {
   // spot is wet, so a body registered later would be invisible to props
   // already positioned — which is how a stone cluster ended up floating on
   // the clearing pond.
-  registerPageWater(page.id, page.props as Array<{ kind: string }>);
+  registerPageWater(page.id, page.props);
 
   page.props.forEach((prop, index) => {
     buildProp(page, prop, index, group);

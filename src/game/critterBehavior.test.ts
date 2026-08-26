@@ -9,7 +9,13 @@ vi.mock('../render/context', () => ({
   textureLoader: { load: () => new THREE.Texture() },
 }));
 vi.mock('../world/terrain', () => ({ sampleTerrainHeight: () => 0 }));
-vi.mock('../world/water', () => ({ isInWater: () => false, waterDepthAt: () => 0 }));
+let deepWater = (_x: number, _z: number) => false;
+vi.mock('../world/water', () => ({
+  bridgeDeckHeightAt: () => null,
+  isDeepWater: (x: number, z: number) => deepWater(x, z),
+  isInWater: () => false,
+  waterDepthAt: () => 0,
+}));
 vi.mock('./friendship', () => ({ getBoldnessBoost: () => 0 }));
 
 /**
@@ -107,17 +113,19 @@ function travel(critter: Critter, maxSeconds: number) {
   let pathLength = 0;
   let maxDetourZ = 0;
   let insideWall = false;
+  let enteredDeepWater = false;
   for (let t = 0; t < maxSeconds && !arrived; t += step) {
     updateCritter(critter, step, t, away);
     const { x, z } = critter.rig.group.position;
     if (solid(x, z)) insideWall = true;
+    if (deepWater(x, z)) enteredDeepWater = true;
     pathLength += Math.hypot(x - previous.x, z - previous.z);
     previous.set(x, 0, z);
     maxDetourZ = Math.max(maxDetourZ, Math.abs(z - start.z));
     seconds = t;
     if (Math.hypot(x - target.x, z - target.z) < 0.5) arrived = true;
   }
-  return { arrived, seconds, pathLength, maxDetourZ, insideWall };
+  return { arrived, seconds, pathLength, maxDetourZ, insideWall, enteredDeepWater };
 }
 
 describe('critter navigation', () => {
@@ -204,5 +212,20 @@ describe('critter navigation', () => {
     travel(critter, 30);
 
     expect(solid(critter.rig.group.position.x, critter.rig.group.position.z)).toBe(false);
+  });
+
+  it('routes around deep water instead of walking into the middle of it', () => {
+    const previousSolid = solid;
+    solid = () => false;
+    deepWater = (x, z) => Math.abs(x) < 0.55 && Math.abs(z) < 1.7;
+    try {
+      const journey = travel(makeCritter(-2, 0, 2, 0), 40);
+      expect(journey.arrived).toBe(true);
+      expect(journey.enteredDeepWater).toBe(false);
+      expect(journey.maxDetourZ).toBeGreaterThan(1.4);
+    } finally {
+      solid = previousSolid;
+      deepWater = () => false;
+    }
   });
 });

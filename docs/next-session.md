@@ -1,123 +1,109 @@
 # Next Session
 
-Written fresh at the end of each working day. Updated 2026-08-15 after the
-avatar shape pipeline rework and Phase B wiring. Start here.
+Updated 2026-08-25 after the first MP.3 invite-room slice. Start here.
 
-> **Today: the avatar stopped being a placeholder — and grew a face.** The shape library grew
-> to 58 hand-drawn cutouts, the compiler learned to fit artwork drawn at any
-> size in any viewBox, and the editor is now wired into the world — your
-> design rasterizes onto the avatar plane, the cast shadow follows its
-> outline, and the settings cog has a "Change how you look…" entry. Then
-> **stamps** landed: 39 pre-drawn details you place, size, turn and flip —
-> eyes and mouths that clip to the cutout, and arms, legs and hair that hang
-> *outside* it. Plans: `avatar-and-identity.md` (§1.3 shapes, §1.6 stamps,
-> §2.3 the closet, §7 phases) and `roadmap.md` Phase 6.
+## What landed today
 
-## Where things stand
+- **MP.3 invite rooms are underway.** The always-reachable Friends panel now
+  creates validated short-code neighborhoods, joins existing codes, copies a
+  join link, exposes preparing/connecting/online/offline/setup-error states,
+  retries failure, and returns to a clean solo URL that retains only an
+  optional inert hosted-server override. The server filters
+  matchmaking and persistence by code; legacy shared development remains
+  `PAPR-22`. Same-code join, cross-code isolation, missing-code recovery, and
+  solo return are locally browser-proved. Protocol is v3.
 
-- **The editor is a room now.** Full-screen studio (`.avatar-studio`):
-  paper stack, work table, tool bench with three tabs — Faces / Arms & hair /
-  Draw. Only the active tab's pointer interactions are wired, so a drag can
-  never leave a stray stroke. The studio stops wheel/pointer/stray keys at its
-  own edge and `main.ts` parks the frame loop via `isAvatarStudioOpen()` —
-  that pair fixes the scroll-also-zooms-the-camera bug.
+- **Colyseus 0.17 migration.** The browser uses `@colyseus/sdk`; the server is
+  on core/schema/transport 0.17/4.x with Express-hosted matchmaking, reflected
+  credentialed CORS, graceful shutdown, and root-proxy schema callbacks.
+- **MP.2 feedback is complete locally.** Settings and the Scrapbook open one
+  accessible Bug / Improvement / New idea / Other sheet. Safe context is
+  inspectable, passport identity is removable, explicit fresh-world
+  screenshots can be previewed/removed and upload under a 350 KB cap, failed
+  sends remain in a bounded local outbox, and Retry produces a durable receipt.
+  The private `?review=1` desk uses `PP_REVIEWER_TOKEN` to filter, read protected
+  screenshots, change status, append audit notes, and export redacted JSON.
+- **Hosting notes are recorded.** `hosting.md` recommends Vercel for the static
+  client and Railway plus a persistent volume for the first alpha server.
 
-- **Avatar Phase B shipped.** `src/game/avatarLook.ts` is the one seam
-  between the DOM+SVG editor and Three.js; `setAvatarTexture()` in
-  `game/avatar.ts` swaps the map and re-runs `applyAlphaShadow`. First-run
-  offers the editor once (`pp.avatar.firstRunDone.v1`); skipping is a real
-  choice, not a postponement.
-- **Shapes: one viewBox per shape, not one for all.** The compiler ignores
-  the viewBox, measures the path's own bounding box, applies one uniform
-  scale, centres it, stands it on a shared ground line, and *bakes* the
-  transform into the coordinates (a wrapper transform would scale the
-  cut-edge stroke with the shape — see `avatar-and-identity.md` §1.3).
-- **The sheet is now bigger than the cutout.** `DESIGN_SHEET` 130 × 180
-  around a `DESIGN_CUTOUT` of 100 × 140 — cutouts are exactly the size they
-  were, and the ring around them is where appendages hang. The avatar plane
-  derives its size and height from those constants, so the ground line still
-  meets the terrain where it did. Done deliberately *before* Phase D: after
-  designs sync it would have been a migration.
-- **Stamps**: `assets/avatar-stamps/` + `npm run stamps:compile`, roles
-  (`ink` / `paper` / `shadow`) recoloured from the crayon and the paper
-  stock, `layer: on | behind` deciding clipped-or-not. Placement is drag
-  *or* buttons — the buttons are the accessible path, not a fallback.
-- 58 shapes and 39 stamps compile; `shapes.test.ts` and `stamps.test.ts`
-  guard the fit, the normalization, and the layer order. 371 tests pass.
-- **Not yet verified: a real browser.** The sandbox has none, so the raster
-  path (SVG data URL → `<Image>` → canvas → `CanvasTexture`) has never
-  actually run. That is the first thing to check on the mac.
-- **Pre-existing breakage, untouched:** `PlacedPiece.ownerId` was renamed
-  to `makerId` in `shared/`, but `src/sim/state.ts`, `src/sim/commands.ts`
-  and `src/game/placement.ts` still write `ownerId`. Seven `tsc` errors;
-  `npm run build` fails on them. Nothing to do with avatars — it is the
-  tail of multiplayer Phase A.
+- **MP.1 — the opt-in shared neighborhood slice.** `?shared=1` joins the local
+  authoritative room while ordinary URLs stay completely solo. Paper passport
+  identity, the worn-design `AvatarRef` adapter, named edge-colored remote
+  cutouts, interpolated movement, shared piece rendering, completed-build
+  publication, and accessible DOM chat with late-join history are all wired.
+- **Alpha Gate 0 is reached.** Two independent browser sessions moved, chatted,
+  received a server-stamped bench, and recovered it after a full server restart.
+  A third fresh session received the bounded chat history.
+- **Critter Knowledge 2.2 — threaded follow-ups.** “Tell me about this place”
+  answers once, then opens Gathering / Growing / Nearby / Local character.
+  Repeated questions rotate facts, exact facts are remembered without closing
+  a topic, and Back restores everyday chat. Authored conversations can use the
+  same recursive `followUps` shape.
+- **Critter Knowledge 2.3 — nearby elsewhere.** Wayfinding now includes named
+  shops/landmarks within a short walk and distinct biomes on the four adjacent
+  pages. It stays local rather than becoming a global index.
+- **Maker identity seam is clean.** Completed pieces and in-progress build
+  sites use protocol-v2 `makerId` in solo, shared, and server shapes. Legacy
+  solo `ownerId` saves migrate on read.
+- **Multiplayer is a parallel lane now.** It starts after 2.2 rather than after
+  biome/map completion. `roadmap.md` defines MP.1–MP.3 and Alpha gate 1;
+  `alpha-testing.md` defines the in-game Bug / Improvement / New idea intake,
+  safe context, offline outbox, receipt, and reviewer queue.
 
-## Do this first (any agent, in order)
+## Verification
 
-1. **Fix the `ownerId` → `makerId` rename** in `src/sim/` and
-   `src/game/placement.ts`, then `npm run build`. The client is writing a
-   field the shared type no longer has; anything that reads maker credit is
-   reading undefined.
-2. **Play-test the avatar end to end on the mac.** Fresh profile (or clear
-   `pp.avatar.*` and `pp.wardrobe.*` in localStorage) → first-run editor
-   should open over the world → pick a shape, paper, draw → Save. Check:
-   the cutout appears on the plane, the *shadow matches its outline* (not
-   the old placeholder's), first person still fades it out, and reloading
-   keeps the look.
-3. **Review the art as a designer.** Three contact sheets now:
-   `designs/avatar-template-contact-sheet.html` (shapes, with the sheet
-   border, cutout box and ground line), `designs/avatar-stamp-contact-sheet.html`
-   (stamps at natural size on their origin), and — the useful one —
-   `npm run avatar:preview`, which composes whole avatars so layering and
-   default placement are visible. `shapes:preview` / `stamps:preview` render
-   PNGs if you're away from a browser. Redraw anything weak with
-   `shapes:watch` / `stamps:watch` running.
-   The starter stamp set is deliberately plain: mine are geometric
-   stand-ins, and hand-drawn ones will look enormously better.
-4. **Check the names.** Three files draw something other than what they're
-   called, so `shapes.json` keys them by what they *are*: `pelicin.svg` →
-   `flamingo`, `firef.svg` → `fire-badge`, `power.svg` → `raised-fist`.
-   Also `prarie-dog.svg` → key `prairie-dog`. Rename the files if you'd
-   rather they match; only `shapes.json` refers to them.
+- Root client: **392 tests pass**; production build succeeds (164 modules).
+- `shared/` and `server/`: standalone typechecks pass.
+- Root and server `npm audit`: **0 advisories**.
+- Independent Playwright Firefox sessions on 0.17 saw one another, propagated
+  held movement, exchanged live chat, delivered chat history to a late joiner,
+  shared a piece, and recovered the piece after a full server restart. A plain
+  URL remained socket-free.
+- Feedback browser proof: a normal screenshot send produced a receipt and a
+  real 52 KB world image; a second screenshot note made while the server was
+  stopped remained queued and delivered by Retry. The reviewer changed status,
+  appended a private note, filtered the queue, viewed the protected image, and
+  produced an export without passport ids or audit notes. Both report and image
+  survived a full server restart. The review page had zero fresh console
+  errors; the expected offline fetch errors occurred only during the deliberate
+  server-down test.
+- MP.3 browser proof used four independent Firefox profiles: Fern and Moss
+  joined `ZRET-83` and saw one another; Sage's `FERN-24` chat did not leak into
+  that room; joining absent `LEAF-29` exposed recovery actions; and Return to
+  solo removed all shared parameters. Closing the rooms wrote distinct
+  `room-invite-ZRET-83.json` and `room-invite-FERN-24.json` stores.
 
-## Then
+## Do this next
 
-- **Avatar Phase C — wardrobe UI, then the closet** (`avatar-and-identity.md`
-  §2.3 + §7). C1 is the panel over the existing store (`wardrobe.ts`, done,
-  capped at 24): save slots, rename, duplicate, wear, delete, share toggle.
-  It also has to fix the rough edge Phase B leaves — a design saved into a
-  full wardrobe is *worn but not saved* with only a console warning; the
-  player needs telling and a slot to replace. C2 turns the wardrobe into a
-  **buildable closet** you stand in front of, displaying the looks you
-  chose to share.
-  Three things already decided, so don't relitigate them mid-build: tiers
-  change style and how much is on display, **never capacity**; displaying
-  reuses the per-design `sharedOnCard` flag rather than a second toggle;
-  and the settings entry stays reachable from anywhere — the closet is the
-  richer door, never the only one. C2 does not go into visitable houses
-  before report/hide exists (§6.1).
-- **Multiplayer Phase B — wire the slice** (`multiplayer-readiness.md`
-  §Suggested sequence): wire `src/net/` into `main.ts`, run `server/`
-  locally, prove two tabs see each other. The join already carries passport
-  credentials via `src/net/passport.ts` → `getOrCreatePassport()`.
-- Cross-dependency unchanged: avatar designs go over the wire in avatar
-  Phase D, which needs multiplayer Phase B first.
+1. **Finish MP.3 and Alpha gate 1.** Add host identity/removal and personal
+   mute/block, then deploy and invite 3–5 known testers around one 30–45 minute
+   loop. Follow `hosting.md`; biome breadth is explicitly not the gate.
+2. **Keep safety reports separate.** Product feedback is done; contextual
+   player/message/design reporting belongs to the MP.3 moderation controls and
+   must not be folded into the general feedback queue.
+
+If staying in the single-player/content lane instead, the next dependency item
+is **Phase 2.4 — the diary**. Give entries stable ids and player-authored fields
+from day one; annotation/highlighting UI remains parked.
 
 ## Watch out for
 
-- `PROTOCOL_VERSION` is **2** — stale clients are refused at join, by
-  design. Bump it again on any wire-shape change.
-- `PlacedPiece.ownerId` was **renamed to `makerId`** and holds an
-  accountId, never a sessionId. Nothing should ever store a sessionId.
-- `shapes.generated.ts` is generated — edit `assets/avatar-shapes/` and
-  recompile. The compiler fails loudly and specifically; read its message.
-- `harp.svg` warns on 21 skipped `<line>` elements: a solid cutout cannot
-  show zero-width lines, so the harp has no strings. Draw them as thin
-  closed shapes if you want them.
-- The editor is a modal overlay and must never register a HUD zone
-  (`hudLayout.ts` owns all screen space).
-- Server saves land in `server/data/` (accounts.json, room-*.json). Chat is
-  deliberately not persisted (privacy default, documented in shared/).
-
----
+- The worktree includes the owner's newly added water/rock assets and the
+  accumulated water, plans, Pip, and UI changes. Preserve all of it; do not
+  reset or treat untracked assets as disposable.
+- `PROTOCOL_VERSION` is 3. Bump it on any wire-shape change.
+- Shared mode is explicitly gated by `?shared=1`; preserve the plain-URL
+  no-socket behavior. Explicit invite URLs use `invite=ABCD-23` and
+  `intent=create|join`; bare `?shared=1` deliberately maps to legacy local code
+  `PAPR-22`. Local dogfood defaults to `ws://localhost:2567` and may take an
+  explicit `server=wss://…` query value later.
+- `makerId` is always a durable account id (or the solo sentinel), never a
+  Colyseus session id.
+- Remote drawings are not an MP.1 blocker. Synchronizing and resolving actual
+  designs remains avatar Phase D and adds UGC report/hide obligations.
+- MP.1 publishes the finished local assembly after local material spending;
+  the room owns shared ids, maker credit, caps, and persistence. Moving the
+  entire build transaction server-side remains a later shared-simulation
+  hardening step—do not mistake this dogfood seam for the final transaction.
+- General tester feedback never silently includes passport secrets, full saves,
+  chat, or drawings. See `alpha-testing.md`.

@@ -104,6 +104,11 @@ Not an unprompted blurt, and not a fact dispensed once and gone. It is a
 critter could say about where you are standing. Multiple responses, randomised
 order, and available every time you ask.
 
+**Built 2026-08-25.** Every live biome now draws from material/tool,
+seed-growth/harvest, registered-place wayfinding, and authored fun-fact pools.
+The useful facts read the live catalogs; stable page-seeded rotation keeps
+repeat answers varied without save/reload or multiplayer drift.
+
 The pool holds several *kinds* of knowledge, all scoped to the current biome
 or region:
 

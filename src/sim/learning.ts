@@ -6,7 +6,6 @@ import {
   type TechNodeId,
   type TechTaskDef,
 } from './catalogs/techTree';
-import { recipeForTool } from './catalogs/recipes';
 import {
   getGameState,
   updateGameState,
@@ -114,9 +113,8 @@ export function getLearningProgress(
 function completeLearning(state: GameState, nodeId: TechNodeId) {
   const node = TECH_DEFS[nodeId];
   if (node.readiness !== 'ready') return;
-  for (const toolId of node.grants) {
-    const recipeId = recipeForTool(toolId);
-    if (recipeId && !state.player.plans.includes(recipeId)) state.player.plans.push(recipeId);
+  for (const recipeId of node.grants) {
+    if (!state.player.plans.includes(recipeId)) state.player.plans.push(recipeId);
   }
   state.player.activeLearning = null;
 }

@@ -1,6 +1,6 @@
 import type { GameState } from '../state';
 import { toolRequiredFor } from './obtaining';
-import { RECIPE_DEFS, recipeForTool, type RecipeId } from './recipes';
+import { RECIPE_DEFS, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { TOOL_DEFS, type ToolId } from './tools';
 
@@ -27,9 +27,10 @@ import { TOOL_DEFS, type ToolId } from './tools';
  * fabricate fake recipes or tool ids for content that doesn't exist, every
  * node declares a `readiness`:
  *
- * - `'ready'` nodes are real: they grant an actual `ToolId`, reference a
- *   real `RecipeId` in their tasks, and behave exactly as Phase 1.1 always
- *   specified.
+ * - `'ready'` nodes are real: they grant actual `RecipeId` plans, reference
+ *   real recipes/tools in their tasks, and behave exactly as Phase 1.1 always
+ *   specified. Current grants happen to be tools; later branches distribute
+ *   furniture, clothing, structure, and decoration plans the same way.
  * - `'concept'` nodes are honest placeholders — a name, a branch, a
  *   one-line summary, and prerequisite edges, nothing more. No fake grant,
  *   no invented recipe, no precision (`learningHours`) the design hasn't
@@ -42,8 +43,8 @@ import { TOOL_DEFS, type ToolId } from './tools';
  *
  * The brainstorm list this was built from is not final — names, order, and
  * branch boundaries are all expected to move. See `docs/knowledge-tree.md`
- * for the mechanical rules (one node at a time, patience-or-doing, tool
- * plans never leave the tree) that do not change regardless of content.
+ * for the mechanical rules (one node at a time, patience-or-doing, and plans
+ * granted throughout the tree) that do not change regardless of content.
  */
 
 export type TechBranchId =
@@ -134,10 +135,11 @@ export type TechNodeDef = TechNodeBase & (
     learningHours: number;
     tasks: TechTaskDef[];
     /**
-     * What this node grants directly. An array because a node can grant more
-     * than one thing in principle; today every ready node grants one tool.
+     * Plans this node teaches directly. An array because a node can teach
+     * several related creations, though plans should be staggered across the
+     * tree rather than bundled into one catch-all lesson.
      */
-    grants: ToolId[];
+    grants: RecipeId[];
   }
   | {
     readiness: 'concept';
@@ -801,7 +803,7 @@ export const TECH_DEFS = {
   readiness: 'ready' | 'concept';
   learningHours?: number;
   tasks?: TechTaskDef[];
-  grants?: ToolId[];
+  grants?: RecipeId[];
   previewGrants?: string[];
 }>;
 
@@ -813,11 +815,9 @@ export const TECH_NODE_ORDER: TechNodeId[] = Object.keys(TECH_DEFS) as TechNodeI
 export function techNodeGrantingRecipe(recipeId: RecipeId): TechNodeId | null {
   const recipe = RECIPE_DEFS[recipeId];
   if (recipe.planSource !== 'knowledge-tree') return null;
-  const output = recipe.output;
-  if (output.kind !== 'tool') return null;
   return TECH_NODE_ORDER.find((nodeId) => {
     const node = TECH_DEFS[nodeId];
-    return node.readiness === 'ready' && (node.grants as readonly ToolId[]).includes(output.toolId);
+    return node.readiness === 'ready' && (node.grants as readonly RecipeId[]).includes(recipeId);
   }) ?? null;
 }
 
@@ -879,7 +879,7 @@ export function techTreeColumnCount(): number {
 export type TechNodeStatus = 'owned' | 'available' | 'locked' | 'not-built';
 
 /**
- * A node reads as owned once every tool it grants has a plan the player
+ * A node reads as owned once every plan it grants is knowledge the player
  * already holds. This deliberately reuses the *current* plan system
  * (`player.plans`) rather than inventing tree-only state — 1.1 is a view,
  * and today's starter tools already satisfy tier-1 nodes on a fresh save,
@@ -890,10 +890,7 @@ export type TechNodeStatus = 'owned' | 'available' | 'locked' | 'not-built';
 export function isTechNodeOwned(nodeId: TechNodeId, state: GameState): boolean {
   const node = TECH_DEFS[nodeId];
   if (node.readiness === 'concept') return false;
-  return node.grants.every((toolId) => {
-    const recipeId = recipeForTool(toolId);
-    return recipeId !== null && state.player.plans.includes(recipeId);
-  });
+  return node.grants.every((recipeId) => state.player.plans.includes(recipeId));
 }
 
 /** The prerequisite nodes still standing between the player and this one. */
@@ -941,13 +938,13 @@ export function recipesUnlockedByTool(toolId: ToolId): RecipeId[] {
 }
 
 /**
- * The node's whole "what does this get me" answer: large icons (the tools
- * granted) and small icons (what those tools then reach), both labelled —
+ * The node's whole "what does this get me" answer: large icons (the plans
+ * granted) and small icons (what granted tools then reach), both labelled —
  * see the accessibility notes in knowledge-tree.md. Empty for a concept
  * node — there is nothing real to derive yet.
  */
 export function techNodeUnlocks(nodeId: TechNodeId): {
-  grants: ToolId[];
+  grants: RecipeId[];
   resources: ResourceId[];
   recipes: RecipeId[];
 } {
@@ -956,9 +953,12 @@ export function techNodeUnlocks(nodeId: TechNodeId): {
 
   const resources = new Set<ResourceId>();
   const recipes = new Set<RecipeId>();
-  for (const toolId of node.grants) {
+  for (const recipeId of node.grants) {
+    const output = RECIPE_DEFS[recipeId].output;
+    if (output.kind !== 'tool') continue;
+    const toolId = output.toolId;
     for (const resource of resourcesUnlockedByTool(toolId)) resources.add(resource);
-    for (const recipeId of recipesUnlockedByTool(toolId)) recipes.add(recipeId);
+    for (const unlockedRecipeId of recipesUnlockedByTool(toolId)) recipes.add(unlockedRecipeId);
   }
   return {
     grants: node.grants,

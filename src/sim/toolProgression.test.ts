@@ -18,6 +18,7 @@ import {
 import { craftBlockers, describeCraftBlocker } from './commands';
 import { createDefaultGameState, setGameStateForTests, type GameState } from './state';
 import { getToolArt } from '../game/toolPresentation';
+import { toolRequiredFor } from './catalogs/obtaining';
 
 afterEach(() => setGameStateForTests(null));
 
@@ -102,11 +103,29 @@ describe('tool ladders', () => {
     for (const recipeId of STARTER_PLAN_IDS) expect(isRecipeAvailable(recipeId)).toBe(true);
   });
 
-  it('assigns every ready tool plan to the starter set or the knowledge tree, never the world', () => {
+  it('assigns every plan to the starter set or a knowledge-tree node', () => {
     for (const recipe of Object.values(RECIPE_DEFS)) {
-      if (recipe.status !== 'ready' || recipe.output.kind !== 'tool') continue;
       expect(['starter', 'knowledge-tree']).toContain(recipe.planSource);
     }
+  });
+
+  it('never requires a material gated behind the tool that plan teaches', () => {
+    const offenders: string[] = [];
+    for (const recipeId of Object.keys(RECIPE_DEFS) as RecipeId[]) {
+      const recipe = RECIPE_DEFS[recipeId];
+      if (recipe.status !== 'ready' || recipe.output.kind !== 'tool') continue;
+      const madeTool = TOOL_DEFS[recipe.output.toolId];
+      for (const ingredient of recipe.ingredients) {
+        if (ingredient.kind !== 'exact') continue;
+        const requiredToolId = toolRequiredFor(ingredient.resource);
+        if (!requiredToolId) continue;
+        const requiredTool = TOOL_DEFS[requiredToolId];
+        if (requiredTool.family === madeTool.family && requiredTool.tier >= madeTool.tier) {
+          offenders.push(`${recipeId} needs ${ingredient.resource}, gated behind ${requiredToolId}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 
   it('hides unimplemented recipes from every family ladder', () => {

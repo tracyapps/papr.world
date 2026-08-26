@@ -22,6 +22,8 @@ export type JoinOptions = {
   protocol: number;
   name: string;
   avatar: AvatarRef;
+  /** Human-facing matchmaking key. Internal Colyseus room ids stay private. */
+  inviteCode: string;
   /**
    * Omitted = join as a guest (`guest:<sessionId>` identity, not durable).
    * Present = the server verifies and stamps the durable accountId.

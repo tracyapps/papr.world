@@ -15,6 +15,7 @@ import { setActionMode } from '../game/actionMode';
 import { getToolArt } from '../game/toolPresentation';
 import { buildPlacesControls } from './placesPanel';
 import { requestHudLayout } from './hudLayout';
+import { openFeedbackPanel } from './feedbackPanel';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
 // a pop-up book. Rationale:
@@ -34,7 +35,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'map' | 'plans' | 'activity';
+type TabId = ResourceCategoryId | 'tools' | 'map' | 'plans' | 'activity' | 'feedback';
 
 type TabDefinition = {
   id: TabId;
@@ -75,6 +76,7 @@ const TABS: TabDefinition[] = [
   { id: 'map', label: 'Map', summary: () => null },
   { id: 'plans', label: 'Plans', summary: () => null },
   { id: 'activity', label: 'Activity', summary: () => null },
+  { id: 'feedback', label: 'Feedback', summary: () => null },
 ];
 
 function renderTabs() {
@@ -218,7 +220,13 @@ function renderPanel() {
     return;
   }
 
-  if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
+  if (activeTab === 'feedback') {
+    panelElement.innerHTML = `
+      <div class="scrapbook-feedback">
+        <span>Found a wrinkle in the world, or imagined something lovely?</span>
+        <button class="scrapbook-item-action" type="button" data-open-feedback>Send feedback…</button>
+      </div>`;
+  } else if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
   else if (activeTab === 'activity') panelElement.innerHTML = renderActivityTab();
   else panelElement.innerHTML = renderMaterialsTab(activeTab);
@@ -284,6 +292,15 @@ export function initializeScrapbook() {
 
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
+
+    if (target.closest('[data-open-feedback]')) {
+      setScrapbookOpen(false);
+      // Give the feedback dialog a visible focus-return target; the button
+      // just clicked is inside the strip that is now hidden.
+      scrapbookToggle?.focus();
+      openFeedbackPanel();
+      return;
+    }
 
     const seedId = target.closest<HTMLButtonElement>('[data-select-seed]')?.dataset.selectSeed as SeedId | undefined;
     if (seedId && seedId in SEED_DEFS) {

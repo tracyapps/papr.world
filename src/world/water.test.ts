@@ -12,7 +12,10 @@ vi.mock('../render/materials', () => ({
 const {
   AUTHORED_WATER_BODIES,
   SHALLOW_WATER_DEPTH,
+  bridgeDeckHeightAt,
   isInWater,
+  isDeepWater,
+  isWaterCrossingAt,
   nudgeOutOfWater,
   registerPageWater,
   registerWaterBody,
@@ -97,6 +100,45 @@ describe('water bodies', () => {
     ]);
     expect(isInWater(10, 10)).toBe(true);
     expect(isInWater(30, 30)).toBe(false);
+  });
+
+  it('samples curved channels with width and depth that vary along their course', () => {
+    registerWaterBody({
+      kind: 'channel',
+      id: '1,0:river',
+      points: [[0, -5], [1, 0], [0, 5]],
+      widths: [2, 4, 6],
+      depths: [0.25, 0.5, 0.75],
+      flowSpeed: 0.05,
+      bankStyle: 'rock',
+      seed: 1,
+    });
+
+    expect(waterDepthAt(0, -5)).toBeCloseTo(0.25, 2);
+    expect(waterDepthAt(0, 5)).toBeCloseTo(0.75, 2);
+    expect(isInWater(3.2, 5)).toBe(false);
+  });
+
+  it('blocks land critters only in deep water and leaves bridges traversable', () => {
+    registerWaterBody({
+      kind: 'channel',
+      id: '1,0:bridged-river',
+      points: [[0, -5], [0, 5]],
+      widths: [6, 6],
+      depths: [0.8, 0.8],
+      flowSpeed: 0.04,
+      bankStyle: 'woodland',
+      seed: 2,
+      crossing: { x: 0, z: 0, rotationY: 0, width: 1.5, length: 8 },
+    });
+
+    expect(isDeepWater(0, 3)).toBe(true);
+    expect(isWaterCrossingAt(0, 0)).toBe(true);
+    expect(isDeepWater(0, 0)).toBe(false);
+    expect(waterDepthAt(0, 0)).toBe(0);
+    expect(bridgeDeckHeightAt(0, 0)).toBeGreaterThan(bridgeDeckHeightAt(3.9, 0)!);
+    expect(bridgeDeckHeightAt(0, 0)).toBeGreaterThan(0.5);
+    expect(bridgeDeckHeightAt(0, 2)).toBeNull();
   });
 });
 

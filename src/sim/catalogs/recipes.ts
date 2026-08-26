@@ -21,7 +21,7 @@ export type RecipeOutput =
  * **Crafting something you cannot then use is worse than not seeing it.**
  */
 export type RecipeStatus = 'ready' | 'planned';
-export type PlanSource = 'starter' | 'knowledge-tree' | 'world';
+export type PlanSource = 'starter' | 'knowledge-tree';
 
 export type RecipeDefinition = {
   id: string;
@@ -192,7 +192,7 @@ export const RECIPE_DEFS = {
     id: 'tape-tapper',
     name: 'Tape Tapper',
     planName: 'Plan: sticky percussion wand',
-    planSource: 'world',
+    planSource: 'knowledge-tree',
     description: 'Pokes, stamps, and convinces stubborn tabs to behave.',
     // Waiting on tape existing as a material and a `stamp` interaction.
     status: 'planned',
@@ -208,7 +208,7 @@ export const RECIPE_DEFS = {
     id: 'crease-scout',
     name: 'Crease Scout',
     planName: 'Plan: folded finder',
-    planSource: 'world',
+    planSource: 'knowledge-tree',
     description: 'Sniffs out promising seams in the paper terrain.',
     // Nothing surfaces seams yet, so this would sit inert in the scrapbook.
     // Same reasoning as the scissors before trimming landed: it comes back
@@ -234,16 +234,12 @@ export function isRecipeAvailable(recipeId: RecipeId): boolean {
 /**
  * Plans you begin with: the explicitly authored starter set, nothing more.
  *
- * The source lives on each recipe so a higher tool rung cannot quietly drift
- * back into world siting, shops, or gifts. Tool plans above the starter set
- * are learned from the knowledge tree; world plans are everything else.
+ * The source lives on each recipe so a future furniture or structure plan
+ * cannot quietly bypass progression. Anything not in the starter set is
+ * learned from an appropriately placed knowledge-tree node.
  */
 export const STARTER_PLAN_IDS: RecipeId[] = (Object.keys(RECIPE_DEFS) as RecipeId[])
   .filter((recipeId) => isRecipeAvailable(recipeId) && RECIPE_DEFS[recipeId].planSource === 'starter');
-
-export function isWorldPlan(recipeId: RecipeId): boolean {
-  return RECIPE_DEFS[recipeId].planSource === 'world';
-}
 
 /** The recipe that makes a given tool, if one exists. */
 export function recipeForTool(toolId: ToolId): RecipeId | null {

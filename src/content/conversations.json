@@ -31,34 +31,31 @@
         "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti."
       ]
     },
-    "placeReplies": {
-      "squirrel": [
+    "placeFacts": {
+      "clearing": [
         "The notebook path remembers everyone who walks on it. Listen closely—it crinkles in different accents.",
-        "There is a very good thinking tree near the north edge of {{region}}."
+        "The blue paper pond keeps one tiny bubble tucked under its edge, as if it is saving a thought.",
+        "The clearing is quiet on purpose. It gives every new adventure somewhere gentle to begin."
       ],
-      "butterfly": [
-        "The blue paper pond is only pretending to be water. Please do not tell it I said so.",
-        "Some scraps flutter more when they are pleased."
+      "forest": [
+        "The trees trade rumors whenever the breeze turns their paper edges sideways.",
+        "A redwood canopy makes its own small weather—cool underneath, rustly above, and always dropping a little shade.",
+        "Old forest paths rarely run straight. Roots, folds, and good thinking trees all get a vote."
       ],
-      "raccoon": [
+      "meadow": [
+        "Meadow paper warms quickly in the sun, so butterflies often find the bright folds before anyone else.",
+        "The soft green patches are warmer than the big sheet. Someone very thorough checked all of them.",
+        "In a meadow, even a short breeze has room to practice being dramatic."
+      ],
+      "dunes": [
+        "The corrugated ridges hum softly when wind crosses them at an angle.",
+        "Dune shadows are excellent clocks until the wind rearranges the clock.",
+        "Warm cardboard keeps the day's heat folded inside it after the sun has moved on."
+      ],
+      "scrapflats": [
         "Every scrap pile is a treasure pile with poor publicity.",
-        "The house window likes visitors. It gets bored staring in only one direction."
-      ],
-      "bunny": [
-        "The soft green patches are warmer than the big sheet. I checked all of them.",
-        "If you stand very still, {{region}} keeps moving anyway. That is how you know it is alive."
-      ],
-      "bird": [
-        "The trees trade rumors whenever the breeze turns them sideways.",
-        "I saw a shiny scrap past the path. Or possibly the sun. Both are worth visiting."
-      ],
-      "cat": [
-        "The best seat is whichever one someone else was about to use.",
-        "The porch is acceptable at sunset. I have issued it a provisional approval."
-      ],
-      "woodchuck": [
-        "The Wood Mill sits where the notebook trail meets the oldest trees. That saves us a great deal of carrying.",
-        "Ribbonwood bundles turn up near the forest edge. Walk over the loose bundles and they will tuck into your scrapbook."
+        "The flats collect offcuts from faraway paper weather; matching two edges can tell you where they came from.",
+        "A shiny glint out here might be foil, a button, or sunlight being mischievous. All three reward a closer look."
       ]
     },
     "selfReplies": {

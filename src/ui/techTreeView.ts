@@ -1,5 +1,5 @@
 import { getToolArt } from '../game/toolPresentation';
-import { RECIPE_DEFS } from '../sim/catalogs/recipes';
+import { RECIPE_DEFS, type RecipeId } from '../sim/catalogs/recipes';
 import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import {
   TECH_BRANCH_ORDER,
@@ -18,7 +18,6 @@ import {
   type TechNodeId,
   type TechNodeStatus,
 } from '../sim/catalogs/techTree';
-import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import {
   describeLearningProgress,
@@ -164,16 +163,15 @@ function renderTreeOverview(): string {
 }
 
 /**
- * One grant, as a reusable icon medallion: a framed box with either the
- * tool's real artwork (via `getToolArt`, sized by the drawing's own aspect
- * ratio) or — for a tool whose drawing has not landed — a monogram chip,
- * the same "playable before the art arrives" treatment toolPresentation
- * already gives rail slots. The name always appears as a visible label:
- * knowledge-tree.md says "Named, not just pictured."
+ * One learned plan, as a reusable icon medallion. Tool plans use their real
+ * artwork; later furniture, clothing, structure, and decoration plans fall
+ * back to a labelled monogram until their own catalog artwork exists.
  */
-function renderToolIcon(toolId: ToolId): string {
-  const name = TOOL_DEFS[toolId].name;
-  const art = getToolArt(toolId);
+function renderPlanIcon(recipeId: RecipeId): string {
+  const recipe = RECIPE_DEFS[recipeId];
+  const output = recipe.output;
+  const name = output.label;
+  const art = output.kind === 'tool' ? getToolArt(output.toolId) : null;
   const media = art
     ? `<img src="${art.sourceUrl}" alt="" />`
     : `<span class="tech-unlock-icon-mono" aria-hidden="true">${name.slice(0, 1)}</span>`;
@@ -207,21 +205,18 @@ function renderUnlocks(nodeId: TechNodeId): string {
   }
 
   const unlocks = techNodeUnlocks(nodeId);
-  const grantToolIds = new Set(unlocks.grants);
+  const grantedRecipes = new Set(unlocks.grants);
   const resourceNames = unlocks.resources.map((resourceId) => RESOURCE_CORE_DEFS[resourceId].label);
-  // Exclude any recipe whose own output is one of the tools already named in
-  // "Grants" above it, so the same thing is never named twice on one card.
+  // Exclude direct grants from the smaller derived tier so one plan is never
+  // named twice on the same card.
   const recipeNames = unlocks.recipes
-    .filter((recipeId) => {
-      const output = RECIPE_DEFS[recipeId].output;
-      return !(output.kind === 'tool' && grantToolIds.has(output.toolId));
-    })
+    .filter((recipeId) => !grantedRecipes.has(recipeId))
     .map((recipeId) => RECIPE_DEFS[recipeId].output.label);
 
   const grantsBlock = `
     <div class="tech-node-unlock-tier tech-node-unlock-tier-large">
       <span class="tech-node-unlock-label">Grants</span>
-      <ul>${unlocks.grants.map(renderToolIcon).join('')}</ul>
+      <ul>${unlocks.grants.map(renderPlanIcon).join('')}</ul>
     </div>`;
 
   const smallItems = [...resourceNames, ...recipeNames];

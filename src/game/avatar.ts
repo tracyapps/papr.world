@@ -9,6 +9,7 @@ import { isSolidAt } from '../world/footprints';
 import { DESIGN_CUTOUT, DESIGN_GROUND_Y, DESIGN_SHEET } from '../../shared/src/index';
 import { slideMove } from '../core/placement';
 import { isTimedActionActive } from './timedAction';
+import { bridgeDeckHeightAt } from '../world/water';
 
 /**
  * How much room the player keeps around a wall.
@@ -177,13 +178,15 @@ export function updateAvatar(delta: number) {
   const bob = Math.abs(Math.sin(walkPhase)) * BOB_HEIGHT * speedRatio;
 
   const terrainHeight = sampleTerrainHeight(avatar.position.x, avatar.position.z);
+  const platformHeight = bridgeDeckHeightAt(avatar.position.x, avatar.position.z);
+  const standingHeight = platformHeight ?? terrainHeight;
   // Standing in water lowers the cutout and flattens its bob — you cannot
   // bounce as freely with your legs in a creek.
   const sink = wadeSinkAt(avatar.position.x, avatar.position.z);
   const wetBob = bob * (1 - Math.min(1, sink / 0.26) * 0.6);
   avatar.position.y = THREE.MathUtils.lerp(
     avatar.position.y,
-    terrainHeight + AVATAR_CENTER_Y + wetBob - sink,
+    standingHeight + AVATAR_CENTER_Y + wetBob - sink,
     0.28,
   );
   updateWading(delta, avatar.position, speed * wadeScale);
@@ -207,7 +210,7 @@ export function updateAvatar(delta: number) {
   currentLean = THREE.MathUtils.lerp(currentLean, targetLean, Math.min(delta * 9, 1));
   avatar.rotateZ(currentLean);
 
-  avatarShadow.position.set(avatar.position.x, terrainHeight + 0.006, avatar.position.z);
+  avatarShadow.position.set(avatar.position.x, standingHeight + 0.006, avatar.position.z);
   const shadowShrink = 1 - bob * 1.4;
   avatarShadow.scale.setScalar(shadowShrink);
 }

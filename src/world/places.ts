@@ -1,5 +1,6 @@
 import { registerMapFeature, removeMapFeature } from './mapFeatures';
 import { getGameState, updateGameState, type SavedPlaceState } from '../sim/state';
+import { GREENHOUSE_POSITION } from './seedStoreLayout';
 
 // Saved places: like starred locations on a map. Home is created at the
 // spawn point automatically and can be renamed but never removed.
@@ -9,6 +10,7 @@ export type Place = SavedPlaceState;
 
 export const HOME_PLACE_ID = 'home';
 export const WOOD_MILL_PLACE_ID = 'wood-mill';
+export const PIP_SEED_STORE_PLACE_ID = 'pips-seed-and-garden';
 
 /** Stable navigation targets used by signs, the map, and the places panel.
  * Future shops only need another entry here plus an authored sign board. */
@@ -17,6 +19,13 @@ export const BUILTIN_NAVIGATION_PLACES: readonly Place[] = [
   { id: 'ribbonbark-forest', name: 'Ribbonbark Forest', x: -50, z: 0, builtin: true },
   { id: 'cardboard-desert', name: 'Cardboard Desert', x: 0, z: 50, builtin: true },
   { id: 'offcut-flats', name: 'Offcut Flats', x: 50, z: 0, builtin: true },
+  {
+    id: PIP_SEED_STORE_PLACE_ID,
+    name: 'Pip’s Seed & Garden',
+    x: GREENHOUSE_POSITION.x,
+    z: GREENHOUSE_POSITION.z,
+    builtin: true,
+  },
   { id: WOOD_MILL_PLACE_ID, name: 'Wood Mill', x: -94, z: 0, builtin: true },
 ];
 

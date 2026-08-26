@@ -1,7 +1,7 @@
 # Water and Waterways
 
-Shallow water is implemented. Rivers, lakes, boats, and water critters are
-planned here.
+Shallow pools and the first deterministic river-channel pass are implemented.
+Lakes, boats, springs, waterfalls, and water critters remain planned here.
 
 ## What Exists
 
@@ -14,6 +14,13 @@ planned here.
 - **Wading:** movement slows toward `WADE_SPEED_FLOOR`, the avatar sinks and
   its walk bob flattens, and ripple rings spread from the feet while moving.
 - **Digging:** water registers a footprint, so you cannot dig a pond.
+- **Rivers:** continuous sampled channels vary in width and depth, animate
+  downstream, reserve their corridor from local terrain bumps, and generate a
+  bridge at deep crossings.
+- **Banks:** page-seeded marsh, rock, sand, and woodland edges use cattails,
+  lilies, driftwood, and stone accents without duplicating at page seams.
+- **Critters:** land critters can wade shallow reaches, treat deep reaches as
+  obstacles, and recognize bridges as safe crossings.
 
 **Water is a kind, not a colour.** The world generator scatters `paper.blue`
 as ordinary decoration alongside plaid and bubble prints. If blue paper meant

@@ -115,6 +115,40 @@ describe('seed-store save compatibility', () => {
     expect(state.world.pages['1,0'].buildSites).toEqual({});
     setGameStateForTests(null);
   });
+
+  it('migrates legacy ownerId credit to makerId for pieces and build sites', () => {
+    const storage = new MemoryStorage();
+    storage.setItem(SAVE_STORAGE_KEY, JSON.stringify({
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      player: {},
+      world: {
+        pages: {
+          '0,0': {
+            placedPieces: {
+              bench: {
+                templateKey: 'paper-bench', x: 1, z: 2, rotY: 0,
+                ownerId: 'legacy-paper-friend', page: '0,0',
+              },
+            },
+            buildSites: {
+              frame: {
+                templateKey: 'paper-bench', x: 3, z: 4, rotY: 0,
+                ownerId: 'legacy-builder', page: '0,0', completedStepIds: [],
+                startedAt: 100, changedAt: 200,
+              },
+            },
+          },
+        },
+      },
+    }));
+    setGameStateForTests(null);
+
+    const page = initializeGameState(storage).world.pages['0,0'];
+
+    expect(page.placedPieces.bench.makerId).toBe('legacy-paper-friend');
+    expect(page.buildSites.frame.makerId).toBe('legacy-builder');
+    setGameStateForTests(null);
+  });
 });
 
 describe('seed-store commands', () => {

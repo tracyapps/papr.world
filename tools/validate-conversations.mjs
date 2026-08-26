@@ -40,14 +40,17 @@ function checkChoices(choices, path) {
     if (choice.replyMode !== undefined && !['cycle', 'random'].includes(choice.replyMode)) {
       errors.push(`${choicePath}.replyMode must be "cycle" or "random"`);
     }
+    if (choice.followUps !== undefined) checkChoices(choice.followUps, `${choicePath}.followUps`);
   }
 }
 
 if (content.version !== 1) errors.push('version must currently be 1');
 for (const key of species) {
   requireNonemptyArray(content.everyday?.greetings?.[key], `everyday.greetings.${key}`);
-  requireNonemptyArray(content.everyday?.placeReplies?.[key], `everyday.placeReplies.${key}`);
   requireNonemptyArray(content.everyday?.selfReplies?.[key], `everyday.selfReplies.${key}`);
+}
+for (const key of biomes) {
+  requireNonemptyArray(content.everyday?.placeFacts?.[key], `everyday.placeFacts.${key}`);
 }
 for (const key of personalities) {
   requireNonemptyArray(content.everyday?.traitReplies?.[key], `everyday.traitReplies.${key}`);

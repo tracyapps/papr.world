@@ -1,19 +1,15 @@
 # The Knowledge Tree
 
-Settled 2026-08-06. Supersedes nothing in `plans-and-blueprints.md` — plans
-stay exactly as designed. This document adds the thing that was missing around
-them, and in doing so re-sequences Phase 1 of the roadmap.
+Settled 2026-08-06; plan acquisition unified here on 2026-08-25. The tree is
+the source of every non-starter plan, including later furniture, clothing,
+decoration, building, and structure recipes.
 
 ## The problem this solves
 
-It is not "how do you get plans." That was answered: find them, buy them from
-the owl, be given one by a critter.
-
 The problem is that **the Thing Maker shows empty plan slots and says nothing
 about what would fill them.** A player looking at a locked tier-2 shovel has no
-way to learn that the plan exists in the world, let alone what kind of effort
-would reach it. Every builder game solves this with a visible tree, and that is
-the part worth borrowing.
+way to learn which skill teaches the plan or what effort reaches it. The visible
+tree supplies that route for every kind of creation.
 
 So the tree is, first and above everything else, a **map of what exists**. Not
 a new progression currency. Not a gate. A map.
@@ -44,8 +40,9 @@ Each node's card shows:
 The card answers *"what does this actually get me?"* at a glance, using the
 pattern most builder games settle on:
 
-1. **Large icons: the things this node grants directly** — tool plans, chiefly.
-   Named, not just pictured.
+1. **Large icons: the plans this node grants directly** — tools at first,
+   followed by building pieces, furniture, clothing, decoration, structures,
+   and other creations as their systems arrive. Named, not just pictured.
 2. **Small icons: what those things then let you do** — the materials they can
    harvest, the ground they can open, the recipes they make reachable.
 
@@ -224,8 +221,7 @@ on its own:**
 2. **Do.** Complete the node's tasks. Each one jumps the clock forward, and
    completing them all finishes the node outright with no waiting.
 
-Neither is the "real" route. This is the same shape as the owl's two prices
-(`plans-and-blueprints.md`) — one path costs time, the other costs effort, and
+Neither is the "real" route. One path costs time, the other costs effort, and
 the game does not have an opinion about which kind of player you are today.
 
 ### Why a timer earns its place
@@ -342,92 +338,34 @@ The craft wait already in `getCraftDuration` — six to ten seconds, shortened b
 Thing Maker level — remains the model for how waiting should feel at the small
 scale: a pleasant beat, never a wall.
 
-## The split: tool plans versus everything else
+## Plans throughout the tree
 
-Settled 2026-08-06. This is the structural decision of this document, and it
-changes `plans-and-blueprints.md` — the two classes of plan now behave
-differently on purpose.
+Unified 2026-08-25. **Every non-starter plan comes from a knowledge-tree node.**
+There is no plan split, world siting, detector, owl stock, physical blueprint
+pickup, duplicate, gift, or mail route.
 
-### Tool plans — the tree, and only the tree
+The tree stays predictable without becoming front-loaded:
 
-**Every tool plan comes from a knowledge tree node. Tool plans cannot be found
-in the world, cannot be bought from the owl, and cannot be gifted or mailed.**
+- early land-care and construction nodes teach the tool plans needed for the
+  first verbs;
+- later Building & Construction nodes distribute build pieces and structures;
+- Interior Design distributes furniture and room decoration;
+- Fine Arts & Textiles distributes clothing, textile, paint, and ornamental
+  recipes;
+- advanced creations can require earlier material or cross-branch skills.
 
-The reasoning: the tool ladder is the spine of progression, and a spine should
-be *predictable*. A player who wants the next shovel should be able to look at
-the tree, see exactly what standing between them and it, and go get it — rather
-than hoping for a lucky dig or a shop having stock. It is a stable, scalable
-model, and it is what makes the game easy to walk into: the answer to "how do I
-get better tools" is always the same answer.
+Nodes may teach several closely related plans, but the array is not permission
+to put a whole catalog on one card. **Plans are staggered across the tree** so
+new things to make keep arriving as competence grows.
 
-It also removes a whole class of tuning problem. Tool tiers no longer have to be
-balanced against a random roll *and* a shop price *and* a barter list.
+Plans are knowledge, never transferable inventory. Gifting the made tool,
+chair, garment, or decoration preserves generosity and gives it more meaning:
+someone receives a thing you made rather than a duplicate unlock.
 
-**What replaces gifting a tool plan: gifting the tool.** You cannot hand someone
-the knowledge, but you can make the thing and give it to them, which is warmer
-anyway — a gifted tool is something you made, not something you happened to find
-twice. The generosity survives the change; only the object does.
-
-### Everything else — found, bought, gifted, as designed
-
-Furniture, clothing, buildings and structures, decoration, oddities: these
-remain **plan objects** exactly as `plans-and-blueprints.md` describes them.
-Blueprint stock, found in the world, sold by the owl, brought by critters,
-gift-only when duplicate.
-
-This is where delight lives, and delight should be *found*. Nobody needs a
-research node to be allowed to own a nice chair.
-
-| | Tool plans | Everything-else plans |
-| --- | --- | --- |
-| Knowledge tree | **Only source** | No |
-| Found in the world | No | Yes |
-| Bought from the owl | No | Yes |
-| Brought by a critter | No | Yes |
-| Is a physical object | No — it is knowledge | Yes — blueprint stock |
-| Giftable | No; gift the made tool instead | Yes, and duplicates are gift-only |
-
-The two halves answer different questions. The tree answers *"how do I get
-better at this game?"* — and should be legible, ordered, and never luck. The
-world answers *"what did I find today?"* — and should be surprising.
-
-### Plan sites are non-exclusive
-
-Settled 2026-08-06, and previously only implied. Applies to the
-everything-else plans, which are now the only sited kind.
-
-A sited plan yields for **every player who does not already have it.** The
-first person to dig it up does not take it from anyone.
-
-Two reasons. `economy.md` requires that scarcity cannot be manufactured, and
-the duplicate rule exists so a player physically cannot deny a plan to others —
-an exclusive site would reintroduce by geography exactly what that rule
-forecloses. And a plan is knowledge, not ore. Ore is a quantity in the ground.
-Knowledge does not leave the place you learned it.
-
-This also resolves the terrain question cleanly. Dug ground stays dug — no
-healing on a timer, per `game-design-plan.md` — and that stays true, because
-plan availability was never a property of the hole.
-
-## What this does to the roadmap
-
-The tree **demotes deterministic plan siting from blocking**, and narrows what
-it is for.
-
-Siting sat at the front because progression could not be *played* until plans
-could be found. With tool plans coming from the tree, that is no longer true at
-all: the entire tool ladder becomes reachable, testable, and tunable without any
-siting existing.
-
-Siting and the hot/cold detector remain wanted, and now apply **only to the
-everything-else plans** — furniture, clothing, structures, decoration. That is a
-better job for them: a detector you build because you want a particular chair is
-a nicer object than one you build because it is the only way to progress.
-
-The argument in 1.1 for determinism is unchanged and still correct: a hot/cold
-detector cannot work against a roll made at dig time, because there is nothing
-for "warmer" to be nearer to. Deterministic siting is not predictable siting —
-the player still has no idea where it is.
+The implementation boundary is `RecipeId[]`, not `ToolId[]`. Current grants
+happen to be tools, but every consumer resolves the recipe output before using
+tool-specific behavior. That is what lets later creation plans join the same
+tree without a second progression system.
 
 ## Build order
 
@@ -448,20 +386,18 @@ the player still has no idea where it is.
    both answerable from existing player state. Jumps come off the shared value
    scale, not per-node tuning.
 
-3. **Nodes granting tool plans — S.** `player.plans` already takes an id from
-   anywhere; this is the same write. At this point the ladder is climbable and
-   **progression is playable end to end.**
+3. **Nodes granting plans — S.** `player.plans` already takes a recipe id; node
+   completion writes the node's grants. Tool progression is playable now, and
+   non-tool recipes use the same path when their systems become ready.
 
-4. **Remove tool plans from every other route — S.** The owl's stock, world
-   siting, and critter gifts become everything-else plans only. Mostly a data
-   and copy change, but do it deliberately rather than letting the old routes
-   linger as dead paths.
-
-5. **The no-self-gating test (roadmap 1.5) — S.** Unchanged and now more
+4. **The no-self-gating test — S.** Unchanged and increasingly
    valuable: a tree makes a deadlock look like an authored dead end rather than
    bad luck, which means players will report it as a bug in the design.
 
-Siting, the detector, and the owl follow at whatever pace they deserve.
+5. **Add creation plans with their gameplay slices.** Building pieces,
+   furniture, decoration, clothing, and structures should be assigned across
+   appropriate later nodes as each catalog becomes real—not authored all at
+   once in advance.
 
 ## Accessibility notes, decided up front
 
@@ -503,8 +439,8 @@ Recorded rather than deleted, because each was a real fork:
 - **Nothing can be paid for with chips.** Culture and equity line, not a dial.
 - **The clock is real-world time**, and closing the game is a legitimate way to
   play.
-- **Tool plans come only from the tree**, and are not objects. Everything-else
-  plans keep the full object design.
+- **Every non-starter plan comes only from the tree**, and plans are knowledge,
+  not objects. They are distributed across relevant branches and tiers.
 - **The tree opens from the Professor**, a movable HUD paperclip, not a
   scrapbook tab. He shows ambient state (reading / idle) and an optional coarse
   clock, but never a score and never a notification.

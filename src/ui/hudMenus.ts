@@ -5,6 +5,8 @@ import {
   setSetting,
 } from '../game/settings';
 import { openAvatarLookEditor } from '../game/avatarLook';
+import { openFeedbackPanel } from './feedbackPanel';
+import { openMultiplayerPanel } from './multiplayerPanel';
 
 // The two top-right icon buttons and the overlays they open.
 //
@@ -56,6 +58,7 @@ const CONTROLS: Array<{ group: string; rows: Array<[string, string]> }> = [
 function buildHelpOverlay(): HTMLElement {
   const overlay = document.createElement('div');
   overlay.className = 'hud-overlay';
+  overlay.hidden = true;
   overlay.innerHTML = `
     <div class="hud-overlay-card" role="dialog" aria-modal="true" aria-labelledby="hud-help-title">
       <button class="hud-overlay-close" type="button" aria-label="Close help">×</button>
@@ -129,6 +132,20 @@ function buildSettingsOverlay(): HTMLElement {
           <small>Uses broad phrases like “about 6 hours left,” never a ticking countdown</small>
         </span>
       </label>
+      <h3 class="hud-overlay-subhead">Friends</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-play-with-friends">
+          Play with friends…
+        </button>
+        <small>Open an invite-only neighborhood, enter a friend's code, or return safely to solo play.</small>
+      </div>
+      <h3 class="hud-overlay-subhead">Alpha notebook</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-send-feedback">
+          Send feedback…
+        </button>
+        <small>Report a bug, suggest an improvement, or leave a new idea. Notes survive an offline spell.</small>
+      </div>
       <p class="hud-overlay-note">
         Coming here later: key remapping, gamepad mapping, invert stick look,
         audio, and text size.
@@ -184,6 +201,14 @@ function buildSettingsOverlay(): HTMLElement {
       setSetting('showLearningTimer', learningTimer.checked);
     });
   }
+  overlay.querySelector<HTMLButtonElement>('#setting-send-feedback')?.addEventListener('click', () => {
+    closeHudMenu();
+    openFeedbackPanel();
+  });
+  overlay.querySelector<HTMLButtonElement>('#setting-play-with-friends')?.addEventListener('click', () => {
+    closeHudMenu();
+    openMultiplayerPanel();
+  });
   return overlay;
 }
 
@@ -217,6 +242,8 @@ export function isHudMenuOpen() {
 export function closeHudMenu(): boolean {
   if (!openMenu) return false;
   overlays.get(openMenu)?.classList.remove('is-open');
+  const overlay = overlays.get(openMenu);
+  if (overlay) overlay.hidden = true;
   buttonFor(openMenu)?.setAttribute('aria-expanded', 'false');
   openMenu = null;
   lastFocused?.focus();
@@ -233,6 +260,7 @@ export function openHudMenu(menu: MenuId) {
 
   lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const overlay = overlayFor(menu);
+  overlay.hidden = false;
   overlay.classList.add('is-open');
   buttonFor(menu)?.setAttribute('aria-expanded', 'true');
   openMenu = menu;

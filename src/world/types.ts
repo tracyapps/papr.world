@@ -60,6 +60,17 @@ export type TreeKind =
 
 export type HarvestVisual = 'fiberTuft' | 'stoneCluster' | 'twigBundle';
 
+export type WaterBankStyle = 'marsh' | 'rock' | 'sand' | 'woodland';
+
+export type WaterCrossingData = {
+  x: number;
+  z: number;
+  /** Long axis of the bridge, which runs bank-to-bank. */
+  rotationY: number;
+  width: number;
+  length: number;
+};
+
 export type PropData = { id?: string } & (
   | {
       kind: 'sheet';
@@ -81,6 +92,18 @@ export type PropData = { id?: string } & (
       x: number;
       z: number;
       rotY?: number;
+      map?: MapHint;
+    }
+  | {
+      /** A curved, flowing water ribbon. Points and widths are world-space. */
+      kind: 'waterChannel';
+      points: Array<[number, number]>;
+      widths: number[];
+      depths: number[];
+      flowSpeed: number;
+      bankStyle: WaterBankStyle;
+      seed: number;
+      crossing?: WaterCrossingData;
       map?: MapHint;
     }
   | {

@@ -57,10 +57,9 @@ The reference case, and the one that prompted this: **harvest a garden someone
 else planted, and they receive the same yield in their mailbox.** You get the
 crop. They get the crop. The garden was worth planting either way.
 
-This is not a new principle. It is the one already settled for plan sites
-(`knowledge-tree.md`): *a site yields for every player who does not already
-hold that plan; the first to find it takes it from nobody.* Gardens are that
-rule applied to things players make rather than things the world hides.
+This is the same non-deprivation principle used throughout shared-world design:
+another player benefiting from something you made must not erase its benefit
+to you. Gardens are the clearest physical expression of that rule.
 
 Stated generally, and worth holding as the spine of shared space:
 

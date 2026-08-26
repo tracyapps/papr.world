@@ -157,14 +157,20 @@ function buildPip() {
   params.accentColor = '#f0d5a1';
   const rig = buildCritterRig('squirrel', params);
 
-  // Three short back stripes are the clearest silhouette cue separating Pip
-  // from the clearing's squirrels without forking the whole critter system.
+  // Three paper marks sit on the back surface. These used to be long boxes
+  // added to the root rig, so they passed straight through Pip whenever his
+  // body breathed or posed — more skewers than stripes.
   const stripeMaterial = createColorMaterial('#55351f', 0.86);
-  for (const x of [-0.085, 0, 0.085]) {
-    const stripe = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.022, 0.42), stripeMaterial));
-    stripe.position.set(x, 0.43, 0.04);
-    stripe.rotation.x = -0.05;
-    rig.group.add(stripe);
+  const body = rig.parts.body;
+  if (body) {
+    for (const [index, x] of [-0.14, 0, 0.14].entries()) {
+      const stripeLength = index === 1 ? 0.24 : 0.2;
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.052, stripeLength), stripeMaterial);
+      stripe.name = 'pip-back-stripe';
+      stripe.position.set(x, 0.282, 0.025);
+      stripe.rotation.x = -Math.PI / 2;
+      body.add(stripe);
+    }
   }
   return rig;
 }
