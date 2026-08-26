@@ -130,8 +130,39 @@ export async function initializeSharedSession(): Promise<void> {
   initializeRemoteAvatarVisuals();
   initializeSharedPieceVisuals();
 
+  // Minting the passport and joining the room are two different things that
+  // fail for two different reasons. Wrapping them in one try meant a passport
+  // problem was reported as "the neighborhood could not be opened", which
+  // named the wrong component and — because the mint is what WRITES the
+  // passport — also left localStorage empty for anyone told to read it.
+  let account;
   try {
-    const account = await getOrCreatePassport(config.httpEndpoint, config.name);
+    account = await getOrCreatePassport(config.httpEndpoint, config.name);
+
+    // Printed once, deliberately. It is the id an owner needs for
+    // PAPR_OWNER_ACCOUNT and the id to quote in a bug report, and digging it
+    // out of localStorage by hand is a miserable first experience. The secret
+    // is never printed.
+    console.info(
+      `papr.world paper passport: ${account.id}\n`
+      + '(this is your account id — the value PAPR_OWNER_ACCOUNT wants. Never share the secret.)',
+    );
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    ui.setStatus('offline');
+    ui.addNotice(`${detail} Solo play is still available.`);
+    publishStatus({
+      phase: 'setup-error',
+      message: detail,
+      name: config.name,
+      inviteCode: config.inviteCode,
+      intent: config.intent,
+    });
+    console.warn('Paper passport could not be minted', error);
+    return;
+  }
+
+  try {
     publishStatus({
       phase: 'connecting',
       message: config.intent === 'join'
@@ -211,9 +242,13 @@ export async function initializeSharedSession(): Promise<void> {
     connected = false;
     connection = null;
     ui.setStatus('offline');
+    // Say which server, because "could not be opened" on its own sends people
+    // to check their invite code when the address is usually the problem.
+    const where = `at ${config.endpoint}`;
+    const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
     const message = config.intent === 'join'
-      ? `Neighborhood ${config.inviteCode} was not found or could not be reached.`
-      : `Neighborhood ${config.inviteCode} could not be opened.`;
+      ? `Neighborhood ${config.inviteCode} was not found ${where}.${detail}`
+      : `Neighborhood ${config.inviteCode} could not be opened ${where}.${detail}`;
     ui.addNotice(`${message} Solo play is still available.`);
     publishStatus({
       phase: 'offline', message, name: config.name,

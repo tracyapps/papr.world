@@ -29,13 +29,38 @@ export function readSharedModeConfig(
 ): SharedModeConfig | null {
   if (url.searchParams.get('shared') !== '1') return null;
 
-  const endpointUrl = new URL(
-    url.searchParams.get('server')
-      || import.meta.env.VITE_SHARED_WS_ENDPOINT
-      || LOCAL_ENDPOINT,
-  );
+  const override = url.searchParams.get('server');
+  const configured = import.meta.env.VITE_SHARED_WS_ENDPOINT;
+  const endpointUrl = new URL(override || configured || LOCAL_ENDPOINT);
+
   if (endpointUrl.protocol !== 'ws:' && endpointUrl.protocol !== 'wss:') {
-    throw new Error('The shared-world server must use a ws:// or wss:// address.');
+    throw new Error(
+      `The shared-world server address must start with ws:// or wss://, but it is "${endpointUrl.protocol}". `
+      + 'If you set VITE_SHARED_WS_ENDPOINT to an https:// address, change it to wss://.',
+    );
+  }
+
+  // ── The two misconfigurations that actually happen on a first deploy ────
+  //
+  // Both used to surface as "neighborhood could not be opened", which named
+  // the wrong thing entirely and sent people looking at their invite code.
+  // Caught here instead, where we still know exactly what went wrong.
+  const pageIsSecure = url.protocol === 'https:';
+
+  if (pageIsSecure && !override && !configured) {
+    throw new Error(
+      'This build does not know where the neighborhood server is, so it is falling back to '
+      + `${LOCAL_ENDPOINT}, which cannot work from ${url.host}. `
+      + 'Set VITE_SHARED_WS_ENDPOINT to your server\'s wss:// address and REDEPLOY — '
+      + 'Vite bakes it in at build time, so saving the variable alone changes nothing.',
+    );
+  }
+
+  if (pageIsSecure && endpointUrl.protocol === 'ws:') {
+    throw new Error(
+      `This page is served over https, so it cannot open an insecure ws:// connection to `
+      + `${endpointUrl.host}. Use wss:// instead.`,
+    );
   }
 
   endpointUrl.username = '';

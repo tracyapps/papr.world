@@ -91,22 +91,33 @@ until you set it.
 
 ### 5. Mint your owner passport — from your own browser
 
-This is the step with the trap in it. The owner is identified by a **paper
-passport**, and the passport that matters is the one in the browser you will
-actually be playing in. Minting one with `curl` gives you an id your browser
-has never heard of.
+The owner is identified by a **paper passport**, and the one that matters is
+the passport in the browser you will actually play in.
 
-So:
+**This step depends on step 3 having worked.** The passport is minted by the
+game on first shared play, against the server address baked in at build time.
+If step 3 is wrong or was not redeployed, no passport is ever created — and
+the symptom is a console error saying `undefined is not valid JSON`, because
+there is nothing in storage to read.
 
 1. Open `https://papr.world/enter/`, put in one of your codes, and go in.
-   The game mints a passport on first shared play and stores it locally.
-2. In that browser's devtools console:
+2. Look at the devtools console. On success the game prints it for you:
+
+   ```
+   papr.world paper passport: b7ffe9c4-9c86-4d37-9102-735e24fc9852
+   ```
+
+   Or read it yourself:
 
    ```js
    JSON.parse(localStorage['pp.passport.v1']).id
    ```
 
 3. Put that id in Railway as `PAPR_OWNER_ACCOUNT` and redeploy.
+
+**If no passport appears**, the game will now tell you why in the chat panel
+and the console — it names the address it tried and what went wrong. See
+"When the neighborhood will not open" below.
 
 Never copy the `secret` anywhere. It is that browser's credential, it is not
 recoverable, and the server only ever stores a hash of it.
@@ -152,6 +163,64 @@ will look like one person).
       disconnected. With "refuse this code", the same code will not let them
       back in — even after the room empties and reopens.
 - [ ] Send feedback from the in-game Settings menu; check `?review=1`.
+
+---
+
+## When the neighborhood will not open
+
+The message names the server it tried. Match it to one of these.
+
+**"does not know where the neighborhood server is … falling back to
+ws://localhost:2567"** — `VITE_SHARED_WS_ENDPOINT` is missing from the build.
+Either it is not set, or it was set *after* the last deploy. It is a
+**build-time** variable: Vite bakes it into the bundle, so saving it in the
+Vercel dashboard changes nothing until you redeploy. This is the most common
+one by a wide margin.
+
+**"cannot open an insecure ws:// connection"** — the address is `ws://` but
+the page is `https://`. Browsers refuse that. Use `wss://`.
+
+**"must start with ws:// or wss://"** — an `https://` address was pasted into
+`VITE_SHARED_WS_ENDPOINT`. That variable wants the WebSocket scheme;
+`VITE_FEEDBACK_HTTP_ENDPOINT` is the one that wants `https://`.
+
+**"Could not reach the paper-passport service at …"** — the address is
+well-formed but nothing answered. Either the Railway service is down (check
+`/health`) or the browser blocked the request, which is nearly always CORS:
+`PP_CORS_ORIGIN` on Railway must exactly match the site origin, with no
+trailing slash.
+
+**"answered 403"** on joining — the code is not in `PAPR_ALPHA_CODES`, or that
+account is banned from that neighbourhood.
+
+You can also test a server without redeploying anything by appending
+`&server=wss://your-service.up.railway.app` to the `/play` URL. That override
+beats the baked-in value and is the quickest way to tell a bad build variable
+apart from a bad server.
+
+### The shortcut, if you just need to get past step 5
+
+If Railway is up but the site build is still pointing somewhere wrong, you can
+mint the passport directly and plant it in the browser:
+
+```bash
+curl -X POST https://your-service.up.railway.app/account \
+  -H 'content-type: application/json' -d '{"name":"tapps"}'
+```
+
+Then in the devtools console **on papr.world**:
+
+```js
+localStorage['pp.passport.v1'] = JSON.stringify({
+  id: 'THE_accountId_FROM_ABOVE',
+  secret: 'THE_secret_FROM_ABOVE',
+  createdAt: Date.now(),
+});
+```
+
+That is the same shape the game writes. Use the `id` for
+`PAPR_OWNER_ACCOUNT`. It unblocks the owner setup, but it does not fix the
+build variable — the game still will not connect until step 3 is right.
 
 ---
 

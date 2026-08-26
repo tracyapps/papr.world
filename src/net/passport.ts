@@ -43,15 +43,36 @@ export async function getOrCreatePassport(
   const existing = loadPassport();
   if (existing) return existing;
 
-  const response = await fetch(`${httpEndpoint}/account`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name }),
-  });
-  if (!response.ok) throw new Error(`passport mint failed: ${response.status}`);
+  const mintUrl = `${httpEndpoint}/account`;
+
+  let response: Response;
+  try {
+    response = await fetch(mintUrl, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+  } catch (cause) {
+    // Never reached the server at all: wrong address, server down, or the
+    // browser refused the request. This is the failure people actually hit on
+    // a first deploy, and it used to be reported as the neighborhood being
+    // unopenable — which sent them off checking their invite code.
+    throw new Error(
+      `Could not reach the paper-passport service at ${mintUrl}. `
+      + 'Check that the server is running and that VITE_SHARED_WS_ENDPOINT points at it. '
+      + 'If the address looks right, this is usually CORS: PP_CORS_ORIGIN on the server '
+      + 'must exactly match this site\'s origin.',
+      { cause },
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(`The paper-passport service at ${mintUrl} answered ${response.status}.`);
+  }
+
   const data = (await response.json()) as { accountId?: string; secret?: string };
   if (typeof data.accountId !== 'string' || typeof data.secret !== 'string') {
-    throw new Error('passport mint failed: malformed response');
+    throw new Error(`The paper-passport service at ${mintUrl} sent something unexpected back.`);
   }
 
   const passport: StoredPassport = {
