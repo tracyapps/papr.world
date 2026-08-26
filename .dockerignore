@@ -1,0 +1,34 @@
+# Everything the server image does not need. Keeping this tight matters:
+# assets/ alone is ~30MB of artwork the server never reads.
+
+**/node_modules
+.git
+.github
+
+# The client, the site, and everything they generate.
+src/
+site/
+api/
+lib/
+web/
+dist/
+docs-site/
+assets/
+designs/
+public/
+middleware.ts
+vercel.json
+index.html
+
+# Docs, tests and tooling.
+docs/
+tools/
+*.md
+!server/**/*.md
+**/*.test.ts
+
+# Local state that must never be baked into an image.
+data/
+.env
+.env.*
+.DS_Store

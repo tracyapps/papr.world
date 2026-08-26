@@ -19,13 +19,15 @@ import {
   LIMITS,
   ALPHA_FEEDBACK_STATUSES,
   MAX_FEEDBACK_SCREENSHOT_BYTES,
+  MODERATION_STATUSES,
   sanitizeAlphaFeedback,
   sanitizeName,
   type AlphaFeedbackCategory,
   type AlphaFeedbackStatus,
+  type ModerationStatus,
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
-import { accounts, feedbackStore } from './stores';
+import { accounts, feedbackStore, moderation, OWNER_ACCOUNT } from './stores';
 
 const port = Number(process.env.PORT ?? 2567);
 const corsOrigin = process.env.PP_CORS_ORIGIN ?? '*';
@@ -176,6 +178,80 @@ function reviewerAuthorized(req: Request, res: Response): boolean {
   return true;
 }
 
+/**
+ * The moderation queue has its OWN token, not the feedback reviewer's.
+ *
+ * alpha-testing.md is explicit that safety reports carry stricter access than
+ * product feedback. Sharing one token would mean anyone who can triage a bug
+ * can also read who reported whom — so triaging bugs would require handing
+ * out moderation access, or moderation would have to wait on bug triage.
+ * Two tokens, and either can be handed out without implying the other.
+ */
+function moderatorAuthorized(req: Request, res: Response): boolean {
+  const expected = process.env.PP_MODERATION_TOKEN;
+  if (!expected) {
+    res.status(503).json({ error: 'moderation queue is not configured' });
+    return false;
+  }
+  const authorization = req.headers.authorization ?? '';
+  const supplied = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+  const suppliedBytes = Buffer.from(supplied);
+  const expectedBytes = Buffer.from(expected);
+  if (suppliedBytes.length !== expectedBytes.length
+    || !timingSafeEqual(suppliedBytes, expectedBytes)) {
+    res.setHeader('www-authenticate', 'Bearer');
+    res.status(401).json({ error: 'moderation token required' });
+    return false;
+  }
+  return true;
+}
+
+function handleReportList(req: Request, res: Response): void {
+  if (!moderatorAuthorized(req, res)) return;
+  const status = String(req.query.status ?? '').toLowerCase();
+  const code = String(req.query.code ?? '').toUpperCase().slice(0, 16);
+  const records = moderation.list().filter((record) => (
+    (!status || record.status === status as ModerationStatus)
+    && (!code || record.report.inviteCode === code)
+  ));
+  res.setHeader('cache-control', 'private, no-store');
+  res.json({ records });
+}
+
+async function handleReportUpdate(req: Request, res: Response): Promise<void> {
+  if (!moderatorAuthorized(req, res)) return;
+  try {
+    const parsed = JSON.parse(await readBody(req, 2400)) as { status?: unknown; note?: unknown };
+    const status = typeof parsed.status === 'string' ? parsed.status : undefined;
+    const note = typeof parsed.note === 'string' ? parsed.note : undefined;
+    if ((status !== undefined && !MODERATION_STATUSES.includes(status as ModerationStatus))
+      || (status === undefined && !note?.trim())) {
+      res.status(400).json({ error: 'invalid moderation update' });
+      return;
+    }
+    const record = moderation.review(String(req.params.id ?? ''), {
+      ...(status ? { status: status as ModerationStatus } : {}),
+      ...(note ? { note } : {}),
+    });
+    if (!record) {
+      res.status(404).json({ error: 'report not found' });
+      return;
+    }
+    res.setHeader('cache-control', 'private, no-store');
+    res.json({ record });
+  } catch (error) {
+    res.status(error instanceof Error && error.message === 'body too large' ? 413 : 400)
+      .json({ error: 'invalid moderation update' });
+  }
+}
+
+function handleReportExport(req: Request, res: Response): void {
+  if (!moderatorAuthorized(req, res)) return;
+  res.setHeader('cache-control', 'private, no-store');
+  res.attachment(`papr-world-reports-${new Date().toISOString().slice(0, 10)}.json`);
+  res.type('application/json').send(JSON.stringify(moderation.exportRedacted(), null, 2));
+}
+
 function handleReviewList(req: Request, res: Response): void {
   if (!reviewerAuthorized(req, res)) return;
   const category = String(req.query.category ?? '').toLowerCase();
@@ -270,6 +346,12 @@ const gameServer = new Server({
     app.patch('/review/feedback/:id', (req: Request, res: Response) => {
       void handleReviewUpdate(req, res);
     });
+    // Safety reports. Separate path, separate token, separate export.
+    app.get('/review/reports', handleReportList);
+    app.get('/review/reports/export', handleReportExport);
+    app.patch('/review/reports/:id', (req: Request, res: Response) => {
+      void handleReportUpdate(req, res);
+    });
   },
 });
 
@@ -280,4 +362,23 @@ await gameServer.listen(port);
 console.log(`pencil-and-paper server listening on ws://localhost:${port}`);
 console.log(
   `room "${DEFAULT_ROOM}" ready (max ${LIMITS.playersPerRoom}) — /health, POST /account, feedback + review API`,
+);
+
+// Say plainly which safety controls are live. A hosted alpha that silently
+// has no owner, or no moderation queue, is exactly the failure worth shouting
+// about — it looks fine right up until the moment somebody needs it.
+console.log(
+  OWNER_ACCOUNT
+    ? `removal: enabled — owner account ${OWNER_ACCOUNT.slice(0, 8)}…, guests refused`
+    : 'removal: DISABLED — PAPR_OWNER_ACCOUNT is unset, nobody can remove anyone, guests allowed',
+);
+console.log(
+  process.env.PP_MODERATION_TOKEN
+    ? 'safety reports: queued, /review/reports needs PP_MODERATION_TOKEN'
+    : 'safety reports: still queued to disk, but /review/reports is CLOSED (PP_MODERATION_TOKEN unset)',
+);
+console.log(
+  corsOrigin === '*'
+    ? 'CORS: open to any origin — fine locally, wrong in production (set PP_CORS_ORIGIN)'
+    : `CORS: pinned to ${corsOrigin}`,
 );

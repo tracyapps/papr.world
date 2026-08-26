@@ -7,8 +7,14 @@
 //
 // Note: schema number fields can't be null, so ResourceNode.respawnAt uses 0
 // to mean "available now" here; convert to null when writing plain snapshots.
+//
+// Chat is deliberately NOT here any more. Synced state is the same for every
+// client by construction, so as long as chat lived in it the server had no way
+// to give two people different views — which meant a personal block could not
+// be honoured. Chat is now history-on-join plus per-recipient broadcasts; see
+// the ChatHistory note in shared/src/protocol/messages.ts.
 
-import { ArraySchema, MapSchema, Schema, type } from '@colyseus/schema';
+import { MapSchema, Schema, type } from '@colyseus/schema';
 
 export class AvatarSchema extends Schema {
   @type('string') preset = 'medium';
@@ -26,14 +32,12 @@ export class PlayerSchema extends Schema {
   @type('number') z = 0;
   @type('number') facing = 0;
   @type('string') page = '0,0';
-}
-
-export class ChatSchema extends Schema {
-  @type('string') id = '';
-  @type('string') playerId = '';
-  @type('string') name = '';
-  @type('string') text = '';
-  @type('number') at = 0;
+  /**
+   * Whether this player may remove others. Synced so every client can show
+   * the right controls — but the server never trusts it back, and checks the
+   * owner account itself on every removal.
+   */
+  @type('boolean') isOwner = false;
 }
 
 export class PieceSchema extends Schema {
@@ -60,7 +64,6 @@ export class NodeSchema extends Schema {
 
 export class PaperRoomState extends Schema {
   @type({ map: PlayerSchema }) players = new MapSchema<PlayerSchema>();
-  @type([ChatSchema]) chat = new ArraySchema<ChatSchema>();
   @type({ map: PieceSchema }) pieces = new MapSchema<PieceSchema>();
   @type({ map: NodeSchema }) nodes = new MapSchema<NodeSchema>();
 }

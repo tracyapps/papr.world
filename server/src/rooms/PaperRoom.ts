@@ -9,6 +9,11 @@
 // First-slice scope on purpose: presence (move), chat, placed pieces, and a
 // stub gather. Persistence, permissions, and richer entities come later; the
 // message/validation seams are already here to hang them on.
+//
+// Moderation lives here too, because it has to: personal blocks, contextual
+// safety reports, and owner removal are all decided server-side. The client
+// asks; this room decides. See blocks.ts and moderation.ts for why each works
+// the way it does.
 
 import { Room, type Client } from '@colyseus/core';
 import { randomUUID } from 'node:crypto';
@@ -27,6 +32,8 @@ import {
   sanitizePlacePiece,
   sanitizeAccountCredentials,
   isFiniteNumber,
+  type BlockIntent,
+  type ChatBroadcast,
   type ChatIntent,
   type GatherIntent,
   type JoinOptions,
@@ -34,12 +41,13 @@ import {
   type PlacePieceIntent,
   type PlacedPiece,
   type RejectionReason,
+  type RemoveIntent,
+  type ReportIntent,
   type ResourceNode,
   type RoomSave,
 } from '../../../shared/src/index';
-import { accounts, roomStore } from '../stores';
+import { accounts, blocks, isOwner, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
 import {
-  ChatSchema,
   NodeSchema,
   PaperRoomState,
   PieceSchema,
@@ -63,10 +71,21 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   override state = new PaperRoomState();
   private sessions = new Map<string, Session>();
   private persistenceId = DEFAULT_PERSISTENCE_ID;
+  private inviteCode = LEGACY_INVITE_CODE;
+
+  /**
+   * Recent chat, in memory rather than in synced state, so each line can be
+   * delivered to some people and withheld from others.
+   */
+  private chatLog: ChatBroadcast[] = [];
+
+  /** Accounts refused entry to this neighborhood. Restored from the save. */
+  private banned = new Set<string>();
 
   override onCreate(options: JoinOptions): void {
     const inviteCode = sanitizeInviteCode(options?.inviteCode);
     if (!inviteCode || inviteCode !== options.inviteCode) throw new Error('bad-invite-code');
+    this.inviteCode = inviteCode;
     this.persistenceId = inviteCode === LEGACY_INVITE_CODE
       ? DEFAULT_PERSISTENCE_ID
       : `invite-${inviteCode}`;
@@ -91,6 +110,18 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     );
     this.onMessage(ClientMessage.Gather, (client, msg: GatherIntent) =>
       this.handleGather(client, msg),
+    );
+    this.onMessage(ClientMessage.Block, (client, msg: BlockIntent) =>
+      this.handleBlock(client, msg, true),
+    );
+    this.onMessage(ClientMessage.Unblock, (client, msg: BlockIntent) =>
+      this.handleBlock(client, msg, false),
+    );
+    this.onMessage(ClientMessage.Report, (client, msg: ReportIntent) =>
+      this.handleReport(client, msg),
+    );
+    this.onMessage(ClientMessage.Remove, (client, msg: RemoveIntent) =>
+      this.handleRemove(client, msg),
     );
 
     // Light housekeeping tick: refill spent resource nodes.
@@ -118,8 +149,19 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       if (!creds || !accounts.verify(creds.id, creds.secret, sanitizeName(options.name))) {
         throw new Error('bad-auth');
       }
+      // Removal has to mean something. Checked here, before the room is
+      // touched at all, so a removed account cannot even see the state.
+      if (this.banned.has(creds.id)) throw new Error('banned');
       return creds.id;
     }
+
+    // Guests are refused once an owner is configured — i.e. on any real
+    // deployment. A guest's identity is `guest:<sessionId>`, which is new on
+    // every connection, so a guest cannot be meaningfully removed, banned or
+    // blocked. Allowing them would make all three of those controls a lie.
+    // Locally, with no owner set, guests stay welcome for quick dogfooding.
+    if (OWNER_ACCOUNT) throw new Error('guest-not-allowed');
+
     return `guest:${client.sessionId}`;
   }
 
@@ -138,8 +180,21 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     player.facing = 0;
     player.page = '0,0';
 
+    player.isOwner = isOwner(player.accountId);
+
     this.state.players.set(client.sessionId, player);
     this.sessions.set(client.sessionId, { lastMoveAt: Date.now(), lastChatAt: 0 });
+
+    // The backlog, filtered the same way live chat is — otherwise a block
+    // would hold for new lines and then hand you everything you blocked the
+    // moment you reconnected.
+    client.send(ServerMessage.ChatHistory, {
+      lines: this.chatLog.filter((line) => !blocks.isBlocked(player.accountId, line.accountId)),
+    });
+
+    // Echo their own block list so the client can label people correctly
+    // without keeping its own copy that could drift.
+    client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
   }
 
   override onLeave(client: Client): void {
@@ -185,23 +240,29 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     }
     session.lastChatAt = now;
 
-    const line = new ChatSchema();
-    line.id = randomUUID();
-    line.playerId = player.id;
-    line.name = player.name;
-    line.text = text;
-    line.at = now;
+    const line: ChatBroadcast = {
+      id: randomUUID(),
+      playerId: player.id,
+      accountId: player.accountId,
+      name: player.name,
+      text,
+      at: now,
+    };
 
-    this.state.chat.push(line);
-    while (this.state.chat.length > LIMITS.chatHistory) this.state.chat.shift();
+    this.chatLog.push(line);
+    while (this.chatLog.length > LIMITS.chatHistory) this.chatLog.shift();
 
-    this.broadcast(ServerMessage.Chat, {
-      id: line.id,
-      playerId: line.playerId,
-      name: line.name,
-      text: line.text,
-      at: line.at,
-    });
+    // Delivered person by person rather than broadcast, because that is the
+    // whole point: someone who blocked this speaker simply never receives it.
+    // The speaker always sees their own line — a block is about what YOU read,
+    // not a punishment applied to them.
+    for (const recipient of this.clients) {
+      const listener = this.state.players.get(recipient.sessionId);
+      if (!listener) continue;
+      if (listener.accountId !== player.accountId
+        && blocks.isBlocked(listener.accountId, player.accountId)) continue;
+      recipient.send(ServerMessage.Chat, line);
+    }
   }
 
   private handlePlacePiece(client: Client, msg: PlacePieceIntent): void {
@@ -258,6 +319,120 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     // Inventory grant lands here once the scrapbook data model exists.
   }
 
+  /**
+   * Block or unblock an account. Personal, instant, and never announced to
+   * the other person — see the header of blocks.ts for why each of those
+   * matters. There is no rejection for blocking somebody who is not here:
+   * you should be able to block from a line you read ten minutes ago.
+   */
+  private handleBlock(client: Client, msg: BlockIntent, add: boolean): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !msg) return;
+
+    const target = typeof msg.accountId === 'string' ? msg.accountId.trim() : '';
+    if (!target || target === player.accountId) {
+      this.reject(client, add ? ClientMessage.Block : ClientMessage.Unblock, 'invalid');
+      return;
+    }
+
+    if (add) {
+      if (!blocks.add(player.accountId, target)) {
+        this.reject(client, ClientMessage.Block, 'not-allowed');
+        return;
+      }
+    } else {
+      blocks.remove(player.accountId, target);
+    }
+
+    client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
+  }
+
+  /**
+   * File a safety report.
+   *
+   * The evidence is assembled HERE, from the server's own chat log, not from
+   * whatever the client sends. A client-supplied message body would be a way
+   * to fabricate a quote and attribute it to someone.
+   */
+  private handleReport(client: Client, msg: ReportIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !msg) return;
+
+    const reportedAccountId = typeof msg.accountId === 'string' ? msg.accountId.trim() : '';
+    if (!reportedAccountId) {
+      this.reject(client, ClientMessage.Report, 'invalid');
+      return;
+    }
+
+    // Look the line up server-side; ignore anything the client claims it said.
+    const quoted = typeof msg.messageId === 'string'
+      ? this.chatLog.find((line) => line.id === msg.messageId)
+      : undefined;
+
+    // Their current name if they are here, the name on the quoted line
+    // otherwise — a report read next month should say who it was about.
+    let reportedName = quoted?.name ?? '';
+    this.state.players.forEach((other) => {
+      if (other.accountId === reportedAccountId) reportedName = other.name;
+    });
+
+    const receiptId = moderation.file({
+      inviteCode: this.inviteCode,
+      reporterAccountId: player.accountId,
+      reportedAccountId,
+      reportedName,
+      ...(quoted
+        ? { messageId: quoted.id, messageText: quoted.text, messageAt: quoted.at }
+        : {}),
+      ...(typeof msg.details === 'string' ? { details: msg.details } : {}),
+    });
+
+    if (!receiptId) {
+      this.reject(client, ClientMessage.Report, 'rate-limited');
+      return;
+    }
+
+    client.send(ServerMessage.ReportFiled, { receiptId });
+  }
+
+  /**
+   * Owner-only removal.
+   *
+   * The client's `isOwner` flag is a hint for drawing the UI; it is never
+   * trusted here. Authority is the account id, checked against the server's
+   * own PAPR_OWNER_ACCOUNT on every single call.
+   */
+  private handleRemove(client: Client, msg: RemoveIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !msg) return;
+
+    if (!isOwner(player.accountId)) {
+      this.reject(client, ClientMessage.Remove, 'not-allowed');
+      return;
+    }
+
+    const target = typeof msg.accountId === 'string' ? msg.accountId.trim() : '';
+    if (!target || target === player.accountId) {
+      this.reject(client, ClientMessage.Remove, 'invalid');
+      return;
+    }
+
+    if (msg.ban) {
+      this.banned.add(target);
+      // Straight to disk: a ban that a crash could undo is not a ban.
+      roomStore.saveNow(this.persistenceId, () => this.snapshot());
+    }
+
+    // Tell them what happened before the socket closes, so they get an
+    // explanation rather than a mystery disconnection.
+    for (const other of [...this.clients]) {
+      const occupant = this.state.players.get(other.sessionId);
+      if (occupant?.accountId !== target) continue;
+      other.send(ServerMessage.Removed, { reason: msg.ban ? 'banned' : 'removed-by-owner' });
+      other.leave(4000);
+    }
+  }
+
   // ---- Helpers --------------------------------------------------------------
 
   private reject(client: Client, action: string, reason: RejectionReason): void {
@@ -308,6 +483,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   }
 
   private snapshot(): Omit<RoomSave, 'version' | 'savedAt'> {
+    const bannedAccountIds = [...this.banned];
     const pieces: PlacedPiece[] = [];
     this.state.pieces.forEach((p) => {
       pieces.push({
@@ -333,10 +509,13 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         respawnAt: n.respawnAt === 0 ? null : n.respawnAt,
       });
     });
-    return { pieces, nodes };
+    return { pieces, nodes, bannedAccountIds };
   }
 
   private hydrate(save: RoomSave): void {
+    // Absent on saves written before removal existed.
+    for (const id of save.bannedAccountIds ?? []) this.banned.add(id);
+
     for (const p of save.pieces) {
       const piece = new PieceSchema();
       piece.id = p.id;

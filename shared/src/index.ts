@@ -7,3 +7,4 @@ export * from './protocol/messages';
 export * from './protocol/validate';
 export * from './protocol/avatarDesign';
 export * from './protocol/feedback';
+export * from './protocol/moderation';

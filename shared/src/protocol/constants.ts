@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 3; // v3: invite-code-filtered neighborhood matchmaking
+export const PROTOCOL_VERSION = 4; // v4: chat off synced state; block/report/remove
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -29,8 +29,6 @@ export const LIMITS = {
   nameMaxLength: 24,
   /** Chat message length after trimming. */
   chatMaxLength: 240,
-  /** Chat messages retained in room state (older ones drop off). */
-  chatHistory: 50,
   /**
    * Anti-teleport speed cap in world units/second. A touch above the
    * avatar's real top speed so honest latency spikes aren't punished, but
@@ -45,6 +43,29 @@ export const LIMITS = {
   accountSecretLength: 43,
   /** Mail items retained per account before oldest drop off. */
   mailboxMax: 200,
+
+  /**
+   * Accounts one person may block. Generous - nobody should ever hit it -
+   * but bounded, because an unbounded list is a way to fill the disk.
+   */
+  blockListMax: 500,
+
+  /** A safety report's own words. */
+  reportDetailsMax: 1000,
+
+  /**
+   * Reports one account may file in ten minutes. Reporting must never feel
+   * rationed, so this is only high enough to stop a script.
+   */
+  reportsPerWindow: 12,
+  reportWindowMs: 10 * 60 * 1000,
+
+  /**
+   * Chat lines a late joiner receives. Chat is NOT synced room state any
+   * more (see the note on ChatHistory in messages.ts), so this is the size
+   * of the ring the server keeps in memory per neighborhood.
+   */
+  chatHistory: 50,
 } as const;
 
 /** Default room name / neighborhood the first slice joins. */

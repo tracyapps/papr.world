@@ -121,4 +121,13 @@ export type RoomSave = {
   savedAt: number;
   pieces: PlacedPiece[];
   nodes: ResourceNode[];
+  /**
+   * Accounts refused entry to THIS neighborhood.
+   *
+   * Durable on purpose: a removal that lasted only until the room emptied
+   * would be no removal at all, since rooms are disposed the moment the last
+   * person leaves. Absent on saves written before removal existed - read it
+   * with `?? []`.
+   */
+  bannedAccountIds?: string[];
 };

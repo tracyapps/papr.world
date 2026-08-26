@@ -112,7 +112,13 @@ export async function initializeSharedSession(): Promise<void> {
   sessionStorage.setItem('pp.shared-name.v1', config.name);
 
   let liveConnection: NetConnection | null = null;
-  const ui = initializeSharedChat((text) => liveConnection?.sendChat(text));
+  const ui = initializeSharedChat({
+    onSend: (text) => liveConnection?.sendChat(text),
+    onBlock: (accountId) => liveConnection?.sendBlock(accountId),
+    onUnblock: (accountId) => liveConnection?.sendUnblock(accountId),
+    onReport: (report) => liveConnection?.sendReport(report),
+    onRemove: (accountId, ban) => liveConnection?.sendRemove({ accountId, ban }),
+  });
   ui.setStatus('connecting…');
   publishStatus({
     phase: 'preparing',
@@ -157,6 +163,16 @@ export async function initializeSharedSession(): Promise<void> {
         onPieceAdd: addSharedPiece,
         onPieceRemove: removeSharedPiece,
         onChat: ui.addChat,
+        onChatHistory: (lines) => {
+          ui.setHistory(lines);
+          // Room state has arrived by now, so this is the first moment we can
+          // know whether the server considers us the owner.
+          ui.setOwner(Boolean(liveConnection?.isOwner()));
+        },
+        onBlocks: ui.setBlocks,
+        onReportFiled: (receiptId) =>
+          ui.addNotice(`Report filed. Its reference is ${receiptId.slice(0, 8)}.`),
+        onRemoved: ui.showRemoved,
         onRejected: (info) => {
           // A first movement can be clamped while the server catches up to the
           // real spawn. It is a correction, not a player-facing failure.

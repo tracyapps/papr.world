@@ -23,7 +23,10 @@ import {
   ServerMessage,
   type AccountCredentials,
   type AvatarRef,
+  type BlockIntent,
+  type BlockList,
   type ChatBroadcast,
+  type ChatHistory,
   type ChatIntent,
   type GatherIntent,
   type JoinOptions,
@@ -32,6 +35,10 @@ import {
   type PlacedPiece,
   type PlayerState,
   type Rejected,
+  type RemoveIntent,
+  type RemovedNotice,
+  type ReportFiled,
+  type ReportIntent,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 
@@ -46,6 +53,14 @@ export type NetCallbacks = {
   onPieceRemove?: (id: string) => void;
   /** A chat line was accepted by the server. */
   onChat?: (line: ChatBroadcast) => void;
+  /** The backlog, once, on join. Already filtered by your blocks. */
+  onChatHistory?: (lines: ChatBroadcast[]) => void;
+  /** Your own block list, on join and after every change. */
+  onBlocks?: (accountIds: string[]) => void;
+  /** A safety report was filed; carries the receipt. */
+  onReportFiled?: (receiptId: string) => void;
+  /** You were removed from the neighborhood. */
+  onRemoved?: (notice: RemovedNotice) => void;
   /** An intent was refused — surface a quiet hint. */
   onRejected?: (info: Rejected) => void;
   /** Connection dropped. */
@@ -59,10 +74,21 @@ export type NetConnection = {
   sampleRemote: (id: string, now?: number) => RemoteSample | null;
   /** Ids of remote players currently tracked. */
   remoteIds: () => string[];
+  /** Whether the server says WE may remove people. Drawn from room state. */
+  isOwner: () => boolean;
+  /** The account behind a session id, for blocking and reporting. */
+  accountFor: (sessionId: string) => string | null;
   sendMove: (intent: MoveIntent) => void;
   sendChat: (text: string) => void;
   sendPlacePiece: (intent: PlacePieceIntent) => void;
   sendGather: (nodeId: string) => void;
+  /** Stop receiving this account's chat. Personal, instant, never announced. */
+  sendBlock: (accountId: string) => void;
+  sendUnblock: (accountId: string) => void;
+  /** File a safety report about a player, optionally about one message. */
+  sendReport: (report: ReportIntent) => void;
+  /** Owner only; the server checks and refuses everyone else. */
+  sendRemove: (intent: RemoveIntent) => void;
   disconnect: () => void;
 };
 
@@ -109,7 +135,6 @@ export async function connect(
 
   wirePlayers(room, stateCallbacks, selfId, buffer, callbacks);
   wirePieces(room, stateCallbacks, callbacks);
-  wireChat(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
   room.onLeave((code) => callbacks.onLeave?.(code));
 
@@ -121,6 +146,12 @@ export async function connect(
     sessionId: selfId,
     sampleRemote: (id, now) => buffer.sample(id, now),
     remoteIds: () => buffer.ids(),
+    // Read live from room state rather than cached: the server owns this, and
+    // it is only ever used to decide whether to DRAW a control. Every removal
+    // is authorised again server-side.
+    isOwner: () => Boolean((room.state as any)?.players?.get(selfId)?.isOwner),
+    accountFor: (sessionId) =>
+      ((room.state as any)?.players?.get(sessionId)?.accountId as string | undefined) ?? null,
     sendMove: (intent) => {
       const now = Date.now();
       if (now - lastMoveSent < minMoveGap) return;
@@ -136,6 +167,16 @@ export async function connect(
       const payload: GatherIntent = { nodeId };
       room.send(ClientMessage.Gather, payload);
     },
+    sendBlock: (accountId) => {
+      const payload: BlockIntent = { accountId };
+      room.send(ClientMessage.Block, payload);
+    },
+    sendUnblock: (accountId) => {
+      const payload: BlockIntent = { accountId };
+      room.send(ClientMessage.Unblock, payload);
+    },
+    sendReport: (report) => room.send(ClientMessage.Report, report),
+    sendRemove: (intent) => room.send(ClientMessage.Remove, intent),
     disconnect: () => {
       void room.leave();
     },
@@ -175,16 +216,6 @@ function readPiece(id: string, raw: any): PlacedPiece {
   };
 }
 
-function readChat(raw: any): ChatBroadcast {
-  return {
-    id: raw.id,
-    playerId: raw.playerId,
-    name: raw.name,
-    text: raw.text,
-    at: raw.at,
-  };
-}
-
 function wirePlayers(
   room: Room,
   $: NonNullable<ReturnType<typeof getStateCallbacks>>,
@@ -219,26 +250,24 @@ function wirePieces(
     callbacks.onPieceRemove?.(id));
 }
 
-function wireMessages(room: Room, callbacks: NetCallbacks): void {
-  room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));
-}
-
 /**
- * Room state supplies late-join history; the broadcast supplies the quickest
- * live delivery. De-duplicate by the server id because a new line uses both.
+ * Every server-sent event.
+ *
+ * Chat used to arrive two ways at once — synced room state for the backlog and
+ * a broadcast for the live line — which needed de-duplication by id. It now
+ * arrives only as messages, because synced state is identical for everybody
+ * and therefore could never honour a personal block. History comes once on
+ * join, already filtered; live lines are sent per recipient.
  */
-function wireChat(
-  room: Room,
-  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
-  callbacks: NetCallbacks,
-): void {
-  if (!callbacks.onChat) return;
-  const seen = new Set<string>();
-  const deliver = (line: ChatBroadcast) => {
-    if (!line.id || seen.has(line.id)) return;
-    seen.add(line.id);
-    callbacks.onChat?.(line);
-  };
-  $(room.state as any).chat.onAdd((raw: any) => deliver(readChat(raw)));
-  room.onMessage(ServerMessage.Chat, deliver);
+function wireMessages(room: Room, callbacks: NetCallbacks): void {
+  room.onMessage(ServerMessage.Chat, (line: ChatBroadcast) => callbacks.onChat?.(line));
+  room.onMessage(ServerMessage.ChatHistory, (history: ChatHistory) =>
+    callbacks.onChatHistory?.(history.lines ?? []));
+  room.onMessage(ServerMessage.Blocks, (list: BlockList) =>
+    callbacks.onBlocks?.(list.accountIds ?? []));
+  room.onMessage(ServerMessage.ReportFiled, (filed: ReportFiled) =>
+    callbacks.onReportFiled?.(filed.receiptId));
+  room.onMessage(ServerMessage.Removed, (notice: RemovedNotice) =>
+    callbacks.onRemoved?.(notice));
+  room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));
 }

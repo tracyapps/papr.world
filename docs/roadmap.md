@@ -339,7 +339,7 @@ changes status, appends audit notes, and exports JSON with identity and private
 notes redacted. Browser proof covered normal delivery, server-offline
 screenshot retry, triage, export, and full restart recovery.
 
-### MP.3 Invite-only alpha shell — 🚧 underway (2026-08-25) — **M**
+### MP.3 Invite-only alpha shell — ✅ built (2026-08-26) — **M**
 
 Minimal connect/room UI, join codes, clear connection states, host kick/mute,
 personal mute/block, and a clean return to solo play. Deploy the already-audited
@@ -358,13 +358,37 @@ development save remains available as `PAPR-22`. Independent browsers proved
 same-code presence/chat, different-code chat isolation, missing-code recovery,
 and return-to-solo. Feedback context now records the neighborhood code.
 
-Still required before Alpha gate 1: host identity and removal, personal
-mute/block (plus contextual safety reports at the point they become necessary),
-Railway/Vercel deployment configuration, and a hosted `https://`/`wss://`
-restart smoke. Invite codes are an alpha discovery boundary, not a substitute
-for those safety controls.
+**Completed 2026-08-26.** The safety controls the gate asked for are built and
+proved against a running server:
 
-### Alpha gate 1 — small invited playtest
+- **Personal block**, account-level and enforced server-side. This required
+  moving chat out of synced room state — synced state is identical for every
+  client by construction, so a block could never have been honoured there.
+  Chat is now history-on-join plus per-recipient delivery, which closes
+  pitfall 2 in `communal-multiplayer.md` §4.
+- **Contextual safety reports** from any chat line, into a moderation queue
+  that is deliberately separate from the product-feedback queue — its own
+  file, its own token, its own redacted export.
+- **Owner removal**, with an optional per-neighborhood ban that is written
+  into the room save, so it survives the room emptying and reopening. The
+  owner is one account set by `PAPR_OWNER_ACCOUNT`; guests are refused
+  whenever it is set, because a guest identity is new on every connection and
+  therefore cannot be removed, banned or blocked.
+- **Deployment**: a committed `Dockerfile` and `railway.json`, with the full
+  ordered setup in `hosting.md`.
+- Protocol is now **v4**; older clients are refused rather than desynced.
+
+The site's `/enter` door hands off to the game with `intent=create`, not
+`join`: rooms are disposed when empty, so the first person through the door at
+any moment has to be able to reopen the neighborhood from its save.
+
+Still owed before inviting anybody: the hosted `https://`/`wss://` smoke in
+`hosting.md`, run against the real deployment.
+
+### Alpha gate 1 — small invited playtest — 🚧 underway (2026-08-26)
+
+<!-- site: title: The first invited playtest -->
+<!-- site: summary: The safety controls are built. What is left is running the hosted smoke test for real, and then asking three to five people whether an evening in a paper neighbourhood is a good evening. -->
 
 Invite the first interested testers when all of these are true:
 

@@ -17,7 +17,19 @@ function destination(code: string, alone: boolean, name: string | null): string 
   // that too, which is why this is the correct "wander alone" destination.
   if (alone) return '/play/';
 
-  const query = new URLSearchParams({ shared: '1', invite: code, intent: 'join' });
+  // intent=create, not join, and this is not a typo.
+  //
+  // The game maps intent=join to Colyseus `client.join`, which REQUIRES a
+  // room to already exist, and intent=create to `joinOrCreate`. Rooms are
+  // disposed when the last person leaves - only the neighbourhood's SAVE is
+  // durable - so the first person through the door at any given moment has to
+  // be able to open the room again. With intent=join, a neighbourhood would
+  // only be enterable while somebody else was already standing in it.
+  //
+  // joinOrCreate is correct for everyone: it joins the room if it is up and
+  // reopens it from the save if it is not. Who may remove people is decided
+  // by the owner account on the server, never by who happened to arrive first.
+  const query = new URLSearchParams({ shared: '1', invite: code, intent: 'create' });
   if (name) query.set('name', name);
   return `/play/?${query.toString()}`;
 }

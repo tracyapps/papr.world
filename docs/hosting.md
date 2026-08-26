@@ -1,60 +1,213 @@
-# Hosting Pencil and Paper
+# Hosting papr.world
 
-Last checked 2026-08-25. This is the short answer to “where do I sign up?”
+Two halves, two hosts, and they only meet over `https://` and `wss://`.
 
-## Recommended alpha setup
+| | Where | What it is |
+| --- | --- | --- |
+| **Site + game** | Vercel | Static. The marketing site, `/play`, `/reference`, and two edge functions (the alpha door and the contact form). |
+| **Neighborhood server** | Railway | A long-lived Node process holding WebSocket connections and the authoritative world. |
 
-Use **Vercel for the game client** and **Railway for the authoritative game
-server**.
+The server **cannot** be a Vercel function. It holds open sockets and owns
+state; serverless has neither. That split is the whole reason there are two
+hosts, and it is not going to change.
 
-- Sign up at [Vercel](https://vercel.com/signup) with the GitHub account that
-  owns the game repository. The existing `vercel.json` already targets the
-  static Vite client. Vercel Hobby is free for personal, non-commercial work;
-  move to Pro if the project becomes commercial or needs paid-team features.
-- Sign up at [Railway](https://railway.com/login) with GitHub. Railway's Hobby
-  plan is currently a $5/month minimum commitment and that $5 counts toward
-  actual usage. It supports the long-running Node process, public WebSockets,
-  and a persistent volume the current JSON world/account/feedback stores need.
+---
 
-Do **not** try to run the Colyseus server as a Vercel Function. The client is
-static, but multiplayer holds long-lived WebSocket connections and must run as
-an always-on Node service.
+## Do this in order
 
-## Railway settings when MP.3 deploys
+The order matters. Two steps depend on something that does not exist until an
+earlier step has run, and doing them out of order is the most likely way to
+end up staring at a working server that refuses to let you in.
 
-The deployment files still need to be added and smoke-tested as part of MP.3;
-creating the accounts now does not deploy anything.
+### 1. Deploy the server to Railway
 
-1. Create a Railway project from the GitHub repository.
-2. Deploy one server replica initially. The current JSON store is intentionally
-   single-writer and should not be horizontally scaled.
-3. Attach a small persistent volume at `/data` and set `PP_DATA_DIR=/data`.
-4. Set `PP_CORS_ORIGIN` to the exact Vercel game origin, such as
-   `https://pencil-and-paper.vercel.app`.
-5. Generate a long random reviewer secret and set it as `PP_REVIEWER_TOKEN`.
-   Never put this value in Vercel, a URL, source control, or a tester invite.
-   Reviewers enter it at the client URL with `?review=1`; the browser keeps it
-   only in that tab's session storage.
-6. Let Railway provide `PORT`; the server already reads it and exposes
-   `/health` for the health check.
-7. In the Vercel project, set `VITE_FEEDBACK_HTTP_ENDPOINT` to the Railway
-   HTTPS origin and `VITE_SHARED_WS_ENDPOINT` to its `wss://` origin, then
-   redeploy so Vite bakes those public endpoints into the client. A temporary
-   `server=wss://…` URL override is also supported and is preserved when a
-   player returns to solo, without opening a socket until they opt in again.
-8. Turn on volume backups before inviting testers. Download a copy before any
-   schema or protocol migration.
+Point a Railway service at this repository. `railway.json` and `Dockerfile`
+are committed, so it should need no dashboard configuration to build — it will
+find the Dockerfile, build from the repository root, and health-check
+`/health`.
 
-## Good alternatives
+**Attach a volume mounted at `/data` before you deploy a second time.**
+Everything durable lives there: neighborhood saves, paper passports, the
+feedback queue, the moderation queue, block lists. Without a volume, every
+redeploy is an amnesia event and your testers lose the things they built. The
+`Dockerfile` already sets `PP_DATA_DIR=/data`, so mounting the volume there is
+the only step.
 
-- **Colyseus Cloud** is the managed, game-specific option (currently starting
-  at $15/month). It becomes attractive when avoiding server operations matters
-  more than the extra cost. The current bootstrap would first need to adopt
-  Colyseus Cloud's `defineServer()` project shape.
-- **Render** supports WebSockets well, but the free service spins down and
-  cannot attach the persistent disk this prototype needs. Use a paid instance
-  plus disk if Render's dashboard is preferable.
+Leave `PAPR_OWNER_ACCOUNT` unset for now. You cannot fill it in yet.
 
-For the first 3–5 invited testers, Vercel + Railway is the smallest practical
-setup. Revisit managed Colyseus hosting or a database after the playtest proves
-what actually needs scaling.
+### 2. Give the server its settings
+
+In the Railway service, set:
+
+| Variable | Value | Why |
+| --- | --- | --- |
+| `PP_CORS_ORIGIN` | `https://papr.world` | The exact site origin, no trailing slash. Leaving it unset means "any origin", which is fine locally and wrong in public. |
+| `PP_REVIEWER_TOKEN` | `openssl rand -base64 32` | Opens the **feedback** desk at `?review=1`. |
+| `PP_MODERATION_TOKEN` | a *different* `openssl rand -base64 32` | Opens the **safety report** queue. Deliberately not the same token — see "Two tokens" below. |
+
+`PORT` is injected by Railway; don't set it.
+
+Redeploy. Then read the deploy log — the server states its own safety posture
+on every boot, and one of those lines should still be a warning:
+
+```
+removal: DISABLED — PAPR_OWNER_ACCOUNT is unset, nobody can remove anyone, guests allowed
+safety reports: queued, /review/reports needs PP_MODERATION_TOKEN
+CORS: pinned to https://papr.world
+```
+
+### 3. Point the site at the server
+
+Copy the Railway public domain. In the **Vercel** project, for Production
+**and** Preview:
+
+| Variable | Value |
+| --- | --- |
+| `VITE_SHARED_WS_ENDPOINT` | `wss://your-service.up.railway.app` |
+| `VITE_FEEDBACK_HTTP_ENDPOINT` | `https://your-service.up.railway.app` |
+
+These are **build-time** variables. Vite bakes them into the bundle, so
+setting them does nothing until you **redeploy**. That is the single most
+common way to end up with a game that stubbornly talks to `localhost:2567`
+in production.
+
+### 4. Set the alpha door
+
+Still on Vercel:
+
+| Variable | Value |
+| --- | --- |
+| `PAPR_ALPHA_CODES` | `WREN-42,FERN-73` — the codes that work, comma separated |
+| `PAPR_ALPHA_SECRET` | `openssl rand -base64 48` |
+
+Codes are four letters and two digits, and the alphabet deliberately excludes
+**I**, **O**, **0** and **1** so a code read aloud has one spelling. A code
+containing any of them is silently not a code — `FERN-19` will never work.
+
+**An empty or unset `PAPR_ALPHA_CODES` means the door is open.** That default
+keeps a fresh clone and `vercel dev` working, and it means the gate never
+switches itself on by accident. It also means the alpha is not invite-only
+until you set it.
+
+### 5. Mint your owner passport — from your own browser
+
+This is the step with the trap in it. The owner is identified by a **paper
+passport**, and the passport that matters is the one in the browser you will
+actually be playing in. Minting one with `curl` gives you an id your browser
+has never heard of.
+
+So:
+
+1. Open `https://papr.world/enter/`, put in one of your codes, and go in.
+   The game mints a passport on first shared play and stores it locally.
+2. In that browser's devtools console:
+
+   ```js
+   JSON.parse(localStorage['pp.passport.v1']).id
+   ```
+
+3. Put that id in Railway as `PAPR_OWNER_ACCOUNT` and redeploy.
+
+Never copy the `secret` anywhere. It is that browser's credential, it is not
+recoverable, and the server only ever stores a hash of it.
+
+The deploy log should now read:
+
+```
+removal: enabled — owner account b7ffe9c4…, guests refused
+```
+
+"Guests refused" is deliberate and arrives with the owner setting. A guest's
+identity is `guest:<sessionId>`, new on every connection — so a guest cannot
+be meaningfully removed, banned or blocked. Allowing them would make all three
+controls a lie. The real client always carries a passport, so nobody notices.
+
+### 6. Send the notes somewhere (optional, but the form is on the homepage)
+
+On Vercel: `RESEND_API_KEY`, `NOTE_TO`, `NOTE_FROM`. Unset means the contact
+form still accepts and validates notes and logs them — it just does not
+deliver them. See `site/README.md`.
+
+---
+
+## The hosted smoke test
+
+Do all of this against the **real** deployment, in two different browsers (or
+one plus a private window — two tabs of the same browser share a passport and
+will look like one person).
+
+- [ ] `https://your-service.up.railway.app/health` returns `ok`
+- [ ] `papr.world/play` **redirects to `/enter`** in a browser that has never
+      been through the door. If it serves the game, the gate is not on.
+- [ ] A valid code gets you in; a wrong code says so and does not.
+- [ ] Two browsers with the **same** code see each other move and chat.
+- [ ] Two browsers with **different** codes cannot see each other at all.
+- [ ] Place something, then **restart the Railway service**. It is still there.
+      (This is the one that proves the volume is mounted.)
+- [ ] Block someone from the ⋯ menu on one of their messages. They keep
+      talking; you stop seeing it. Reload — still blocked.
+- [ ] Report a message. `GET /review/reports` with your moderation token shows
+      it, with the exact message text attached.
+- [ ] From the owner browser, remove the other person. They are told why and
+      disconnected. With "refuse this code", the same code will not let them
+      back in — even after the room empties and reopens.
+- [ ] Send feedback from the in-game Settings menu; check `?review=1`.
+
+---
+
+## Things that will bite
+
+**Two tokens, on purpose.** `PP_REVIEWER_TOKEN` opens product feedback;
+`PP_MODERATION_TOKEN` opens safety reports. They are separate so you can hand
+somebody bug triage without also handing them "who reported whom". Neither
+queue ever appears in the other's export.
+
+**The volume, again.** It is worth checking twice. A Railway service without a
+mounted volume looks completely healthy and quietly discards the world on
+every deploy.
+
+**One replica.** The JSON stores are single-writer by design. Scaling to two
+instances will corrupt saves. If you outgrow one process, that is a real
+piece of work, not a slider.
+
+**Back up before a protocol change.** `PROTOCOL_VERSION` is 4. Bumping it
+refuses older clients on purpose — but download `/data` first if a save-shape
+change is involved.
+
+**Secrets stay on Railway.** `PP_MODERATION_TOKEN` and `PP_REVIEWER_TOKEN`
+never go in Vercel, in a URL, in the repository, or in a tester invitation.
+Reviewers paste them at the client URL with `?review=1`; the browser keeps
+them in that tab's session storage only.
+
+---
+
+## Costs, as of writing
+
+- **Vercel Hobby** — free for personal, non-commercial use. Move to Pro if
+  this becomes commercial.
+- **Railway Hobby** — $5/month minimum, and the $5 counts toward usage. It
+  buys the always-on process, public WebSockets, and the persistent volume.
+
+**Colyseus Cloud** (from about $15/month) is the managed alternative and
+becomes attractive when avoiding server operations is worth more than the
+difference. It would want this bootstrap adopting its `defineServer()` shape
+first. **Render** handles WebSockets well but its free tier spins down and
+cannot attach the disk this needs.
+
+---
+
+## Running it locally
+
+```bash
+npm --prefix server install
+npm --prefix server run dev     # ws://localhost:2567
+npm run dev                     # the game, on :5173
+```
+
+Then open the game with `?shared=1&invite=PAPR-22&intent=create`. With no
+`PAPR_OWNER_ACCOUNT` set, nobody is owner and guests are welcome — which is
+what you want for a quick two-tab dogfood and exactly what you do not want in
+public.
+
+To exercise removal locally, set `PAPR_OWNER_ACCOUNT` to the passport id from
+your own browser, the same way step 5 does.

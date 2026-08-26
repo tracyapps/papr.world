@@ -122,6 +122,21 @@ immediately hide it for the reporter. These records go to the moderation queue,
 not the product-feedback queue. Invite-only reduces reach; it does not remove
 the need for mute, block, host removal, or evidence-preserving reports.
 
+**Built 2026-08-26.** Reporting a message is one control on the message
+itself, in the chat log, because that is the only moment somebody wants it —
+a reporting screen somewhere else is a control that exists and never gets
+used. The report carries the exact line, snapshotted server-side from the
+server's own log rather than from anything the client claims was said, so the
+evidence cannot be fabricated or erased by an edit or a disconnect.
+
+The queue is separate from this document's feedback queue in every way that
+matters: its own file, its own `PP_MODERATION_TOKEN`, its own export with the
+reporter's identity and the private notes removed. Neither queue can be read
+with the other's token.
+
+Personal block ships alongside it — account-level, instant, silent, and
+enforced server-side rather than hidden client-side.
+
 Public discovery remains blocked on `communal-multiplayer.md` Phase G and the
 stronger UGC rules in `avatar-and-identity.md`.
 
