@@ -1,0 +1,229 @@
+---
+/**
+ * The site navigation. Appears on every page, identical every time.
+ *
+ * TO CHANGE THE MENU: edit the `links` array below. That is the whole job —
+ * the markup and the "you are here" marker both read from it.
+ *
+ * There is deliberately no hamburger. Five short links wrap onto a second row
+ * on a phone, which needs no JavaScript, no disclosure to operate, and no
+ * focus trap to get wrong. The bar is fixed on wide screens where there is
+ * room for it, and scrolls away normally on narrow ones where there isn't.
+ */
+const links = [
+  { href: '/world/',        label: 'The world' },
+  { href: '/together/',     label: 'Together' },
+  { href: '/how-it-works/', label: 'How it works' },
+  { href: '/roadmap/',      label: 'Roadmap' },
+  { href: '/reference/',    label: 'Reference' },
+];
+
+const here = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  here === href || here === href.replace(/\/$/, '');
+---
+
+<a class="skip-link" href="#main">Skip to the main content</a>
+
+<nav class="nav" aria-label="Main">
+  <a class="nav__mark" href="/">
+    <span class="nav__wordmark">papr.world</span>
+  </a>
+
+  <ul class="nav__links">
+    {links.map((link) => (
+      <li>
+        <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <div class="nav__tail">
+    <button
+      type="button"
+      class="nav__theme"
+      data-theme-toggle
+      aria-label="Switch between daylight and the night craft table"
+      title="Day / night"
+    >
+      <svg class="nav__sun" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M12 1.6v2.6" /><path d="M12 19.8v2.6" />
+          <path d="M1.6 12h2.6" /><path d="M19.8 12h2.6" />
+          <path d="M4.6 4.6l1.9 1.9" /><path d="M17.5 17.5l1.9 1.9" />
+          <path d="M19.4 4.6l-1.9 1.9" /><path d="M6.5 17.5l-1.9 1.9" />
+        </g>
+      </svg>
+      <svg class="nav__moon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 14.2A8.4 8.4 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"
+          fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+      </svg>
+    </button>
+
+    <a class="nav__cta" href="/enter/">I have a code</a>
+  </div>
+</nav>
+
+<style lang="scss">
+  .nav {
+    position: relative;
+    z-index: 60;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px clamp(14px, 4vw, 46px);
+  }
+
+  // The little paper slabs the bar is made of.
+  @mixin slab($turn: 0deg) {
+    background: var(--paper);
+    border: 1px solid var(--edge);
+    border-radius: $radius-md;
+    box-shadow: 0 6px 14px var(--sh-1);
+    transform: rotate($turn);
+  }
+
+  .nav__mark {
+    @include slab(-1.2deg);
+    flex: none;
+    padding: 2px 14px 5px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav__wordmark {
+    font-family: $font-hand;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.05;
+  }
+
+  .nav__links {
+    @include slab(.7deg);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    order: 3;             // on narrow screens the links drop to their own row
+    width: 100%;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+
+    a {
+      display: block;
+      padding: 9px 11px;
+      border-radius: $radius-sm;
+      font: 500 13px/1 $font-body;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      text-decoration: none;
+
+      &:hover { background: var(--kraft-2); color: var(--ink); }
+
+      // The page you are on gets a crayon underline as well as a weight
+      // change — colour is never the only thing carrying the meaning.
+      &[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 700;
+        box-shadow: inset 0 -3px 0 var(--crayon);
+      }
+    }
+  }
+
+  .nav__tail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex: none;
+  }
+
+  .nav__theme {
+    @include slab;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 38px;
+    padding: 0;
+    color: var(--ink);
+    cursor: pointer;
+
+    &:hover { background: var(--kraft-2); }
+  }
+
+  // Show what is currently on — sun in daylight, moon at night — rather than
+  // what the button will do. Both states are also in the button's title.
+  .nav__moon { display: none; }
+
+  :global(:root[data-theme="dark"]) {
+    .nav__sun  { display: none; }
+    .nav__moon { display: block; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) {
+      .nav__sun  { display: none; }
+      .nav__moon { display: block; }
+    }
+  }
+
+  .nav__cta {
+    @include slab;
+    background: var(--kraft-2);
+    padding: 11px 14px;
+    font: 700 13px/1 $font-body;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover { background: var(--kraft); color: var(--ink); }
+  }
+
+  // ── Wide screens: one row, pinned to the top of the viewport ────────────
+  @media (min-width: $bp-mid) {
+    .nav {
+      position: fixed;
+      inset: 0 0 auto;
+      flex-wrap: nowrap;
+      padding: 14px clamp(16px, 4vw, 46px);
+      // The bar itself is not a surface — the scenery keeps drifting behind
+      // it — so only the slabs inside it may catch a click.
+      pointer-events: none;
+
+      > * { pointer-events: auto; }
+    }
+
+    // Once the page has scrolled, body text starts sliding under the slabs
+    // and gets hard to read right where it meets them. A soft fade of the
+    // page's own paper colour, only while scrolled, so the bar still floats
+    // freely over the scenery at the top of every page.
+    :global(body[data-scrolled]) .nav::after {
+      content: "";
+      position: absolute;
+      inset: -20px 0 -56px;
+      z-index: -1;
+      background: linear-gradient(
+        to bottom,
+        var(--paper-3) 0%,
+        var(--paper-3) 42%,
+        color-mix(in srgb, var(--paper-3) 55%, transparent) 72%,
+        transparent 100%
+      );
+      pointer-events: none;
+    }
+
+    .nav__links {
+      order: 0;
+      width: auto;
+      margin-left: auto;
+    }
+
+    .nav__tail { margin-left: 0; }
+  }
+</style>

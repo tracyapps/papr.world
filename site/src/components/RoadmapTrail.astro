@@ -1,0 +1,153 @@
+---
+/**
+ * The short roadmap trail for the homepage.
+ *
+ * Nothing here is typed by hand. It reads src/data/roadmap.json, which
+ * tools/build-roadmap.mjs generates from docs/roadmap.md on every build. Move
+ * a phase to ✅ in the roadmap and this changes by itself.
+ *
+ * To make the public wording warmer without touching your planning doc, add
+ * a directive under the heading in docs/roadmap.md:
+ *     <!-- site: title: A friendlier name -->
+ *     <!-- site: summary: One warm sentence. -->
+ */
+import roadmap from '../data/roadmap.json';
+
+const LOOK = {
+  done:    { badge: '✓ Done',        tone: 'done' },
+  active:  { badge: '◆ You are here', tone: 'here' },
+  started: { badge: '◑ Underway',    tone: 'part' },
+  planned: { badge: '○ Next',        tone: 'next' },
+} as const;
+
+type Status = keyof typeof LOOK;
+
+// A hand-drawn trail should not be evenly spaced. These are the tilts, in
+// order, repeating — change them and every card leans differently.
+const TILTS = ['-1.6deg', '1.2deg', '-.8deg', '1.6deg', '-2.2deg', '.9deg'];
+---
+
+<ol class="trail">
+  <svg class="trail__path" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
+    <path
+      d="M0 60 C 120 10, 200 104, 330 62 S 560 8, 700 66 S 900 106, 1000 46"
+      fill="none" stroke="var(--crayon)" stroke-width="4" stroke-linecap="round"
+      stroke-dasharray="11 15" opacity=".55"
+    />
+  </svg>
+
+  {roadmap.phases.map((phase, index) => {
+    const look = LOOK[phase.status as Status] ?? LOOK.planned;
+    return (
+      <li class="trail__step" style={`--tilt:${TILTS[index % TILTS.length]}`}>
+        <a class:list={['trail__card', `is-${look.tone}`]} href={`/roadmap/#${phase.id}`}>
+          <span class="trail__badge">{look.badge}</span>
+          <h3 class="trail__title">{phase.title}</h3>
+          <p class="trail__blurb">{phase.intro}</p>
+          {phase.counts.total > 0 && (
+            <p class="trail__count">
+              {phase.counts.done} of {phase.counts.total} pieces built
+            </p>
+          )}
+        </a>
+      </li>
+    );
+  })}
+</ol>
+
+<style lang="scss">
+  .trail {
+    position: relative;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    margin: 66px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // The marching dotted line behind the cards. Decorative only — the order of
+  // the list is what actually carries the sequence.
+  .trail__path {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 34px;
+    width: 100%;
+    height: 120px;
+    overflow: visible;
+
+    path { animation: march 5s linear infinite; }
+  }
+
+  @keyframes march { to { stroke-dashoffset: -60; } }
+
+  .trail__card {
+    @include card(var(--paper-2), var(--paper-3));
+    @include lifts;
+    display: block;
+    padding: 16px 16px 18px;
+    color: inherit;
+    text-decoration: none;
+    height: 100%;
+  }
+
+  .trail__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    font: 700 10px/1 $font-mono;
+    letter-spacing: .12em;
+    color: var(--ink-faint);
+  }
+
+  .trail__title {
+    @include hand(30px, 38px, 4vw);
+    margin: 12px 0 6px;
+  }
+
+  .trail__blurb {
+    margin: 0;
+    font: 400 13.5px/1.5 $font-body;
+    color: var(--ink-soft);
+  }
+
+  .trail__count {
+    margin: 10px 0 0;
+    font: 700 10px/1 $font-mono;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  // ── Status ───────────────────────────────────────────────────────────────
+  // Each state differs in wording, border and fill — never colour alone.
+
+  .is-done .trail__badge { color: var(--green); border-color: var(--green); }
+
+  .is-part .trail__badge { color: var(--crayon-3); border-color: var(--crayon-3); }
+
+  .is-next {
+    background: var(--paper);
+    border-style: dashed;
+    box-shadow: 3px 8px 0 var(--paper-2);
+  }
+
+  .is-here {
+    background: var(--kraft-2);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 8px 0 var(--kraft-3), 5px 18px 30px var(--sh-2);
+
+    .trail__badge {
+      background: var(--paper);
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    // A strip of tape, because this is the card you actually want read.
+    &::after { @include tape(auto, 44px, 11deg, -13px); right: 16px; left: auto; height: 26px; }
+  }
+</style>

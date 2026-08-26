@@ -1,25 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "module": "ESNext",
+    "moduleResolution": "Bundler",
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
     "types": [
-      "vite/client"
+      "node"
     ],
     "skipLibCheck": true,
-    "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
-    "strict": true
+    "strict": true,
+    "noUncheckedIndexedAccess": false
   },
   "include": [
-    "src"
+    "lib",
+    "api",
+    "middleware.ts"
   ]
 }

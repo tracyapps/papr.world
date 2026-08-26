@@ -1,0 +1,117 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  TOKENS — every colour and measurement on the site starts here.
+//
+//  If you want to change how the site LOOKS and not what it SAYS, this is
+//  almost always the file. Nothing below this file invents a colour; every
+//  other stylesheet refers back to these names.
+//
+//  This file emits NO CSS. It is injected into every component stylesheet
+//  automatically (see astro.config.mjs), which is why no .astro file needs
+//  an @use line to say var(--paper) or $font-hand.
+//
+//  The actual :root rules that give those custom properties their values
+//  live next door in _theme.scss, applied once by site.scss.
+//
+//  Two halves:
+//    1. $sass-variables  — compile-time. Sizes, shadow recipes, breakpoints.
+//    2. CSS custom props — runtime. Anything that changes between day and
+//       night has to be a custom property, because the theme toggle swaps
+//       them live in the browser.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── 1. Compile-time values ────────────────────────────────────────────────
+
+// Typefaces. Each has a real fallback stack — if Google Fonts is blocked or
+// slow, the page still reads correctly instead of showing nothing.
+// "Dokdo fallback" is a metric-matched stand-in declared in site.scss, so
+// the headings occupy the same space before the webfont arrives.
+$font-hand:  Dokdo, "Dokdo fallback", "Bradley Hand", cursive;      // big headings
+$font-body:  Karla, "Trebuchet MS", "Helvetica Neue", sans-serif;   // everything else
+$font-mono:  "Courier Prime", "Courier New", ui-monospace, monospace; // labels, codes
+$font-note:  Georgia, "Iowan Old Style", serif;                     // chat + speech
+
+// Layout rhythm.
+$gutter-min: 18px;
+$gutter-max: 150px;
+$measure:    68ch;   // widest a paragraph is ever allowed to get
+$radius-sm:  8px;
+$radius-md:  12px;
+$radius-lg:  15px;
+
+// Breakpoints. Used as @media (min-width: $bp-wide) { … }
+$bp-narrow: 560px;
+$bp-mid:    900px;
+$bp-wide:   1180px;
+
+// How far a paper card lifts when you point at it.
+$lift: 6px;
+
+// Motion. One place, so "make it all calmer" is a one-line change.
+$ease-paper: cubic-bezier(.2, .7, .3, 1);
+$dur-quick:  .16s;
+$dur-settle: .4s;
+
+
+// ── 2. Runtime values (the two themes) ────────────────────────────────────
+//
+//  A note on the three ink colours before you retune them.
+//
+//  --ink-faint is used for the small typewritten labels, captions and the
+//  parking-lot notes. It is FAINT, not decorative — it is real text somebody
+//  has to read, often at 12px, and often on the darker --paper-3 bands. Both
+//  values below are set at the point where they still clear 4.5:1 against
+//  every paper in their own theme, which is the threshold for normal-size
+//  text. The originals were prettier and sat at about 4.2, which is a
+//  readable-if-your-eyes-are-good colour, and this site should not require
+//  that of anybody.
+//
+//  If you lighten --ink-faint (light theme) or darken it (dark theme), check
+//  it against --paper-3 before you keep it.
+//
+//  The dark values live in a mixin so they can be applied in two places
+//  without being typed twice:
+//    · when the visitor's system is set to dark and they have not overridden it
+//    · when they have explicitly chosen dark with the toggle
+//  Change a dark colour once here and both cases follow.
+
+@mixin theme-night {
+  --sky-h: #3b3040;  --sky-z: #131a2b;
+
+  --paper:   #2b241d;  --paper-2: #342b22;  --paper-3: #241d17;
+  --kraft:   #4a3a29;  --kraft-2: #5a462f;  --kraft-3: #6b543a;
+
+  --ink: #f3ead4;  --ink-soft: #cbb896;  --ink-faint: #a49379;
+
+  --edge: rgba(255, 240, 205, .22);  --edge-soft: rgba(255, 240, 205, .10);
+  --sh-1: rgba(0, 0, 0, .35);  --sh-2: rgba(0, 0, 0, .5);  --sh-3: rgba(0, 0, 0, .66);
+
+  --cloud: #4a4356;  --cloud-shade: #332e3f;
+
+  --green:   #8fbc7f;   // "done" ticks and confirmations
+  --crayon:  #e88f78;   // links and the first crayon
+  --crayon-2:#7fb6e0;
+  --crayon-3:#e8c069;
+
+  --lamp: rgba(246, 217, 154, .13);   // the warm glow in the corner of the sky
+
+  // Distant hills, front to back.
+  --h1:#1f5a2a; --h1d:#12331a; --h2:#2c6b28; --h2d:#16311a; --h3:#1c6b43; --h3d:#1b2a24;
+  --h4:#3f7a52; --h4d:#1b2a24; --h5:#1f6440; --h5d:#182d1e; --h6:#256444; --h6d:#16311a;
+
+  // Mountains.
+  --m1:#3f434b; --m1d:#242730; --m2:#343d45; --m2d:#1d2128; --msnow:#8d99ad;
+  --m3:#3a5361; --m3d:#1f2c30; --m4:#2b5a55; --m4d:#16302b;
+
+  // The little paper friend.
+  --potato: #d8c9a4;  --potato-line: #8b6f4c;  --potato-ink: #241d16;
+
+  --tape: rgba(255, 240, 205, .10);
+
+  // Paper textures are printed on white stock. At night they need to be
+  // knocked back or they glow. --img-dim is the opacity of a paper-coloured
+  // sheet laid over them; --blend is how they mix with what's underneath.
+  --img-dim: .8;
+  --blend: multiply;
+
+  color-scheme: dark;
+}

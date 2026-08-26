@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="515.57" height="526.64" viewBox="0 0 515.57 526.64">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<defs>
+  <filter id="fx0" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <filter id="fx1" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="screen" result="n0"/>
+  </filter>
+  <filter id="fx2" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx3" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx4" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx5" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="7659" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="color-burn" result="n0"/>
+  </filter>
+  <filter id="fx6" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <filter id="fx7" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx8" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx9" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <filter id="fx10" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="screen" result="n0"/>
+  </filter>
+  <filter id="fx11" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="7659" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="color-burn" result="n0"/>
+  </filter>
+  <filter id="fx12" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="screen" result="n0"/>
+  </filter>
+  <filter id="fx13" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <filter id="fx14" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="overlay" result="n0"/>
+  </filter>
+  <filter id="fx15" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="multiply" result="n0"/>
+  </filter>
+  <filter id="fx16" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="turbulence" baseFrequency="0.43" numOctaves="4" seed="1597" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="screen" result="n0"/>
+  </filter>
+  <filter id="fx17" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feMerge result="base">
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="7659" result="n0t"/>
+<feColorMatrix in="n0t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.35" result="n0c"/>
+<feComposite in="n0c" in2="SourceAlpha" operator="in" result="n0x"/>
+<feBlend in="n0x" in2="base" mode="color-burn" result="n0"/>
+  </filter>
+</defs>
+<g class="layer-path" filter="url(#fx0)">
+<path d="M 395.47 155.14 C 379.31 84.62 333.22 53.11 302.1 48.77 C 294.22 47.59 285.95 47.59 276.49 47.59 C 267.04 47.59 258.76 47.59 250.89 48.77 C 225.28 52.71 168.15 73.98 144.52 147.26 C 130.73 188.63 130.34 251.66 132.7 289.08 C 136.24 343.84 153.58 464 221.34 498.67 C 231.98 503.4 250.89 505.76 266.25 505.76 C 281.61 505.76 295.01 503.4 306.04 499.85 C 368.68 471.88 392.32 344.24 398.62 289.08 C 402.16 255.2 404.13 192.96 395.47 155.14 C 395.47 155.14 395.47 155.14 395.47 155.14 C 395.47 155.14 395.47 155.14 395.47 155.14 Z" fill="#2B6D3B" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" transform="rotate(7.21 189 188.23)" filter="url(#fx1)">
+<path d="M 221.18 48.4 C 193.61 61.79 147.56 108.8 148.35 236.83 C 148.35 236.83 207.32 328.07 207.32 328.07 C 207.32 328.07 230.44 51.37 230.44 51.37 C 230.44 51.37 221.18 48.4 221.18 48.4 Z" fill="#347742" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 298.36 47.59 C 308.99 57.44 355.48 108.65 354.3 238.66 C 354.3 238.66 292.45 234.72 292.45 234.72 C 292.45 234.72 298.36 47.59 298.36 47.59 C 298.36 47.59 298.36 47.59 298.36 47.59 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx2)">
+<path d="M 284.57 467.15 C 284.57 467.15 296.39 498.67 296.39 498.67 C 314.51 494.73 327.9 482.91 335.78 471.09 C 335.78 471.09 330.09 434.24 330.09 434.24 C 330.09 434.24 284.57 467.15 284.57 467.15 C 284.57 467.15 284.57 467.15 284.57 467.15 C 284.57 467.15 284.57 467.15 284.57 467.15 Z" fill="#347742" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" style="mix-blend-mode:screen" filter="url(#fx3)">
+<path d="M 245.76 59.01 C 235.13 83.05 213.46 144.5 212.67 262.69 C 212.28 321.78 225.28 447.85 245.37 503 C 256.79 505.37 264.67 505.76 278.86 504.18 C 291.46 463.21 308.01 353.3 308.01 266.63 C 308.01 176.02 300.13 97.23 284.37 57.83 C 272.55 59.41 260.73 57.83 245.76 59.01 C 245.76 59.01 245.76 59.01 245.76 59.01 C 245.76 59.01 245.76 59.01 245.76 59.01 Z" fill="#46914A" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx4)">
+<path d="M 301.03 314.12 C 301.03 314.12 300.53 298.45 300.53 298.45 C 300.53 298.45 280.63 57.44 280.63 57.44 C 280.63 57.44 280.63 57.44 280.63 57.44 C 280.63 57.44 280.63 57.44 280.63 57.44 C 280.63 57.44 280.63 57.44 280.63 57.44 C 288.51 56.26 296.39 53.5 300.33 53.5 C 331.84 88.96 353.9 147.65 353.9 234.32 C 353.9 234.32 350.38 239.12 345.11 246.3 C 343.99 368.02 322.35 454.16 296.39 498.67 C 296.39 498.67 288.51 501.43 279.05 502.61 C 279.05 502.61 279.05 502.61 279.05 502.61 C 282.99 467.15 301.42 372.81 301.03 314.12 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx5)">
+<path d="M 286.79 43.24 C 295.46 38.52 304.52 17.64 295.06 17.64 C 287.58 17.64 278.91 24.73 274.97 31.42 C 277.34 17.64 270.64 5.82 265.91 6.21 C 261.58 7.79 255.67 19.61 256.46 29.85 C 249.76 19.61 239.91 13.7 235.58 15.27 C 231.64 17.64 234 31.42 242.67 41.27 C 232.03 37.33 224.15 38.52 224.94 43.24 C 226.12 53.09 249.76 62.94 267.49 62.94 C 285.22 62.94 305.31 55.06 305.31 47.18 C 304.91 41.27 295.06 41.27 286.79 43.24 C 286.79 43.24 286.79 43.24 286.79 43.24 C 286.79 43.24 286.79 43.24 286.79 43.24 Z" fill="#EE9FE8" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 488.24 271.36 C 473.67 238.66 446.09 222.9 433.88 222.51 C 433.88 222.51 388.97 220.54 388.97 220.54 C 371.24 222.9 327.9 238.66 312.15 309.57 C 305.84 347 309.39 413.97 331.84 459.27 C 348 492.76 355.48 508.91 371.24 516.4 C 381.09 521.91 398.82 526.25 410.63 526.25 C 420.09 526.25 430.33 524.28 436.64 522.7 C 446.09 518.37 455.94 512.46 463.82 498.67 C 476.03 478.97 503.21 421.85 504 356.84 C 504.4 321.39 499.27 293.81 488.24 271.36 C 488.24 271.36 488.24 271.36 488.24 271.36 C 488.24 271.36 488.24 271.36 488.24 271.36 Z" fill="#2B6D3B" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx6)">
+<path d="M 436.24 222.51 C 450.03 224.48 473.67 236.69 485.49 266.23 C 497.3 291.84 503.21 325.33 501.24 362.75 C 498.49 412 477.21 468.33 457.91 502.61 C 452 509.7 446.09 514.03 436.24 517.97 C 440.57 463.21 450.03 333.21 436.24 222.51 C 436.24 222.51 436.24 222.51 436.24 222.51 C 436.24 222.51 436.24 222.51 436.24 222.51 Z" fill="#4C8359" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" style="mix-blend-mode:screen" filter="url(#fx7)">
+<path d="M 385.03 220.93 C 368.88 226.05 323.96 238.66 310.18 317.45 C 305.31 360.51 305.77 424.62 354.8 502.55 C 357.35 506.61 362.5 509.82 365.31 513.97 C 365.31 513.97 359.42 392.3 359.42 392.3 C 359.42 392.3 385.03 220.93 385.03 220.93 C 385.03 220.93 385.03 220.93 385.03 220.93 C 385.03 220.93 385.03 220.93 385.03 220.93 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" style="mix-blend-mode:screen" filter="url(#fx8)">
+<path d="M 438.21 224.48 C 450.03 232.75 477.61 268.2 477.61 348.97 C 477.61 427.76 455.94 480.94 435.85 518.37 C 431.91 520.34 424.82 521.12 420.09 521.91 C 420.09 521.91 418.51 297.75 418.51 297.75 C 418.51 297.75 438.21 224.48 438.21 224.48 C 438.21 224.48 438.21 224.48 438.21 224.48 C 438.21 224.48 438.21 224.48 438.21 224.48 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx9)">
+<path d="M 385.42 221.32 C 365.72 234.72 338.15 272.14 338.15 352.91 C 338.15 421.85 357.84 484.88 375.18 516.79 C 379.12 518.76 387 520.34 389.36 520.73 C 389.36 520.73 405.12 352.91 405.12 352.91 C 405.12 352.91 385.42 221.32 385.42 221.32 C 385.42 221.32 385.42 221.32 385.42 221.32 C 385.42 221.32 385.42 221.32 385.42 221.32 Z" fill="#2C6D3B" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx10)">
+<path d="M 394.88 226.84 C 383.06 248.51 368.48 299.72 368.48 374.97 C 368.48 431.7 379.12 490.79 388.97 520.73 C 400.79 522.7 406.69 524.67 418.12 522.31 C 426.39 498.67 439.79 431.7 439.39 350.94 C 439.39 299.72 431.91 246.54 426.39 230.78 C 426.39 230.78 394.88 226.84 394.88 226.84 C 394.88 226.84 394.88 226.84 394.88 226.84 C 394.88 226.84 394.88 226.84 394.88 226.84 Z" fill="#56954C" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx11)">
+<path d="M 428.76 216.99 C 433.88 212.66 439.79 201.23 434.67 197.69 C 427.97 197.69 422.85 203.2 420.09 207.14 C 420.09 195.32 416.54 188.23 413 189.02 C 410.24 190.99 406.3 197.29 406.69 207.14 C 401.18 199.26 392.51 192.96 388.97 197.29 C 387.39 203.6 393.3 213.05 395.27 215.41 C 387.78 213.05 380.69 214.63 383.06 218.96 C 384.63 223.29 397.24 230.78 412.6 230.78 C 426.79 230.78 440.57 225.26 441.36 218.96 C 440.97 215.41 433.09 215.02 428.76 216.99 C 428.76 216.99 428.76 216.99 428.76 216.99 C 428.76 216.99 428.76 216.99 428.76 216.99 Z" fill="#F3C330" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx12)">
+<path d="M 140.78 224.48 C 156.53 230.39 182.53 236.29 197.9 270.17 C 211.69 293.81 217.6 329.27 214.05 374.57 C 210.11 419.88 195.93 467.15 174.26 506.55 C 166.38 518.37 146.68 526.64 117.53 526.64 C 117.53 526.64 119.11 356.84 119.11 356.84 C 119.11 356.84 140.78 224.48 140.78 224.48 C 140.78 224.48 140.78 224.48 140.78 224.48 C 140.78 224.48 140.78 224.48 140.78 224.48 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx13)">
+<path d="M 87.81 224 C 68.11 229.91 22.59 258.36 22.98 349.36 C 24.16 419.88 54.1 486.85 74.2 510.09 C 79.71 516.4 110.57 524.17 118.85 525.35 C 118.85 525.35 119.11 356.84 119.11 356.84 C 119.11 356.84 110.78 227.4 110.78 227.4 C 110.78 227.4 83.65 226.84 83.65 226.84 C 83.65 226.84 87.81 224 87.81 224 Z" fill="#2C6D3B" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx14)">
+<path d="M 130.93 224.87 C 130.93 224.87 119.11 348.97 119.11 348.97 C 119.11 348.97 146.68 518.37 146.68 518.37 C 156.53 516 160.47 512.85 164.41 508.52 C 176.23 490.79 197.9 431.7 186.47 331.24 C 182.14 293.81 165.59 238.66 130.93 224.87 C 130.93 224.87 130.93 224.87 130.93 224.87 C 130.93 224.87 130.93 224.87 130.93 224.87 Z" fill="#588F4A" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" style="mix-blend-mode:screen" filter="url(#fx15)">
+<path d="M 87.06 225.66 C 77.21 239.44 51.74 273.72 51.35 347 C 51.74 423.42 72.23 480.55 89.17 516 C 95.86 521.52 97.05 519.94 112.02 523.49 C 112.02 523.49 117.53 348.57 117.53 348.57 C 117.53 348.57 106.3 225.24 106.3 225.24 C 106.3 225.24 87.06 225.66 87.06 225.66 Z" fill="#67A95E" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx16)">
+<path d="M 99.41 232.75 C 91.53 257.96 84.83 309.18 85.62 366.69 C 87.59 421.85 99.41 502.61 109.65 523.88 C 116.74 524.67 127.77 523.49 136.44 521.91 C 144.32 500.24 156.53 447.45 156.14 376.54 C 156.14 311.54 140.77 248.51 129.35 230.78 C 129.35 230.78 99.41 232.75 99.41 232.75 C 99.41 232.75 99.41 232.75 99.41 232.75 C 99.41 232.75 99.41 232.75 99.41 232.75 Z" fill="#56954C" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" filter="url(#fx17)">
+<path d="M 125.8 221.72 C 132.5 214.63 134.47 200.84 126.59 202.02 C 122.65 203.2 117.14 211.08 116.74 213.84 C 116.74 205.17 112.8 197.29 107.29 196.9 C 103.35 200.84 101.38 208.32 102.96 215.02 C 99.41 211.08 91.53 207.14 85.62 206.35 C 83.26 210.29 87.59 220.54 93.89 224.87 C 85.62 222.9 79.71 225.26 82.08 229.6 C 83.65 234.32 95.47 237.87 107.29 237.48 C 128.56 236.69 143.14 224.87 139.99 220.54 C 136.84 218.57 130.93 220.54 125.8 221.72 C 125.8 221.72 125.8 221.72 125.8 221.72 C 125.8 221.72 125.8 221.72 125.8 221.72 Z" fill="#F38530" stroke-linejoin="round"/>
+</g>
+</svg>

@@ -1,0 +1,273 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  SITE — the global stylesheet. Loaded once, by the Base layout.
+//
+//  Order matters and is deliberate:
+//    tokens  → the names          (_tokens.scss)
+//    paper   → the recipes        (_paper.scss)
+//    here    → base elements + the page chrome every page shares
+//    parts   → nav, footer, prose, scenery, delight
+// ═══════════════════════════════════════════════════════════════════════════
+
+// tokens + paper are injected automatically (see astro.config.mjs), so they
+// are deliberately NOT listed here — loading them twice is a Sass error.
+@use "theme";   // applies the :root rules — exactly once, and this is the once
+
+// ── Fallback metrics ──────────────────────────────────────────────────────
+//
+// Dokdo sits very small on the em: at the same font-size a local serif draws
+// letters roughly half again as tall. Because the big headings are set at
+// line-height .82, that difference is not cosmetic — the fallback's letters
+// overflow their own line box and land on top of the paragraph underneath.
+//
+// You see it in three situations: in the moment before the webfont arrives,
+// on a connection where Google Fonts is blocked, and for anyone who turns
+// webfonts off. All three used to look broken.
+//
+// So the fallback is declared as a font of its own, with its metrics
+// overridden to match Dokdo. Now the substitute occupies the same space as
+// the real thing, the swap is nearly invisible, and nothing ever collides.
+@font-face {
+  font-family: "Dokdo fallback";
+  src: local("Bradley Hand"), local("Segoe Print"), local("Georgia"), local("Times New Roman"), local("DejaVu Serif");
+  size-adjust: 58%;
+  ascent-override: 96%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+// ── Base ──────────────────────────────────────────────────────────────────
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  // Anchored headings shouldn't hide under the fixed nav.
+  scroll-padding-top: 96px;
+
+  @media (prefers-reduced-motion: reduce) { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper-3);
+  color: var(--ink);
+  font: 400 17px/1.6 $font-body;
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+  overflow-x: clip;   // scenery deliberately overhangs; never scroll sideways
+}
+
+h1, h2, h3, h4 { text-wrap: balance; }
+
+p { margin: 0 0 1em; max-width: $measure; }
+
+a {
+  color: var(--crayon);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+
+  &:hover { color: var(--ink); }
+}
+
+button { font-family: inherit; color: inherit; }
+
+img, svg { max-width: 100%; }
+
+::selection { background: var(--kraft-2); color: var(--ink); }
+
+:focus-visible { @include focus-ring; }
+
+// Nothing on this site is important enough to move for someone who asked it
+// not to. This is a blunt instrument on purpose — the decorative animations
+// are all ambient, and none of them carry meaning.
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ── Skip link ─────────────────────────────────────────────────────────────
+
+.skip-link {
+  @include sr-only;
+
+  &:focus {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 200;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 12px 18px;
+    clip-path: none;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: $radius-md;
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 20px var(--sh-2);
+  }
+}
+
+// ── Reusable pieces ───────────────────────────────────────────────────────
+
+.label { @include label; }
+
+.hand { @include hand; }
+// Dokdo is a compact face, so it carries a large size well. The cap is set
+  // where the FALLBACK face still behaves, for the seconds before the webfont
+  // arrives and for anyone who blocks it.
+  .hand--xl {
+    @include hand(74px, 240px, 17vw);
+    line-height: .8;
+    margin-bottom: .12em;
+    letter-spacing: -8px;
+  }
+.hand--sm { @include hand(38px, 56px, 5vw); line-height: .88; letter-spacing:-5px;}
+
+.lede {
+  max-width: 46ch;
+  font-size: clamp(18px, 2vw, 21px);
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.btn      { @include chunky; }
+.btn--quiet { @include chunky-quiet; }
+
+.band       { @include band; }
+.band--sunk { @include band(var(--paper-3)); }
+.band__inner { @include band-inner; }
+
+// Crayon marks live HERE — inside the band, behind everything it contains.
+//
+// In the original design one page-wide layer sat above all the content, which
+// meant a stray click could scribble across a paragraph and leave it
+// unreadable. Giving every band its own layer at z-index 0, under the inner
+// column at z-index 1, keeps the toy and loses the hazard: you draw ON the
+// paper, never on the words.
+.band__marks {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+// ── The paper margin rule ─────────────────────────────────────────────────
+// The red line down a sheet of school paper. Wide screens only — on a phone
+// the gutter is too small for it to be anything but clutter.
+
+.margin-rule {
+  display: none;
+
+  @media (min-width: $bp-wide) {
+    display: block;
+    position: fixed;
+    left: calc(var(--gutter) - 28px);
+    top: 0;
+    bottom: 0;
+    z-index: 45;
+    width: 1px;
+    background: var(--crayon);
+    opacity: .3;
+    pointer-events: none;
+  }
+}
+
+// ── Prose ─────────────────────────────────────────────────────────────────
+// Everything rendered from a markdown file in src/content/ lands in here.
+// Write markdown; it comes out looking like the rest of the site.
+
+.prose {
+  max-width: $measure;
+
+  > * + * { margin-top: 1.1em; }
+
+  h2 {
+    @include hand(40px, 68px, 5.5vw);
+    margin-top: 1.6em;
+    letter-spacing: -5px;
+  }
+
+  h3 {
+    margin-top: 1.5em;
+    font: 700 21px/1.3 $font-body;
+    color: var(--ink);
+  }
+
+  ul, ol { padding-left: 1.3em; }
+  li + li { margin-top: .5em; }
+  li::marker { color: var(--crayon); }
+
+  strong { color: var(--ink); }
+
+  blockquote {
+    margin: 1.6em 0;
+    padding: 4px 0 4px 18px;
+    border-left: 3px solid var(--crayon);
+    font: 400 18px/1.55 $font-note;
+    color: var(--ink-soft);
+  }
+
+  code {
+    font: 400 .9em/1.4 $font-mono;
+    background: var(--paper-2);
+    border: 1px solid var(--edge-soft);
+    border-radius: 5px;
+    padding: 2px 5px;
+  }
+
+  hr {
+    margin: 2.4em 0;
+    border: 0;
+    border-top: 1px dashed var(--edge);
+  }
+}
+
+// ── Crayon marks ──────────────────────────────────────────────────────────
+// Created at runtime by src/scripts/crayon.ts, into a band's [data-marks]
+// layer. They sit behind the words on purpose — see the note in that file.
+
+.crayon-mark {
+  position: absolute;
+  width: 52px;
+  height: 40px;
+  transform: rotate(var(--turn, 0deg));
+  // Multiply lets the mark sink into the paper texture instead of sitting on
+  // top of it as a sticker, and keeps text legible if one lands behind some.
+  mix-blend-mode: multiply;
+  opacity: .7;
+  animation: mark-pop .35s ease-out;
+  pointer-events: none;
+}
+
+// At night the paper is dark, so a multiply blend would erase the mark.
+// Screen is the same idea the other way up.
+:root[data-theme="dark"] .crayon-mark { mix-blend-mode: screen; opacity: .5; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .crayon-mark { mix-blend-mode: screen; opacity: .5; }
+}
+
+@keyframes mark-pop {
+  from { transform: rotate(var(--turn, 0deg)) scale(.3); opacity: 0; }
+  to   { transform: rotate(var(--turn, 0deg)) scale(1); opacity: .7; }
+}
+
+// ── The heart a critter gives you ─────────────────────────────────────────
+
+.critter__heart {
+  position: absolute;
+  left: 50%;
+  top: -16px;
+  font: 700 18px/1 $font-body;
+  color: var(--crayon);
+  animation: mark-pop $dur-settle ease-out;
+  pointer-events: none;
+}

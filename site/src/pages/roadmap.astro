@@ -1,0 +1,347 @@
+---
+/**
+ * /roadmap — the full thing.
+ *
+ * Not one word of the content below is typed here. It all comes from
+ * src/data/roadmap.json, which tools/build-roadmap.mjs generates from
+ * docs/roadmap.md every time the site builds. The homepage trail reads the
+ * same file, which is why the two can never disagree.
+ *
+ * TO CHANGE WHAT THIS SAYS: edit docs/roadmap.md.
+ * TO CHANGE HOW IT LOOKS: edit this file.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Critter from '../components/Critter.astro';
+import roadmap from '../data/roadmap.json';
+
+const PHASE_LOOK = {
+  done:    { word: 'Done',        tone: 'done' },
+  active:  { word: 'You are here', tone: 'here' },
+  started: { word: 'Underway',    tone: 'part' },
+  planned: { word: 'Not started', tone: 'next' },
+} as const;
+
+const ITEM_LOOK = {
+  done:    { mark: '✓', word: 'Built',    tone: 'done' },
+  active:  { mark: '◆', word: 'Underway', tone: 'here' },
+  partial: { mark: '◑', word: 'Partly built', tone: 'part' },
+  planned: { mark: '○', word: 'Planned',  tone: 'next' },
+} as const;
+
+const SIZE = { S: 'a sitting', M: 'a few sessions', L: 'its own project', XL: 'needs a doc first' };
+
+const updated = new Date(roadmap.sourceUpdated).toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<Base
+  title="Roadmap"
+  description="Everything planned for papr.world, ordered by dependency rather than enthusiasm. Generated straight from the project's own roadmap, so it cannot go stale."
+>
+  <Sky />
+
+  <PageHeader kicker="the paper trail" title="Where we are,<br />in full." scene="mid">
+    Ordered by dependency, not by enthusiasm. No dates, because dates would be
+    a lie.
+  </PageHeader>
+
+  <section class="band">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      {roadmap.focus && (
+        <aside class="focus">
+          <p class="focus__label">If we only do one thing next</p>
+          <p class="focus__text">{roadmap.focus}</p>
+        </aside>
+      )}
+
+      <p class="generated">
+        Generated from the project's own roadmap file, last changed {updated}.
+        If a status here is wrong, the roadmap is wrong too — there is no
+        second copy to fall behind.
+      </p>
+
+      <nav class="jump" aria-label="Jump to a phase">
+        <ul>
+          {roadmap.phases.map((phase) => (
+            <li><a href={`#${phase.id}`}>{phase.title}</a></li>
+          ))}
+          <li><a href="#parked">Parked</a></li>
+        </ul>
+      </nav>
+
+      <Critter id="trail-beetle" shape="beetle" place="right: 4%; top: 6%;" size={46} />
+    </div>
+  </section>
+
+  {roadmap.phases.map((phase, index) => {
+    const look = PHASE_LOOK[phase.status as keyof typeof PHASE_LOOK] ?? PHASE_LOOK.planned;
+    return (
+      <section class:list={['band', index % 2 ? 'band--sunk' : '']} id={phase.id}>
+        <div class="band__marks" data-marks aria-hidden="true"></div>
+
+        <div class="band__inner">
+          <div class="phase__head">
+            <p class="label">
+              {phase.kind === 'lane' ? 'parallel lane' : `phase ${phase.number}`}
+            </p>
+            <h2 class="hand phase__title">{phase.title}</h2>
+            <p class:list={['phase__state', `is-${look.tone}`]}>
+              {look.word}
+              {phase.counts.total > 0 && (
+                <span class="phase__count"> · {phase.counts.done} of {phase.counts.total} built</span>
+              )}
+            </p>
+            {phase.intro && <p class="lede">{phase.intro}</p>}
+          </div>
+
+          {phase.items.length > 0 && (
+            <ol class="items">
+              {phase.items.map((item) => {
+                const mark = ITEM_LOOK[item.status as keyof typeof ITEM_LOOK] ?? ITEM_LOOK.planned;
+                return (
+                  <li class:list={['item', `is-${mark.tone}`]} id={item.id}>
+                    <p class="item__state">
+                      <span aria-hidden="true">{mark.mark}</span> {mark.word}
+                      {item.completed && <span class="item__when"> · {item.completed}</span>}
+                    </p>
+
+                    <h3 class="item__title">
+                      {item.ref && <span class="item__ref">{item.ref}</span>}
+                      {item.title}
+                    </h3>
+
+                    {item.summary && <p class="item__body">{item.summary}</p>}
+
+                    {item.size && item.status !== 'done' && (
+                      <p class="item__size">
+                        Reckoned at {SIZE[item.size as keyof typeof SIZE]}
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+      </section>
+    );
+  })}
+
+  <section class="band" id="parked">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <p class="label">the important part</p>
+      <h2 class="hand">Parked on purpose.</h2>
+      <p class="lede">
+        Every good idea that is not next lives here. Each one has a written
+        reason, and the reason is the useful part — it tells you what would
+        have to change for it to move.
+      </p>
+
+      <dl class="parked">
+        {roadmap.parked.map((entry) => (
+          <div class="parked__row">
+            <dt>{entry.idea}</dt>
+            <dd>{entry.because}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+</Base>
+
+<style lang="scss">
+  // ── The focus callout ────────────────────────────────────────────────────
+
+  .focus {
+    max-width: 62ch;
+    padding: 24px 26px 26px;
+    background: var(--kraft-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px 18px 6px 16px;
+    box-shadow: 4px 12px 0 var(--kraft-3), 6px 22px 36px var(--sh-2);
+    transform: rotate(-.5deg);
+  }
+
+  .focus__label {
+    @include label;
+    color: var(--ink);
+  }
+
+  .focus__text {
+    margin: 0;
+    font: 500 18px/1.5 $font-body;
+    color: var(--ink);
+  }
+
+  .generated {
+    max-width: 60ch;
+    margin: 34px 0 0;
+    font: 400 13px/1.6 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  // ── Jump links ───────────────────────────────────────────────────────────
+
+  .jump {
+    margin-top: 30px;
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    a {
+      display: block;
+      padding: 9px 14px;
+      background: var(--paper-2);
+      border: 1px solid var(--edge);
+      border-radius: 999px;
+      font: 500 14px/1 $font-body;
+      color: var(--ink-soft);
+      text-decoration: none;
+
+      &:hover { background: var(--kraft-2); color: var(--ink); }
+    }
+  }
+
+  // ── Phases ───────────────────────────────────────────────────────────────
+
+  // Eight of these in a row, so they are tighter than a normal band. The page
+  // is meant to be scanned, and scanning is mostly about how much scrolling
+  // sits between one heading and the next.
+  .band__inner { padding-top: clamp(52px, 7vh, 88px); padding-bottom: clamp(56px, 8vh, 96px); }
+
+  .phase__head { max-width: 62ch; }
+
+  .phase__title { @include hand(46px, 96px, 7vw); }
+
+  .phase__state {
+    margin: 14px 0 0;
+    font: 700 12px/1 $font-mono;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .phase__count { font-weight: 400; color: var(--ink-faint); letter-spacing: .08em; }
+
+  .phase__state.is-done { color: var(--green); }
+  .phase__state.is-part { color: var(--crayon-3); }
+  .phase__state.is-next { color: var(--ink-faint); }
+
+  .phase__state.is-here {
+    display: inline-block;
+    padding: 6px 12px 7px;
+    background: var(--ink);
+    border-radius: 999px;
+    color: var(--paper);
+
+    // The count inherits --ink-faint, which is tuned against paper and is
+    // unreadable on an ink-coloured chip. Quieten it the other way instead.
+    .phase__count { color: var(--paper); opacity: .78; }
+  }
+
+  .phase__head .lede { margin-top: 18px; }
+
+  // ── Items ────────────────────────────────────────────────────────────────
+
+  .items {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    margin: 46px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    @include card(var(--paper), var(--paper-2));
+    padding: 18px 20px 22px;
+    border-radius: 4px 14px 6px 12px;
+    box-shadow: 3px 8px 0 var(--paper-2), 5px 16px 26px var(--sh-1);
+  }
+
+  .item__state {
+    margin: 0 0 10px;
+    font: 700 11px/1 $font-mono;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .item__when { font-weight: 400; }
+
+  .item.is-done .item__state { color: var(--green); }
+  .item.is-part .item__state { color: var(--crayon-3); }
+
+  .item.is-here {
+    background: var(--kraft-2);
+    border-color: var(--ink);
+    border-width: 2px;
+
+    // Kraft is a darker stock than the papers --ink-faint was tuned against,
+    // so everything quiet on this card steps up a level to stay readable.
+    .item__state,
+    .item__ref,
+    .item__size { color: var(--ink-soft); }
+  }
+
+  .item.is-next { border-style: dashed; }
+
+  .item__title {
+    margin: 0 0 8px;
+    font: 700 18px/1.3 $font-body;
+    color: var(--ink);
+  }
+
+  .item__ref {
+    display: inline-block;
+    margin-right: 8px;
+    font: 700 13px/1 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  .item__body {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .item__size {
+    margin: 12px 0 0;
+    font: 400 12px/1 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  // ── Parking lot ──────────────────────────────────────────────────────────
+
+  .parked {
+    max-width: 78ch;
+    margin: 40px 0 0;
+  }
+
+  .parked__row {
+    display: grid;
+    gap: 4px 24px;
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--edge);
+
+    @media (min-width: $bp-mid) {
+      grid-template-columns: minmax(180px, 22ch) 1fr;
+    }
+
+    dt { font: 700 16px/1.4 $font-body; color: var(--ink); }
+    dd { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-soft); }
+  }
+</style>

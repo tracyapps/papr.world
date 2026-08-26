@@ -1,0 +1,45 @@
+---
+/**
+ * The torn sheet of notebook paper that the page content sits on, sliding up
+ * under the scenery. Two offset sheets so it reads as a stack, not a line.
+ */
+---
+<div class="edge" aria-hidden="true">
+  <div class="edge__under"></div>
+  <div class="edge__sheet"></div>
+</div>
+
+<style lang="scss">
+  .edge {
+    position: relative;
+    z-index: 6;
+    height: 11vh;
+    min-height: 78px;
+  }
+
+  .edge__under,
+  .edge__sheet {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-top: 1px solid var(--edge);
+  }
+
+  // The sheet beneath, sitting very slightly crooked.
+  .edge__under {
+    left: -2%;
+    right: 4%;
+    background: var(--paper-2);
+    transform: rotate(-.35deg);
+    box-shadow: 0 -10px 26px var(--sh-1);
+  }
+
+  .edge__sheet {
+    @include ruled(30px);
+    left: 0;
+    right: 0;
+    top: 10px;
+    background-color: var(--paper);
+    box-shadow: 0 -12px 28px var(--sh-1);
+  }
+</style>

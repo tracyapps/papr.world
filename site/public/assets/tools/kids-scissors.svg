@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="305" height="205" viewBox="0 0 305 205">
+
+<defs>
+  <radialGradient id="grad0" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0.51" stop-color="#6A0000"></stop>
+    <stop offset="0.63" stop-color="#A50000"></stop>
+    <stop offset="0.73" stop-color="#460000"></stop>
+  </radialGradient>
+  <radialGradient id="grad1" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0.51" stop-color="#6A0000"></stop>
+    <stop offset="0.63" stop-color="#A50000"></stop>
+    <stop offset="0.73" stop-color="#460000"></stop>
+  </radialGradient>
+  <linearGradient id="grad2" x1="0.14" y1="0.85" x2="0.86" y2="0.15">
+    <stop offset="0.17" stop-color="#8C0E00"></stop>
+    <stop offset="0.39" stop-color="#E73030"></stop>
+    <stop offset="0.62" stop-color="#E40404"></stop>
+  </linearGradient>
+  <linearGradient id="grad3" x1="0.35" y1="0.02" x2="0.65" y2="0.98">
+    <stop offset="0.17" stop-color="#A80101"></stop>
+    <stop offset="0.37" stop-color="#E73030"></stop>
+    <stop offset="0.52" stop-color="#710101"></stop>
+    <stop offset="1" stop-color="#E40404"></stop>
+  </linearGradient>
+  <filter id="fx4" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="2" result="s0b"></feGaussianBlur>
+<feOffset in="s0b" dx="0" dy="2" result="s0o"></feOffset>
+<feFlood flood-color="#000000" flood-opacity="0.33" result="s0c"></feFlood>
+<feComposite in="s0c" in2="s0o" operator="in" result="s0"></feComposite>
+<feMerge result="base">
+<feMergeNode in="s0"></feMergeNode>
+<feMergeNode in="SourceGraphic"></feMergeNode>
+</feMerge>
+  </filter>
+  <radialGradient id="grad5" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#E2FF03"></stop>
+    <stop offset="0.88" stop-color="#98AC00"></stop>
+  </radialGradient>
+  <linearGradient id="grad6" x1="0.44" y1="0" x2="0.56" y2="1">
+    <stop offset="0.34" stop-color="#A50000" stop-opacity="0"></stop>
+    <stop offset="0.74" stop-color="#8C0E00"></stop>
+  </linearGradient>
+  <linearGradient id="grad7" x1="0.27" y1="0.94" x2="0.73" y2="0.06">
+    <stop offset="0.61" stop-color="#A50000" stop-opacity="0"></stop>
+    <stop offset="0.74" stop-color="#7C0B04"></stop>
+  </linearGradient>
+  <linearGradient id="grad8" x1="0.78" y1="0.09" x2="0.22" y2="0.91">
+    <stop offset="0.64" stop-color="#881515" stop-opacity="0"></stop>
+    <stop offset="0.81" stop-color="#7C0B04"></stop>
+  </linearGradient>
+</defs>
+<g class="layer-group" transform="rotate(180.7 157.11 109.85)">
+<g class="layer-ellipse">
+<path d="M 96.46 176.39 C 96.46 199.18 78.01 217.66 55.24 217.66 C 32.48 217.66 14.02 199.18 14.02 176.39 C 14.02 153.6 32.48 135.13 55.24 135.13 C 78.01 135.13 96.46 153.6 96.46 176.39 Z M 26.27 176.39 C 26.27 192.41 39.24 205.39 55.24 205.39 C 71.24 205.39 84.21 192.41 84.21 176.39 C 84.21 160.38 71.24 147.4 55.24 147.4 C 39.24 147.4 26.27 160.38 26.27 176.39 Z" fill="url(#grad0)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-ellipse">
+<path d="M 92.75 58.92 C 92.75 81.71 74.29 100.19 51.53 100.19 C 28.76 100.19 10.31 81.71 10.31 58.92 C 10.31 36.13 28.76 17.66 51.53 17.66 C 74.29 17.66 92.75 36.13 92.75 58.92 Z M 22.56 58.92 C 22.56 74.94 35.53 87.92 51.53 87.92 C 67.52 87.92 80.49 74.94 80.49 58.92 C 80.49 42.91 67.52 29.93 51.53 29.93 C 35.53 29.93 22.56 42.91 22.56 58.92 Z" fill="url(#grad1)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-group">
+<g class="layer-path" transform="rotate(350.62 171.15 102.24) translate(171.15 102.24) scale(1 -1) translate(-171.15 -102.24)">
+<path d="M 295.11 52.59 C 300.57 55.71 304.5 60.9 303.2 63.89 C 301.9 66.88 174.52 119.34 169.1 122.33 C 163.69 125.33 105.65 139.8 102.05 140.15 C 98.45 140.51 87.52 155.02 87.52 155.02 C 87.52 155.02 83.8 140.12 65.44 136.05 C 52.2 134.4 44.69 138.49 38.49 145.24 C 37.8 145.11 43.94 126.97 43.23 126.85 C 52.83 121.93 111.65 106.63 114.22 105.69 C 116.78 104.75 119.51 104.58 119.51 104.51 C 119.51 104.44 127.53 74.73 133.91 73.37 C 140.28 72.01 187.48 63.03 190.99 62.52 C 194.5 62.01 289.65 49.46 295.11 52.59 Z" fill="url(#grad2)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-path" filter="url(#fx4)">
+<path d="M 294.53 65.39 C 299.99 68.51 303.91 73.69 302.61 76.69 C 301.31 79.68 173.93 132.14 168.52 135.13 C 163.1 138.12 103.54 153.01 99.94 153.36 C 96.34 153.72 91.43 167.69 91.43 167.69 C 91.43 167.69 84.68 150.38 71.58 144.32 C 57.48 137.8 33.65 141.71 39.16 138.96 C 48.76 134.04 111.07 119.43 113.63 118.49 C 116.19 117.54 118.92 117.38 118.92 117.31 C 118.92 117.24 126.95 87.53 133.32 86.17 C 139.7 84.81 186.89 75.82 190.4 75.32 C 193.92 74.81 289.07 62.26 294.53 65.39 Z" fill="url(#grad3)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-ellipse">
+<ellipse cx="161.82" cy="109.11" rx="17.08" ry="17.1" fill="url(#grad5)"></ellipse>
+</g>
+</g>
+<g class="layer-ellipse">
+<path d="M 92.75 58.92 C 92.75 81.71 74.29 100.19 51.53 100.19 C 28.76 100.19 10.31 81.71 10.31 58.92 C 10.31 36.13 28.76 17.66 51.53 17.66 C 74.29 17.66 92.75 36.13 92.75 58.92 Z M 22.56 58.92 C 22.56 74.94 35.53 87.92 51.53 87.92 C 67.52 87.92 80.49 74.94 80.49 58.92 C 80.49 42.91 67.52 29.93 51.53 29.93 C 35.53 29.93 22.56 42.91 22.56 58.92 Z" fill="url(#grad6)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-ellipse">
+<path d="M 96.46 176.39 C 96.46 199.18 78.01 217.66 55.24 217.66 C 32.48 217.66 14.02 199.18 14.02 176.39 C 14.02 153.6 32.48 135.13 55.24 135.13 C 78.01 135.13 96.46 153.6 96.46 176.39 Z M 26.27 176.39 C 26.27 192.41 39.24 205.39 55.24 205.39 C 71.24 205.39 84.21 192.41 84.21 176.39 C 84.21 160.38 71.24 147.4 55.24 147.4 C 39.24 147.4 26.27 160.38 26.27 176.39 Z" fill="url(#grad7)" stroke-linejoin="round"></path>
+</g>
+<g class="layer-path">
+<path d="M 294.21 65.39 C 299.67 68.52 303.59 73.7 302.29 76.7 C 300.99 79.69 173.61 132.14 168.2 135.14 C 162.78 138.13 103.22 153.01 99.62 153.37 C 96.02 153.73 91.11 167.7 91.11 167.7 C 91.11 167.7 84.36 150.39 71.25 144.33 C 57.16 137.81 33.33 141.72 38.84 138.96 C 48.44 134.05 110.74 119.44 113.31 118.49 C 115.87 117.55 118.6 117.39 118.6 117.32 C 118.6 117.25 126.63 87.54 133 86.18 C 139.38 84.82 186.57 75.83 190.08 75.33 C 193.6 74.82 288.75 62.27 294.21 65.39 Z" fill="url(#grad8)" stroke-linejoin="round"></path>
+</g>
+</g>
+</svg>

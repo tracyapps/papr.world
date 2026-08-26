@@ -1,0 +1,60 @@
+---
+/**
+ * One cut-out card. The workhorse of the interior pages.
+ *
+ * <PaperCard title="Make yourself" note="58 shapes · 39 stamps" turn="-.8deg">
+ *   <p>Pick a cutout shape or draw your own outline…</p>
+ * </PaperCard>
+ */
+interface Props {
+  title?: string;
+  /** The small typewritten line along the bottom. */
+  note?: string;
+  turn?: string;
+  /** Alternate the corner rhythm so neighbours aren't cut the same way. */
+  mirrored?: boolean;
+  tape?: boolean;
+  class?: string;
+}
+const { title, note, turn = '0deg', mirrored = false, tape = true, class: cls = '' } = Astro.props;
+---
+
+<article
+  class:list={['pcard', { 'pcard--mirrored': mirrored, 'pcard--taped': tape }, cls]}
+  style={`--tilt:${turn}`}
+>
+  {title && <h3 class="pcard__title">{title}</h3>}
+  <div class="pcard__body"><slot /></div>
+  {note && <p class="pcard__note">{note}</p>}
+</article>
+
+<style lang="scss">
+  .pcard {
+    @include card;
+    @include lifts;
+    padding: 30px 26px 32px;
+  }
+
+  .pcard--mirrored { @include card-mirrored; }
+
+  .pcard--taped::before { @include tape(30px, 50px, -6deg, -13px); width: 50px; height: 26px; }
+
+  .pcard__title { @include hand(40px, 52px, 5.5vw); margin: 0 0 12px; }
+
+  .pcard__body :global(p) {
+    margin: 0 0 .8em;
+    font-size: 15.5px;
+    line-height: 1.62;
+    color: var(--ink-soft);
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  .pcard__note {
+    margin: 14px 0 0;
+    font: 700 11px/1.5 $font-mono;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+</style>

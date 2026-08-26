@@ -1,0 +1,108 @@
+---
+/**
+ * The shell every page sits inside: <head>, the nav, the footer.
+ *
+ * TO CHANGE THE FONTS, the favicon, or what search engines and link previews
+ * show — this is the file.
+ *
+ * Pages pass in their own title and description:
+ *   <Base title="The world" description="What papr.world is made of.">
+ */
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Delight from '../components/Delight.astro';
+import '../styles/site.scss';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Set false on pages where the drifting sky and clouds would be noise. */
+  sky?: boolean;
+  /** Set false to switch off the crayon marks and the paper friend. */
+  delight?: boolean;
+}
+
+const { title, description, sky = true, delight = true } = Astro.props;
+
+const fullTitle = title === 'papr.world' ? title : `${title} · papr.world`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://papr.world');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={new URL('/og.png', canonical).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Dokdo&family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap"
+    />
+
+    {/*
+      Runs before the page paints, so a visitor who chose a theme never sees
+      the other one flash first. It is the only blocking script on the site,
+      and it does exactly one thing.
+
+      Note what it does NOT do: it does not read the system preference. That
+      is handled in CSS (_theme.scss), so the correct theme appears even if
+      this script never runs at all.
+    */}
+    <script is:inline>
+      try {
+        var choice = localStorage.getItem('papr-theme');
+        if (choice === 'dark' || choice === 'light') {
+          document.documentElement.dataset.theme = choice;
+        }
+      } catch (e) {
+        /* Private browsing, storage disabled — daylight is a fine default. */
+      }
+    </script>
+  </head>
+
+  <body data-sky={sky ? '' : undefined} data-delight={delight ? '' : undefined}>
+    <SiteNav />
+
+    <div class="margin-rule" aria-hidden="true"></div>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <SiteFooter />
+
+    {delight && <Delight />}
+
+    <script>
+      // Every interactive flourish on the site, in one place. Each module
+      // looks for its own elements and quietly does nothing if they are not
+      // on this page, so adding a page never means editing this list.
+      import '../scripts/theme';       // the day / night button
+      import '../scripts/nav';         // the scrim behind the fixed bar
+      import '../scripts/sky';         // the twelve-minute sky
+      import '../scripts/parallax';    // scenery depth
+      import '../scripts/crayon';      // marks on the paper
+      import '../scripts/critters';    // the five hidden friends
+      import '../scripts/friend';      // the one who walks with you
+      import '../scripts/tool-cursor'; // press T
+      import '../scripts/secrets';     // the cheat code
+      import '../scripts/note-form';   // the contact form, enhanced
+      import '../scripts/enter-form';  // the code box on /enter
+    </script>
+  </body>
+</html>

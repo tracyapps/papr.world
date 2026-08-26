@@ -8,19 +8,28 @@
     "assets:sample": "node tools/generate-sample-assets.mjs",
     "avatar:preview": "node tools/preview-avatar-design.mjs",
     "build": "npm run content:check && npm run styles:check && tsc && vite build",
+    "build:web": "node tools/build-web.mjs",
     "content:check": "node tools/validate-conversations.mjs",
     "dev": "vite --host 0.0.0.0",
     "docs:build": "node tools/build-reference.mjs",
+    "edge:check": "tsc -p tsconfig.edge.json",
     "hud:check": "node tools/check-hud-layout.mjs",
+    "og:build": "node tools/build-og.mjs",
     "preview": "vite preview --host 0.0.0.0",
+    "reference:stage": "npm run docs:build && node tools/stage-reference.mjs",
+    "roadmap:build": "node tools/build-roadmap.mjs",
     "shapes:compile": "node tools/compile-avatar-shapes.mjs",
     "shapes:preview": "node tools/preview-avatar-shapes.mjs",
     "shapes:watch": "node tools/compile-avatar-shapes.mjs --watch",
+    "site:build": "npm run roadmap:build && npm run reference:stage && npm --prefix site run build",
+    "site:dev": "npm run roadmap:build && npm run reference:stage && npm --prefix site run dev",
+    "site:install": "npm --prefix site ci",
     "stamps:compile": "node tools/compile-avatar-stamps.mjs",
     "stamps:preview": "node tools/preview-avatar-stamps.mjs",
     "stamps:watch": "node tools/compile-avatar-stamps.mjs --watch",
     "styles:check": "node tools/check-styles.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "web:preview": "npx serve web"
   },
   "dependencies": {
     "@colyseus/sdk": "^0.17.43",
@@ -31,6 +40,7 @@
   "devDependencies": {
     "playwright": "^1.61.1",
     "typescript": "^5.8.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "@types/node": "^22.10.0"
   }
 }

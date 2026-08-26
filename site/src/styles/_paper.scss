@@ -1,0 +1,248 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  PAPER — the craft-table look, as a handful of named recipes.
+//
+//  The original design repeated the same six or seven visual tricks a hundred
+//  times as inline styles. They are each written once here. Anywhere you see
+//  @include card or @include tape in another stylesheet, this is what it does.
+//
+//  Every card carries a --tilt custom property so it can be rotated a little
+//  differently without a new class. Set it in markup: style="--tilt: 1.4deg".
+//  Hover lifts compose with the tilt instead of fighting it.
+// ═══════════════════════════════════════════════════════════════════════════
+
+@use "tokens" as *;
+
+// ── A sheet of paper sitting on the table ─────────────────────────────────
+// $stock  which paper colour the sheet is cut from
+// $under  the colour of the offset sheet peeking out behind it
+@mixin card($stock: var(--paper-2), $under: var(--paper-3)) {
+  --tilt: 0deg;
+  position: relative;
+  background: $stock;
+  border: 1px solid var(--edge);
+  // Deliberately unequal corners: a real cut-out is never a perfect rectangle.
+  border-radius: 4px 16px 6px 14px;
+  box-shadow:
+    4px 10px 0 $under,        // the sheet underneath
+    6px 18px 30px var(--sh-1); // and the shadow both of them cast
+  transform: rotate(var(--tilt));
+}
+
+// The alternate corner rhythm. Alternate them down a row of cards so no two
+// neighbours are cut the same way.
+@mixin card-mirrored {
+  border-radius: 14px 5px 15px 6px;
+}
+
+// ── Lift on hover / focus ─────────────────────────────────────────────────
+// Composes with --tilt. Never lifts for someone who asked for less motion.
+@mixin lifts($by: $lift) {
+  transition: transform $dur-quick $ease-paper, box-shadow $dur-quick $ease-paper;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover,
+    &:focus-visible {
+      transform: rotate(var(--tilt)) translateY(-#{$by});
+    }
+  }
+}
+
+// ── A strip of masking tape ───────────────────────────────────────────────
+// Used on ::before / ::after so it costs no extra markup.
+// $x and $y place it; $w is how wide the strip is; $turn is its angle.
+@mixin tape($x: 20%, $w: 92px, $turn: -4deg, $y: -16px) {
+  content: "";
+  position: absolute;
+  top: $y;
+  left: $x;
+  width: $w;
+  height: 30px;
+  background: var(--tape);
+  // The dashed sides read as the torn edge where it was pulled off the roll.
+  border-left: 1px dashed var(--edge-soft);
+  border-right: 1px dashed var(--edge-soft);
+  transform: rotate($turn);
+  pointer-events: none;
+}
+
+// ── The chunky pressable button ───────────────────────────────────────────
+// The flat shadow is the button's own thickness; pressing squashes it.
+@mixin chunky($face: var(--kraft-2), $lip: var(--kraft-3)) {
+  --tilt: 0deg;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: $face;
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: $radius-lg;
+  padding: 15px 24px;
+  font: 700 16px/1 $font-body;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 8px 0 $lip, 0 14px 24px var(--sh-2);
+  transform: rotate(var(--tilt));
+  transition: transform $dur-quick $ease-paper, box-shadow $dur-quick $ease-paper;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover,
+    &:focus-visible {
+      transform: rotate(var(--tilt)) translateY(-3px);
+      box-shadow: 0 11px 0 $lip, 0 18px 30px var(--sh-2);
+    }
+  }
+
+  // Pressed: the button loses its thickness and sinks to the table.
+  &:active {
+    transform: rotate(var(--tilt)) translateY(4px);
+    box-shadow: 0 3px 0 $lip, 0 6px 12px var(--sh-2);
+  }
+}
+
+// The quieter sibling — same shape, cut from plain paper.
+@mixin chunky-quiet {
+  @include chunky(var(--paper), var(--paper-2));
+  font-weight: 500;
+  box-shadow: 0 8px 0 var(--paper-2), 0 14px 24px var(--sh-1);
+}
+
+// ── The small typewritten label above a heading ───────────────────────────
+@mixin label {
+  margin: 0 0 8px;
+  font: 700 12px/1 $font-mono;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+// ── Big handwritten headings ──────────────────────────────────────────────
+// $min and $max are the smallest and largest it is ever allowed to be.
+@mixin hand($min: 56px, $max: 124px, $grow: 8.5vw) {
+  margin: 0;
+  font-family: $font-hand;
+  font-weight: 400;
+  font-size: clamp($min, $grow, $max);
+  line-height: .82;
+  color: var(--ink);
+  // Dokdo has very little natural spacing; a touch of breathing room stops
+  // the descenders of one line from touching the caps of the next.
+  letter-spacing: -.05em;
+  // Tight leading crops the line box below the glyphs. This is the clearance
+  // that keeps a descender off whatever sits underneath.
+  padding-bottom: .06em;
+}
+
+// ── Ruled paper, drawn rather than photographed ───────────────────────────
+//
+// The material library's paper_notebook_blue_lined_01.svg carries a heavy
+// feTurbulence grain. That is right for a texture the game rasterises at a
+// known size, and wrong on the web: at browser scale it reads as television
+// static and it fought every piece of text laid over it.
+//
+// So the site draws its own rule with a gradient. A few bytes instead of
+// 21KB, crisp at any zoom, and the line spacing is one number you can change.
+//
+//   $step    distance between lines
+//   $ink     the ruling colour
+//   $margin  also draw the red margin line down the left
+//
+// The real material SVGs are still used where showing the actual asset is the
+// point — the swatch row on the homepage and the paper drawer on /world.
+@mixin ruled($step: 34px, $ink: rgb(108 159 196 / .34), $margin: false) {
+  $rule: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(#{$step} - 1px),
+    #{$ink} calc(#{$step} - 1px),
+    #{$ink} #{$step}
+  );
+
+  @if $margin {
+    background-image:
+      linear-gradient(
+        to right,
+        transparent 0 38px,
+        rgb(169 53 31 / .3) 38px 39px,
+        transparent 39px
+      ),
+      $rule;
+  } @else {
+    background-image: $rule;
+  }
+}
+
+// ── A repeating paper texture laid into a background ──────────────────────
+// Textures are scans of white stock, so at night they need dimming. That is
+// what --img-dim and --blend in _tokens.scss are for; this wires them up.
+@mixin texture($file, $size: 320px, $opacity: 1) {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url("/assets/materials/#{$file}") repeat center / $size auto;
+    mix-blend-mode: var(--blend);
+    opacity: $opacity;
+    pointer-events: none;
+  }
+
+  // The knock-back sheet for night.
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--paper);
+    opacity: var(--img-dim);
+    pointer-events: none;
+  }
+}
+
+// ── Section shell ─────────────────────────────────────────────────────────
+// Every band of the page: full-bleed background, contents held to a column
+// that starts at the gutter so the margin rule lines up with the text.
+@mixin band($stock: var(--paper)) {
+  position: relative;
+  z-index: 3;
+  background: $stock;
+  border-top: 2px solid var(--edge-soft);
+  overflow: hidden;
+}
+
+@mixin band-inner($max: 1240px) {
+  position: relative;
+  z-index: 1;
+  max-width: $max;
+  margin: 0 auto;
+  padding:
+    clamp(70px, 11vh, 140px)
+    clamp(#{$gutter-min}, 6vw, 90px)
+    clamp(80px, 12vh, 150px)
+    var(--gutter);
+}
+
+// ── Focus ─────────────────────────────────────────────────────────────────
+// One visible focus style for the whole site. Two-tone so it survives on both
+// pale paper and dark kraft without ever disappearing.
+@mixin focus-ring {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+// ── Visually hidden, still read aloud ─────────────────────────────────────
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,358 @@
+---
+/**
+ * /how-it-works — the tour. Six things, in the order you would meet them.
+ *
+ * Each step is one <Step> with its own heading and body. To add a seventh,
+ * copy a block and change the number; the numbering is written in the markup
+ * rather than generated, so you can reorder them by moving the blocks.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import PageHeader from '../components/PageHeader.astro';
+import PaperCard from '../components/PaperCard.astro';
+import StickyNote from '../components/StickyNote.astro';
+
+const tools = [
+  { file: 'kids-scissors.svg',   name: "Kids' scissors",  limit: 'Loose paper only. Never breaks.' },
+  { file: 'sturdy-scissors.svg', name: 'Sturdy scissors', limit: 'The gate for redwood bark.' },
+  { file: 'flimsy-shovel.svg',   name: 'Flimsy shovel',   limit: 'One dent at a time. Dents stay dents.' },
+  { file: 'garden-hoe-alt.svg',  name: 'Garden hoe',      limit: 'One garden bed at a time.' },
+  { file: 'basic-mallet.svg',    name: 'Basic mallet',    limit: 'Tape joins and corner tabs.' },
+  { file: 'standard-hammer.svg', name: 'Standard hammer', limit: 'A roof that stays folded.' },
+];
+---
+
+<Base
+  title="How it works"
+  description="A tour of the craft table: making yourself, learning plans, talking to critters, how big the world is, chips and mail, and what it runs on."
+>
+  <Sky />
+
+  <PageHeader kicker="the tour" title="A tour of<br />the craft table." scene="front">
+    Six things, in the order you'd meet them. None of it is a grind, and none
+    of it is on a timer you didn't choose.
+  </PageHeader>
+
+  {/* ── One ───────────────────────────────────────────────────────────── */}
+  <section class="band" id="one">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">one — the first thing you do</p>
+      <h2 class="hand">You are a drawing.</h2>
+
+      <div class="prose">
+        <p>
+          Shape first — a silhouette from the library, or an outline you draw
+          yourself. Then paper stock, then a printed pattern, then crayon on
+          top. Then stamps: eyes, mouths, hair, and limbs that are allowed to
+          hang outside the cutout, because a crayon stroke can never make an arm.
+        </p>
+        <p>
+          Your drawing decides nothing about how you move. Hidden body presets —
+          small, wide, tall, wheeled, hovering — come from the shape you chose,
+          so <strong>a big flourish never buys a big hitbox</strong>.
+        </p>
+        <p>Nothing here is a commitment. You can redraw yourself whenever you like.</p>
+      </div>
+
+      <p class="more"><a href="/world/">More about the materials →</a></p>
+    </div>
+  </section>
+
+  {/* ── Two ───────────────────────────────────────────────────────────── */}
+  <section class="band band--sunk" id="two">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">two — how you get better tools</p>
+      <h2 class="hand">Plans are knowledge.</h2>
+
+      <div class="prose">
+        <p>
+          Every plan past the starter set is learned from a knowledge tree, and
+          nowhere else. Plans are never found, sold, gifted, or mailed.
+        </p>
+        <p>
+          A node is paid for in <strong>patience</strong> — real-world time that
+          runs while the game is closed — or in <strong>doing</strong>, and
+          either one finishes it alone. One node at a time. No queue to
+          optimise, no notifications, nothing purchasable, nothing totalled.
+        </p>
+      </div>
+
+      <ul class="tools">
+        {tools.map((tool, index) => (
+          <li class="tool-card" style={`--tilt:${((index % 3) - 1) * 1.2}deg`}>
+            <img src={`/assets/tools/${tool.file}`} alt="" loading="lazy" />
+            <span class="tool-card__name">{tool.name}</span>
+            <span class="tool-card__limit">{tool.limit}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="prof">
+        <img class="prof__face" src="/assets/scenery/the-prof.svg" alt="" loading="lazy" />
+        <div>
+          <h3 class="prof__title">The Professor</h3>
+          <p>
+            A paperclip with googly eyes, dark-rimmed glasses and a graduation
+            cap. He opens the tree, reads a book while something is being
+            learned, and shows a friendly face when nothing is. He shows
+            ambient state, never a score. He never speaks unprompted.
+            <strong>He is never called Clippy.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Three ─────────────────────────────────────────────────────────── */}
+  <section class="band" id="three">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">three — who else lives here</p>
+      <h2 class="hand">Ask a squirrel<br />about this place.</h2>
+
+      <div class="prose">
+        <p>
+          Critters wander, react with mild curiosity, and will tell you things.
+          Four lanes of answers, all repeatable: what grows here and what tool
+          you'd need, how long a seed takes and what it yields, which landmarks
+          are a short walk away, and the local gossip.
+        </p>
+        <p>
+          Personality changes which kind of answer comes first. It never hides
+          one. And they remember what they told you — a squirrel who knew the
+          whole map would be an index, not a neighbour.
+        </p>
+      </div>
+
+      <blockquote class="quote">
+        <p>Bark curls? You'd want sturdier scissors than those. Try the far side of the pines, where it's damp.</p>
+      </blockquote>
+    </div>
+  </section>
+
+  {/* ── Four ──────────────────────────────────────────────────────────── */}
+  <section class="band band--sunk" id="four">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">four — how big the world is</p>
+      <h2 class="hand">A neighbourhood<br />is a stack of pages.</h2>
+
+      <div class="prose">
+        <p>
+          Not metres — pages. Square sheets that hold terrain, paths, props,
+          resources and permissions. Some are authored exactly, some are grown
+          from a seed, most are authored structure with the details rolled.
+        </p>
+        <p>
+          Distant hills live in a parallax backdrop behind tracing-paper haze,
+          so far away actually looks far away.
+        </p>
+        <p>
+          Water goes creek to river to something Mississippi, bending across
+          pages, throwing off waterfalls and swamps, ending in a lake. Width and
+          depth are functions of distance from the source. You can always wade —
+          deep water is where a boat becomes <em>useful</em>, never where you
+          die. A river is never a wall: bridges, docks and beaches come with it.
+        </p>
+      </div>
+
+      <div class="aside">
+        <StickyNote tint="yellow" turn="3deg" cite="the material rule">
+          salmon ribbonwood, aqua folded pebbles, graphite cardstone, plaid bark.
+          a harvested material visually remembers where it came from.
+        </StickyNote>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Five ──────────────────────────────────────────────────────────── */}
+  <section class="band" id="five">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">five — chips, shops, mail</p>
+      <h2 class="hand">A quiet<br />little economy.</h2>
+
+      <div class="prose">
+        <p>
+          One price table for the whole world, so there is no price-shopping.
+          Chips are shown as a pouch balance and nothing else — <strong>no
+          session totals, no earnings summary, no tallies anywhere, ever</strong>.
+        </p>
+      </div>
+
+      <ul class="prices">
+        <li><span class="prices__what">Loose material or a spare seed</span><span class="prices__how">₡1</span></li>
+        <li><span class="prices__what">Garden produce</span><span class="prices__how">₡2</span></li>
+        <li><span class="prices__what">A seed packet, one at a time</span><span class="prices__how">₡2</span></li>
+        <li><span class="prices__what">Two paper fibers</span><span class="prices__how">barter for any packet</span></li>
+        <li><span class="prices__what">Recycle a tool</span><span class="prices__how">chips — a material, noticeably fewer</span></li>
+      </ul>
+
+      <div class="cards">
+        <PaperCard title="The scrapbook" note="no quest log · pin your own projects" turn="-.9deg">
+          <p>
+            Not a backpack — a scrapbook. Materials, sketches, plans, critter
+            notes, photos, house memories, gifts from neighbours. It is the
+            inventory and the record of everyone you met.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Generosity payoffs" note="random · non-fungible · never itemised" turn="1.1deg" mirrored>
+          <p>
+            A trinket brought round by a critter who heard you did something
+            nice. Kept small, rare, and worth less than the thing you gave, on
+            purpose — otherwise it becomes a farming loop.
+          </p>
+        </PaperCard>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Six ───────────────────────────────────────────────────────────── */}
+  <section class="band band--sunk" id="six">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <div class="band__inner">
+      <p class="label">six — under the paper</p>
+      <h2 class="hand">It runs<br />in a browser.</h2>
+
+      <div class="prose">
+        <p>
+          Web first, hostable on your own machine for a LAN, and eventually
+          packaged for a desktop. TypeScript, Three.js and Colyseus, with a
+          great deal of tape.
+        </p>
+        <p>
+          <strong>A plain URL is always solo and never opens a socket.</strong>
+          The invite code is the only door into a shared neighbourhood — that is
+          enforced in the client, not just promised here.
+        </p>
+        <p>
+          The first playtest is three to five people, one neighbourhood, and one
+          or two specific questions per build. If that sounds like your idea of
+          a good evening, say so.
+        </p>
+      </div>
+
+      <div class="ending">
+        <a class="btn" href="/#note" style="--tilt: -.6deg">Ask for an invite</a>
+        <a class="btn btn--quiet" href="/reference/" style="--tilt: .5deg">Browse the catalog</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style lang="scss">
+  // ── Tools ────────────────────────────────────────────────────────────────
+
+  .tools {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    margin: 46px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tool-card {
+    @include card(var(--paper), var(--paper-2));
+    display: grid;
+    gap: 4px;
+    padding: 20px 18px 22px;
+    text-align: center;
+    box-shadow: 3px 8px 0 var(--paper-2), 5px 16px 26px var(--sh-1);
+
+    img {
+      height: 64px;
+      margin: 0 auto 10px;
+      object-fit: contain;
+      filter: drop-shadow(3px 5px 0 var(--sh-1));
+    }
+  }
+
+  .tool-card__name  { font: 700 15px/1.3 $font-body; color: var(--ink); }
+  .tool-card__limit { font: 400 12.5px/1.45 $font-mono; color: var(--ink-faint); }
+
+  // ── The Professor ────────────────────────────────────────────────────────
+
+  .prof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px;
+    align-items: flex-start;
+    margin-top: 54px;
+    padding: 26px 24px;
+    background: var(--paper);
+    border: 1px solid var(--edge);
+    border-radius: 6px 18px 6px 16px;
+    box-shadow: 4px 10px 0 var(--paper-2), 6px 18px 30px var(--sh-1);
+
+    p { margin: 0; max-width: 58ch; font-size: 15.5px; line-height: 1.62; color: var(--ink-soft); }
+  }
+
+  .prof__face  { flex: none; width: 96px; }
+  .prof__title { @include hand(34px, 46px, 5vw); margin: 0 0 8px; }
+
+  // ── Quote ────────────────────────────────────────────────────────────────
+
+  .quote {
+    max-width: 46ch;
+    margin: 44px 0 0;
+    padding: 22px 24px;
+    background: var(--paper-2);
+    border: 0;
+    border-left: 4px solid var(--crayon);
+    border-radius: 4px 14px 6px 12px;
+    box-shadow: 3px 8px 0 var(--paper-3), 5px 16px 26px var(--sh-1);
+    transform: rotate(-.6deg);
+
+    p { margin: 0; font: 400 19px/1.5 $font-note; color: var(--ink); }
+  }
+
+  // ── Prices ───────────────────────────────────────────────────────────────
+
+  .prices {
+    max-width: 52ch;
+    margin: 34px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--edge);
+    }
+  }
+
+  .prices__what { font-size: 16px; color: var(--ink); }
+  .prices__how  { font: 700 15px/1.3 $font-mono; color: var(--ink-soft); }
+
+  // ── Shared ───────────────────────────────────────────────────────────────
+
+  .cards {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+    margin-top: 46px;
+  }
+
+  .aside  { margin-top: 48px; }
+  .ending { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+
+  .more {
+    margin: 40px 0 0;
+
+    a {
+      font: 700 16px/1 $font-body;
+      color: var(--crayon);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+
+      &:hover { color: var(--ink); }
+    }
+  }
+</style>

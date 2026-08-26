@@ -26,6 +26,12 @@ const server = await createServer({
   server: { middlewareMode: true },
   appType: 'custom',
   logLevel: 'error',
+  // This server exists only to load one TypeScript module and is closed
+  // immediately. Vite's background dependency scan does not finish before
+  // that happens, and then prints a few hundred lines of stack trace about a
+  // server that was closed on purpose. Nothing is pre-bundled here, so there
+  // is nothing to scan for.
+  optimizeDeps: { noDiscovery: true },
 });
 
 let reference;
@@ -150,6 +156,17 @@ const page = `<!doctype html>
   .wrap { margin: 0 auto; max-width: 1080px; }
   header.top { padding: 40px 0 8px; }
   h1 { font-size: 30px; margin: 0 0 4px; }
+  /* The way back to the rest of the site. This page is generated and does not
+     share the site's stylesheet, so it carries its own small version. */
+  .back {
+    display: inline-block; margin: 0 0 14px; padding: 7px 13px 8px;
+    border: 1px solid var(--line); border-radius: 10px;
+    color: var(--ink); text-decoration: none;
+    font: 600 13px/1 ui-rounded, "Segoe UI", system-ui, sans-serif;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .back:hover { background: var(--card); }
+  .back:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
   .lede, .meta, .muted { color: var(--muted); }
   .lede { margin: 0 0 4px; }
   .generated { font-size: 13px; }
@@ -181,6 +198,7 @@ const page = `<!doctype html>
 <body>
 <div class="wrap">
 <header class="top">
+  <a class="back" href="/">&larr; papr.world</a>
   <h1>papr.world reference</h1>
   <p class="lede">Generated from the game's own catalogs. If a rule here is wrong, the game is wrong too.</p>
   <p class="generated meta">Built ${esc(reference.generatedAt)}</p>

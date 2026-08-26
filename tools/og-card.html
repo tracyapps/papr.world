@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>papr.world share card</title>
+<!--
+  The social-share card, as an ordinary web page. tools/build-og.mjs takes a
+  1200x630 screenshot of it and writes site/public/og.png.
+
+  Edit this file to change the card, then run: npm run og:build
+  Open it directly in a browser to see what you are changing.
+
+  The colours are copied from site/src/styles/_tokens.scss rather than shared
+  with it, because this page has to stand alone for the screenshot. If you
+  retune the palette there, the six hex values below are the ones to match.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dokdo&family=Karla:wght@400;500;700&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    background: linear-gradient(to top, #f2ead2 0%, #f2ead2 30%, #a9c9e2 100%);
+    font-family: Karla, "Trebuchet MS", "DejaVu Sans", sans-serif;
+  }
+
+  .scene { position: relative; width: 1200px; height: 630px; }
+
+  /* Scenery. preserveAspectRatio="none" on every band, for the reason set out
+     at the top of site/src/components/Hills.astro: these bands are far wider
+     than they are tall, and "slice" would crop the peaks off. */
+  .hills  { position: absolute; left: 0; width: 1200px; }
+  .hills--far   { bottom: 150px; height: 200px; opacity: .55; }
+  .hills--near  { bottom: 92px;  height: 170px; }
+
+  .sheet  { position: absolute; left: 0; right: 0; bottom: 0; height: 96px;
+            background: #fffdf6; border-top: 2px solid rgba(72,54,36,.30); }
+  .sheet2 { position: absolute; left: -20px; right: 40px; bottom: 88px; height: 96px;
+            background: #f6edcb; border-top: 1px solid rgba(72,54,36,.30);
+            transform: rotate(-.4deg); }
+
+  .words { position: absolute; left: 76px; top: 74px; z-index: 5; width: 700px; }
+
+  .flag {
+    display: inline-block; padding: 8px 18px 9px; margin-bottom: 18px;
+    background: #fffdf6; border: 1px solid rgba(72,54,36,.30); border-radius: 999px;
+    font: 700 14px/1 "Courier Prime", "DejaVu Sans Mono", monospace;
+    letter-spacing: .16em; text-transform: uppercase; color: #63492f;
+    transform: rotate(-1.4deg);
+  }
+
+  h1 {
+    font-family: Dokdo, "Bradley Hand", "Segoe Print", cursive;
+    font-weight: 400; font-size: 150px; line-height: .82; letter-spacing: -.01em;
+    color: #2d261e; text-shadow: 4px 5px 0 #f6edcb, 9px 11px 0 rgba(54,39,27,.18);
+  }
+
+  p { margin-top: 22px; max-width: 21ch; font-size: 29px; line-height: 1.32;
+      font-weight: 500; color: #2d261e; }
+
+  .stickie {
+    position: absolute; right: 74px; top: 132px; z-index: 6; width: 214px;
+    padding: 20px 18px 24px; background: #fdf0a6; border-radius: 3px 3px 12px 3px;
+    box-shadow: 4px 10px 22px rgba(54,39,27,.3); transform: rotate(5deg);
+    font: 400 15px/1.45 "Courier Prime", "DejaVu Sans Mono", monospace; color: #4a3a1a;
+  }
+  .stickie b { display: block; margin-top: 10px; font-size: 12px; letter-spacing: .1em; color: #8a7434; }
+
+  .tape {
+    position: absolute; top: -12px; left: 50%; margin-left: -34px;
+    width: 68px; height: 26px; background: rgba(255,253,240,.6); transform: rotate(-4deg);
+    border-left: 1px dashed rgba(72,54,36,.2); border-right: 1px dashed rgba(72,54,36,.2);
+  }
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <svg style="position:absolute;top:38px;left:520px" width="300" height="120" viewBox="0 0 300 120">
+    <g fill="#e4dcc8"><circle cx="64" cy="76" r="30"/><circle cx="112" cy="62" r="42"/><circle cx="168" cy="70" r="34"/><circle cx="212" cy="80" r="24"/></g>
+    <g fill="#fffdf4"><circle cx="60" cy="72" r="30"/><circle cx="108" cy="58" r="42"/><circle cx="164" cy="66" r="34"/><circle cx="208" cy="76" r="24"/></g>
+  </svg>
+
+  <svg class="hills hills--far" viewBox="-60 450 1612 450" preserveAspectRatio="none">
+    <polygon fill="#648F6F" points="957 450 539 900 1396 900"/><polygon fill="#2F462F" points="957 450 872.9 900 1396 900"/>
+    <polygon fill="#4D5952" points="-60 900 398 662 816 900"/><polygon fill="#2B2F2C" points="337 900 398 662 816 900"/>
+    <polygon fill="#63645F" points="1203 546 1552 900 876 900"/><polygon fill="#333530" points="1203 546 1552 900 1162 900"/>
+    <polygon fill="#D9D9D9" points="1203 546 1288 632 1237 610 1203 626 1160 616"/>
+  </svg>
+
+  <svg class="hills hills--near" viewBox="10 487 1307 433" preserveAspectRatio="none">
+    <path fill="#12AA1C" d="M1135 920.11 580.62 487.11 10 920.11Z"/>
+    <path fill="#125B0F" d="M515.67 920.11 1135 920.11 580.62 487.11Z"/>
+    <path fill="#51CC0F" d="M1317 920.11 717.62 653.11 126 920.11Z"/>
+    <path fill="#1D561A" d="M1317 920.11 717.62 653.11 647.79 920.11Z"/>
+    <path fill="#02CC63" d="M959.65 593.11 647 920.11 1288 920.11Z"/>
+    <path fill="#2E4439" d="M959.65 593.11 896.74 920.11 1288 920.11Z"/>
+  </svg>
+
+  <div class="sheet2"></div>
+  <div class="sheet"></div>
+
+  <div class="words">
+    <div class="flag">Invite-only alpha &middot; folding in progress</div>
+    <h1>papr.world</h1>
+    <p>A cozy communal sandbox where everything &mdash; including you &mdash; is made of paper.</p>
+  </div>
+
+  <div class="stickie">
+    <div class="tape"></div>
+    nobody wins. nothing gets destroyed. somebody just says come see what i made.
+    <b>&mdash; the whole pitch</b>
+  </div>
+
+</div>
+</body>
+</html>

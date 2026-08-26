@@ -1,0 +1,235 @@
+---
+/**
+ * /world — what the place is actually made of.
+ *
+ * The homepage carries a paragraph of this; the detail lives here. All the
+ * words are in the markup below, so editing the page is editing the page.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import PageHeader from '../components/PageHeader.astro';
+import PaperCard from '../components/PaperCard.astro';
+import StickyNote from '../components/StickyNote.astro';
+import Critter from '../components/Critter.astro';
+
+// Every sheet in here is a real file the game draws from. Add or remove rows
+// and the grid re-flows on its own.
+const stock = [
+  ['construction-paper-brown-2.svg',      'Brown construction paper', 'bark, soil, cardboard boxes'],
+  ['construction-paper-green-2.svg',      'Green construction paper', 'leaves, grass, hedges'],
+  ['paper_notebook_blue_lined_01.svg',    'Blue lined notebook paper', 'the ground you walk on'],
+  ['wrapping-paper-blue-plaid-01.svg',    'Blue plaid wrapping paper', 'picnic blankets, curtains'],
+  ['folded-stripes-blue-green-yellow.svg','Folded stripes',            'awnings, market stalls'],
+  ['cork-board.svg',                      'Cork board',                'notice boards, backing'],
+  ['3d-squares-aqua.svg',                 'Folded pebbles, aqua',      'shallow water, tiling'],
+  ['monstera-patch.svg',                  'Monstera patch',            'undergrowth in the damp places'],
+  ['ribbon-weave-pink.svg',               'Ribbon weave',              'trim, gift wrap, bunting'],
+  ['crosshatch-cubes-yellow-maroon.svg',  'Crosshatch cubes',          'quilts, market floors'],
+  ['subtle-bubbles-blues.svg',            'Subtle bubbles',            'deep water'],
+  ['building-blocks-green.svg',           'Building blocks',           'garden walls, foundations'],
+];
+---
+
+<Base
+  title="The world"
+  description="Lined paper, construction paper, cardboard, tape, glue, crayon. If it couldn't be cut out with kids' scissors, it isn't in papr.world."
+>
+  <Sky />
+
+  <PageHeader kicker="01 — the visual rule" title="Everything you see<br />could be made<br />on a craft table." scene="mid">
+    Lined paper, construction paper, cardboard, tracing paper, tape, glue,
+    crayon. No plastic. No realistic stone. No perfectly clean digital
+    gradients.
+  </PageHeader>
+
+  <section class="band">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <div class="prose">
+        <p>
+          The rule is one sentence long and it decides everything: <strong>if it
+          couldn't be cut out with kids' scissors, it isn't in the world</strong>.
+          That is not a style, it is a constraint, and it is what stops the
+          world from slowly turning into every other sandbox game.
+        </p>
+        <p>
+          It settles arguments cheaply. Should the river have a specular
+          highlight? No — paper doesn't. Should the mountain get a rock
+          texture? No — it gets folded cardstock and a snowline cut from white
+          paper. Should the UI have a drop shadow? Only the hard, offset kind
+          that a cutout standing a few millimetres off the page would cast.
+        </p>
+        <p>
+          The pay-off is that the whole thing hangs together. Everything shares
+          the same handful of materials, so a bridge somebody built out of
+          scraps sits comfortably next to a hillside that was authored months
+          earlier.
+        </p>
+      </div>
+
+      <h2 class="hand section-head">The paper drawer.</h2>
+      <p class="lede">
+        Every sheet below is a real file the game draws from, not a mock-up of
+        one. When a material is harvested it visually remembers which sheet it
+        came from — salmon ribbonwood stays salmon ribbonwood in your scrapbook.
+      </p>
+
+      <ul class="stock">
+        {stock.map(([file, name, used], index) => (
+          <li class="stock__item" style={`--tilt:${(index % 3) - 1}deg`}>
+            <span class="stock__sheet" style={`--sheet:url('/assets/materials/${file}')`}></span>
+            <span class="stock__name">{name}</span>
+            <span class="stock__use">{used}</span>
+          </li>
+        ))}
+      </ul>
+
+      <Critter id="stock-mouse" shape="mouse" place="right: 6%; bottom: 8%;" size={58} />
+    </div>
+  </section>
+
+  <section class="band band--sunk">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <p class="label">the first thing you do</p>
+      <h2 class="hand">You are a drawing.</h2>
+      <p class="lede">
+        Shape first — a silhouette from the library, or an outline you draw
+        yourself. Then paper stock, then a printed pattern, then crayon on top.
+      </p>
+
+      <div class="cards">
+        <PaperCard title="Cut your shape" note="58 shapes · or draw your own outline" turn="-.8deg">
+          <p>
+            Start from a cutout in the library or draw the silhouette yourself.
+            A monster on wheels is fine. Nobody is checking.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Stamp it" note="39 stamps · arms may hang off the edge" turn="1deg" mirrored>
+          <p>
+            Eyes, mouths, hair and limbs go on as pre-drawn stamps — and they
+            are allowed to hang outside the silhouette, because a crayon stroke
+            can never make a convincing arm.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Nothing is bought" note="no advantage · no hitbox" turn="-1.4deg">
+          <p>
+            Your drawing decides nothing about how you move. The hidden body
+            presets — small, wide, tall, wheeled, hovering — come from the shape
+            you chose, so a big flourish never buys a big hitbox.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Keep a wardrobe" note="tiers are display only, never capacity" turn=".6deg" mirrored>
+          <p>
+            Save as many looks as you like, rename them, wear whichever one fits
+            the day. Later the wardrobe becomes a closet you build in your own
+            house, displaying the looks you chose to share.
+          </p>
+        </PaperCard>
+      </div>
+
+      <div class="aside">
+        <StickyNote tint="green" turn="-3deg" cite="avatar-and-identity.md">
+          the sheet grew to 130 × 180 around a 100 × 140 cutout box, purely to
+          make room for arms that stick out.
+        </StickyNote>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <p class="label">how big it is</p>
+      <h2 class="hand">A neighbourhood<br />is a stack of pages.</h2>
+
+      <div class="prose">
+        <p>
+          Not metres — <strong>pages</strong>. Square sheets that each hold their
+          own terrain, paths, props, resources and permissions. Some are
+          authored exactly, some are grown from a seed, and most are authored
+          structure with the details rolled.
+        </p>
+        <p>
+          Distant hills live in a parallax backdrop behind tracing-paper haze,
+          so far away actually looks far away rather than just being smaller.
+        </p>
+        <p>
+          Water runs creek to river to something Mississippi, bending across
+          pages, throwing off waterfalls and swamps, ending in a lake. Width and
+          depth are functions of distance from the source. You can always wade.
+          Deep water is where a boat becomes <em>useful</em>, never where you
+          die — and a river is never a wall, because bridges, docks and beaches
+          arrive with it.
+        </p>
+      </div>
+
+      <p class="more"><a href="/how-it-works/">Take the full tour →</a></p>
+    </div>
+  </section>
+</Base>
+
+<style lang="scss">
+  .section-head { @include hand(44px, 84px, 6.5vw); margin-top: 3rem; }
+
+  // ── The paper drawer ─────────────────────────────────────────────────────
+
+  .stock {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    margin: 40px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stock__item {
+    display: grid;
+    gap: 4px;
+    transform: rotate(var(--tilt));
+  }
+
+  .stock__sheet {
+    display: block;
+    aspect-ratio: 1;
+    margin-bottom: 8px;
+    background: var(--sheet) center / cover;
+    background-blend-mode: var(--blend);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    box-shadow: 3px 6px 12px var(--sh-1);
+  }
+
+  .stock__name { font: 700 13px/1.3 $font-body; color: var(--ink); }
+  .stock__use  { font: 400 12px/1.4 $font-mono; color: var(--ink-faint); }
+
+  // ── Card grid ────────────────────────────────────────────────────────────
+
+  .cards {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+    margin-top: 46px;
+  }
+
+  .aside { margin-top: 48px; }
+
+  .more {
+    margin: 40px 0 0;
+
+    a {
+      font: 700 16px/1 $font-body;
+      color: var(--crayon);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+
+      &:hover { color: var(--ink); }
+    }
+  }
+</style>

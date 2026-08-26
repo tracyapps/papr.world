@@ -1,0 +1,361 @@
+---
+/**
+ * /enter — the door into the alpha.
+ *
+ * ── What changed from the original design, and why ───────────────────────
+ * The mock-up had a login page with an "invite code" field, which implied
+ * accounts. There are none. What actually exists is:
+ *
+ *   · a paper passport — an id and a secret minted on your own device,
+ *     holding no personal information and needing no sign-up; and
+ *   · a neighbourhood code in WREN-42 form, which is the only door into
+ *     shared play. A plain URL is always solo and never opens a socket.
+ *
+ * So this page asks for ONE code, which does two jobs at once: it opens the
+ * alpha door (checked server-side by api/enter.ts) and it names the
+ * neighbourhood you land in. The checkbox is for arriving through the same
+ * door but wandering off alone.
+ *
+ * There is no password field, because there is no password. Adding one would
+ * have meant inventing an account system to have something to check.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import TreeLine from '../components/TreeLine.astro';
+import Hills from '../components/Hills.astro';
+
+// api/enter.ts sends people back here with ?problem=… when JavaScript is off.
+const problem = Astro.url.searchParams.get('problem');
+// middleware.ts adds ?next=… when it turns someone away from /play.
+const next = Astro.url.searchParams.get('next');
+---
+
+<Base
+  title="Let me in"
+  description="Enter your papr.world alpha code."
+  delight={false}
+>
+  <Sky />
+
+  <Hills layer="front" height="24vh" drift={-40} style="z-index: 1;" />
+  <TreeLine drift={-70} rise={0} style="bottom: 0; z-index: 2;" />
+
+  <div class="door">
+    <div class="passport">
+      <div class="passport__head">
+        <div>
+          <p class="passport__kicker">Paper passport · alpha</p>
+          <h1 class="hand passport__title">Let me in.</h1>
+        </div>
+
+        <svg class="passport__face" width="88" height="88" viewBox="0 0 512 512" aria-hidden="true">
+          <path d="M169 98 C204 55 268 58 302 104 C332 146 315 228 286 278 C318 315 306 405 250 422 C191 440 137 399 151 329 C107 284 122 155 169 98 Z"
+            fill="var(--potato)" stroke="var(--potato-line)" stroke-width="10" />
+          <path d="M188 155 Q214 135 238 157" fill="none" stroke="var(--potato-ink)" stroke-width="8" stroke-linecap="round" />
+          <circle cx="202" cy="204" r="11" fill="var(--potato-ink)" />
+          <circle cx="263" cy="204" r="11" fill="var(--potato-ink)" />
+          <path d="M202 258 Q237 291 276 256" fill="none" stroke="var(--potato-ink)" stroke-width="8" stroke-linecap="round" />
+        </svg>
+      </div>
+
+      <p class="passport__blurb">
+        papr.world is invite-only while it is being folded. One code opens the
+        door <em>and</em> names the neighbourhood you land in.
+      </p>
+
+      {problem && (
+        <p class="passport__problem" role="alert">{problem}</p>
+      )}
+
+      <form method="post" action="/api/enter" data-enter-form>
+        {next && <input type="hidden" name="next" value={next} />}
+
+        <div class="codefield">
+          <label class="codefield__label" for="code">Your code</label>
+          <p class="codefield__help" id="code-help">
+            Four letters, a dash, two numbers — like <span class="codefield__eg">WREN-42</span>.
+            Capitals and the dash are added for you.
+          </p>
+
+          <div class="codefield__slot">
+            <input
+              id="code" name="code" type="text" required
+              inputmode="text" autocomplete="off" spellcheck="false"
+              autocapitalize="characters" maxlength="7"
+              placeholder="WREN-42"
+              aria-describedby="code-help"
+              data-code
+            />
+            <span class="stamp" data-stamp hidden aria-hidden="true">Approved</span>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field__label">What should we call you <span class="soft">(optional)</span></span>
+          <input type="text" name="name" maxlength="24" autocomplete="nickname"
+            placeholder="pilcrow, fern, bug-on-wheels…" />
+        </label>
+
+        <label class="tickbox">
+          <input type="checkbox" name="alone" />
+          <span>
+            Let me wander on my own first
+            <small>Solo play never opens a connection to anybody else.</small>
+          </span>
+        </label>
+
+        <button type="submit" class="btn door__go">
+          Let me in
+          <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
+            <path d="M1 7h16M12 2l5.5 5L12 12" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <p class="door__status" data-enter-status role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div class="asides">
+      <div class="aside-card">
+        <p class="aside-card__label">What a code gets you</p>
+        <ul>
+          <li>One neighbourhood, shared with whoever else has the same code</li>
+          <li>A paper passport minted on this device — no email, no sign-up</li>
+          <li>Everything you build, still there after a restart</li>
+          <li>A rough, honest alpha that says so on the tin</li>
+        </ul>
+      </div>
+
+      <div class="aside-card aside-card--quiet">
+        <p class="aside-card__label">Haven't got one?</p>
+        <p>
+          The first playtest is three to five people and one neighbourhood.
+          If that sounds like your idea of a good evening,
+          <a href="/#note">slip a note under the door</a> and say so.
+        </p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style lang="scss">
+  .door {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    gap: clamp(28px, 4vw, 54px);
+    align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(40px, 8vh, 90px) clamp(18px, 5vw, 60px) 40vh;
+
+    @media (min-width: $bp-mid) {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    }
+  }
+
+  // ── The passport ─────────────────────────────────────────────────────────
+
+  .passport {
+    @include card(var(--paper), var(--paper-2));
+    --tilt: -.7deg;
+    padding: clamp(26px, 4vw, 46px) clamp(24px, 4vw, 44px) clamp(30px, 4vw, 42px);
+    border-radius: 10px 22px 10px 20px;
+    box-shadow: 10px 22px 0 var(--paper-2), 16px 38px 64px var(--sh-2);
+
+    &::before { @include tape(14%, 104px, -4deg, -17px); height: 34px; }
+    &::after  { @include tape(auto, 86px, 7deg, -16px); right: 12%; left: auto; height: 32px; }
+  }
+
+  .passport__head {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .passport__kicker {
+    margin: 0 0 4px;
+    font: 700 11px/1 $font-mono;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .passport__title { @include hand(52px, 92px, 9vw); }
+
+  .passport__face { flex: none; }
+
+  .passport__blurb {
+    margin: 18px 0 0;
+    max-width: 42ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .passport__problem {
+    margin: 20px 0 0;
+    padding: 12px 14px;
+    background: var(--paper-2);
+    border: 2px solid var(--crayon);
+    border-radius: 4px 12px 4px 12px;
+    font: 500 15px/1.5 $font-body;
+    color: var(--ink);
+  }
+
+  form { margin-top: 26px; }
+
+  // ── The big code box ─────────────────────────────────────────────────────
+
+  .codefield__label {
+    display: block;
+    font: 700 12px/1 $font-mono;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .codefield__help {
+    margin: 8px 0 10px;
+    max-width: 44ch;
+    font: 400 14px/1.5 $font-body;
+    color: var(--ink-soft);
+  }
+
+  .codefield__eg {
+    font: 700 14px/1 $font-mono;
+    letter-spacing: .1em;
+    color: var(--ink);
+  }
+
+  .codefield__slot { position: relative; }
+
+  #code {
+    @include ruled(26px);
+    width: 100%;
+    padding: 20px 14px 18px;
+    background-color: var(--paper-2);
+    border: 2px dashed var(--edge);
+    border-radius: $radius-md;
+    font: 700 clamp(28px, 7vw, 48px)/1.1 $font-mono;
+    letter-spacing: .18em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--ink);
+
+    // Set by enter-form.ts once the code is the right shape. Solid, not just
+    // green, so the change is visible without relying on colour.
+    &[data-shape="ok"] { border-style: solid; border-color: var(--green); }
+  }
+
+  .stamp {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    padding: 6px 12px 7px;
+    background: rgb(255 253 246 / .72);
+    border: 4px double var(--green);
+    border-radius: 8px;
+    font: 700 15px/1 $font-mono;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--green);
+    transform: translateY(-50%) rotate(-11deg);
+    animation: stamp-down .25s ease-out;
+  }
+
+  @keyframes stamp-down {
+    from { transform: translateY(-50%) rotate(-11deg) scale(2.2); opacity: 0; }
+    to   { transform: translateY(-50%) rotate(-11deg) scale(1); opacity: 1; }
+  }
+
+  // ── The rest of the form ─────────────────────────────────────────────────
+
+  .field {
+    display: grid;
+    gap: 7px;
+    margin-top: 22px;
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      background: var(--paper-2);
+      border: 1px solid var(--edge);
+      border-radius: 9px;
+      font: 400 16px/1.4 $font-body;
+      color: var(--ink);
+    }
+  }
+
+  .field__label {
+    font: 700 12px/1 $font-mono;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .soft { font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+  .tickbox {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 20px;
+    font-size: 15px;
+    color: var(--ink);
+    cursor: pointer;
+
+    input {
+      flex: none;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--green);
+    }
+
+    small {
+      display: block;
+      margin-top: 2px;
+      font-size: 13.5px;
+      color: var(--ink-faint);
+    }
+  }
+
+  .door__go { width: 100%; margin-top: 26px; padding: 18px 24px; font-size: 19px; }
+
+  .door__status {
+    margin: 14px 0 0;
+    min-height: 1.4em;
+    font: 500 15px/1.4 $font-body;
+    color: var(--ink-soft);
+
+    &[data-state="failed"] { color: var(--crayon); font-weight: 700; }
+    &[data-state="ok"]     { color: var(--green);  font-weight: 700; }
+  }
+
+  // ── The two notes beside it ──────────────────────────────────────────────
+
+  .asides { display: grid; gap: 18px; }
+
+  .aside-card {
+    @include card(var(--paper-2), var(--paper-3));
+    --tilt: .8deg;
+    padding: 20px 20px 22px;
+
+    ul { margin: 0; padding-left: 1.2em; }
+    li + li { margin-top: .5em; }
+    li { font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
+    p  { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+  }
+
+  .aside-card--quiet { --tilt: -1.2deg; }
+
+  .aside-card__label {
+    @include label;
+    margin-bottom: 10px !important;
+    font-size: 11px;
+    letter-spacing: .14em;
+  }
+</style>

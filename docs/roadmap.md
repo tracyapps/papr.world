@@ -35,7 +35,12 @@ Nothing in Phases 1–4 requires the map work, which is deliberately deferred.
 
 ## Phase 0 — The foundation — **DONE**
 
+<!-- site: title: The foundation -->
+<!-- site: summary: One table that answers "how do I get this?" for every material in the world. Unglamorous, and everything else stands on it. -->
+
 ### 0.1 The `obtainedBy` descriptor — ✅ built
+
+<!-- site: summary: Every material in the world declares how it is obtained in one place, so nothing can exist without a way to get it. -->
 
 `sim/catalogs/obtaining.ts` exists and does the job: one table answering *"how
 do I get this?"*, with `BIOME_SCATTER` derived rather than hand-kept, plus
@@ -53,6 +58,8 @@ have one source of truth in `obtaining.ts`.
 ---
 
 ## Phase 1 — Plans and the knowledge tree — **DONE**
+
+<!-- site: summary: Recipes are never bought or found lying around — they are learned from a knowledge tree, paid for in patience or in doing. -->
 
 **Promoted to the front on 2026-08-04.** Reason: progression cannot be tested at
 all until plans can be reached. Advanced materials need advanced tools, advanced
@@ -195,6 +202,8 @@ actual acquisition route.
 
 ## Phase 2 — Critter knowledge
 
+<!-- site: summary: Ask a paper squirrel about this place and it will tell you, at length, and remember what it told you. -->
+
 Reuses the conversation engine almost entirely, and makes the world feel
 inhabited. Independent of Phase 1 — swap the order freely if plans get tiring.
 
@@ -263,6 +272,9 @@ rather than retrofitted. The annotation UI itself is parked.
 ---
 
 ## Parallel lane — Multiplayer and the first invited alpha
+
+<!-- site: title: The invited alpha -->
+<!-- site: summary: Two people in one paper neighbourhood, joined by a code, with everything they built still standing after a restart. Then a handful of invited testers and one or two honest questions per build. -->
 
 **Starts now, after 2.2; it does not wait for the rest of the biomes, the map,
 or the underground.** Deterministic pages, local building, gathering, saved
@@ -378,10 +390,14 @@ a feedback milestone, not a claim that the game is content-complete.
 
 ## Phase 3 — Economy, shops, mail
 
+<!-- site: summary: Shiny chips, flat prices in every shop, and a mailbox. Generosity means making a thing and giving that thing — never selling knowledge. -->
+
 The design is settled and nothing here is blocked on code. This phase is
 sequenced so the *guardrails* land with the mechanics rather than after them.
 
 ### 3.1 Chips as a quantity — ✅ built (2026-08-08)
+
+<!-- site: summary: A pouch of shiny chips, shown quietly. No session totals, no earnings summary, no tallies anywhere, ever. -->
 
 `player.chips`. Displayed quietly. **No session totals, no earnings summary, no
 tallies anywhere, ever** — this is the constraint from `economy.md` and it is
@@ -462,6 +478,8 @@ what everything else is worth.
 ---
 
 ## Phase 4 — Water: rivers and lakes
+
+<!-- site: summary: A creek that becomes a river that becomes something Mississippi. Fish, frogs, shorelines you can cross, and eventually a canoe. -->
 
 Ordered so that the most visible current problem is fixed first and each step
 after is independently playable.
@@ -574,6 +592,9 @@ persistence remain.
 
 ## Phase 5 — Deferred: map, then underground
 
+<!-- site: title: The map, then underground -->
+<!-- site: summary: A full-page map of everywhere you have been, and then caves worth getting lost in. Deliberately last: the underground is only worth having once you can find your way around it. -->
+
 **Waiting on owner design work for the map interface and functionality
 (in progress as of 2026-08-04).** Logged here so the dependencies do not get
 rediscovered later.
@@ -601,6 +622,9 @@ Steps 1 and 2 are the real work; everything after is content on top of them.
 ---
 
 ## Phase 6 — Becoming someone: avatars, identity, multiplayer
+
+<!-- site: title: Becoming someone -->
+<!-- site: summary: Drawing yourself, a wardrobe and a closet to keep your looks in, and the slower careful work of a world that strangers can share safely. -->
 
 **Tracked in their own docs to avoid double-maintenance — this section is a
 pointer, not the plan.** Both docs carry locked decisions up top, a

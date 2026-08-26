@@ -1,0 +1,410 @@
+---
+/**
+ * The homepage.
+ *
+ * Every section here is an OVERVIEW with a link to the page that carries the
+ * detail. If a section starts growing past a screenful, that is the signal to
+ * move the new material onto its own page and leave a paragraph behind.
+ *
+ * The words are right here in the markup — this file is HTML with a fenced
+ * block of imports at the top, so editing the copy is editing the copy.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import Hills from '../components/Hills.astro';
+import TreeLine from '../components/TreeLine.astro';
+import PaperEdge from '../components/PaperEdge.astro';
+import StickyNote from '../components/StickyNote.astro';
+import RoadmapTrail from '../components/RoadmapTrail.astro';
+import NoteForm from '../components/NoteForm.astro';
+import Critter from '../components/Critter.astro';
+import roadmap from '../data/roadmap.json';
+
+const parkedNames = roadmap.parked.slice(0, 5).map((p) => p.idea.toLowerCase());
+---
+
+<Base
+  title="papr.world"
+  description="A cozy communal sandbox where the trees, the river, the little house you build — and you — are all made of paper."
+>
+  <Sky />
+
+  {/* ───────────────────────────── Hero ───────────────────────────── */}
+  <section class="hero" id="top">
+    <div class="hero__marks" data-marks aria-hidden="true"></div>
+
+    <Hills layer="mountains" height="34vh" drift={-16} rise={26}
+      style="bottom: 21vh; opacity: .72; filter: saturate(.75); z-index: 1;" />
+    <Hills layer="mid" height="30vh" drift={-30} rise={52} style="bottom: 11vh; z-index: 2;" />
+    <TreeLine />
+    <Hills layer="front" height="26vh" drift={-84} rise={120} style="z-index: 4;" />
+
+    <div class="hero__words" data-px="14" data-py="-40">
+      <p class="hero__flag">
+        <span class="hero__pip" aria-hidden="true"></span>
+        Invite-only alpha · folding in progress
+      </p>
+
+      <h1 class="hand hand--xl hero__title">papr.world</h1>
+
+      <p class="hero__lede">
+        A cozy communal sandbox where the trees, the river, the little house you
+        build — and you — are all made of paper.
+      </p>
+
+      <p class="hero__sub">
+        Draw yourself into a shared neighbourhood. Cut, fold, tape, plant, wander.
+        Nobody wins. Nothing gets destroyed. Somebody just says
+        <em>come see what I made</em>.
+      </p>
+
+      <div class="hero__buttons">
+        <a class="btn" href="#note" style="--tilt: -.6deg">
+          Ask for an invite
+          <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
+            <path d="M1 7h16M12 2l5.5 5L12 12" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a class="btn btn--quiet" href="/how-it-works/" style="--tilt: .5deg">Take the tour</a>
+      </div>
+    </div>
+
+    <div class="hero__note">
+      <StickyNote cite="sky.ts" turn="5deg">
+        the sky here drifts through four paper blues over 12 minutes. no night.
+        nothing ever goes dark.
+      </StickyNote>
+    </div>
+
+    <Critter id="pond-snail" shape="snail" place="left: 8vw; bottom: 17vh;" />
+
+    <PaperEdge />
+  </section>
+
+  {/* ──────────────────────── What it is made of ──────────────────── */}
+  <section class="band" id="what">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <div data-px="10" data-py="-22">
+        <p class="label">01 — the visual rule</p>
+        <h2 class="hand">Everything you see<br />could be made<br />on a craft table.</h2>
+        <p class="lede">
+          Lined paper, construction paper, cardboard, tracing paper, tape, glue,
+          crayon. No plastic. No realistic stone. No perfectly clean digital
+          gradients. If it couldn't be cut out with kids' scissors, it isn't in
+          the world.
+        </p>
+      </div>
+
+      <ul class="swatches" data-px="-14" data-py="34">
+        {[
+          ['construction-paper-brown-2.svg', 'brown construction paper', '-2deg'],
+          ['construction-paper-green-2.svg', 'green construction paper', '1.6deg'],
+          ['paper_notebook_blue_lined_01.svg', 'blue lined notebook paper', '-1deg'],
+          ['wrapping-paper-blue-plaid-01.svg', 'blue plaid wrapping paper', '2.4deg'],
+          ['folded-stripes-blue-green-yellow.svg', 'folded stripes', '-2.2deg'],
+          ['cork-board.svg', 'cork board', '-1.6deg'],
+        ].map(([file, name, turn]) => (
+          <li class="swatch" style={`--tilt:${turn};--sheet:url('/assets/materials/${file}')`}>
+            <span>{name}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="swatches__cap">real material sheets from the game's own asset library</p>
+
+      <p class="more">
+        <a href="/world/">See what the world is made of →</a>
+      </p>
+    </div>
+  </section>
+
+  {/* ──────────────────────────── Together ────────────────────────── */}
+  <section class="band band--sunk" id="together">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+    <Hills layer="soft" height="40vh" drift={-22} rise={-56} style="opacity: .35; bottom: -4%;" />
+
+    <div class="band__inner">
+      <div data-px="12" data-py="-26">
+        <p class="label">02 — the social contract</p>
+        <h2 class="hand">Come see<br />what I made.</h2>
+        <p class="lede">
+          A neighbourhood is a handful of paper pages you and a few friends
+          share. You see each other move, you chat, you place things, you leave
+          things for each other. Helping is a first-class verb — the rewards are
+          ribbons and wall charms and thank-you stamps, never an advantage.
+        </p>
+
+        <ul class="ticks">
+          <li>Join by invite code, not by browsing a server list</li>
+          <li>Everything you place remembers who made it</li>
+          <li>Plans are knowledge — they can't be sold, only learned</li>
+          <li>Generosity means making a thing and giving that thing</li>
+        </ul>
+
+        <p class="more">
+          <a href="/together/">How a neighbourhood works →</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ──────────────────────────── Roadmap ─────────────────────────── */}
+  <section class="band trailband" id="trail">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <div data-px="8" data-py="-20" style="max-width: 42ch">
+        <p class="label">03 — the paper trail</p>
+        <h2 class="hand">Where we are.</h2>
+        <p class="lede">
+          Ordered by dependency, not by enthusiasm. No dates, because dates
+          would be a lie. This trail is generated from the actual roadmap, so it
+          cannot quietly go stale.
+        </p>
+      </div>
+
+      <RoadmapTrail />
+
+      <p class="parked">
+        Parked on purpose: {parkedNames.join(', ')}, and a dozen more.
+        Each one has a written reason, and the reason is the useful part.
+      </p>
+
+      <p class="more">
+        <a href="/roadmap/">Read the whole roadmap →</a>
+      </p>
+    </div>
+  </section>
+
+  {/* ───────────────────────── Slip a note ────────────────────────── */}
+  <section class="band band--sunk" id="note">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <img class="cattails" src="/assets/props/cattail-cluster-01.svg" alt="" loading="lazy" aria-hidden="true" />
+
+    <div class="band__inner">
+      <div data-px="10" data-py="-18" style="max-width: 44ch">
+        <p class="label">04 — the mailbox</p>
+        <h2 class="hand">Slip a note<br />under the door.</h2>
+        <p class="lede">
+          One form for everything. Ask for an alpha invite, get the occasional
+          letter, offer to help, send art, or tell us the idea you can't stop
+          thinking about.
+        </p>
+      </div>
+
+      <NoteForm />
+    </div>
+  </section>
+</Base>
+
+<style lang="scss">
+  // ── Hero ─────────────────────────────────────────────────────────────────
+
+  .hero {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100vh;
+    // On a short laptop screen the composition would otherwise squeeze; on a
+    // tall one it would stretch the sky out. This keeps it roughly a screen.
+    max-height: 1100px;
+  }
+
+  .hero__marks {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero__words {
+    position: relative;
+    z-index: 10;
+    max-width: 1180px;
+    // Kept deliberately tight. The scenery hangs off the BOTTOM of the hero,
+    // so every extra vh of padding here pushes the hills off the screen.
+    padding: 13vh clamp(18px, 6vw, 90px) 16vh var(--gutter);
+    will-change: transform;
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  }
+
+  .hero__flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 18px;
+    padding: 6px 14px 7px;
+    background: var(--paper);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    box-shadow: 0 6px 16px var(--sh-1);
+    transform: rotate(-1.4deg);
+    font: 700 11px/1 $font-mono;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .hero__pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--crayon);
+    animation: glow 2.6s ease-in-out infinite;
+  }
+
+  @keyframes glow { 0%, 100% { opacity: .45 } 50% { opacity: .85 } }
+
+  .hero__title {
+    // Two stacked hard shadows: an offset sheet, then the shadow both cast.
+    text-shadow: 4px 5px 0 var(--paper-2), 8px 10px 0 var(--sh-1);
+  }
+
+  .hero__lede {
+    max-width: 30ch;
+    margin: 26px 0 0;
+    font-size: clamp(19px, 2.3vw, 27px);
+    font-weight: 500;
+    line-height: 1.42;
+    color: var(--ink);
+  }
+
+  .hero__sub {
+    max-width: 44ch;
+    margin: 14px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .hero__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .hero__note {
+    position: absolute;
+    right: clamp(12px, 5vw, 80px);
+    bottom: 20vh;
+    z-index: 11;
+  }
+
+  // Below this the note collides with the headline; the headline wins.
+  @media (max-width: $bp-mid) {
+    .hero__note { display: none; }
+  }
+
+  // ── Material swatches ────────────────────────────────────────────────────
+
+  .swatches {
+    display: flex;
+    gap: 14px;
+    margin: 54px 0 0;
+    padding: 16px 0;
+    list-style: none;
+    overflow: hidden;
+    will-change: transform;
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  }
+
+  .swatch {
+    flex: 1 1 0;
+    min-width: 0;
+    aspect-ratio: 1;
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    background: var(--sheet) center / cover;
+    background-blend-mode: var(--blend);
+    box-shadow: 3px 6px 12px var(--sh-1);
+    transform: rotate(var(--tilt));
+
+    // The name is a real caption, not a title attribute — a title tooltip is
+    // invisible to touch and to most assistive tech.
+    span {
+      display: block;
+      margin-top: calc(100% + 8px);
+      font: 400 11px/1.3 $font-mono;
+      color: var(--ink-faint);
+      text-align: center;
+    }
+  }
+
+  @media (max-width: $bp-narrow) {
+    .swatch:nth-child(n + 5) { display: none; }
+  }
+
+  .swatches__cap {
+    margin: 34px 0 0;
+    font: 400 12px/1 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  // ── Bits and pieces ──────────────────────────────────────────────────────
+
+  .ticks {
+    display: grid;
+    gap: 10px;
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 16px;
+    color: var(--ink);
+
+    li {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      max-width: 52ch;
+
+      &::before {
+        content: "✓";
+        flex: none;
+        color: var(--green);
+        font-weight: 700;
+      }
+    }
+  }
+
+  .more {
+    margin: 34px 0 0;
+
+    a {
+      font: 700 16px/1 $font-body;
+      color: var(--crayon);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+
+      &:hover { color: var(--ink); }
+    }
+  }
+
+  // Ruled like a page from the notebook the plan was written in.
+  .trailband {
+    @include ruled(38px, rgb(108 159 196 / .16));
+    background-color: var(--paper);
+  }
+
+  .parked {
+    max-width: 62ch;
+    margin: 54px 0 0;
+    font: 400 13px/1.6 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  .cattails {
+    position: absolute;
+    right: -4%;
+    bottom: 0;
+    height: 34vh;
+    opacity: .3;
+    pointer-events: none;
+  }
+</style>

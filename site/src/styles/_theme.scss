@@ -1,0 +1,61 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  THEME — where the custom properties actually get their values.
+//
+//  Applied exactly once, by site.scss. The values themselves are defined in
+//  _tokens.scss; this file is only the plumbing that puts daylight on :root
+//  and swaps in the night mixin for the two ways someone can ask for it.
+// ═══════════════════════════════════════════════════════════════════════════
+
+@use "tokens" as *;
+
+:root {
+  // ── DAYLIGHT (the default) ──────────────────────────────────────────────
+  --sky-h: #f2ead2;  --sky-z: #a9c9e2;
+
+  --paper:   #fffdf6;  --paper-2: #f6edcb;  --paper-3: #efe4c4;
+  --kraft:   #d9c18f;  --kraft-2: #e9d6a6;  --kraft-3: #c2a875;
+
+  --ink: #2d261e;  --ink-soft: #63492f;  --ink-faint: #695a46;
+
+  --edge: rgba(72, 54, 36, .30);  --edge-soft: rgba(72, 54, 36, .14);
+  --sh-1: rgba(54, 39, 27, .16);  --sh-2: rgba(54, 39, 27, .26);  --sh-3: rgba(54, 39, 27, .40);
+
+  --cloud: #fffdf4;  --cloud-shade: #e4dcc8;
+
+  --green:   #3d5c34;
+  --crayon:  #a9351f;
+  --crayon-2:#265f92;
+  --crayon-3:#8a5c0c;
+
+  --lamp: transparent;
+
+  --h1:#12AA1C; --h1d:#125B0F; --h2:#51CC0F; --h2d:#1D561A; --h3:#02CC63; --h3d:#2E4439;
+  --h4:#97E09B; --h4d:#2E4439; --h5:#11BE49; --h5d:#284D2B; --h6:#13B12D; --h6d:#1D561A;
+
+  --m1:#63645F; --m1d:#333530; --m2:#4D5952; --m2d:#2B2F2C; --msnow:#D9D9D9;
+  --m3:#648F6F; --m3d:#2F462F; --m4:#418F55; --m4d:#235223;
+
+  --potato: #f6edcb;  --potato-line: #6f553b;  --potato-ink: #2f251d;
+
+  --tape: rgba(255, 253, 240, .55);
+
+  --img-dim: 0;
+  --blend: normal;
+
+  color-scheme: light;
+
+  // The page gutter grows on wide screens, where the margin rule also appears.
+  --gutter: clamp(#{$gutter-min}, 6vw, 90px);
+}
+
+// System preference, unless the visitor has explicitly asked for daylight.
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { @include theme-night; }
+}
+
+// An explicit choice always wins, in both directions.
+:root[data-theme="dark"] { @include theme-night; }
+
+@media (min-width: $bp-wide) {
+  :root { --gutter: #{$gutter-max}; }
+}

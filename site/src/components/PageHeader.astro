@@ -1,0 +1,66 @@
+---
+/**
+ * The top of an interior page: a strip of sky and hills, the page title, and
+ * one line saying what the page is for.
+ *
+ * <PageHeader kicker="02 — together" title="Come see what I made.">
+ *   A neighbourhood is a handful of pages you and a few friends share.
+ * </PageHeader>
+ */
+import Hills from './Hills.astro';
+import PaperEdge from './PaperEdge.astro';
+
+interface Props {
+  kicker: string;
+  title: string;
+  /** Swap the hill band so consecutive pages don't look identical. */
+  scene?: 'mid' | 'front' | 'soft';
+}
+const { kicker, title, scene = 'mid' } = Astro.props;
+---
+
+<header class="head">
+  <div class="head__marks" data-marks aria-hidden="true"></div>
+
+  <Hills layer={scene} height="26vh" drift={-30} rise={40} style="z-index: 1;" />
+
+  <div class="head__words" data-px="12" data-py="-30">
+    <p class="label">{kicker}</p>
+    <h1 class="hand head__title" set:html={title} />
+    <p class="lede"><slot /></p>
+  </div>
+
+  <PaperEdge />
+</header>
+
+<style lang="scss">
+  .head {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 62vh;
+  }
+
+  .head__marks {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .head__words {
+    position: relative;
+    z-index: 10;
+    max-width: 1180px;
+    padding: 18vh clamp(18px, 6vw, 90px) 12vh var(--gutter);
+    will-change: transform;
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  }
+
+  .head__title {
+    text-shadow: 3px 4px 0 var(--paper-2);
+  }
+</style>

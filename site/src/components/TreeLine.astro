@@ -1,0 +1,81 @@
+---
+/**
+ * A row of cut-out trees along the bottom of a scene, swaying gently.
+ *
+ * TO CHANGE THE TREES: edit the `trees` array. Each entry names a file in
+ * site/public/assets/props/ and how tall it stands, in vh. Anything in that
+ * folder works — have a look at what is in there.
+ */
+interface Props {
+  drift?: number;
+  rise?: number;
+  style?: string;
+}
+const { drift = -52, rise = 86, style = '' } = Astro.props;
+
+const trees = [
+  { file: 'pine-tree-tall-01.svg',   height: 25, sway: 9,  delay: 0 },
+  { file: 'tree-02.svg',             height: 17, sway: 12, delay: -3 },
+  { gap: true },
+  { file: 'cactus-03.svg',           height: 9,  sway: 0,  delay: 0 },
+  { file: 'pine-tree-medium-01.svg', height: 21, sway: 11, delay: -6 },
+  { file: 'redwood3.svg',            height: 34, sway: 15, delay: -9 },
+] as const;
+---
+
+<div class="treeline" data-px={drift} data-py={rise} style={style} aria-hidden="true">
+  {trees.map((tree) =>
+    'gap' in tree ? (
+      <div class="treeline__gap"></div>
+    ) : (
+      <img
+        src={`/assets/props/${tree.file}`}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        class="treeline__tree"
+        style={`height:${tree.height}vh;${
+          tree.sway ? `animation-duration:${tree.sway}s;animation-delay:${tree.delay}s;` : 'animation:none;'
+        }`}
+      />
+    ),
+  )}
+</div>
+
+<style lang="scss">
+  .treeline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8vh;
+    display: flex;
+    align-items: flex-end;
+    gap: 2vw;
+    padding: 0 4vw;
+    will-change: transform;
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  }
+
+  .treeline__gap { flex: 1 1 auto; }
+
+  .treeline__tree {
+    flex: 0 0 auto;
+    // A hard offset shadow, as if the cutout were standing a few millimetres
+    // off the page. Not a soft blur — paper does not do soft blur.
+    filter: drop-shadow(6px 10px 0 var(--sh-1));
+    transform-origin: bottom center;
+    animation: sway ease-in-out infinite;
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-1.1deg); }
+    50%      { transform: rotate(1.1deg); }
+  }
+
+  // On a phone the row is mostly off-screen anyway; drop the middle of it so
+  // the tallest trees still read instead of everything squeezing to nothing.
+  @media (max-width: $bp-narrow) {
+    .treeline__tree:nth-child(2),
+    .treeline__tree:nth-child(4) { display: none; }
+  }
+</style>

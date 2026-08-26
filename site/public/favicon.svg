@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="papr.world">
+  <!-- A sheet of paper with one corner folded back. Two tones so it still
+       reads at 16px, where anything finer turns to mush. -->
+  <rect x="0" y="0" width="64" height="64" rx="10" fill="#a9c9e2"/>
+  <path d="M14 10h26l12 12v32a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2Z" fill="#fffdf6"/>
+  <path d="M40 10l12 12H42a2 2 0 0 1-2-2Z" fill="#e9d6a6"/>
+  <g stroke="#63492f" stroke-width="3" stroke-linecap="round">
+    <path d="M20 32h24"/>
+    <path d="M20 41h18"/>
+  </g>
+  <path d="M20 50c4-6 8 4 12-2s6 2 12-4" fill="none" stroke="#a9351f" stroke-width="3" stroke-linecap="round"/>
+</svg>

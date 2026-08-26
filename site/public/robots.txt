@@ -1,0 +1,10 @@
+# papr.world
+
+User-agent: *
+Allow: /
+
+# The game itself is behind the alpha door and there is nothing here for a
+# crawler to index — every URL under it needs a code.
+Disallow: /play
+
+Sitemap: https://papr.world/sitemap-index.xml

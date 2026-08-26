@@ -1,0 +1,192 @@
+---
+/**
+ * The footer. On every page.
+ *
+ * The "things hidden" list counts src/data/critters.ts rather than stating a
+ * number, so it can never promise five and hide two again.
+ */
+import Critter from './Critter.astro';
+import { CRITTER_COUNT, spellOut } from '../data/critters';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+  <div class="foot__marks" data-marks aria-hidden="true"></div>
+
+  <div class="foot__inner">
+    <div class="foot__cols">
+      <div>
+        <p class="foot__wordmark">papr.world</p>
+        <p class="foot__blurb">
+          A small paper neighbourhood, being folded slowly and on purpose.
+        </p>
+        <div class="foot__buttons">
+          <a class="foot__button foot__button--strong" href="/enter/">Enter a code</a>
+          <a class="foot__button" href="/#note">Write to us</a>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="foot__heading">Hidden around the site</h2>
+        <ul class="foot__list">
+          <li>Click any bare paper. It keeps the crayon mark.</li>
+          <li>Click the little friend who follows you down the page. Draw over him.</li>
+          <li>
+            <span class="foot__count">{spellOut(CRITTER_COUNT)}</span> critters are hiding.
+            <strong data-critter-tally>None befriended yet</strong>.
+          </li>
+          <li>A very old cheat code still works here.</li>
+          <li>
+            Press <kbd>T</kbd> to swap the tool in your hand.
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="foot__heading">Built out of</h2>
+        <p class="foot__stack">
+          TypeScript · Three.js · Colyseus · Astro · a great deal of tape
+        </p>
+
+        <div class="foot__moth">
+          <Critter id="footer-moth" shape="moth" size={40} place="position: relative; opacity: .3;" />
+        </div>
+      </div>
+    </div>
+
+    <div class="foot__rule">
+      <p>© {year} papr.world · alpha, and it says so</p>
+      <p>made at a craft table</p>
+    </div>
+  </div>
+</footer>
+
+<style lang="scss">
+  .foot {
+    @include band(var(--paper));
+    @include texture("cork-board.svg", 260px, .12);
+  }
+
+  .foot__marks {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .foot__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(60px, 9vh, 110px) clamp(18px, 6vw, 90px) 48px var(--gutter);
+  }
+
+  .foot__cols {
+    display: grid;
+    gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-items: start;
+  }
+
+  .foot__wordmark {
+    margin: 0;
+    font-family: $font-hand;
+    font-size: 72px;
+    line-height: .8;
+    color: var(--ink);
+  }
+
+  .foot__blurb {
+    margin: 14px 0 0;
+    max-width: 30ch;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .foot__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .foot__button {
+    background: var(--paper-2);
+    border: 1px solid var(--edge);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font: 700 13px/1 $font-body;
+    color: var(--ink);
+    text-decoration: none;
+
+    &:hover { background: var(--kraft-2); }
+    &--strong { background: var(--kraft-2); }
+  }
+
+  .foot__heading {
+    @include label;
+    margin: 0 0 14px;
+    font-size: 12px;
+    letter-spacing: .16em;
+  }
+
+  // spellOut gives "five"; this is a sentence, so it starts with a capital.
+  // Done in CSS so the data file stays plain words rather than sentence-cased
+  // strings that only fit one place.
+  .foot__count { text-transform: capitalize; }
+
+  .foot__list {
+    display: grid;
+    gap: 11px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+
+    strong { color: var(--ink); }
+  }
+
+  kbd {
+    font: 700 12px/1 $font-mono;
+    background: var(--paper-2);
+    border: 1px solid var(--edge);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    padding: 3px 6px;
+  }
+
+  .foot__stack {
+    margin: 0;
+    font: 400 14px/1.7 $font-mono;
+    color: var(--ink-soft);
+  }
+
+  .foot__moth {
+    position: relative;
+    margin-top: 22px;
+    height: 44px;
+  }
+
+  .foot__rule {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 52px;
+    padding-top: 22px;
+    border-top: 1px solid var(--edge-soft);
+
+    p {
+      margin: 0;
+      font: 400 13px/1 $font-mono;
+      color: var(--ink-faint);
+    }
+  }
+</style>

@@ -1,0 +1,259 @@
+---
+/**
+ * "Slip a note under the door" — the one contact form on the site.
+ *
+ * TO CHANGE THE REASONS someone might write: edit the `reasons` array.
+ * TO CHANGE WHERE NOTES GO: api/note.ts at the repo root.
+ *
+ * Two things worth knowing before you edit it:
+ *
+ * 1. The reason chips are real <input type="checkbox">, not buttons pretending
+ *    to be checkboxes. They arrive at the server on their own if JavaScript
+ *    never loads, they are announced correctly, and space toggles them the
+ *    way a checkbox is supposed to.
+ * 2. The form has a real action and method, so it submits and works with
+ *    JavaScript switched off. The script in src/scripts/note-form.ts only
+ *    upgrades it to submit in place without losing the page.
+ */
+const reasons = [
+  'Join the alpha waitlist',
+  'Subscribe to updates',
+  'I want to help build it',
+  'Art / asset contribution',
+  'I have an idea for the game',
+];
+---
+
+<form class="note" method="post" action="/api/note" data-note-form>
+  <fieldset class="note__reasons">
+    <legend>
+      I'm writing because …
+      <span class="note__hint">(tick as many as apply)</span>
+    </legend>
+
+    <div class="note__chips">
+      {reasons.map((reason, index) => (
+        <label class="chip">
+          <input type="checkbox" name="reason" value={reason} />
+          <span>{reason}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <div class="note__pair">
+    <label class="field">
+      <span class="field__label">What should we call you</span>
+      <input type="text" name="name" autocomplete="nickname" placeholder="pilcrow, fern, bug-on-wheels…" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">
+        Where to send the letter
+        <span class="note__hint">(only if you want one back)</span>
+      </span>
+      <input type="email" name="email" autocomplete="email" placeholder="you@somewhere.paper" />
+    </label>
+  </div>
+
+  <label class="field">
+    <span class="field__label">
+      The note itself
+      <span class="note__hint">(optional, but the good ones are long)</span>
+    </span>
+    <textarea name="note" rows="5" class="field__lined" placeholder="I keep thinking about a paper mailbox that…"></textarea>
+  </label>
+
+  {/*
+    The spam trap. Real people never see or focus this; the automated ones
+    fill in everything they find. aria-hidden and tabindex keep it out of the
+    way of anyone using a screen reader or a keyboard.
+  */}
+  <p class="note__trap" aria-hidden="true">
+    <label>Leave this empty
+      <input type="text" name="fold" tabindex="-1" autocomplete="off" />
+    </label>
+  </p>
+
+  <div class="note__send">
+    <button type="submit" class="btn">
+      Post it
+      <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
+        <path d="M1 8h17M13 2.5L19.5 8 13 13.5" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+
+    {/*
+      The receipt. aria-live means the outcome is announced when it changes,
+      so someone who cannot see the form turn green still finds out it worked.
+    */}
+    <p class="note__receipt" data-note-receipt role="status" aria-live="polite">
+      No newsletter machine on the other end. Just a mailbox somebody actually opens.
+    </p>
+  </div>
+</form>
+
+<style lang="scss">
+  .note {
+    @include card(var(--paper), var(--paper-2));
+    --tilt: -.5deg;
+    max-width: 860px;
+    margin-top: 46px;
+    padding: clamp(26px, 4vw, 48px);
+    border-radius: 6px 20px 8px 18px;
+    box-shadow: 8px 18px 0 var(--paper-2), 12px 30px 54px var(--sh-2);
+
+    &::before { @include tape(12%, 96px, -4deg); }
+    &::after  { @include tape(auto, 78px, 6deg);  right: 16%; left: auto; }
+  }
+
+  .note__reasons {
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      padding: 0 0 14px;
+      font: 700 13px/1 $font-body;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+  }
+
+  .note__hint {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-faint);
+  }
+
+  .note__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  // ── A chip is a checkbox wearing a coat ──────────────────────────────────
+  .chip {
+    position: relative;
+    display: inline-flex;
+
+    input {
+      // Not display:none — a hidden input cannot be focused or announced.
+      // It sits exactly on top of its own label, invisible but real.
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 17px;
+      background: var(--paper-2);
+      border: 1px solid var(--edge);
+      border-radius: 999px;
+      box-shadow: 0 3px 0 var(--paper-3);
+      font: 500 15px/1 $font-body;
+      color: var(--ink);
+      transition: transform $dur-quick $ease-paper;
+    }
+
+    // Ticked: darker stock, a heavier edge, AND a tick mark drawn in — three
+    // signals, so it is not colour doing the work on its own.
+    input:checked + span {
+      background: var(--kraft-2);
+      border-color: var(--ink);
+      box-shadow: 0 3px 0 var(--kraft-3);
+      font-weight: 700;
+
+      &::before { content: "✓"; font-weight: 700; color: var(--green); }
+    }
+
+    input:focus-visible + span { @include focus-ring; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      input:hover + span { transform: translateY(-2px); }
+    }
+  }
+
+  .note__pair {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    margin-top: 30px;
+  }
+
+  .field {
+    display: grid;
+    gap: 7px;
+    margin-top: 18px;
+
+    input, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      // background-COLOR, not the shorthand: the shorthand would wipe out the
+      // ruled lines that .field__lined paints underneath.
+      background-color: var(--paper-2);
+      border: 1px solid var(--edge);
+      border-radius: 9px;
+      font: 400 16px/1.4 $font-body;
+      color: var(--ink);
+    }
+
+    textarea { resize: vertical; }
+  }
+
+  .note__pair .field { margin-top: 0; }
+
+  .field__label {
+    font: 700 12px/1.4 $font-mono;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  // Notebook rule inside the big text box. The line spacing matches the
+  // textarea's line-height so what you type sits ON the lines, not across
+  // them — which is the entire point of ruled paper.
+  .field__lined {
+    @include ruled(22.4px);
+    background-color: var(--paper-2);
+    line-height: 22.4px;
+    padding-top: 12px;
+  }
+
+  .note__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .note__send {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .note__receipt {
+    margin: 0;
+    max-width: 36ch;
+    font: 400 14px/1.5 $font-body;
+    color: var(--ink-faint);
+  }
+
+  // Set by src/scripts/note-form.ts once the server has said yes or no.
+  .note__receipt[data-state="sent"]  { color: var(--green); font-weight: 700; }
+  .note__receipt[data-state="failed"] { color: var(--crayon); font-weight: 700; }
+</style>

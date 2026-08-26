@@ -1,0 +1,77 @@
+---
+/**
+ * A sticky note taped to the page, with a line of typewritten text on it.
+ * Used for the little asides that quote the game's own source.
+ *
+ * <StickyNote tint="yellow" cite="sky.ts">the sky drifts through four…</StickyNote>
+ */
+interface Props {
+  /** yellow · green · peach — the pad it was torn off. */
+  tint?: 'yellow' | 'green' | 'peach';
+  /** Small credit line under the note, e.g. a filename. */
+  cite?: string;
+  /** Degrees of lean. */
+  turn?: string;
+  width?: string;
+  class?: string;
+  style?: string;
+}
+const { tint = 'yellow', cite, turn = '5deg', width = '176px', class: cls = '', style = '' } = Astro.props;
+---
+
+<div class:list={['sticky', `sticky--${tint}`, cls]} style={`--turn:${turn};--w:${width};${style}`}>
+  <div class="sticky__pad">
+    <p class="sticky__text"><slot /></p>
+    {cite && <p class="sticky__cite">— {cite}</p>}
+  </div>
+</div>
+
+<style lang="scss">
+  .sticky {
+    width: var(--w);
+    transform: rotate(var(--turn));
+    animation: flutter 8s ease-in-out infinite;
+  }
+
+  @keyframes flutter {
+    0%, 100% { transform: rotate(calc(var(--turn) - 2deg)) translateY(0); }
+    50%      { transform: rotate(calc(var(--turn) + 2deg)) translateY(-3px); }
+  }
+
+  .sticky__pad {
+    position: relative;
+    padding: 18px 16px 22px;
+    // Only the bottom-right corner is curled; the other three are still stuck.
+    border-radius: 3px 3px 10px 3px;
+    box-shadow: 3px 8px 18px var(--sh-2);
+
+    // The strip of tape holding it on.
+    &::before { @include tape(50%, 62px, -3deg, -12px); margin-left: -31px; height: 24px; }
+  }
+
+  // Sticky pads are printed on saturated stock that does not have a night
+  // version — they are the same paper in both themes, just less bright.
+  .sticky--yellow .sticky__pad { background: #fdf0a6; color: #4a3a1a; }
+  .sticky--green  .sticky__pad { background: #cfe6c6; color: #2c4429; }
+  .sticky--peach  .sticky__pad { background: #f3c9a1; color: #4a2f16; }
+
+  :global(:root[data-theme="dark"]) .sticky__pad { filter: saturate(.62) brightness(.7); }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .sticky__pad { filter: saturate(.62) brightness(.7); }
+  }
+
+  .sticky__text {
+    margin: 0;
+    font: 400 13px/1.42 $font-mono;
+    color: inherit;
+  }
+
+  .sticky__cite {
+    margin: 8px 0 0;
+    font: 700 10px/1 $font-mono;
+    letter-spacing: .1em;
+    opacity: .65;
+    color: inherit;
+  }
+</style>

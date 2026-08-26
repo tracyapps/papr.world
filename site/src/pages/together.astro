@@ -1,0 +1,289 @@
+---
+/**
+ * /together — how a neighbourhood works, and the rules that keep it kind.
+ */
+import Base from '../layouts/Base.astro';
+import Sky from '../components/Sky.astro';
+import PageHeader from '../components/PageHeader.astro';
+import PaperCard from '../components/PaperCard.astro';
+import StickyNote from '../components/StickyNote.astro';
+import Critter from '../components/Critter.astro';
+---
+
+<Base
+  title="Together"
+  description="A neighbourhood is a handful of paper pages you and a few friends share. Helping is a first-class verb, and the rewards are never an advantage."
+>
+  <Sky />
+
+  <PageHeader kicker="02 — the social contract" title="Come see<br />what I made." scene="front">
+    A neighbourhood is a handful of paper pages you and a few friends share.
+    You see each other move, you chat, you place things, you leave things for
+    each other.
+  </PageHeader>
+
+  <section class="band">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <div class="split">
+        <div class="prose">
+          <p>
+            The thing being built here is not a server with a lot of people on
+            it. It is a <strong>handful of pages that a few friends share</strong>,
+            reached with a code somebody gave you, where the interesting
+            sentence is <em>come see what I made</em>.
+          </p>
+          <p>
+            That framing decides the mechanics. There is no server browser,
+            because meeting strangers by accident is a different product with a
+            different set of problems. There is no leaderboard, because the
+            fastest way to make helping feel like a chore is to score it.
+          </p>
+
+          <ul class="ticks">
+            <li>Join by invite code, not by browsing a server list</li>
+            <li>Everything you place remembers who made it</li>
+            <li>Plans are knowledge — they can't be sold, only learned</li>
+            <li>Generosity means making a thing and giving that thing</li>
+            <li>A plain URL is always solo, and never opens a socket</li>
+          </ul>
+        </div>
+
+        <div class="chat-wrap">
+          {/* A picture of the chat, not the chat. Marked as such for anyone
+              who cannot see that it is obviously a mock-up. */}
+          <figure class="chat">
+            <div class="chat__top">
+              <span class="chat__name">neighbourhood chat</span>
+              <span class="chat__state">Online · 3</span>
+            </div>
+            <div class="chat__lines">
+              <p><strong class="chat__who chat__who--a">fern</strong> ok the bridge is done. it is extremely a bridge</p>
+              <p><strong class="chat__who chat__who--b">bug&#8209;on&#8209;wheels</strong> i taped a second roof onto the roof</p>
+              <p><strong class="chat__who chat__who--c">pilcrow</strong> left you four paper fibers in the mailbox, don't spend it all</p>
+              <p class="chat__event">fern placed a folded roof</p>
+            </div>
+            <div class="chat__bar" aria-hidden="true">
+              <span class="chat__field">say something nice…</span>
+              <span class="chat__send">send</span>
+            </div>
+            <figcaption class="chat__cap">
+              An example of neighbourhood chat. It is plain accessible DOM, not text
+              painted into the game canvas.
+            </figcaption>
+          </figure>
+
+          <Critter id="thread-spider" shape="spider" place="left: -34px; bottom: -30px;" size={46} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--sunk">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <p class="label">what you can give</p>
+      <h2 class="hand">Give the thing,<br />not the shortcut.</h2>
+      <p class="lede">
+        Generosity in papr.world means making something and handing it over.
+        The one thing that can never change hands is knowledge.
+      </p>
+
+      <div class="cards">
+        <PaperCard title="Things you can give" note="tools · furniture · clothing · decoration" turn="-.8deg">
+          <p>
+            Anything you made, plus materials, chips, and harvests. Hand it over
+            in person or put it in somebody's mailbox.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Things you cannot" note="plans are learned, never transferred" turn="1deg" mirrored>
+          <p>
+            Plans are never found, sold, gifted or mailed. Giving somebody a
+            plan would be handing them a shortcut past a path they chose — and
+            it would quietly make the knowledge tree pointless.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="What helping earns" note="ribbons · wall charms · thank-you stamps" turn="-1.4deg">
+          <p>
+            Never an advantage. Payoffs are random, non-fungible and never
+            itemised — a trinket brought round by a critter who heard you did
+            something nice, worth less than the thing you gave away.
+          </p>
+        </PaperCard>
+
+        <PaperCard title="Who made it" note="every placed piece carries a maker id" turn=".6deg" mirrored>
+          <p>
+            Maker credit is written into the piece itself, so it survives
+            disconnects, restarts, and you wandering off for a month.
+          </p>
+        </PaperCard>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band__marks" data-marks aria-hidden="true"></div>
+
+    <div class="band__inner">
+      <p class="label">the unglamorous part</p>
+      <h2 class="hand">Small on purpose.</h2>
+
+      <div class="prose">
+        <p>
+          Invite-only is a real safety boundary, not a waiting-list gimmick.
+          It keeps the first neighbourhoods to people who already know each
+          other, which is the cheapest possible way to make moderation
+          tractable while the actual controls get built.
+        </p>
+        <p>
+          It is also not a substitute for those controls. Mute, block, host
+          removal and contextual reporting all ship before testers can chat or
+          share drawings — that is written into the gate, not left to good
+          intentions.
+        </p>
+        <p>
+          A paper passport is the identity behind all of it: an id and a secret
+          minted on your device, holding <strong>no personal information at
+          all</strong>. No email, no name you have to give anybody. It is what
+          makes "made by wren" and a mailbox survive a restart, and nothing more
+          than that.
+        </p>
+      </div>
+
+      <div class="aside">
+        <StickyNote tint="green" turn="-2deg" cite="the Gate 0 dogfood">
+          two browsers, one code, a bridge that survived a full server restart.
+          that was the whole gate.
+        </StickyNote>
+      </div>
+
+      <p class="more"><a href="/roadmap/#the-invited-alpha">Where the alpha has got to →</a></p>
+    </div>
+  </section>
+</Base>
+
+<style lang="scss">
+  .split {
+    display: grid;
+    gap: clamp(34px, 5vw, 70px);
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    align-items: start;
+  }
+
+  // ── The chat mock-up ─────────────────────────────────────────────────────
+
+  .chat-wrap { position: relative; }
+
+  .chat {
+    @include card(var(--paper), var(--paper-2));
+    --tilt: 1.4deg;
+    margin: 0;
+    padding: 20px 18px 22px;
+    border-radius: $radius-lg;
+    box-shadow: 6px 14px 0 var(--paper-2), 10px 26px 44px var(--sh-2);
+  }
+
+  .chat__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--edge-soft);
+  }
+
+  .chat__name  { font: 700 14px/1 $font-body; color: var(--ink); }
+  .chat__state { font: 700 11px/1 $font-mono; letter-spacing: .1em; text-transform: uppercase; color: var(--green); }
+
+  .chat__lines {
+    display: grid;
+    gap: 12px;
+    padding: 16px 0 4px;
+
+    p { margin: 0; font: 400 15px/1.4 $font-note; color: var(--ink); }
+  }
+
+  .chat__who      { font-weight: 700; }
+  .chat__who--a   { color: var(--crayon-2); }
+  .chat__who--b   { color: var(--crayon-3); }
+  .chat__who--c   { color: var(--crayon); }
+
+  .chat__event { font-style: italic; font-size: 14px; color: var(--ink-faint); }
+
+  .chat__bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--edge-soft);
+  }
+
+  .chat__field {
+    padding: 9px 10px;
+    background: var(--paper-2);
+    border: 1px solid var(--edge);
+    border-radius: 7px;
+    font: 400 13px/1.2 $font-body;
+    color: var(--ink-faint);
+  }
+
+  .chat__send {
+    padding: 9px 14px;
+    background: var(--kraft-2);
+    border: 1px solid var(--edge);
+    border-radius: 7px;
+    font: 700 13px/1.2 $font-body;
+    color: var(--ink);
+  }
+
+  .chat__cap {
+    margin-top: 14px;
+    font: 400 12px/1.5 $font-mono;
+    color: var(--ink-faint);
+  }
+
+  // ── Shared ───────────────────────────────────────────────────────────────
+
+  .ticks {
+    display: grid;
+    gap: 10px;
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 16px;
+    color: var(--ink);
+
+    li {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+
+      &::before { content: "✓"; flex: none; color: var(--green); font-weight: 700; }
+    }
+  }
+
+  .cards {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+    margin-top: 46px;
+  }
+
+  .aside { margin-top: 48px; }
+
+  .more {
+    margin: 40px 0 0;
+
+    a {
+      font: 700 16px/1 $font-body;
+      color: var(--crayon);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+
+      &:hover { color: var(--ink); }
+    }
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+/**
+ * The folded-paper scenery: mountains and three depths of hill.
+ *
+ * ── Why the hills used to get their tops cut off ─────────────────────────
+ * Two things were wrong, and fixing only one of them would not have done it.
+ *
+ * 1. THE VIEWBOX WAS MOSTLY EMPTY. These drawings were exported on a canvas
+ *    about 900 units tall with all the ink crammed into the bottom third.
+ *    Every viewBox below is now tightened to the real bounding box of the
+ *    paths, so the frame is the artwork rather than the artwork plus a great
+ *    deal of blank sky.
+ *
+ * 2. THE BAND IS FAR WIDER THAN IT IS TALL. A scenery band is roughly 116%
+ *    of the window wide and a quarter of it high — say 1670 × 270, an aspect
+ *    of about 6. The tightest viewBox here is about 3. With
+ *    `preserveAspectRatio="slice"` the browser scales the drawing until it
+ *    COVERS that box and discards the overhang, which meant scaling to the
+ *    width and then throwing away half the height — starting at the top,
+ *    where the peaks are. Hence flat-topped mountains at almost every window
+ *    size, and differently flat-topped at each one.
+ *
+ * So these use `preserveAspectRatio="none"`, which stretches the drawing to
+ * fill the band exactly. For abstract folded-paper triangles that is not a
+ * distortion worth avoiding — there is no correct proportion for a paper
+ * hill — and it guarantees the whole silhouette is always visible, at every
+ * window shape, with no cropping at all.
+ *
+ * If you add a shape and it looks squashed, change the BAND HEIGHT where the
+ * component is used. Do not reach for `slice`; that is what cropped it before.
+ */
+interface Props {
+  /** Which band of scenery to draw. */
+  layer: 'mountains' | 'mid' | 'front' | 'soft';
+  /** Height of the band, any CSS length. */
+  height?: string;
+  /** How far it drifts with the pointer. Negative = moves against you. */
+  drift?: number;
+  /** How far it rises as you scroll past. */
+  rise?: number;
+  class?: string;
+  style?: string;
+}
+
+const { layer, height = '30vh', drift = 0, rise = 0, class: cls = '', style = '' } = Astro.props;
+
+// Real ink bounds, measured off the path data.
+const BOX = {
+  mountains: '-60 450 1612 450',
+  mid:       '-7 550 1181 370',
+  front:     '10 487 1307 433',
+  soft:      '18 569 928 351',
+} as const;
+---
+
+<div
+  class:list={['hills', cls]}
+  data-px={drift || undefined}
+  data-py={rise || undefined}
+  style={`--band-height:${height};${style}`}
+  aria-hidden="true"
+>
+  <svg viewBox={BOX[layer]} preserveAspectRatio="none" class="hills__svg">
+    {layer === 'mountains' && (
+      <>
+        <polygon fill="var(--m3)"  points="957 450 539 900 1396 900" />
+        <polygon fill="var(--m3d)" points="957 450 872.9 900 1396 900" />
+        <polygon fill="var(--m2)"  points="-60 900 398 662 816 900" />
+        <polygon fill="var(--m2d)" points="337 900 398 662 816 900" />
+        <polygon fill="var(--m1)"  points="1203 546 1552 900 876 900" />
+        <polygon fill="var(--m1d)" points="1203 546 1552 900 1162 900" />
+        <polygon fill="var(--msnow)" points="1203 546 1288 632 1237 610 1203 626 1160 616" />
+        <polygon fill="var(--m4)"  points="641 695 886 900 367 900" />
+        <polygon fill="var(--m4d)" points="587 900 641 695 886 900" />
+      </>
+    )}
+
+    {layer === 'mid' && (
+      <>
+        <path fill="var(--h4)"  d="M473.92 550.11 -7 920.11 979 920.11Z" />
+        <path fill="var(--h4d)" d="M473.92 550.11 377.16 920.11 979 920.11Z" />
+        <path fill="var(--h5)"  d="M825 589.11 1174 920.11 498 920.11Z" />
+        <path fill="var(--h5d)" d="M825 589.11 1174 920.11 784 920.11Z" />
+        <path fill="var(--h1)"  d="M498 920.11 259 795.11 13 920.11Z" />
+        <path fill="var(--h1d)" d="M231 920.11 498 920.11 259 795.11Z" />
+        <path fill="var(--h6)"  d="M1120 920.11 811 824.11 506 920.11Z" />
+        <path fill="var(--h6d)" d="M1120 920.11 811 824.11 775 920.11Z" />
+      </>
+    )}
+
+    {layer === 'front' && (
+      <>
+        <path fill="var(--h1)"  d="M1135 920.11 580.62 487.11 10 920.11Z" />
+        <path fill="var(--h1d)" d="M515.67 920.11 1135 920.11 580.62 487.11Z" />
+        <path fill="var(--h2)"  d="M1317 920.11 717.62 653.11 126 920.11Z" />
+        <path fill="var(--h2d)" d="M1317 920.11 717.62 653.11 647.79 920.11Z" />
+        <path fill="var(--h3)"  d="M959.65 593.11 647 920.11 1288 920.11Z" />
+        <path fill="var(--h3d)" d="M959.65 593.11 896.74 920.11 1288 920.11Z" />
+      </>
+    )}
+
+    {layer === 'soft' && (
+      <>
+        <path fill="var(--h6)"  d="M946 920.11 535.34 738.57 130 920.11Z" />
+        <path fill="var(--h6d)" d="M946 920.11 535.34 738.57 487.5 920.11Z" />
+        <path fill="var(--h4)"  d="M388.2 569.11 18 920.11 777 920.11Z" />
+        <path fill="var(--h4d)" d="M388.2 569.11 313.72 920.11 777 920.11Z" />
+      </>
+    )}
+  </svg>
+</div>
+
+<style lang="scss">
+  .hills {
+    position: absolute;
+    // The overhang is what lets the band drift sideways without a bald edge
+    // appearing at the side of the window. It is why <body> clips overflow-x.
+    left: -8%;
+    right: -8%;
+    bottom: 0;
+    will-change: transform;
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  }
+
+  .hills__svg {
+    display: block;
+    width: 100%;
+    height: var(--band-height);
+  }
+</style>
