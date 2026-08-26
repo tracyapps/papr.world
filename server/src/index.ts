@@ -384,7 +384,9 @@ gameServer.define(DEFAULT_ROOM, PaperRoom).filterBy(['inviteCode']);
 gameServer.onShutdown(() => accounts.flush());
 
 await gameServer.listen(port);
-console.log(`pencil-and-paper server listening on ws://localhost:${port}`);
+// Not "localhost" — this line is read far more often in a deploy log than on
+// a laptop, and claiming localhost there is actively confusing.
+console.log(`pencil-and-paper server listening on port ${port}`);
 console.log(
   `room "${DEFAULT_ROOM}" ready (max ${LIMITS.playersPerRoom}) — /health, POST /account, feedback + review API`,
 );

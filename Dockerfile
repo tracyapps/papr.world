@@ -59,4 +59,17 @@ WORKDIR /app/server
 # volume, and then hands over to `node` via gosu. The server itself never runs
 # as root.
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
-CMD ["npm", "start"]
+
+# node directly, NOT `npm start`.
+#
+# `npm start` inserts two processes between the signal and the server:
+#   tini -> npm -> sh -c "tsx src/index.ts" -> node
+# SIGTERM then has to be relayed twice, npm reports the signal as an ERROR
+# ("npm error signal SIGTERM") which makes an ordinary redeploy look like a
+# crash in the logs, and Colyseus's graceful shutdown -- which flushes pending
+# account writes -- may not get to run at all.
+#
+# Running node as the direct child of tini means the signal lands on the
+# process that knows what to do with it. `--import tsx` is how tsx runs as a
+# loader rather than as its own wrapper process.
+CMD ["node", "--import", "tsx", "src/index.ts"]

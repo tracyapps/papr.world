@@ -207,6 +207,43 @@ will look like one person).
 
 ---
 
+## Reading the Railway log
+
+A healthy boot prints, in this order:
+
+```
+pencil-and-paper server listening on port 8080
+room "neighborhood" ready (max 16) — /health, POST /account, feedback + review API
+removal: enabled — owner account 1a2b3c4d…, guests refused
+safety reports: queued, /review/reports needs PP_MODERATION_TOKEN
+CORS: pinned to https://papr.world
+```
+
+Those middle lines are the safety posture, printed on purpose so you can read
+it off a deploy rather than guess at it. `removal: DISABLED` means step 5 is
+still undone: nobody can be removed from a neighbourhood, including you.
+
+If a `FATAL` line about the data directory appears instead, the server has
+stopped on purpose - see the volume note below. It refuses to run rather than
+accept a world it cannot save.
+
+**`Stopping Container` on its own is not an error.** It is what a redeploy
+looks like: the new build comes up, the old container is asked to stop, and
+that line is the asking. Two things make it appear when you did not deploy:
+Railway's **App Sleeping** setting, which stops the service after a quiet
+period (find it under the service's Settings; turn it off for alpha, or
+accept a cold start on the first visit of the day), and a crash loop, which
+you can tell apart because a crash prints a stack trace first.
+
+**`npm error signal SIGTERM` was our own bug, and is fixed.** `npm start` sat
+between the container and the server, so an ordinary stop had to be relayed
+through two extra processes and npm reported it as a failure. The container
+now runs node directly, so a stop is quiet and the server gets to flush
+pending passport writes on the way out. If you still see that line, the
+deploy predates the fix - redeploy.
+
+---
+
 ## When the neighborhood will not open
 
 The message names the server it tried. Match it to one of these.
