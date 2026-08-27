@@ -345,7 +345,18 @@ function handleReviewExport(req: Request, res: Response): void {
 }
 
 const gameServer = new Server({
-  transport: new WebSocketTransport(),
+  // WHY THESE NUMBERS: the transport pings every client on a timer and
+  // hard-terminates anyone who has not ponged after `pingMaxRetries` of them.
+  // The library default is 3s x 2, which is a SIX SECOND patience budget --
+  // fine on a LAN, far too tight across a hosted proxy, a phone changing
+  // towers, or a laptop lid closed for a moment. Six seconds of bad wifi
+  // should not end a visit to a cozy neighbourhood.
+  //
+  // 8s x 5 gives forty seconds before a socket is declared dead. The cost of
+  // being generous is only that a genuinely dead connection lingers a little
+  // longer in the room; the cost of being strict is people being thrown out
+  // of a game they were playing.
+  transport: new WebSocketTransport({ pingInterval: 8000, pingMaxRetries: 5 }),
   express: (app) => {
     app.use((req: Request, res: Response, next: NextFunction) => {
       withCors(req, res);

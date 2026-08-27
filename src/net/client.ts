@@ -63,7 +63,14 @@ export type NetCallbacks = {
   onRemoved?: (notice: RemovedNotice) => void;
   /** An intent was refused — surface a quiet hint. */
   onRejected?: (info: Rejected) => void;
-  /** Connection dropped. */
+  /**
+   * The socket died and the SDK has started trying to get it back. This is
+   * NOT the end of the visit — the server holds the seat for about a minute.
+   */
+  onDropped?: (code: number) => void;
+  /** It worked: same seat, same avatar, same neighbourhood. */
+  onReconnected?: () => void;
+  /** The visit is over, for one of the reasons in closeReason.ts. */
   onLeave?: (code: number) => void;
 };
 
@@ -136,6 +143,17 @@ export async function connect(
   wirePlayers(room, stateCallbacks, selfId, buffer, callbacks);
   wirePieces(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
+  // Three distinct endings, and they used to be one.
+  //
+  // The SDK reconnects by itself: on an unexpected close it fires onDrop and
+  // then retries with exponential backoff, reusing THIS room object and this
+  // state, so nothing below needs re-wiring and no avatars need rebuilding.
+  // Messages sent while it is away are queued and flushed on return.
+  //
+  // onLeave now only fires when it is genuinely over — a deliberate leave, a
+  // removal, or the retries running out (code 4003).
+  room.onDrop((code: number) => callbacks.onDropped?.(code));
+  room.onReconnect(() => callbacks.onReconnected?.());
   room.onLeave((code) => callbacks.onLeave?.(code));
 
   // Throttle outbound movement so we don't flood past the server tick.

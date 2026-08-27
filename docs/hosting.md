@@ -280,6 +280,31 @@ fix on 2026-08-26 the server also answered 400 when it could not write to
 disk, which was a lie: the request was fine and the server was broken. If you
 are seeing 400 from an old deploy, redeploy first and read the message again.
 
+**It connects, then drops you after a while.** A brief drop should no longer
+end the visit at all: the game now says "lost the thread for a moment", the
+server holds your seat for 60 seconds, and the client retries on its own
+backoff for about a minute. Your avatar stays standing in the room the whole
+time and anything you typed while away is delivered when you get back.
+
+If it *does* end, the notice carries a close code — read that first, and the
+browser console line beside it says what to check.
+
+- **1006** — the network went away, or the server stopped hearing from the
+  browser and hung up. The server waits `pingInterval x pingMaxRetries` before
+  giving up; that is 8s x 5 = 40s, set in `server/src/index.ts`. It used to be
+  the library default of 3s x 2 — six seconds, which threw people out for an
+  ordinary wifi hiccup.
+- **4003** — reconnection was attempted and ran out of road. The outage lasted
+  longer than the 60-second grace window in `PaperRoom.ts`, or the server came
+  back as a different process with no memory of the seat (a redeploy).
+- **1001 / 4001** — the server shut down. That is a redeploy, or Railway's
+  **App Sleeping** stopping the service after a quiet period. Turn App
+  Sleeping off in the service's Settings for the alpha.
+- **4000** — a normal, deliberate leave. Nothing is wrong.
+
+If everyone drops at the same moment, it is the server (deploy or sleep). If
+one person drops and the others carry on, it is that person's connection.
+
 **"answered 403"** on joining — the code is not in `PAPR_ALPHA_CODES`, or that
 account is banned from that neighbourhood.
 

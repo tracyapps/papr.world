@@ -6,6 +6,7 @@ import { getWornDesign } from '../ui/avatarEditor/wardrobe';
 import { initializeSharedChat } from '../ui/sharedChat';
 import { getCurrentPageId } from '../world/streaming';
 import { connect, type NetConnection } from './client';
+import { describeClose } from './closeReason';
 import { getOrCreatePassport } from './passport';
 import {
   addRemoteAvatar,
@@ -210,15 +211,47 @@ export async function initializeSharedSession(): Promise<void> {
           if (info.action === 'move' && info.reason === 'too-far') return;
           showPetToast(`The neighborhood could not ${info.action}: ${info.reason}.`);
         },
-        onLeave: () => {
+        onDropped: () => {
+          // Deliberately quiet and deliberately not "offline". Nothing has
+          // been lost yet: their avatar is still standing in the room and the
+          // seat is held. Saying "disconnected" here would send someone off to
+          // re-enter a neighbourhood they have not actually left.
+          ui.setStatus('reconnecting…');
+          ui.addNotice('Lost the thread for a moment — finding the neighborhood again.');
+          publishStatus({
+            phase: 'online',
+            message: 'Reconnecting to the neighborhood…',
+            name: config.name,
+            inviteCode: config.inviteCode,
+            intent: config.intent,
+          });
+        },
+        onReconnected: () => {
+          ui.setStatus(`online as ${config.name}`, true);
+          ui.addNotice('Back in the neighborhood.');
+          publishStatus({
+            phase: 'online',
+            message: `Online in neighborhood ${config.inviteCode}.`,
+            name: config.name,
+            inviteCode: config.inviteCode,
+            intent: config.intent,
+          });
+        },
+        onLeave: (code) => {
+          // The close code is the only evidence there is about WHY a visit
+          // ended, and it used to be thrown away. Leaving on purpose and
+          // being hung up on by a server that stopped hearing from you are
+          // different events and should not read the same.
+          const reason = describeClose(code);
           clearRemoteAvatars();
           connected = false;
           connection = null;
           ui.setStatus('offline');
-          ui.addNotice('The neighborhood connection closed. Solo play is still here.');
+          ui.addNotice(`${reason.notice} (code ${reason.code})`);
+          console.info(`[neighborhood] connection closed — ${reason.detail}`);
           publishStatus({
             phase: 'offline',
-            message: 'The neighborhood connection closed. Your solo world is still safe.',
+            message: `${reason.notice} Your solo world is still safe.`,
             name: config.name,
             inviteCode: config.inviteCode,
             intent: config.intent,

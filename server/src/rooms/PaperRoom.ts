@@ -62,6 +62,23 @@ type Session = {
 
 const DEFAULT_PERSISTENCE_ID = 'neighborhood';
 
+/**
+ * How long a dropped visitor's seat is held open.
+ *
+ * Matched to the client SDK's own retry schedule (15 attempts on exponential
+ * backoff, capped at 5s apiece, which runs to roughly a minute). Longer would
+ * keep a room alive for someone who is not coming back; shorter would give up
+ * while their browser is still politely knocking.
+ */
+const RECONNECT_GRACE_SECONDS = 60;
+
+/**
+ * WebSocket close code 4000. Colyseus reads it as "this departure was meant",
+ * which routes it to onLeave rather than onDrop — so a removal ends the visit
+ * instead of holding a seat open for the person who was just removed.
+ */
+const CONSENTED_CLOSE = 4000;
+
 type PaperRoomOptions = {
   state: PaperRoomState;
   metadata: { inviteCode: string };
@@ -197,9 +214,84 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
   }
 
+  /**
+   * A deliberate departure: they closed the tab, went back to solo, or were
+   * removed by the owner. Their paper self is put away.
+   */
   override onLeave(client: Client): void {
     this.state.players.delete(client.sessionId);
     this.sessions.delete(client.sessionId);
+  }
+
+  /**
+   * The socket died without a goodbye — bad wifi, a closed laptop lid, a
+   * redeploy, a proxy hiccup.
+   *
+   * WHY THIS IS NOT onLeave: those are genuinely different events and used to
+   * be treated the same, which meant a two-second network blip cost somebody
+   * their avatar, their position, and the chat they were in the middle of.
+   * Colyseus routes an unexpected close here instead, and `allowReconnection`
+   * holds the seat open. Room state is NOT torn down during the wait, so
+   * everyone else keeps seeing them standing where they were, and they slip
+   * back into the same body rather than arriving as a stranger.
+   *
+   * The client SDK retries on its own with exponential backoff — roughly a
+   * minute of trying, which is what this grace window is matched to. If the
+   * window closes, it becomes an ordinary departure.
+   */
+  override async onDrop(client: Client): Promise<void> {
+    if (!this.state.players.has(client.sessionId)) {
+      this.onLeave(client);
+      return;
+    }
+
+    try {
+      await this.allowReconnection(client, RECONNECT_GRACE_SECONDS);
+      // Resolved means they made it back; onReconnect does the re-briefing.
+    } catch {
+      this.onLeave(client);
+    }
+  }
+
+  /**
+   * They made it back into the same seat.
+   *
+   * Two things have to happen here and nowhere else. First the ban check:
+   * `onAuth` does NOT run again on a reconnection — the seat was authorised
+   * when they first joined — so if a ban landed while they were away, this is
+   * the only place it can be enforced. Second the re-briefing: they kept
+   * everything that lives in room state (their avatar, where they stood, the
+   * pieces on the ground) and lost everything delivered as MESSAGES, which is
+   * the chat backlog and their own block list.
+   */
+  override onReconnect(client: Client): void {
+    // `client.auth` is whatever onAuth returned, which here is the account id,
+    // and Colyseus carries it across a reconnection. Read the ban from THAT
+    // rather than from the player, because the owner may have cleared the
+    // player out of room state entirely while this person was away — and that
+    // is precisely the case the check exists for.
+    const accountId = typeof client.auth === 'string' ? client.auth : '';
+
+    if (accountId && this.banned.has(accountId)) {
+      client.send(ServerMessage.Removed, { reason: 'banned' });
+      client.leave(CONSENTED_CLOSE);
+      return;
+    }
+
+    const player = this.state.players.get(client.sessionId);
+
+    // No player and no ban means an ordinary removal landed while they were
+    // away. Same outcome, different sentence.
+    if (!player) {
+      client.send(ServerMessage.Removed, { reason: 'removed-by-owner' });
+      client.leave(CONSENTED_CLOSE);
+      return;
+    }
+
+    client.send(ServerMessage.ChatHistory, {
+      lines: this.chatLog.filter((line) => !blocks.isBlocked(player.accountId, line.accountId)),
+    });
+    client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
   }
 
   // ---- Handlers -------------------------------------------------------------
@@ -429,7 +521,19 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       const occupant = this.state.players.get(other.sessionId);
       if (occupant?.accountId !== target) continue;
       other.send(ServerMessage.Removed, { reason: msg.ban ? 'banned' : 'removed-by-owner' });
-      other.leave(4000);
+      other.leave(CONSENTED_CLOSE);
+    }
+
+    // Someone can be mid-reconnection when the owner removes them: their
+    // socket is gone, so the loop above never sees them, but their paper self
+    // is still standing in the room holding a reserved seat. Clear it. A ban
+    // would stop them at onReconnect anyway; a plain removal would not, and an
+    // owner who removed somebody should not watch them walk back in.
+    for (const [sessionId, occupant] of [...this.state.players.entries()]) {
+      if (occupant.accountId !== target) continue;
+      if (this.clients.some((c) => c.sessionId === sessionId)) continue;
+      this.state.players.delete(sessionId);
+      this.sessions.delete(sessionId);
     }
   }
 
