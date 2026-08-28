@@ -4,118 +4,177 @@
     "greetings": {
       "squirrel": [
         "Oh! Hello. I was counting acorns, but I am happy to lose count.",
-        "You came back! I saved the sunniest patch of paper."
+        "You came back! I saved the sunniest patch of paper.",
+        "I reorganized my acorns by mood. They were all 'nervous', so I started over.",
+        "Careful where you step—there is a very important pile pretending to be a mess.",
+        "Hello! I was about to take a break from counting. You saved me from myself."
       ],
       "butterfly": [
         "The air tastes like blue paper today.",
-        "I have been practicing a very small loop-de-loop."
+        "I have been practicing a very small loop-de-loop.",
+        "I dreamed I was a bookmark. I woke up still holding the page together.",
+        "You float along on two feet. I have always admired that.",
+        "The wind and I are not speaking. It keeps finishing my sentences."
       ],
       "raccoon": [
         "Psst. I found something extremely interesting. It was a button.",
-        "Hello, neighbor. Your pockets sound promising."
+        "Hello, neighbor. Your pockets sound promising.",
+        "Do not look in the hollow log. That is where I keep the things I am not hiding.",
+        "I have upgraded my collection. It now has a second button.",
+        "You look like someone who appreciates a good shiny rock. I respect that."
       ],
       "bunny": [
         "Hi! I heard your footsteps before I saw you.",
-        "Everything is especially sniffable today."
+        "Everything is especially sniffable today.",
+        "I listened to the whole meadow this morning. It mostly said 'grass'.",
+        "If you find a clover with four leaves, it might be mine. I am still looking for it.",
+        "Your shadow hopped along with you the whole way here. We are officially a trio."
       ],
       "bird": [
         "Cheep! That means hello. It also means cheep.",
-        "I have news from the tall tree. Most of it is about wind."
+        "I have news from the tall tree. Most of it is about wind.",
+        "I saw the whole page from up there. It is even better upside down.",
+        "A worm told me a secret. I kept it, but I do not know what it means.",
+        "Cheep-cheep! That is hello-hello. I am twice as glad to see you."
       ],
       "cat": [
         "Oh. It is you. You may stay.",
-        "I was not waiting here. This simply happens to be where you arrived."
+        "I was not waiting here. This simply happens to be where you arrived.",
+        "I have decided today is acceptable. You may tell the others.",
+        "That spot is mine now. The spot I was in before is also mine. Everything scales.",
+        "I have considered petting you back. The paperwork is in progress."
       ],
       "woodchuck": [
         "Mind the cutter guard! The big lever is still finding its manners.",
-        "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti."
+        "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti.",
+        "If the sawdust piles look taller, that is not your imagination. It was a productive week.",
+        "Measure twice, cut once, then measure the offcut for scrap. Mill wisdom, free of charge.",
+        "Safety squint engaged. Good to see you."
       ]
     },
     "placeFacts": {
       "clearing": [
         "The notebook path remembers everyone who walks on it. Listen closely—it crinkles in different accents.",
         "The blue paper pond keeps one tiny bubble tucked under its edge, as if it is saving a thought.",
-        "The clearing is quiet on purpose. It gives every new adventure somewhere gentle to begin."
+        "The clearing is quiet on purpose. It gives every new adventure somewhere gentle to begin.",
+        "The porch creaks in a friendly way, like it is clearing its throat to say hello.",
+        "Paper clouds drift slower over the clearing. Even the sky is in no hurry here."
       ],
       "forest": [
         "The trees trade rumors whenever the breeze turns their paper edges sideways.",
         "A redwood canopy makes its own small weather—cool underneath, rustly above, and always dropping a little shade.",
-        "Old forest paths rarely run straight. Roots, folds, and good thinking trees all get a vote."
+        "Old forest paths rarely run straight. Roots, folds, and good thinking trees all get a vote.",
+        "Deep in the forest the paper grows a darker green. Old ink, the old-timers say.",
+        "At dusk the redwoods trade their long shadows like neighbors borrowing tools."
       ],
       "meadow": [
         "Meadow paper warms quickly in the sun, so butterflies often find the bright folds before anyone else.",
         "The soft green patches are warmer than the big sheet. Someone very thorough checked all of them.",
-        "In a meadow, even a short breeze has room to practice being dramatic."
+        "In a meadow, even a short breeze has room to practice being dramatic.",
+        "The grass here grows in neat little pen strokes. A very tidy field, as fields go.",
+        "On windy days the whole meadow ripples like a page being turned somewhere far away."
       ],
       "dunes": [
         "The corrugated ridges hum softly when wind crosses them at an angle.",
         "Dune shadows are excellent clocks until the wind rearranges the clock.",
-        "Warm cardboard keeps the day's heat folded inside it after the sun has moved on."
+        "Warm cardboard keeps the day's heat folded inside it after the sun has moved on.",
+        "The dunes rearrange themselves at night. Nobody has ever caught them doing it.",
+        "Somewhere out here is a sheet of sandpaper that dreams of being a proper dune."
       ],
       "scrapflats": [
         "Every scrap pile is a treasure pile with poor publicity.",
         "The flats collect offcuts from faraway paper weather; matching two edges can tell you where they came from.",
-        "A shiny glint out here might be foil, a button, or sunlight being mischievous. All three reward a closer look."
+        "A shiny glint out here might be foil, a button, or sunlight being mischievous. All three reward a closer look.",
+        "Rumor says a whole sewing kit is buried out here. The scissors inside are legendary.",
+        "The flats are honest country. What you see is exactly one layer of what is there."
       ]
     },
     "selfReplies": {
       "squirrel": [
         "I collect tiny things with important shapes.",
-        "My tail is five pieces of paper and one piece of confidence."
+        "My tail is five pieces of paper and one piece of confidence.",
+        "My cheeks can hold eleven acorns. Twelve is showing off.",
+        "I nap in supply closets I build myself. Other people call them 'nests'."
       ],
       "butterfly": [
         "My wings never agree on which color is the favorite.",
-        "I can land on a pencil line without smudging it. Usually."
+        "I can land on a pencil line without smudging it. Usually.",
+        "I once followed a rainbow for three pages. It was walking faster than me.",
+        "If I hold very still, flowers tell me things."
       ],
       "raccoon": [
         "I wash my paws even when there is no water. It is about the ceremony.",
-        "My mask is formalwear. I am always ready for an occasion."
+        "My mask is formalwear. I am always ready for an occasion.",
+        "Everything I own fits in three pockets and one secret fourth pocket.",
+        "I am not a hoarder. I am a curator with generous standards."
       ],
       "bunny": [
         "I know seven kinds of quiet and three kinds of lettuce.",
-        "My ears are excellent umbrellas for very small friends."
+        "My ears are excellent umbrellas for very small friends.",
+        "I can hear a carrot being peeled from two pages away. It is a burden.",
+        "I dig test holes for science. The science is 'where should I dig next'."
       ],
       "bird": [
         "I keep songs in the folds under my wings.",
-        "I am working on a duet with the wind chime. The wind chime does not know yet."
+        "I am working on a duet with the wind chime. The wind chime does not know yet.",
+        "I have mapped every updraft on this page. This one is the good one.",
+        "My nest has a guest room. Nobody has visited yet, but it is ready."
       ],
       "cat": [
         "My hobbies include sitting near things and improving them.",
-        "I have never knocked anything off a table without a reason. The reasons are private."
+        "I have never knocked anything off a table without a reason. The reasons are private.",
+        "I am on a strict schedule: sunbeam, patrol, judge everyone, nap.",
+        "I know every quiet place on this page. That information is not free."
       ],
       "woodchuck": [
         "I am Chisel: miller, measurer, and occasional sandwich inspector.",
-        "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen."
+        "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen.",
+        "The mill keeps a lost-and-found drawer. It is mostly sawdust and one very patient snail.",
+        "I built my own front door. It squeaks in E. I am getting it tuned."
       ]
     },
     "traitReplies": {
       "bold": [
         "I tried something before deciding whether it was sensible. It was excellent.",
-        "Today feels like a good day to go first."
+        "Today feels like a good day to go first.",
+        "I once stared down a gust of wind. We are friends now, but it knows I won.",
+        "If something looks impossible, I like to be nearby when it changes its mind."
       ],
       "curious": [
         "I have had three questions since breakfast and breakfast was one of them.",
-        "I keep wondering what is behind things. Usually it is more things!"
+        "I keep wondering what is behind things. Usually it is more things!",
+        "I asked the pond why it is blue. It is still thinking. So am I.",
+        "I opened an empty box to check. It was even emptier than expected. Great day."
       ],
       "dramatic": [
         "A breeze moved my favorite scrap. I may write a play about the betrayal.",
-        "Everything today has been enormous, even the tiny parts."
+        "Everything today has been enormous, even the tiny parts.",
+        "Today I saw a leaf fall. I will not spoil the ending, but it was devastating.",
+        "When I sneeze, the whole clearing knows. I consider it community theater."
       ],
       "gentle": [
         "I found a quiet spot and left half of it empty in case a friend came by.",
-        "I am taking special care not to crease the morning."
+        "I am taking special care not to crease the morning.",
+        "I smoothed the wrinkles out of a path so the next walker has an easy time.",
+        "I keep the softest scrap for whoever needs it. Today that might be you."
       ],
       "mischievous": [
         "I moved one small thing two inches. Nobody suspects me yet.",
-        "I know a joke that only works if you are standing beside a scrap pile."
+        "I know a joke that only works if you are standing beside a scrap pile.",
+        "I switched two pebbles on the path. If you notice, we are co-conspirators.",
+        "My plans are small, harmless, and extremely satisfying. Two out of three so far."
       ],
       "shy": [
         "It has been a quiet day. I liked it, but I am glad you visited.",
-        "I practiced saying hello before you arrived. Hello."
+        "I practiced saying hello before you arrived. Hello.",
+        "I wrote a note to the mailbox. The mailbox did not write back. I understand.",
+        "If you hear rustling in the hedges, that is me, being social at a distance."
       ],
       "sleepy": [
         "I am awake in all the important places.",
-        "I found a sunbeam shaped exactly like a nap."
+        "I found a sunbeam shaped exactly like a nap.",
+        "I slept through the sunrise. I hear it was good. I will catch the rerun.",
+        "My dream had a nap in it. Very efficient."
       ]
     },
     "choices": [
@@ -133,6 +192,19 @@
         "id": "self",
         "label": "Tell me about you",
         "replyPool": "self"
+      },
+      {
+        "id": "news",
+        "label": "Any news?",
+        "replyMode": "random",
+        "replies": [
+          "“The {{biome}} is the same as yesterday, which is exactly how I like it.”",
+          "“A breeze came through earlier and rearranged the light. Everyone is talking about it.”",
+          "“Nothing happened, and it was wonderful. I will report again tomorrow.”",
+          "“Someone new moved into the neighborhood. It was a leaf. We are watching it closely.”",
+          "“The path near {{region}} looks freshly folded. New paper, maybe.”",
+          "“Big news: I finished a small project. I cannot remember what it was, but the feeling stays.”"
+        ]
       },
       {
         "id": "pet",
@@ -199,6 +271,9 @@
           "replies": [
             "“Square broad paper timber, trim wall panels, and make clean building pieces. The guard stays down whenever the lever is feeling ambitious.”"
           ],
+          "addFlags": [
+            "chisel:met"
+          ],
           "friendship": 2,
           "endsScene": true
         },
@@ -209,6 +284,7 @@
             "“Soon. I am making a list of jobs, supplies, and snacks. The jobs list is currently shortest.”"
           ],
           "addFlags": [
+            "chisel:met",
             "chisel:offered-help"
           ],
           "friendship": 3,
@@ -514,6 +590,1400 @@
             "“You can find it in {{found-in:redwood-bark-curls}}. Only off a living redwood, mind — you'll never find a pile of it lying about.”"
           ],
           "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    }
+    ,
+    {
+      "id": "bold-first-leap",
+      "personalities": [
+        "bold"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "Small bravery",
+      "opening": [
+        "{{name}} is standing at the edge of the porch rail, toes over the line, tail rigged for launch. “I am going to jump it. The gap. Probably. Today, even.”"
+      ],
+      "choices": [
+        {
+          "id": "countdown",
+          "label": "Count them down",
+          "replies": [
+            "You count three, two, one—{{name}} leaps, wobbles mid-air, and sticks the landing. “Did the ground notice? Tell me the ground noticed.”",
+            "“Three! Two! ONE!” {{name}} is airborne before you finish. The landing is ninety percent grace and ten percent rolling, which {{name}} declares was on purpose."
+          ],
+          "replyMode": "random",
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "plan",
+          "label": "Suggest a safety plan",
+          "replies": [
+            "“A plan! Yes. Bold AND unbroken.” {{name}} paces out a landing zone, stacks two scraps as crash cushions, and jumps anyway. The cushions applaud."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "curious-half-question",
+      "personalities": [
+        "curious"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The unfinished question",
+      "opening": [
+        "“I have half a question,” {{name}} says, holding it carefully, like it might spill. “It starts with 'why does the pond—' and then I lost the rest.”"
+      ],
+      "choices": [
+        {
+          "id": "finish",
+          "label": "Help finish the question",
+          "replies": [
+            "You wonder at it together until the missing half wanders in on its own. “Why does the pond ripple in circles! Thank you. I can sleep again, right after I find out.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "ponder",
+          "label": "Wonder out loud with them",
+          "replies": [
+            "“Exactly! Wondering is better with a second brain.” You spend a while not knowing things, side by side. It is surprisingly filling."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "dramatic-tiny-premier",
+      "personalities": [
+        "dramatic"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The Tiny Premier",
+      "opening": [
+        "“Tonight. This clearing. One critter show,” {{name}} announces. “It is called 'The Leaf That Fell'. I need an audience of at least one. You qualify. Congratulations.”"
+      ],
+      "choices": [
+        {
+          "id": "watch",
+          "label": "Take a front-row seat",
+          "replies": [
+            "{{name}} performs the entire rise and fall of one brave leaf. There is a wind machine (a friend, blowing). At the end, {{name}} bows so deeply their nose touches the ground.",
+            "The show runs a full four minutes. {{name}} plays the leaf, the branch, the breeze, and one cloud who “brings texture”. By the falling scene, you are genuinely moved."
+          ],
+          "replyMode": "random",
+          "friendship": 4,
+          "followUps": [
+            {
+              "id": "encore",
+              "label": "Call for an encore",
+              "replies": [
+                "“An ENCORE?” {{name}} whispers, overcome. The second performance has twice the wind and three times the falling."
+              ],
+              "friendship": 2,
+              "endsScene": true
+            },
+            {
+              "id": "review",
+              "label": "Give a glowing review",
+              "replies": [
+                "“'Powerful,' you say. 'Grounded. Leaf-like.'” {{name}} writes every word on an imaginary poster."
+              ],
+              "friendship": 2,
+              "endsScene": true
+            }
+          ]
+        },
+        {
+          "id": "help",
+          "label": "Offer to work the wind",
+          "replies": [
+            "You are handed one (1) giant leaf and promoted to Weather. “On my cue,” {{name}} says, “make history.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "gentle-wilted-fold",
+      "personalities": [
+        "gentle"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The recovery bed",
+      "opening": [
+        "{{name}} has built a tiny bed out of soft scraps. In it lies one wilted paper fern, drooping like a sad semicolon. “It got stepped on,” {{name}} whispers. “It needs quiet and good light.”"
+      ],
+      "choices": [
+        {
+          "id": "help",
+          "label": "Help set up the recovery bed",
+          "replies": [
+            "You fold a watering can from a spare scrap and move the bed into a sunbeam with a view. “There,” {{name}} says. “Now it has a reason to stand back up.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "sit",
+          "label": "Sit quietly with them",
+          "replies": [
+            "You sit with {{name}} and the fern. Nobody says much. The fern, very slowly, unclenches one frond."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "mischievous-two-inch",
+      "personalities": [
+        "mischievous"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The two-inch heist",
+      "opening": [
+        "“Keep your voice down,” {{name}} says, though you are outside and entirely alone. “I am going to move that garden stone two inches to the left. No one will know. Everyone will feel it.”"
+      ],
+      "choices": [
+        {
+          "id": "accomplice",
+          "label": "Volunteer as lookout",
+          "replies": [
+            "You watch the path. {{name}} shifts the stone with surgical ceremony. By afternoon, three critters say the clearing 'feels different'. Art."
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "redirect",
+          "label": "Suggest a worthier target",
+          "replies": [
+            "“Worthier?” {{name}} gasps. You point at the pebble that has been hogging your favorite sitting spot all week. The pebble is relocated. “Justice,” {{name}} breathes, “but make it sneaky.”"
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "shy-kind-note",
+      "personalities": [
+        "shy"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The unsigned kindness",
+      "opening": [
+        "{{name}} waves you over with the urgency of a critter committing a crime. The crime is kindness. “I wrote a nice note for the neighbor. But if I deliver it, I will be SEEN.”"
+      ],
+      "choices": [
+        {
+          "id": "deliver",
+          "label": "Deliver it for them",
+          "replies": [
+            "You slide the note under the porch gap while {{name}} watches from behind a fence post, thrilled beyond words. Later, the note is pinned up where everyone can see it."
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "coach",
+          "label": "Help them practice saying it out loud",
+          "replies": [
+            "“Hello. I. Like. Your. Garden.” Each word gets its own drumbeat of courage. By the tenth try, {{name}} is whispering it at full volume."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "sleepy-sunbeam-sommelier",
+      "personalities": [
+        "sleepy"
+      ],
+      "minFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "storyArc": "The sunbeam sommelier",
+      "opening": [
+        "{{name}} is lying in a sunbeam with the focused expression of a professional. “This one is top shelf,” they murmur. “Warm front, soft grain, ideal drift. But I believe there is a better one. Care to help me check?”"
+      ],
+      "choices": [
+        {
+          "id": "tour",
+          "label": "Join the sunbeam tour",
+          "replies": [
+            "You visit three candidate beams. {{name}} test-naps in each for quality control. The winner: a wide gold patch by the porch, rated 'fluffy'."
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "rate",
+          "label": "Ask how the ratings work",
+          "replies": [
+            "“Warmth is one star. Stillness is two stars. If a dust mote floats through it? That is the whole show.” {{name}} demonstrates by falling asleep mid-review."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "stranger-first-hello",
+      "friendshipLevels": [
+        "stranger"
+      ],
+      "priority": 12,
+      "maxPlays": 1,
+      "storyArc": "First hellos",
+      "opening": [
+        "{{name}} pauses mid-step, suddenly very interested in being elsewhere. Then curiosity wins, the way it usually does. “...Hello. I have seen you around. You seem un-scary.”"
+      ],
+      "choices": [
+        {
+          "id": "hello",
+          "label": "Say hello properly",
+          "replies": [
+            "“Hello back.” {{name}} relaxes by one whole notch. “There. Now we are not strangers anymore. That was the hard part.”"
+          ],
+          "friendship": 2,
+          "endsScene": true
+        },
+        {
+          "id": "wave",
+          "label": "Offer a friendly wave",
+          "replies": [
+            "You wave. {{name}} waves back with one careful paw, checking over both shoulders first. “That is how neighbors start,” they say, mostly to themselves."
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "friend-favorite-thing",
+      "minFriendship": "friend",
+      "priority": 20,
+      "maxPlays": 1,
+      "storyArc": "Favorite things",
+      "opening": [
+        "“Since we are friends now,” {{name}} says, suddenly bashful, “there is something I want to show you.” They open a secret fold and take out a small, well-polished treasure that has clearly been loved for a long time."
+      ],
+      "choices": [
+        {
+          "id": "admire",
+          "label": "Admire it properly",
+          "replies": [
+            "You hold it carefully, like the honor it is. “It is better when someone else sees it too,” {{name}} admits. “That is why I showed you.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        },
+        {
+          "id": "trade-story",
+          "label": "Share your own favorite thing",
+          "replies": [
+            "{{name}} listens with both ears. “So that is yours. And this is mine.” They look pleased. “Now the treasures know each other, too.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "buddy-secret-spot",
+      "minFriendship": "buddy",
+      "priority": 20,
+      "maxPlays": 1,
+      "storyArc": "The secret spot",
+      "opening": [
+        "“Follow me, and walk like a normal breeze,” {{name}} whispers. They lead you under a folded overhang to a hidden nook that is somehow exactly the right size for two. “This is my spot. I have never shown anyone. It needs a name, and I am terrible at names.”"
+      ],
+      "choices": [
+        {
+          "id": "name",
+          "label": "Help name the spot",
+          "replies": [
+            "You toss ideas back and forth until one lands. “The Fold-Away,” {{name}} repeats, trying it on. “Yes. Official. I will make a tiny sign and everything.”"
+          ],
+          "friendship": 4,
+          "addFlags": [
+            "buddy:spot-named"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "sit",
+          "label": "Just sit there a while",
+          "replies": [
+            "You sit in the good quiet. After a while {{name}} says, “You can come here anytime. That is what the spot was missing—a second someone who fits.”"
+          ],
+          "friendship": 4,
+          "addFlags": [
+            "buddy:spot-named"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "pet-quiet-hour",
+      "minFriendship": "pet",
+      "priority": 18,
+      "maxPlays": 3,
+      "storyArc": "The quiet hour",
+      "opening": [
+        "{{name}} is waiting at the exact spot you first met. “I saved you the good view,” they say, scooting over by exactly one critter-width.",
+        "{{name}} pats the ground beside them, twice, with great ceremony. “It is doing-nothing hour. You are officially invited.”",
+        "“I counted my favorite days,” {{name}} says as you settle in. “Most of them have you in them. Anyway. Sit.”"
+      ],
+      "choices": [
+        {
+          "id": "settle",
+          "label": "Settle in for the quiet hour",
+          "replies": [
+            "You watch the light move across the page together. No words needed. {{name}}'s slow blink is the whole conversation.",
+            "The breeze does the talking. Every so often {{name}} sighs the sigh of a critter whose life turned out good.",
+            "Time passes the way it should. Before you go, {{name}} says, “Same time, whenever. This is a standing invitation now.”"
+          ],
+          "replyMode": "random",
+          "friendship": 1,
+          "endsScene": true
+        },
+        {
+          "id": "remember",
+          "label": "Ask what their favorite memory is",
+          "replies": [
+            "“The day I stopped being scared of you,” {{name}} says without hesitation. “Remember? I pretended I was busy. I was not busy. I was coming to find you.”"
+          ],
+          "friendship": 2,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "chisel-wind-1-ledger",
+      "critterIds": [
+        "-2,0#woodchuck"
+      ],
+      "requiresFlags": [
+        "chisel:met"
+      ],
+      "excludesFlags": [
+        "chisel:wind-promised",
+        "chisel:wind-complete"
+      ],
+      "priority": 85,
+      "storyArc": "The Wind Ledger",
+      "opening": [
+        "“Good timing,” Chisel says, sliding over a fresh page ruled in tidy columns. “Job one for my helpers list: the mill needs a wind ledger. Height, gusts, drift. I can hold the ribbon, but I need someone to write what the wind is actually doing.”"
+      ],
+      "choices": [
+        {
+          "id": "signup",
+          "label": "I'm your wind-writer",
+          "replies": [
+            "“Knew you had it in you.” Chisel hands you a pencil sharpened to a reputable point. “Rule one of wind-writing: never chase the gust. Let it come to the page.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "chisel:wind-promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "why",
+          "label": "Why does a mill need wind data?",
+          "replies": [
+            "“Paper timber curls in a crosswind. Trim tables drift. A mill that knows its wind is a mill that cuts straight.” He taps the ledger. “Also, I have always wanted a science.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "chisel:wind-promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "chisel-wind-2-measure",
+      "critterIds": [
+        "-2,0#woodchuck"
+      ],
+      "requiresFlags": [
+        "chisel:wind-promised"
+      ],
+      "excludesFlags": [
+        "chisel:wind-measured",
+        "chisel:wind-complete"
+      ],
+      "priority": 85,
+      "storyArc": "The Wind Ledger",
+      "opening": [
+        "Chisel has rigged a ribbon to a stick and a spool to a rock. “Instrumentation,” he explains, sounding extremely pleased about it. “We take readings from the high side of the page, where the wind introduces itself properly. Ready?”"
+      ],
+      "choices": [
+        {
+          "id": "climb",
+          "label": "Take the high-side reading",
+          "replies": [
+            "You hold the ribbon high while Chisel squints, mutters numbers, and writes in all caps. “Gust from the north, polite but firm. Excellent. That is a real entry in a real ledger.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "chisel:wind-measured"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "hold",
+          "label": "Hold the ribbon steady",
+          "replies": [
+            "The ribbon streams, dips, and loops. Chisel narrates every move like a sports announcer. “Little cyclone at the end there—bold choice by the wind. Noted.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "chisel:wind-measured"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "chisel-wind-3-record",
+      "critterIds": [
+        "-2,0#woodchuck"
+      ],
+      "requiresFlags": [
+        "chisel:wind-measured"
+      ],
+      "excludesFlags": [
+        "chisel:wind-recorded",
+        "chisel:wind-complete"
+      ],
+      "priority": 85,
+      "storyArc": "The Wind Ledger",
+      "opening": [
+        "“Now the part I am best at and like least,” Chisel admits. “Sitting still and writing it all neat.” The ledger is open. The pencil is ready. The wind, helpfully, keeps doing things."
+      ],
+      "choices": [
+        {
+          "id": "transcribe",
+          "label": "Write the neat copy",
+          "replies": [
+            "You rule the columns; Chisel dictates. By the last entry the ledger is a thing of beauty. “Look at it,” he says softly. “Wind, but organized.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "chisel:wind-recorded"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "chart",
+          "label": "Add a wind drawing",
+          "replies": [
+            "Chisel resists, then surrenders. The finished ledger now includes one diagram of a gust wearing a tiny hat. “Unscientific,” he declares. “It stays in forever.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "chisel:wind-recorded"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "chisel-wind-4-complete",
+      "critterIds": [
+        "-2,0#woodchuck"
+      ],
+      "requiresFlags": [
+        "chisel:wind-recorded"
+      ],
+      "excludesFlags": [
+        "chisel:wind-complete"
+      ],
+      "priority": 85,
+      "storyArc": "The Wind Ledger",
+      "opening": [
+        "Chisel has copied the ledger onto weatherproof stock and hung it by the cutter, next to a small hand-lettered plaque: MILL WIND LEDGER, EST. TODAY. “First science at the Wood Mill,” he says. “Wouldn't have pages one through nine without you.”"
+      ],
+      "choices": [
+        {
+          "id": "medal",
+          "label": "Accept the Wind Medal",
+          "replies": [
+            "He pins a hexagon of brass-look paper to your scrapbook, stamped with one proud spiral. “Official wind-writer, Wood Mill chapter. The role comes with responsibilities. Mostly snacking during readings.”"
+          ],
+          "friendship": 10,
+          "addFlags": [
+            "chisel:wind-complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "standing",
+          "label": "Propose a daily reading time",
+          "replies": [
+            "“A standing appointment? Now that is institution-quality thinking.” Chisel pencils WIND, WITH FRIEND into the corner of the ledger where appointments go."
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "chisel:wind-complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "census-1-missing",
+      "species": [
+        "squirrel"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "minFriendship": "curious",
+      "priority": 80,
+      "excludesFlags": [
+        "census:promised",
+        "census:complete"
+      ],
+      "storyArc": "The Great Acorn Census",
+      "opening": [
+        "{{name}} looks like a critter with a math problem. “My acorn count keeps changing. Yesterday: forty. Today: forty-two. I counted twice! The acorns are doing something, and I intend to know what.”"
+      ],
+      "choices": [
+        {
+          "id": "recount",
+          "label": "Offer to help recount",
+          "replies": [
+            "“A second counter! The gold standard of counting.” {{name}} lines up the acorn ranks with military precision and hands you a pebble to mark your place. “No acorn left unturned. Or turned twice.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "census:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "theorize",
+          "label": "Ask for their leading theory",
+          "replies": [
+            "“Theory one: acorns multiply when unobserved. Theory two: I cannot count. I have been avoiding theory two with great success until today.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "census:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "census-2-pile-seven",
+      "species": [
+        "squirrel"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "census:promised"
+      ],
+      "excludesFlags": [
+        "census:counted",
+        "census:complete"
+      ],
+      "storyArc": "The Great Acorn Census",
+      "opening": [
+        "The recount is underway. Piles everywhere, each one labeled with a tiny written number. “Thirty-eight, thirty-nine…” {{name}} freezes. “Wait. Who is PILE SEVEN? That pile was not there when we started.”"
+      ],
+      "choices": [
+        {
+          "id": "inspect",
+          "label": "Investigate pile seven",
+          "replies": [
+            "Inside pile seven: a note. 'For the counter, from someone who appreciates organization.' {{name}} reads it four times. “The acorns have an ally. I am CHOOSING not to investigate further.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "census:counted"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "count",
+          "label": "Count pile seven anyway",
+          "replies": [
+            "“Four acorns. Round, excellent acorns.” {{name}} adds the total with trembling paws. “Forty-six. More than we started with. This is the greatest mystery of our time.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "census:counted"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "census-3-kindness",
+      "species": [
+        "squirrel"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "census:counted"
+      ],
+      "excludesFlags": [
+        "census:complete"
+      ],
+      "storyArc": "The Great Acorn Census",
+      "opening": [
+        "Mystery solved, mostly: a young squirrel had been leaving acorn gifts on the pile—“paying rent,” the little one said, “for living so close to a professional.” {{name}} has not stopped glowing since. “The census is complete. The answer was kindness. I am framing the ledger.”"
+      ],
+      "choices": [
+        {
+          "id": "frame",
+          "label": "Help frame the ledger",
+          "replies": [
+            "You press the counting page flat and fold a frame from kraft scraps. “Exhibit one,” {{name}} announces to the empty air. “The day mathematics failed and friendship succeeded.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "census:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "reciprocate",
+          "label": "Suggest leaving a gift back",
+          "replies": [
+            "“Reciprocal acorns! Of course. An economy.” {{name}} selects the two roundest acorns for return delivery. “The rent situation here is about to get extremely fair.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "census:complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "regatta-1-invite",
+      "species": [
+        "bunny"
+      ],
+      "biomes": [
+        "meadow"
+      ],
+      "minFriendship": "curious",
+      "priority": 80,
+      "excludesFlags": [
+        "regatta:promised",
+        "regatta:complete"
+      ],
+      "storyArc": "The Meadow Regatta",
+      "opening": [
+        "{{name}} is crouched at the pond's edge, holding a leaf boat with both paws. “Race day,” they whisper. “The pond gets one good breeze an hour, and I have been practicing my launch. I need a rival. A friendly one. You.”"
+      ],
+      "choices": [
+        {
+          "id": "compete",
+          "label": "Accept the rivalry",
+          "replies": [
+            "“YES.” {{name}} hands you a pre-folded boat with a tiny painted stripe. “I made you the fast one by accident. You will never prove otherwise.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "regatta:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "scout",
+          "label": "Ask about the course",
+          "replies": [
+            "“Start line: that reed. Finish line: the shady fold. Hazards: one duck—no, that is a leaf. Unknown hazards: at least two.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "regatta:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "regatta-2-race",
+      "species": [
+        "bunny"
+      ],
+      "biomes": [
+        "meadow"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "regatta:promised"
+      ],
+      "excludesFlags": [
+        "regatta:raced",
+        "regatta:complete"
+      ],
+      "storyArc": "The Meadow Regatta",
+      "opening": [
+        "The breeze is due. {{name}} lines both boats up at the reed start line, tongue out in concentration. “On three. One… two… three!” The pond does the rest."
+      ],
+      "choices": [
+        {
+          "id": "launch",
+          "label": "Launch your boat",
+          "replies": [
+            "Your boat catches the breeze and rides the pond's soft ripple in a clean diagonal. {{name}}'s boat spins twice, bows to a lily pad, and finishes second—but with undeniable style points."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "regatta:raced"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "wait",
+          "label": "Wait for the perfect gust",
+          "replies": [
+            "You both hold, holding… then the gust arrives all at once. Both boats go skimming. It is a photo finish, if anyone had a camera, which no one does, so it is a story finish."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "regatta:raced"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "regatta-3-ceremony",
+      "species": [
+        "bunny"
+      ],
+      "biomes": [
+        "meadow"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "regatta:raced"
+      ],
+      "excludesFlags": [
+        "regatta:complete"
+      ],
+      "storyArc": "The Meadow Regatta",
+      "opening": [
+        "“Champion's ceremony,” {{name}} announces, wearing a wreath of grass that is clearly sized for a much larger head. They hand you a tiny folded trophy. “The rules say the winner gets this. The rules also say the runner-up hosts the next regatta. I will begin planning.”"
+      ],
+      "choices": [
+        {
+          "id": "accept",
+          "label": "Accept the tiny trophy",
+          "replies": [
+            "The trophy is two pen-strokes tall and completely legitimate. You set it on your scrapbook edge, where it gleams. “Rematch whenever,” {{name}} says. “The pond is always in season.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "regatta:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "share",
+          "label": "Declare co-champions",
+          "replies": [
+            "{{name}} gasps. “Shared victory? That is twice the trophy AND twice the bragging rights, which mathematically evens out to one each.” The wreath is split in two. It fits perfectly."
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "regatta:complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "snack-1-invite",
+      "species": [
+        "cat"
+      ],
+      "minFriendship": "friend",
+      "priority": 80,
+      "excludesFlags": [
+        "snack:invited",
+        "snack:complete"
+      ],
+      "storyArc": "The Midnight Snack Club",
+      "opening": [
+        "“You are trustworthy,” the cat states, without preamble. “I can tell by your knees. There is a club. It meets after dark. There are snacks. This is not an invitation.” A slow blink. “Do you want in?”"
+      ],
+      "choices": [
+        {
+          "id": "join",
+          "label": "Say you're in",
+          "replies": [
+            "“Good. Correct answer.” The cat writes your name on an invisible list with an invisible paw. “Orientation is whenever I say. Bring nothing. Want nothing. The snacks find you.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "snack:invited"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "details",
+          "label": "Ask what the club actually does",
+          "replies": [
+            "“We walk. We sit on good surfaces. We find the snacks the day left behind: one seed here, a berry there. It is patrol work. It is important work.” A pause. “It is mostly sitting.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "snack:invited"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "snack-2-patrol",
+      "species": [
+        "cat"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "snack:invited"
+      ],
+      "excludesFlags": [
+        "snack:scouted",
+        "snack:complete"
+      ],
+      "storyArc": "The Midnight Snack Club",
+      "opening": [
+        "The moon is a paper circle with one corner peeled. The cat is waiting at the fence line, tail curled like a signature. “First patrol. Walk soft, judge quietly, and remember: anything shiny is a coincidence.”"
+      ],
+      "choices": [
+        {
+          "id": "walk",
+          "label": "Walk the patrol route",
+          "replies": [
+            "You check the porch gap (clear), the compost fold (one excellent berry, logged), and the sunny stone (sat upon, both of you, briefly). At the end the cat nods once. That is a standing ovation."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "snack:scouted"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "find",
+          "label": "Find a snack to log",
+          "replies": [
+            "You spot a sun-warmed berry tucked by the fence post. The cat inspects it, declares it “club property,” and logs it in a ledger it definitely did not have a moment ago."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "snack:scouted"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "snack-3-membership",
+      "species": [
+        "cat"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "snack:scouted"
+      ],
+      "excludesFlags": [
+        "snack:complete"
+      ],
+      "storyArc": "The Midnight Snack Club",
+      "opening": [
+        "At the fence line, the cat produces a small tin—where from is not explained—and pushes it toward you with one paw. “Membership dues, reversed. Members get snacks. This is the whole economy. Do not tell the raccoon.”"
+      ],
+      "choices": [
+        {
+          "id": "take",
+          "label": "Accept the membership tin",
+          "replies": [
+            "Inside: two berries and one almond, each polished to a shine. The cat watches you pocket it, satisfied. “Club business is concluded. Same time, next moon. Bring your knees.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "snack:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "contribute",
+          "label": "Leave something in the tin first",
+          "replies": [
+            "The cat looks at what you added, then at you, then away—a cat's version of being moved. “The treasury has never had two of anything,” it says. “You may be going places, Club-wise.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "snack:complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "duet-1-invite",
+      "species": [
+        "bird"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "minFriendship": "curious",
+      "priority": 80,
+      "excludesFlags": [
+        "duet:promised",
+        "duet:complete"
+      ],
+      "storyArc": "The Duet of Small Winds",
+      "opening": [
+        "“I am composing,” the bird announces from a low branch, “a duet. For bird and wind chime. The wind chime does not know yet, which is the hard part of any collaboration.” They look at you hopefully. “Will you be my rehearsal audience?”"
+      ],
+      "choices": [
+        {
+          "id": "audience",
+          "label": "Accept the audience role",
+          "replies": [
+            "“Excellent. You have the most important job: reacting.” The bird produces a concert program folded from a candy wrapper. Showtime is “soon, when the wind commits.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "duet:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "hum",
+          "label": "Offer to hum the chime's part",
+          "replies": [
+            "The bird goes very still. “A stand-in chime. An UNDERSTUDY.” Feathers puff with excitement. “Rehearsal is now. Try to be metallic.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "duet:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "duet-2-rehearsal",
+      "species": [
+        "bird"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "duet:promised"
+      ],
+      "excludesFlags": [
+        "duet:rehearsed",
+        "duet:complete"
+      ],
+      "storyArc": "The Duet of Small Winds",
+      "opening": [
+        "The branch has been arranged like a stage: two good acoustics leaves and a clear view of the wind chime, who hangs there, oblivious and glittering. The bird runs warm-up scales. “Cheep-cheep-cheeeep. Right. Places.”"
+      ],
+      "choices": [
+        {
+          "id": "perform",
+          "label": "Perform the rehearsal",
+          "replies": [
+            "The bird sings; you hum the chime's line. The real wind chime, caught up in the moment, rings once—perfectly on key. Both of you pretend to be calm about it."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "duet:rehearsed"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "conduct",
+          "label": "Conduct instead",
+          "replies": [
+            "You conduct with a twig baton. The bird follows every gesture, including the ones you invent on the spot. “Dynamic!” they cry at your big finish. “I have never been so conducted.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "duet:rehearsed"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "duet-3-premiere",
+      "species": [
+        "bird"
+      ],
+      "biomes": [
+        "clearing",
+        "forest"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "duet:rehearsed"
+      ],
+      "excludesFlags": [
+        "duet:complete"
+      ],
+      "storyArc": "The Duet of Small Winds",
+      "opening": [
+        "Premiere day. A proper audience has gathered: two butterflies, a squirrel, and one beetle with strong opinions. The wind picks up right on cue. The bird looks at you, takes a breath, and begins."
+      ],
+      "choices": [
+        {
+          "id": "cheer",
+          "label": "Cheer the premiere",
+          "replies": [
+            "Bird and wind chime trade melodies until neither knows who is leading. The beetle cries. The squirrel applauds with an acorn against a trunk. “We did it,” the bird whispers, mid-bow. “The chime finally answered.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "duet:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "afterparty",
+          "label": "Host the after-party",
+          "replies": [
+            "You gather seeds and berry slices on the best leaf in the forest. The wind chime rings politely whenever someone thanks it. “It IS a member,” the bird insists. “It gets a plate.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "duet:complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "bloommap-1-blank",
+      "species": [
+        "butterfly"
+      ],
+      "biomes": [
+        "meadow",
+        "clearing",
+        "dunes"
+      ],
+      "minFriendship": "curious",
+      "priority": 80,
+      "excludesFlags": [
+        "bloommap:promised",
+        "bloommap:complete"
+      ],
+      "storyArc": "The Bloom Map",
+      "opening": [
+        "{{name}} unfurls a map made of petals, none of which are the same shape. “My life's work,” they explain. “A map of every good fold and bloom, from a flying height. It is missing three places. My wings stop where my courage does.”"
+      ],
+      "choices": [
+        {
+          "id": "crew",
+          "label": "Offer to be their ground crew",
+          "replies": [
+            "“A ground crew member! I fly, you confirm. Between us we will be an entire expedition.” {{name}} pins the petal map flat with four pebbles and taps a blank corner. “Start here. Probably. Maybe there.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "bloommap:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "criteria",
+          "label": "Ask what makes a bloom good",
+          "replies": [
+            "“Warmth in the petals, shade nearby for thinking, and a landing edge that does not argue with your wings.” {{name}} nods, satisfied with the list. “You learn these things. Or you crash gently a lot.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "bloommap:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "bloommap-2-expedition",
+      "species": [
+        "butterfly"
+      ],
+      "biomes": [
+        "meadow",
+        "clearing",
+        "dunes"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "bloommap:promised"
+      ],
+      "excludesFlags": [
+        "bloommap:marked",
+        "bloommap:complete"
+      ],
+      "storyArc": "The Bloom Map",
+      "opening": [
+        "Expedition day. {{name}} spirals overhead, calling down landmarks while you navigate from below. “Big red fold! Small suspicious shadow! AN UNDOCUMENTED BLOOM—this is not a drill!”"
+      ],
+      "choices": [
+        {
+          "id": "mark",
+          "label": "Mark the new bloom",
+          "replies": [
+            "You press a petal from the new bloom onto the map's blank corner. {{name}} lands beside it, wings quivering. “Documented. My map has grown. I have grown, honestly.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "bloommap:marked"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "name",
+          "label": "Suggest naming the bloom",
+          "replies": [
+            "“A name! For the map AND the legend.” You settle on The Second-Best Fold, which {{name}} insists is perfect, because now every explorer will want to find the first."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "bloommap:marked"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "bloommap-3-complete",
+      "species": [
+        "butterfly"
+      ],
+      "biomes": [
+        "meadow",
+        "clearing",
+        "dunes"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "bloommap:marked"
+      ],
+      "excludesFlags": [
+        "bloommap:complete"
+      ],
+      "storyArc": "The Bloom Map",
+      "opening": [
+        "The finished map hangs from a twig frame, petals and all. “Three blank corners to go,” {{name}} says, “but the map has learned to grow. That was the hard part. Maps do not finish. They get better.”"
+      ],
+      "choices": [
+        {
+          "id": "seal",
+          "label": "Celebrate the cartographer",
+          "replies": [
+            "You award the map a tiny gold seal (a very round crumb, applied ceremonially). {{name}} beams. “Official. When other butterflies ask, I will say: ground crew, excellent, one human, do not lose them.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "bloommap:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "nextflight",
+          "label": "Ask to join the next flight",
+          "replies": [
+            "“Next season's survey? The team accepts.” {{name}} taps the remaining blank corners. “There is so much page left. That is my favorite thing about maps. And about friends, actually.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "bloommap:complete"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "flats-1-survey",
+      "species": [
+        "raccoon"
+      ],
+      "biomes": [
+        "scrapflats"
+      ],
+      "minFriendship": "curious",
+      "priority": 80,
+      "excludesFlags": [
+        "flats:promised",
+        "flats:complete"
+      ],
+      "storyArc": "The Great Edge-Matching",
+      "opening": [
+        "{{name}} holds two scraps up to the light, one in each paw, squinting like a jeweler. “Match these edges, and you learn where the paper weather came from. That one came from FAR away—the tear is homesick. I need a second opinion for the big survey.”"
+      ],
+      "choices": [
+        {
+          "id": "join",
+          "label": "Join the survey",
+          "replies": [
+            "“Excellent. You take the tall pile, I take the interesting pile.” {{name}} sets a working table: twelve scraps, two suspect edges, one magnifying button (not needed, but professional)."
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "flats:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "how",
+          "label": "Ask how edge-matching works",
+          "replies": [
+            "“Fibers remember. Hold two edges close, not touching, and feel for the pull—like magnets, but for paper.” {{name}} demonstrates: the scraps click together with a soft whisper. “See? Reunited.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "flats:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "flats-2-stubborn",
+      "species": [
+        "raccoon"
+      ],
+      "biomes": [
+        "scrapflats"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "flats:promised"
+      ],
+      "excludesFlags": [
+        "flats:mapped",
+        "flats:complete"
+      ],
+      "storyArc": "The Great Edge-Matching",
+      "opening": [
+        "The survey table now looks like a very small crime scene. “Nine matches,” {{name}} reports. “But these two refuse. Same color, same weight, OPPOSITE hearts.” They slide the quarreling scraps toward you. “You try. Fresh eyes.”"
+      ],
+      "choices": [
+        {
+          "id": "rotate",
+          "label": "Try the stubborn pair",
+          "replies": [
+            "You rotate one scrap a quarter turn—and the edges settle together like a sigh. “Upside down the whole time,” {{name}} breathes. “Paper does not care which way is up. Noted for science.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "flats:mapped"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "pair",
+          "label": "Declare them a matched set",
+          "replies": [
+            "“A SET! Of course!” {{name}} pairs them side by side, tears aligned. “They were never apart. They are a pair of bookmarks separated at birth.” The survey gains its first exhibit."
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "flats:mapped"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "flats-3-archive",
+      "species": [
+        "raccoon"
+      ],
+      "biomes": [
+        "scrapflats"
+      ],
+      "priority": 80,
+      "requiresFlags": [
+        "flats:mapped"
+      ],
+      "excludesFlags": [
+        "flats:complete"
+      ],
+      "storyArc": "The Great Edge-Matching",
+      "opening": [
+        "The finished survey is pinned to a board: matched pairs, labeled origins, one scrap marked MYSTERY (KEEP). “We now know more about the paper weather than anyone,” {{name}} says, solemn. “This is a burden and a joy. Mostly a joy.”"
+      ],
+      "choices": [
+        {
+          "id": "exhibit",
+          "label": "Help build a public exhibit",
+          "replies": [
+            "You mount the board by the path where everyone can browse. {{name}} adds a sign: THE EDGE ARCHIVE. “Knowledge should be free,” they say, “and slightly shiny.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "flats:complete"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "mystery",
+          "label": "Ask about the mystery scrap",
+          "replies": [
+            "“The one with no match? It stays on the board.” {{name}} taps it gently. “Every archive needs one open question. Otherwise, what would we do tomorrow?”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "flats:complete"
+          ],
           "endsScene": true
         }
       ]
