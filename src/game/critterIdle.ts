@@ -258,6 +258,16 @@ const SPECIES_IDLE: Record<CritterSpecies, WeightedAction[]> = {
     { id: 'groom', weight: 2 },
   ],
   butterfly: [{ id: 'settle', weight: 1 }],
+  // Heavy on perk-up on purpose: a meerkat checking things out is not a
+  // special occasion, it is the species' entire personality.
+  meerkat: [
+    { id: 'perk-up', weight: 6 },
+    { id: 'look-around', weight: 4 },
+    { id: 'sniff-ground', weight: 4 },
+    { id: 'ear-swivel', weight: 3 },
+    { id: 'settle', weight: 2 },
+    { id: 'stretch', weight: 1 },
+  ],
 };
 
 /**

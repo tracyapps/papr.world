@@ -194,6 +194,8 @@ Bird: hops with wing flicks, pecks idly (tipping forward beak-first, never throu
 
 Cat: long, low, and self-satisfied. Almond eyes, whiskers, pink triangle nose and ear linings, tail with a dark curled tip that never stops talking. Coats include orange tabby (striped wrapping paper), calico (desert camo blobs), gray, black, cream, and one houseplant-print wildcard. Cats have a higher shyness floor than other species — most watch from a distance, but the bold ones are VERY bold. Their curious tell is the slow blink (a compliment), and their flourish is sitting up tall, wrapping their tail around their front, and closing their eyes. The clearing has a resident cat near the gift-wrap patch.
 
+Meerkat (added 2026-09-01): sandy tan coat, small dark eye patches (sun-shielding, not a bandit mask — a raccoon's mask is a full band, a meerkat's is two localized patches), long tapering tail with a dark tip, small rounded ears. Dune country's signature species. Its curious tell is rising partway onto its haunches before anyone earns the full flourish — checking things out is the whole personality, not a special occasion — and its flourish is the real reason it exists: rising fully upright onto a tripod of hind legs and tail, paws clasped at the chest, scanning. First of a planned desert roster (dingo, gazelle, zebra, ostrich, red kangaroo, red fox and similar — see the parking-lot note in `docs/roadmap.md`'s companion memory); snakes and spiders are deliberately excluded from every biome's roster, cute renditions included, since they're a common trigger even in friendly art styles.
+
 ## Variation System ("critter DNA")
 
 Every individual is generated from one seed (`src/game/critterVariation.ts`):
@@ -243,6 +245,10 @@ Raccoons appear in every biome's spawn table and each page rolls a 15% bonus rac
 ### The cat distribution system
 
 Cats appear in every biome (as is their custom) and each page that doesn't roll a bonus raccoon rolls a 12% bonus cat. Long-term: cats should be the hardest species to befriend and the most rewarding — they ignore offered materials at low friendship, and at pet level they're the only species that seeks the *player* out.
+
+### The meerkat sentry system
+
+Meerkats are dune country's signature species — 30% of dune-page spawns, the same flagship weight raccoons get in scrapflats (`BIOME_SPECIES.dunes` in `critters.ts`). Their defining trait is built into idle behavior itself, not a special mechanic: `SPECIES_IDLE.meerkat` (`critterIdle.ts`) weights `perk-up` above every other action, and `animate()` lerps the torso partway upright whenever `curious` is true — before the player has done anything to earn the full sentry `flourish()`. The flourish itself reuses the raccoon's torso-pivot sit-up technique but takes it further: a meerkat rises to a near-vertical tripod of hind legs and tail rather than a partial sit-up, since a full sentry stance is the entire reason to draw this species rather than reuse another small mammal's rig.
 
 ## Performance & Scaling
 

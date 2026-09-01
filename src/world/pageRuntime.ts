@@ -3,6 +3,7 @@ import { aspect, createRng } from '../core/math';
 import { createCutout, createSheet, groundedCutoutY } from '../render/builders';
 import { getMaterial } from '../render/materials';
 import { registerHarvestable } from '../game/harvesting';
+import { getResourceArt } from '../game/resourcePresentation';
 import { buildCritters, populatePageCritters } from '../game/critters';
 import { buildThingMaker } from '../game/thingMaker';
 import { buildSeedStore } from '../game/seedStore';
@@ -292,7 +293,22 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
       const node = new THREE.Group();
       node.position.set(prop.x, sampleTerrainHeight(prop.x, prop.z) + 0.035, prop.z);
 
-      if (prop.visual === 'twigBundle') {
+      // A resource with real art gets a cutout billboard instead of the
+      // generic primitive cluster below — same "playable before the art
+      // lands" rule as tools and decor. See resourcePresentation.ts and
+      // docs/resource-artwork-guide.md.
+      const art = getResourceArt(prop.resource);
+      if (art) {
+        const height = 0.34 + rng() * 0.1;
+        const cutout = createCutout({
+          aspectRatio: art.aspectRatio,
+          height,
+          position: [0, height / 2, 0],
+          rotationY: rng() * Math.PI * 2,
+          textureUrl: art.sourceUrl,
+        });
+        node.add(cutout);
+      } else if (prop.visual === 'twigBundle') {
         for (let twigIndex = 0; twigIndex < 5; twigIndex += 1) {
           const length = 0.48 + rng() * 0.38;
           const twig = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.038, length, 7), material);

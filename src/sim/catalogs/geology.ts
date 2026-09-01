@@ -83,7 +83,7 @@ export const DIG_TABLES: Record<Biome, Record<DigLayer, WeightedResource[]>> = {
   dunes: {
     1: [
       { resource: 'ochre-paperclay', weight: 74 },
-      { resource: 'bluefold-pebbles', weight: 26 },
+      { resource: 'terracotta-pebbles', weight: 26 },
     ],
     2: [
       { resource: 'sunbaked-cardboard', weight: 58 },

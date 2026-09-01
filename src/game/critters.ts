@@ -30,7 +30,8 @@ const BIOME_SPECIES: Record<Biome, WeightedSpecies> = {
   clearing: [['squirrel', 0.25], ['butterfly', 0.2], ['bunny', 0.18], ['bird', 0.15], ['cat', 0.12], ['raccoon', 0.1]],
   forest: [['squirrel', 0.3], ['bunny', 0.22], ['bird', 0.18], ['butterfly', 0.1], ['raccoon', 0.1], ['cat', 0.1]],
   meadow: [['butterfly', 0.28], ['bunny', 0.27], ['bird', 0.2], ['cat', 0.1], ['raccoon', 0.1], ['squirrel', 0.05]],
-  dunes: [['bird', 0.35], ['bunny', 0.2], ['raccoon', 0.2], ['butterfly', 0.15], ['cat', 0.1]],
+  // Meerkats are dune country's signature species — same flagship density raccoons get in scrapflats.
+  dunes: [['meerkat', 0.3], ['bird', 0.25], ['bunny', 0.15], ['raccoon', 0.15], ['butterfly', 0.1], ['cat', 0.05]],
   scrapflats: [['raccoon', 0.45], ['cat', 0.15], ['bird', 0.15], ['bunny', 0.13], ['squirrel', 0.12]],
 };
 

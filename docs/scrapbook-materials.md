@@ -36,6 +36,7 @@ resource's world-map color.
 - Confetti stones — `resource.confetti-stones`
 - Graphite cardstone — `resource.graphite-cardstone`
 - Carbon-copy shale — `resource.carbon-copy-shale`
+- Terracotta pebbles — `resource.terracotta-pebbles` (dunes-exclusive, added 2026-09-01 to give the desert its own stone identity instead of reusing meadow's aqua pebbles)
 
 ### Fibers & Foliage
 

@@ -50,6 +50,13 @@
         "If the sawdust piles look taller, that is not your imagination. It was a productive week.",
         "Measure twice, cut once, then measure the offcut for scrap. Mill wisdom, free of charge.",
         "Safety squint engaged. Good to see you."
+      ],
+      "meerkat": [
+        "I saw you coming from three dunes away. Sentry duty has its perks.",
+        "Hello! I was just standing very tall and looking very serious about it.",
+        "You interrupted my watch shift, but you are a much better view than the horizon.",
+        "The whole mob says hello. I am translating on their behalf. They say hello.",
+        "I stood up the moment I heard footsteps. It is mostly for style at this point."
       ]
     },
     "placeFacts": {
@@ -131,6 +138,12 @@
         "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen.",
         "The mill keeps a lost-and-found drawer. It is mostly sawdust and one very patient snail.",
         "I built my own front door. It squeaks in E. I am getting it tuned."
+      ],
+      "meerkat": [
+        "I can stand taller than I am wide. It is my best trick and also my only trick.",
+        "My tail counts as a third leg when I am on watch. Nobody question the math.",
+        "I dig for grubs and gossip in roughly equal measure.",
+        "The sun patches on the sand are reserved seating, and I reserved the best one."
       ]
     },
     "traitReplies": {

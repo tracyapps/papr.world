@@ -72,6 +72,11 @@ const miniMapWidget = document.querySelector<HTMLElement>('#mini-map-widget');
 const compassRoseElement = document.querySelector<HTMLElement>('#compass-rose');
 const compassHeadingElement = document.querySelector<HTMLElement>('#compass-heading');
 const professorWidget = document.querySelector<HTMLElement>('#professor-widget');
+// The left tool rail (`hudLayout.ts`'s `--hud-rail-width`), read via its
+// resolved layout box rather than re-parsing the clamp() that sizes it, so
+// the minimap's default position can clear it without duplicating the rail
+// width's own source of truth.
+const toolRailElement = document.querySelector<HTMLElement>('.tool-toolbar');
 
 /** Screen-edge margin used by every widget's default position. */
 const HUD_WIDGET_MARGIN = 16;
@@ -103,9 +108,15 @@ const hudWidgetConfigs: HudWidgetConfig[] = [
     defaultSize: () => (
       window.innerWidth <= 680 ? { width: 118, height: 118 } : { width: 156, height: 156 }
     ),
+    // Anchored past the left tool rail rather than top-right: the
+    // top-right corner is where `#hud-actions` (activity log / help /
+    // settings) sits, so a first-time player who has never dragged the
+    // minimap used to find it hidden under those buttons. Only the
+    // *default* moves — anyone who already dragged the minimap keeps their
+    // saved localStorage position untouched.
     defaultPosition: () => ({
-      x: window.innerWidth - ((miniMapWidget?.offsetWidth ?? 156) + 16),
-      y: 16,
+      x: (toolRailElement?.getBoundingClientRect().right ?? 0) + HUD_WIDGET_MARGIN,
+      y: HUD_WIDGET_MARGIN,
     }),
     afterApply: resizeMiniMapCanvas,
   },

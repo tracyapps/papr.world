@@ -40,6 +40,7 @@ export const RESOURCE_CORE_DEFS = {
   'confetti-stones': { id: 'confetti-stones', label: 'Confetti stones', shortLabel: 'Confetti stone', category: 'stones', iconKey: 'resource.confetti-stones' },
   'graphite-cardstone': { id: 'graphite-cardstone', label: 'Graphite cardstone', shortLabel: 'Cardstone', category: 'stones', iconKey: 'resource.graphite-cardstone' },
   'bluefold-pebbles': { id: 'bluefold-pebbles', label: 'Bluefold pebbles', shortLabel: 'Bluefolds', category: 'stones', iconKey: 'resource.bluefold-pebbles' },
+  'terracotta-pebbles': { id: 'terracotta-pebbles', label: 'Terracotta pebbles', shortLabel: 'Terracottas', category: 'stones', iconKey: 'resource.terracotta-pebbles' },
   'sunbaked-cardboard': { id: 'sunbaked-cardboard', label: 'Sunbaked cardboard', shortLabel: 'Sunbaked card', category: 'cardboard', iconKey: 'resource.sunbaked-cardboard' },
   'ochre-paperclay': { id: 'ochre-paperclay', label: 'Ochre paperclay', shortLabel: 'Ochre clay', category: 'soil', iconKey: 'resource.ochre-paperclay' },
   'carbon-soil': { id: 'carbon-soil', label: 'Carbon soil', shortLabel: 'Carbon soil', category: 'soil', iconKey: 'resource.carbon-soil' },

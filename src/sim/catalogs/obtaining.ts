@@ -48,7 +48,10 @@ const SCATTERED_IN: Partial<Record<ResourceId, Biome[]>> = {
   'mossy-paper-fiber': ['clearing', 'forest', 'meadow'],
   'confetti-stones': ['meadow', 'scrapflats'],
   'graphite-cardstone': ['forest', 'scrapflats'],
-  'bluefold-pebbles': ['meadow', 'dunes'],
+  // Desert stone got its own identity rather than sharing meadow's aqua
+  // pebbles — a material should visually remember where it came from.
+  'bluefold-pebbles': ['meadow'],
+  'terracotta-pebbles': ['dunes'],
   'sunbaked-cardboard': ['dunes', 'scrapflats'],
   // Seed packets lie about near the kind of ground they want to grow in —
   // the farm finds the player almost as often as the player finds the farm.

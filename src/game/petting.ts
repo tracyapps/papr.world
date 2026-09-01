@@ -30,6 +30,7 @@ const PET_VERBS: Record<string, string> = {
   bird: 'cheeps',
   cat: 'slow-blinks at you',
   woodchuck: 'chatters its teeth and beams',
+  meerkat: 'stands up tall on its toes to get a better look at you',
 };
 
 // --- Paper hearts -----------------------------------------------------

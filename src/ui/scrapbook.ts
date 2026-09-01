@@ -13,6 +13,7 @@ import { getGameState, onGameStateChanged } from '../sim/state';
 import { SEED_DEFS, type SeedId } from '../sim/catalogs/seeds';
 import { setActionMode } from '../game/actionMode';
 import { getToolArt } from '../game/toolPresentation';
+import { getResourceArt } from '../game/resourcePresentation';
 import { requestHudLayout } from './hudLayout';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
@@ -100,9 +101,12 @@ function renderMaterialsTab(categoryId: ResourceCategoryId) {
     const selected = seed && getGameState().player.selectedSeed === seed.id;
     // The count speaks for itself — "12 tucked away" says nothing "12" does
     // not. Undiscovered items still need words, because a blank is ambiguous.
+    const art = getResourceArt(resource.id);
     return `
       <li class="scrapbook-item ${count === 0 ? 'is-undiscovered' : ''}" data-icon-key="${resource.iconKey}">
-        <span class="scrapbook-item-icon" style="--material-color:${resource.mapColor}" aria-hidden="true"></span>
+        ${art
+    ? `<img class="scrapbook-item-art" src="${art.sourceUrl}" alt="" aria-hidden="true">`
+    : `<span class="scrapbook-item-icon" style="--material-color:${resource.mapColor}" aria-hidden="true"></span>`}
         <span class="scrapbook-item-copy">
           <strong>${resource.label}</strong>
           ${count === 0 ? '<small>Not found yet</small>' : ''}

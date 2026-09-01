@@ -5,7 +5,7 @@ import { createRng } from '../core/math';
 // agree without syncing). Variation comes from swapping paper textures,
 // colors, scale, speed, shyness, and a name.
 
-export type CritterSpecies = 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck';
+export type CritterSpecies = 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck' | 'meerkat';
 
 export type PersonalityTrait =
   | 'bold'
@@ -91,6 +91,12 @@ const COATS: Record<CritterSpecies, Coat[]> = {
     { url: null, color: '#80583b', accent: '#e6cf9d' },
     { url: null, color: '#b07a4d', accent: '#f3dfb1' },
   ],
+  meerkat: [
+    { url: null, color: '#c9a06a', accent: '#3a2c22' }, // classic sandy tan
+    { url: `${M}/construction-paper-brown-2.png`, color: '#d9b781', accent: '#372a20' }, // papery tan grain
+    { url: null, color: '#b98f5c', accent: '#2e2219' }, // darker desert tan
+    { url: null, color: '#dcc192', accent: '#40311f' }, // pale sand
+  ],
 };
 
 /** Cozy craft-table names. Seeded pick; duplicates across the world are fine. */
@@ -112,6 +118,8 @@ const BASE: Record<CritterSpecies, { speed: number; wander: number }> = {
   bird: { speed: 1.5, wander: 10 },
   cat: { speed: 1.5, wander: 9 },
   woodchuck: { speed: 1.05, wander: 5 },
+  // Quick, but a mob sentry doesn't wander far from the burrow.
+  meerkat: { speed: 1.35, wander: 5.5 },
 };
 
 const SECONDARY_TRAITS: PersonalityTrait[] = [
@@ -164,4 +172,5 @@ export const SPECIES_MAP_COLORS: Record<CritterSpecies, string> = {
   bird: '#4f8fb8',
   cat: '#c77b3f',
   woodchuck: '#9b683d',
+  meerkat: '#c9a06a',
 };

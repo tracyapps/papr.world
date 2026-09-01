@@ -422,6 +422,134 @@ function buildRaccoon(params: CritterParams): CritterRig {
   };
 }
 
+function buildMeerkat(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = bodyMaterial(params, [1.2, 1.2]);
+  const dark = createColorMaterial(params.accentColor, 0.82);
+  const cream = createColorMaterial('#f2e6cf', 0.92);
+
+  // Torso pivots upright — the sentry stance is the entire reason to draw
+  // a meerkat rather than reuse another small mammal.
+  const torso = new THREE.Group();
+  torso.position.set(0, 0.13, 0);
+
+  const body = sphere(0.2, coat, 22, 14);
+  body.scale.set(1, 1.35, 1.55);
+  body.position.set(0, 0, 0.02);
+
+  const chest = sphere(0.1, cream, 16, 12);
+  chest.scale.set(0.85, 1.1, 0.75);
+  chest.position.set(0, -0.03, -0.18);
+
+  const head = sphere(0.115, coat, 20, 14);
+  head.scale.set(0.92, 0.88, 1);
+  head.position.set(0, 0.29, -0.24);
+
+  const snout = sphere(0.062, coat, 14, 10);
+  snout.scale.set(0.85, 0.75, 1.05);
+  snout.position.set(0, 0.265, -0.34);
+
+  const nose = sphere(0.026, dark, 8, 6);
+  nose.position.set(0, 0.27, -0.4);
+
+  // Signature dark eye patches: smaller and more localized than a raccoon's
+  // full mask band, reading as sun-shielding rather than bandit disguise.
+  const eyePatches: THREE.Mesh[] = [];
+  for (const x of [-0.06, 0.06]) {
+    const patch = sphere(0.042, dark, 12, 8);
+    patch.scale.set(1, 1.3, 0.6);
+    patch.position.set(x, 0.305, -0.335);
+    eyePatches.push(patch);
+  }
+
+  const eyes: THREE.Mesh[] = [];
+  for (const x of [-0.058, 0.058]) {
+    const glint = sphere(0.012, cream, 8, 6);
+    glint.position.set(x, 0.315, -0.375);
+    eyes.push(glint);
+  }
+
+  const ears: THREE.Mesh[] = [];
+  for (const x of [-0.095, 0.095]) {
+    const ear = sphere(0.032, coat, 12, 8);
+    ear.scale.set(0.85, 1, 0.55);
+    ear.position.set(x, 0.37, -0.24);
+    ears.push(ear);
+  }
+
+  torso.add(body, chest);
+  const headGroup = makeHead(torso, [0, 0.27, -0.2], [head, snout, nose, ...eyePatches, ...eyes, ...ears]);
+
+  // Short legs — the stance does the work, not leg length.
+  const legs: THREE.Mesh[] = [];
+  for (const [index, x] of [-0.09, 0.09, -0.075, 0.075].entries()) {
+    const leg = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.032, 0.16, 8), dark));
+    leg.position.set(x, -0.05, index < 2 ? -0.14 : 0.13);
+    legs.push(leg);
+  }
+
+  // Paws, held loosely at rest and clasped at the chest at full attention.
+  const paws: THREE.Mesh[] = [];
+  for (const x of [-0.075, 0.075]) {
+    const paw = sphere(0.034, dark, 10, 8);
+    paw.position.set(x, 0.03, -0.14);
+    paws.push(paw);
+  }
+
+  // Long, tapering tail with a dark tip rather than the raccoon's
+  // alternating rings — and a meerkat's tripod leg when it stands sentry.
+  const tail = new THREE.Group();
+  tail.position.set(0, -0.01, 0.22);
+  const tailBase = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.03, 0.34, 8), coat));
+  tailBase.rotation.x = Math.PI / 2.3;
+  tailBase.position.set(0, 0.06, 0.12);
+  const tailTip = sphere(0.032, dark, 10, 8);
+  tailTip.position.set(0, 0.14, 0.36);
+  tail.add(tailBase, tailTip);
+
+  group.add(torso, ...legs, ...paws, tail);
+
+  const o = params.animOffset;
+  return {
+    group,
+    parts: partsOf({ head: headGroup, body: torso, tail, ears }),
+    flying: false,
+    hopper: false,
+    groundOffset: 0.155,
+    hopHeight: 0,
+    animate: (t, _dt, moving, speedRatio, curious) => {
+      torso.rotation.z = moving ? Math.sin(t * 9 + o) * 0.05 * speedRatio : 0;
+      tail.rotation.x = Math.sin(t * (moving ? 7 : 2.4) + o) * (moving ? 0.1 : 0.04);
+      legs.forEach((leg, index) => {
+        leg.rotation.x = moving ? Math.sin(t * 12 + o + index * Math.PI) * 0.28 * speedRatio : 0;
+      });
+      // A curious meerkat rises partway onto its haunches before it ever
+      // earns the full sentry flourish — checking things out is the whole
+      // personality, not a special occasion. Head pose stays with the idle
+      // action system so the two never fight.
+      const perk = curious ? 1 : 0;
+      torso.rotation.x = THREE.MathUtils.lerp(torso.rotation.x, -0.5 * perk, 0.1);
+    },
+    flourish: (progress, t) => {
+      // Full sentry stance: rises upright on a tripod of hind legs and
+      // tail, paws clasped at the chest, scanning. The most meerkat thing a
+      // meerkat can do.
+      const rise = Math.sin(Math.min(progress * 1.2, 1) * Math.PI);
+      torso.rotation.x = -1.15 * rise;
+      tail.rotation.x = 0.55 * rise;
+      const clasp = Math.sin(t * 10) * 0.02 * rise;
+      paws[0].position.set(-0.045 + clasp, 0.06 * rise + 0.03, -0.1 - 0.1 * rise);
+      paws[1].position.set(0.045 - clasp, 0.06 * rise + 0.03, -0.1 - 0.1 * rise);
+      if (progress >= 1) {
+        torso.rotation.x = 0;
+        tail.rotation.x = 0;
+        paws[0].position.set(-0.075, 0.03, -0.14);
+        paws[1].position.set(0.075, 0.03, -0.14);
+      }
+    },
+  };
+}
+
 function buildBunny(params: CritterParams): CritterRig {
   const group = new THREE.Group();
   const coat = bodyMaterial(params);
@@ -828,6 +956,7 @@ const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = 
   bird: buildBird,
   cat: buildCat,
   woodchuck: buildWoodchuck,
+  meerkat: buildMeerkat,
 };
 
 export function buildCritterRig(species: CritterSpecies, params: CritterParams): CritterRig {

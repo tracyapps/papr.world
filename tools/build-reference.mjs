@@ -35,9 +35,17 @@ const server = await createServer({
 });
 
 let reference;
+let resourceArt;
 try {
   const mod = await server.ssrLoadModule('/src/sim/catalogs/reference.ts');
   reference = mod.gameReference();
+  // Presentation, not a catalog fact — lives beside the game's own
+  // `getResourceArt()` rather than in `sim/catalogs/`, and is loaded the
+  // same ssrLoadModule way as the reference itself so this page can never
+  // show art the game doesn't. Empty until resources start getting real
+  // drawings; see docs/resource-artwork-guide.md.
+  const artMod = await server.ssrLoadModule('/src/game/resourcePresentation.ts');
+  resourceArt = artMod.RESOURCE_ART;
 } finally {
   await server.close();
 }
@@ -78,11 +86,13 @@ function materialCard(resource) {
   const routes = resource.routes.length
     ? resource.routes.map((route) => `<li>${esc(describeRoute(route, toolsById))}</li>`).join('')
     : '<li class="muted">No way to obtain this yet.</li>';
+  const art = resourceArt[resource.id];
   return `
   <article class="card" data-name="${esc(resource.label.toLowerCase())}" data-category="${esc(resource.category)}"
     data-biomes="${esc(resource.biomes.join(' '))}" data-exclusive="${resource.exclusive}"
     data-tool="${esc(resource.toolRequired ?? '')}">
     <header>
+      ${art ? `<img class="card-art" src="${esc(art.sourceUrl)}" alt="" aria-hidden="true">` : ''}
       <h3>${esc(resource.label)}</h3>
       ${resource.exclusive ? `<span class="tag tag-exclusive">Only in ${esc(titleCase(resource.biomes[0]))}</span>` : ''}
     </header>
@@ -182,6 +192,8 @@ const page = `<!doctype html>
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
   .card header { align-items: baseline; display: flex; gap: 8px; justify-content: space-between; }
   .card h3 { font-size: 16px; margin: 0 0 2px; }
+  /* Empty until a resource has real art (docs/resource-artwork-guide.md) — first pass, worth an eyeball once art exists. */
+  .card-art { flex: none; height: 30px; object-fit: contain; width: 30px; }
   .card p { margin: 5px 0; }
   .meta { font-size: 13px; }
   .limitation { border-left: 2px solid var(--line); font-size: 14px; padding-left: 9px; }

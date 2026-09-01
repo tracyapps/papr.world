@@ -48,6 +48,11 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'l
   'bluefold-pebbles': {
     material: 'paper.aqua', visual: 'stoneCluster', mapColor: '#4c91a8',
   },
+  // Desert-exclusive: warm orange wrapping paper reads as sun-baked clay
+  // rather than reusing meadow's aqua pebbles in a biome they don't suit.
+  'terracotta-pebbles': {
+    material: 'paper.orangewrap', visual: 'stoneCluster', mapColor: '#c2703f',
+  },
   'sunbaked-cardboard': {
     material: 'paper.brown.warm', visual: 'stoneCluster', mapColor: '#af7e42',
   },

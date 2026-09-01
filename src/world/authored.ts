@@ -233,7 +233,7 @@ function dunesPage(px: number, pz: number, seed: number): PageData {
         map: { kind: 'resource', color: '#a97e46' },
       },
       { kind: 'harvestable', resource: 'sunbaked-cardboard', visual: 'stoneCluster', material: 'paper.brown.warm', x: cx + 1.8 * S, z: cz + 1.6 * S, seed: seed + 91, amount: 2, respawnSeconds: 100, mapColor: '#af7e42' },
-      { kind: 'harvestable', resource: 'bluefold-pebbles', visual: 'stoneCluster', material: 'paper.aqua', x: cx - 5.2 * S, z: cz - 1.2 * S, seed: seed + 92, amount: 2, respawnSeconds: 105, mapColor: '#4c91a8' },
+      { kind: 'harvestable', resource: 'terracotta-pebbles', visual: 'stoneCluster', material: 'paper.orangewrap', x: cx - 5.2 * S, z: cz - 1.2 * S, seed: seed + 92, amount: 2, respawnSeconds: 105, mapColor: '#c2703f' },
     ],
   };
 }
