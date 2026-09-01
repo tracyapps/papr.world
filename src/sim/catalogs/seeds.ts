@@ -138,9 +138,23 @@ export const SEED_DEFS = {
     /** Seconds until another harvest on plants that keep producing. */
     repeatSeconds?: number;
   };
+  /**
+   * How long picking a ready harvest takes by hand, in seconds.
+   *
+   * Optional and unset for every seed today, which falls back to
+   * `DEFAULT_HARVEST_SECONDS` — the original flat duration every plant used
+   * before this field existed. The seam exists for later, bigger crops that
+   * should take real effort to bring in by hand, and for a future farming-tech
+   * node to shorten (never remove — see `docs/roadmap.md` Phase 3/knowledge
+   * tree "farming-equipment-automation").
+   */
+  harvestSeconds?: number;
 }>>;
 
 export type SeedId = keyof typeof SEED_DEFS;
+
+/** Flat harvest time every plant used before `harvestSeconds` existed. */
+export const DEFAULT_HARVEST_SECONDS = 1.35;
 
 /** Seeds currently carried, in the stable order used by every picker. */
 export function carriedSeedIds(
@@ -197,6 +211,12 @@ export function plantHarvest(seedId: SeedId): {
 } | null {
   const def = SEED_DEFS[seedId];
   return 'harvest' in def ? def.harvest ?? null : null;
+}
+
+/** How long picking this plant's ready harvest takes by hand, in milliseconds. */
+export function plantHarvestDurationMs(seedId: SeedId): number {
+  const def = SEED_DEFS[seedId] as { harvestSeconds?: number };
+  return (def.harvestSeconds ?? DEFAULT_HARVEST_SECONDS) * 1000;
 }
 
 /**

@@ -229,6 +229,7 @@ function readPiece(id: string, raw: any): PlacedPiece {
     x: raw.x,
     z: raw.z,
     rotY: raw.rotY,
+    material: raw.material ?? '',
     makerId: raw.makerId,
     page: raw.page,
   };

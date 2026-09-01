@@ -2,7 +2,7 @@
 // friendship points: affection answers "how close are we?", while conversation
 // memory answers "what happened between us?".
 
-import { getGameState, updateGameState } from '../sim/state';
+import { DIARY_ENTRY_LIMIT, getGameState, updateGameState } from '../sim/state';
 
 export type ConversationMemory = {
   flags: string[];
@@ -44,4 +44,37 @@ export function markConversationSeen(critterId: string, key: string): number {
     memory.seen[key] = previous + 1;
   });
   return previous;
+}
+
+/**
+ * Write down one thing a critter has told the player — the scrapbook diary's
+ * data shape (roadmap Phase 2.4).
+ *
+ * `id` is the caller's job to make stable (the conversation-flag key it rode
+ * in on is the natural choice), which gives free dedup on the same check
+ * `activityLog` uses. Newest first, capped at `DIARY_ENTRY_LIMIT` the same
+ * way a save is capped on load, so an unbroken play session cannot grow the
+ * save past what normalization will trim it back to anyway.
+ */
+export function recordDiaryEntry(entry: {
+  id: string;
+  critterId: string;
+  pageId: string;
+  kind: string;
+  text: string;
+}) {
+  updateGameState((state) => {
+    if (state.player.diaryEntries.some((existing) => existing.id === entry.id)) return;
+    state.player.diaryEntries.unshift({
+      id: entry.id,
+      critterId: entry.critterId,
+      pageId: entry.pageId,
+      kind: entry.kind,
+      text: entry.text,
+      recordedAt: Date.now(),
+    });
+    if (state.player.diaryEntries.length > DIARY_ENTRY_LIMIT) {
+      state.player.diaryEntries.length = DIARY_ENTRY_LIMIT;
+    }
+  });
 }

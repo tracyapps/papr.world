@@ -49,6 +49,7 @@ import { hasToolActionAt, initializeToolActions, tryToolActionAt } from './game/
 import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } from './game/planting';
 import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverlay';
 import {
+  cancelCarryingPiece,
   initializePlacement,
   rotateSelectedBuildPiece,
   tryPlaceAt,
@@ -253,6 +254,7 @@ initializeInput({
     && !hasOrbitBlockingInteractionAt(event.clientX, event.clientY)
   ),
   onEscape: () => {
+    if (cancelCarryingPiece()) return true;
     if (cancelTimedAction('escape')) return true;
     if (closeTechTreeView()) return true;
     if (closeHudMenu()) return true;
@@ -426,6 +428,7 @@ window.__paperWorld = {
   sharedPlace: (templateKey = 'paper-bench') => publishSharedPlacedPiece({
     id: 'console-only',
     templateKey,
+    material: '',
     x: avatar.position.x + 1.2,
     z: avatar.position.z,
     rotY: 0,

@@ -260,7 +260,7 @@ walk with the distinct biomes one page north/east/south/west. Asking generates
 only those four deterministic neighboring pages; it never turns a critter into
 a global directory.
 
-### 2.4 The diary — **L**
+### 2.4 The diary — **L** — ◐ data shape built (2026-09-01)
 
 Depends on 2.1 having something to record. A searchable record of what you have
 been told, formatted like something the player kept.
@@ -268,6 +268,20 @@ been told, formatted like something the player kept.
 **Build the data shape properly on day one**: stable entry ids and room for
 player-authored fields, so annotation and highlighting can be *added* later
 rather than retrofitted. The annotation UI itself is parked.
+
+`player.diaryEntries: DiaryEntry[]` is live and recording. Every place-knowledge
+follow-up reply (`placeKnowledgeFollowUps` in `conversationEngine.ts`) now
+writes a `DiaryEntry` — critter id, page id, kind, the exact resolved sentence,
+and a timestamp — alongside the existing conversation flag, using the same id
+as that flag so repeats dedupe for free. `note?: string` rides along unused as
+the seam for later player-authored annotation. No save migration was needed:
+old saves default the field to `[]` on load, same pattern as `activityLog`.
+Capped at `DIARY_ENTRY_LIMIT` (400) on both write and load.
+
+**Still parked, on purpose:** the scrapbook Diary tab, its visual format (an
+open design question per `biome-knowledge.md`), and the annotation UI. There
+is no UI yet for a player to actually read their diary — only the save-level
+record of what would go in it.
 
 ---
 

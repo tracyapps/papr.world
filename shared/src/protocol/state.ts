@@ -59,6 +59,21 @@ export type PlacedPiece = {
   /** Yaw in radians. */
   rotY: number;
   /**
+   * Which of that piece type's `BUILD_MATERIAL_OPTIONS` it was built from —
+   * a plain string here, not a `MaterialKey`, so this render-free shared
+   * layer never imports anything from `render/`. A stray/unrecognized value
+   * (an older save, an older protocol client) falls back to that piece
+   * type's original look — see `resolveBuildMaterial` in
+   * `sim/catalogs/building.ts`, the single place that reconciles this.
+   */
+  material: string;
+  /**
+   * Reserved for a future choice of style/design per piece type (e.g.
+   * several bench shapes) — always empty today. The seam exists now so
+   * that feature won't need another protocol bump when it lands.
+   */
+  designId?: string;
+  /**
    * Durable ACCOUNT id of who placed it — permissions, maker credit, and
    * mailed harvests all key off this. Stamped by the server from the
    * authenticated join; never taken from the client intent.

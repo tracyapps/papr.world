@@ -56,6 +56,7 @@ describe('build-piece catalog', () => {
       x: 1,
       z: 2,
       rotY: 0,
+      material: 'paper.brown.warm',
       makerId: 'local',
       page: '0,0',
     });
@@ -68,7 +69,7 @@ describe('build-piece catalog', () => {
   it('rotates a rectangular physical footprint with the saved piece', () => {
     const footprint = placedPieceFootprint({
       id: 'turned-plank', templateKey: 'path-plank', x: 1, z: 2,
-      rotY: Math.PI / 2, makerId: 'local', page: '0,0',
+      rotY: Math.PI / 2, material: 'paper.plaid', makerId: 'local', page: '0,0',
     });
 
     expect(footprint.radiusX).toBeCloseTo(BUILD_PIECE_DEFS['path-plank'].radiusZ);

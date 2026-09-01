@@ -11,6 +11,15 @@ export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
 
 /**
+ * Soft cap on stored diary entries.
+ *
+ * Shared between the write path (`recordDiaryEntry`) and save normalization,
+ * so a save trimmed on load and a save trimmed as it's written agree on the
+ * same number.
+ */
+export const DIARY_ENTRY_LIMIT = 400;
+
+/**
  * Maker account id for pieces placed in solo play.
  *
  * The server assigns durable account ids to networked makers; a solo save has
@@ -114,6 +123,29 @@ export type ActivityEntry = {
   at: number;
 };
 
+/**
+ * One thing a critter has told the player, written down like something kept
+ * rather than generated.
+ *
+ * `id` mirrors the conversation-flag key it comes from, so recording is
+ * naturally deduplicated the same way `activityLog` entries are. `kind` and
+ * `pageId` are carried alongside the flag rather than parsed back out of it,
+ * since the flag format is an internal detail of the conversation engine.
+ *
+ * `note` is a deliberately unused seam for later player-authored annotation
+ * (roadmap Phase 2.4) — the game never writes it, and its presence now means
+ * that feature will not need a save migration when it lands.
+ */
+export type DiaryEntry = {
+  id: string;
+  critterId: string;
+  pageId: string;
+  kind: string;
+  text: string;
+  recordedAt: number;
+  note?: string;
+};
+
 export type GameState = {
   schemaVersion: typeof SAVE_SCHEMA_VERSION;
   player: {
@@ -132,6 +164,8 @@ export type GameState = {
     activeLearning: ActiveLearningState | null;
     /** Newest first; quiet world updates the player can inspect when ready. */
     activityLog: ActivityEntry[];
+    /** Newest first; everything a critter has told the player so far. */
+    diaryEntries: DiaryEntry[];
   };
   world: {
     harvestRespawns: Record<string, number>;
@@ -174,6 +208,7 @@ export function createDefaultGameState(): GameState {
       nextPlaceNumber: 2,
       activeLearning: null,
       activityLog: [],
+      diaryEntries: [],
     },
     world: {
       harvestRespawns: {},
@@ -291,6 +326,10 @@ function normalizePlacedPieces(value: unknown): Record<string, PlacedPiece> {
       x: piece.x,
       z: piece.z,
       rotY: typeof piece.rotY === 'number' && Number.isFinite(piece.rotY) ? piece.rotY : 0,
+      // Absent on saves written before this field existed. An empty string
+      // resolves to that piece type's original look — see
+      // resolveBuildMaterial in sim/catalogs/building.ts.
+      material: typeof piece.material === 'string' ? piece.material.slice(0, 64) : '',
       // ownerId was the pre-protocol-v2 name. Read it once for old solo saves,
       // then every subsequent save writes the durable makerId shape.
       makerId: typeof piece.makerId === 'string'
@@ -424,6 +463,25 @@ function normalizeState(value: unknown): GameState | null {
         at: Math.max(0, entry.at),
       }];
     }).slice(0, 80)
+    : [];
+  state.player.diaryEntries = Array.isArray(player.diaryEntries)
+    ? player.diaryEntries.flatMap((rawEntry) => {
+      const entry = safeObject(rawEntry);
+      if (typeof entry.id !== 'string' || typeof entry.critterId !== 'string') return [];
+      if (typeof entry.pageId !== 'string' || typeof entry.kind !== 'string') return [];
+      if (typeof entry.text !== 'string') return [];
+      if (typeof entry.recordedAt !== 'number' || !Number.isFinite(entry.recordedAt)) return [];
+      const note = typeof entry.note === 'string' ? entry.note.slice(0, 500) : undefined;
+      return [{
+        id: entry.id,
+        critterId: entry.critterId,
+        pageId: entry.pageId,
+        kind: entry.kind,
+        text: entry.text.slice(0, 500),
+        recordedAt: Math.max(0, entry.recordedAt),
+        ...(note !== undefined ? { note } : {}),
+      }];
+    }).slice(0, DIARY_ENTRY_LIMIT)
     : [];
   const learning = safeObject(player.activeLearning);
   if (

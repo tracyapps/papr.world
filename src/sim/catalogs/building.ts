@@ -53,6 +53,66 @@ export function buildAssemblyDef(templateKey: string): BuildAssemblyDefinition |
   return BUILD_ASSEMBLY_DEFS[templateKey as BuildPieceKey] ?? null;
 }
 
+/**
+ * Materials a build piece can be made from.
+ *
+ * Plain strings on purpose — sim/ stays renderer-free by design (see this
+ * file's own header comment), so this catalog does not import `MaterialKey`
+ * from `render/materials.ts`. `buildPieceVisuals.ts` is the one place that
+ * needs to know these strings double as real `MaterialKey`s, and it already
+ * imports that type natively. Every entry here must already exist in
+ * `MATERIAL_DEFS` — there is no asset work in offering a new one, only in
+ * curating which existing paper textures make sense on furniture.
+ */
+export const BUILD_MATERIAL_OPTIONS = [
+  'paper.brown.warm',
+  'paper.brown',
+  'paper.cork',
+  'paper.grey',
+  'paper.green',
+  'paper.plaid',
+] as const;
+
+export type BuildMaterialKey = (typeof BUILD_MATERIAL_OPTIONS)[number];
+
+export function isBuildMaterial(value: string): value is BuildMaterialKey {
+  return (BUILD_MATERIAL_OPTIONS as readonly string[]).includes(value);
+}
+
+/** Player-facing name for each material option, for the build picker UI. */
+export const BUILD_MATERIAL_LABELS: Record<BuildMaterialKey, string> = {
+  'paper.brown.warm': 'Warm Kraft',
+  'paper.brown': 'Brown Paper',
+  'paper.cork': 'Corkboard',
+  'paper.grey': 'Grey Wood-Print',
+  'paper.green': 'Construction Green',
+  'paper.plaid': 'Blue Plaid',
+};
+
+/**
+ * What every piece looked like before a `material` was ever recorded.
+ *
+ * Must match `buildPieceVisuals.ts`'s previously-hardcoded material for that
+ * piece's customizable surface exactly, so a piece built before this field
+ * existed — or a malformed/omitted value from an older client — renders
+ * pixel-identical to how it always has. See that file for which surface on
+ * each piece this default applies to (never all of a piece's materials —
+ * e.g. a planter's soil and a lamp's shade are deliberately fixed).
+ */
+export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, BuildMaterialKey> = {
+  'paper-bench': 'paper.brown.warm',
+  'planter-box': 'paper.cork',
+  'path-plank': 'paper.plaid',
+  'paper-lamp': 'paper.brown',
+};
+
+/** The material a piece should render/build with: the requested one if it's
+ * real, otherwise that piece type's original look. */
+export function resolveBuildMaterial(templateKey: BuildPieceKey, requested?: string): BuildMaterialKey {
+  if (requested && isBuildMaterial(requested)) return requested;
+  return DEFAULT_BUILD_MATERIAL[templateKey];
+}
+
 function partsFromCompleted(definition: BuildAssemblyDefinition, completedStepIds: readonly string[]) {
   const completed = new Set(completedStepIds);
   return new Set(definition.steps

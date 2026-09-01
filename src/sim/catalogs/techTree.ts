@@ -301,7 +301,9 @@ export const TECH_DEFS = {
     branch: 'caring-for-the-land',
     requires: ['irrigation-systems', 'harvesting-tech'],
     readiness: 'concept',
-    previewGrants: ['Automated tending', 'Farm equipment'],
+    // Harvesting by hand always works — this is what pays off once a farm
+    // outgrows one pair of hands, not a wall it puts up before then.
+    previewGrants: ['A tractor', 'Faster harvesting on a big farm'],
   },
   'advanced-farming': {
     id: 'advanced-farming',
@@ -393,6 +395,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['trimming-2'],
     readiness: 'concept',
+    previewGrants: ['New build materials', 'Material-quality notes'],
   },
   'woodworking-safety': {
     id: 'woodworking-safety',
@@ -409,6 +412,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['woodworking-safety'],
     readiness: 'concept',
+    previewGrants: ['New build pieces', 'Basic joinery'],
   },
   'advanced-woodworking': {
     id: 'advanced-woodworking',
@@ -427,6 +431,9 @@ export const TECH_DEFS = {
     branch: 'materials',
     requires: ['lumber-types'],
     readiness: 'concept',
+    // The natural home for build-piece materials as an unlockable set,
+    // rather than every swatch being open from the very first hammer.
+    previewGrants: ['Refined build materials', 'New material swatches'],
   },
   'materials-refinement-2': {
     id: 'materials-refinement-2',
@@ -435,6 +442,7 @@ export const TECH_DEFS = {
     branch: 'materials',
     requires: ['materials-refinement-1'],
     readiness: 'concept',
+    previewGrants: ['Finer material grades', 'Better yield per raw find'],
   },
   'advanced-rare-materials': {
     id: 'advanced-rare-materials',
@@ -443,6 +451,7 @@ export const TECH_DEFS = {
     branch: 'materials',
     requires: ['materials-refinement-2'],
     readiness: 'concept',
+    previewGrants: ['Rare material finds', 'Exclusive material swatches'],
   },
 
   // --- Building & Construction: tinkering sub-thread ------------------------
@@ -453,6 +462,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['materials-refinement-1'],
     readiness: 'concept',
+    previewGrants: ['Salvage & disassembly', 'Tinkering plans'],
   },
   'fixing-improvements': {
     id: 'fixing-improvements',
@@ -461,6 +471,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['building-tinkering-basics'],
     readiness: 'concept',
+    previewGrants: ['Repair actions', 'Upgrade options'],
   },
   'small-furniture-building': {
     id: 'small-furniture-building',
@@ -469,6 +480,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['fixing-improvements'],
     readiness: 'concept',
+    previewGrants: ['New small furniture designs', 'Stool & shelving plans'],
   },
   'large-furniture-building': {
     id: 'large-furniture-building',
@@ -477,6 +489,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['small-furniture-building'],
     readiness: 'concept',
+    previewGrants: ['Tables & wardrobes', 'Large furniture plans'],
   },
   'painting-and-staining': {
     id: 'painting-and-staining',
@@ -485,6 +498,9 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['large-furniture-building'],
     readiness: 'concept',
+    // The natural home for a real `designId` on a placed piece — the seam
+    // PlacedPiece already carries, unused, for exactly this.
+    previewGrants: ['Paint & stain finishes', 'New surface designs'],
   },
 
   // --- Building & Construction: structures sub-thread -----------------------
@@ -495,6 +511,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['large-furniture-building'],
     readiness: 'concept',
+    previewGrants: ['Walls & simple structures', 'Roofed spaces'],
   },
   'structural-analysis': {
     id: 'structural-analysis',
@@ -503,6 +520,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['intro-to-structures'],
     readiness: 'concept',
+    previewGrants: ['Structural stability notes', 'Bigger structure plans'],
   },
   'foundation-design': {
     id: 'foundation-design',

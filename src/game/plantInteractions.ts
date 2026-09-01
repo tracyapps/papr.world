@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { camera, scene } from '../render/context';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState } from '../sim/state';
-import { plantHarvest, plantProduce } from '../sim/catalogs/seeds';
+import { plantHarvest, plantHarvestDurationMs, plantProduce } from '../sim/catalogs/seeds';
 import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { avatar } from './avatar';
@@ -117,8 +117,10 @@ function collectDrop(entry: PlantEntry) {
 
 function startPlantHarvest(entry: PlantEntry) {
   pendingPlantHarvests.add(entry.id);
+  const seedId = stateFor(entry)?.plantedSeedId;
+  const durationMs = seedId ? plantHarvestDurationMs(seedId) : 1_350;
   const started = startTimedAction({
-    steps: [{ kind: 'harvest', durationMs: 1_350 }],
+    steps: [{ kind: 'harvest', durationMs }],
     onComplete: () => {
       pendingPlantHarvests.delete(entry.id);
       collectDrop(entry);

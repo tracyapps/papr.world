@@ -46,6 +46,10 @@ export class PieceSchema extends Schema {
   @type('number') x = 0;
   @type('number') z = 0;
   @type('number') rotY = 0;
+  /** Which material option the piece was built from; see shared PlacedPiece. */
+  @type('string') material = '';
+  /** Reserved for a future per-piece style choice; always empty today. */
+  @type('string') designId = '';
   /** Durable ACCOUNT id of the maker — stamped server-side, never client-sent. */
   @type('string') makerId = '';
   @type('string') page = '0,0';

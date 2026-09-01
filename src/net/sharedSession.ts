@@ -325,6 +325,7 @@ export function publishSharedPlacedPiece(piece: PlacedPiece): void {
     z: piece.z,
     rotY: piece.rotY,
     page: piece.page,
+    material: piece.material,
   });
   syncSharedPieceVisibility();
 }

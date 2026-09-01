@@ -116,6 +116,13 @@ export function createPaperMaterial(options: PaperMaterialOptions): THREE.MeshSt
   });
 }
 
+/** The texture image behind a material key, for UI swatches (e.g. the build
+ * material picker) that want to preview the real paper art in plain CSS
+ * rather than approximate it with a flat color. */
+export function materialTextureUrl(key: MaterialKey): string {
+  return MATERIAL_DEFS[key].textureUrl;
+}
+
 /** Cached lookup by registry key. Pages should always use this. */
 export function getMaterial(key: MaterialKey): THREE.MeshStandardMaterial {
   let material = paperCache.get(key);

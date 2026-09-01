@@ -26,6 +26,7 @@ import {
   beginConversationVisit,
   getConversationMemory,
   markConversationSeen,
+  recordDiaryEntry,
   type ConversationMemory,
 } from './conversationMemory';
 import { addFriendshipPoints, getFriendshipLevel, type FriendshipLevel } from './friendship';
@@ -47,6 +48,12 @@ export type ConversationChoice = {
   returnToEveryday?: boolean;
   /** Record the exact rotating reply without using that memory to close a topic. */
   rememberReplyAs?: string;
+  /**
+   * Typed context for the diary entry `rememberReplyAs` produces.
+   * Left unset outside place knowledge — `rememberReplyAs` still records the
+   * conversation flag either way, but no diary entry is written without this.
+   */
+  rememberReplyContext?: { pageId: string; kind: string };
 };
 
 export type ConversationScene = {
@@ -346,6 +353,7 @@ export function placeKnowledgeFollowUps(
         label,
         replies: pools[kind],
         rememberReplyAs: `place:${context.pageId}:${kind}`,
+        rememberReplyContext: { pageId: context.pageId, kind },
       }]
     )),
     {
@@ -571,7 +579,17 @@ export function resolveConversationChoice(
   );
   if (choice.rememberReplyAs) {
     const replyIndex = choice.replies.indexOf(reply);
-    addConversationFlags(critter.id, [`${choice.rememberReplyAs}:${Math.max(0, replyIndex)}`]);
+    const flagKey = `${choice.rememberReplyAs}:${Math.max(0, replyIndex)}`;
+    addConversationFlags(critter.id, [flagKey]);
+    if (choice.rememberReplyContext) {
+      recordDiaryEntry({
+        id: flagKey,
+        critterId: critter.id,
+        pageId: choice.rememberReplyContext.pageId,
+        kind: choice.rememberReplyContext.kind,
+        text: reply,
+      });
+    }
   }
   let nextScene: ConversationScene | undefined;
   if (choice.followUps?.length) {

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { BIOME_IDS, type Biome } from '../sim/catalogs/biomes';
 import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import { SEED_DEFS, formatGrowthTime, plantHarvest } from '../sim/catalogs/seeds';
-import { createDefaultGameState, setGameStateForTests } from '../sim/state';
+import { createDefaultGameState, getGameState, setGameStateForTests } from '../sim/state';
 import type { Critter } from './critterBehavior';
 import { getConversationMemory } from './conversationMemory';
 import {
@@ -130,5 +130,40 @@ describe('place knowledge', () => {
     expect(second.endsScene).toBe(false);
     expect(first.reply).not.toBe(second.reply);
     expect(flags.filter((flag) => flag.startsWith('place:0,0:materials:'))).toHaveLength(2);
+  });
+
+  it('writes a diary entry per remembered fact and dedups on repeat (Phase 2.4 data shape)', () => {
+    setGameStateForTests(createDefaultGameState());
+    const critter = { id: 'diary-test-critter' } as Critter;
+    const followUps = placeKnowledgeFollowUps(placeContext('forest'), 'gentle');
+    const materials = followUps.find((choice) => choice.id === 'materials')!;
+    const scene = { id: 'place', opening: 'A first local fact.', choices: followUps };
+    const poolSize = materials.replies.length;
+
+    // One call per fact in the pool, then one more that must land on the
+    // first fact again — the wraparound is what proves dedup rather than an
+    // accidentally-small pool.
+    const results = Array.from({ length: poolSize + 1 }, () => (
+      resolveConversationChoice(critter, scene, materials)
+    ));
+
+    const entries = getGameState().player.diaryEntries;
+    expect(entries).toHaveLength(poolSize);
+    expect(results[poolSize].reply).toBe(results[0].reply);
+    expect(entries.every((entry) => entry.critterId === critter.id)).toBe(true);
+    expect(entries.every((entry) => entry.pageId === '0,0')).toBe(true);
+    expect(entries.every((entry) => entry.kind === 'materials')).toBe(true);
+    expect(entries.every((entry) => typeof entry.id === 'string' && entry.id.startsWith('place:0,0:materials:'))).toBe(true);
+    expect(entries.every((entry) => typeof entry.recordedAt === 'number')).toBe(true);
+    expect(entries.map((entry) => entry.text).sort()).toEqual(
+      [...new Set(results.slice(0, poolSize).map((result) => result.reply))].sort(),
+    );
+
+    // Choices without rememberReplyContext (like the "back" route) never
+    // touch the diary — checked structurally rather than by resolving it,
+    // since "back" exits to everydayConversation and needs a full critter rig.
+    const back = followUps.find((choice) => choice.id === 'back')!;
+    expect(back.rememberReplyAs).toBeUndefined();
+    expect(back.rememberReplyContext).toBeUndefined();
   });
 });

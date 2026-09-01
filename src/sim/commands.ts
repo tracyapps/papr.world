@@ -39,8 +39,8 @@ import {
   trimProfileForTier,
   type TreeAddress,
 } from './catalogs/trees';
-import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict } from '../world/buildPieces';
-import { buildAssemblyDef, nextBuildStep } from './catalogs/building';
+import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, type BuildPieceKey } from '../world/buildPieces';
+import { buildAssemblyDef, nextBuildStep, resolveBuildMaterial } from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
 
@@ -53,12 +53,12 @@ export type GameCommand =
   | { type: 'collectOutput'; index: number }
   | { type: 'completeCraft'; now: number }
   | { type: 'completeMending'; target: TerrainCellAddress; now: number }
-  | { type: 'completeBuildStep'; templateKey: string; stepId: string; x: number; z: number; rotY: number; pageId: string; now: number }
+  | { type: 'completeBuildStep'; templateKey: string; stepId: string; x: number; z: number; rotY: number; pageId: string; now: number; material?: string }
   | { type: 'digTerrain'; target: TerrainCellAddress; discovery: DigDiscovery; now: number }
   | { type: 'equipTool'; toolId: ToolId | null }
   | { type: 'liftPlant'; target: TerrainCellAddress; now: number }
   | { type: 'observePlantGrowth'; target: TerrainCellAddress; now: number }
-  | { type: 'placePiece'; templateKey: string; x: number; z: number; rotY: number; pageId: string; now: number }
+  | { type: 'placePiece'; templateKey: string; x: number; z: number; rotY: number; pageId: string; now: number; material?: string }
   | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number }
   | { type: 'refillTerrain'; target: TerrainCellAddress; now: number }
   | { type: 'selectSeed'; seedId: SeedId | null }
@@ -66,6 +66,7 @@ export type GameCommand =
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
   | { type: 'tendPlant'; target: TerrainCellAddress; now: number }
   | { type: 'trimTree'; target: TreeAddress; now: number }
+  | { type: 'updatePlacedPiece'; id: string; x: number; z: number; rotY: number; material?: string; pageId: string }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
   | { type: 'upgradeThingMaker' };
 
@@ -155,9 +156,11 @@ function piecePlacementBlocker(
   state: GameState,
   candidate: { templateKey: string; x: number; z: number; rotY: number },
   ignoreBuildSiteId?: string,
+  ignorePieceId?: string,
 ) {
   for (const page of Object.values(state.world.pages)) {
     for (const piece of Object.values(page.placedPieces)) {
+      if (piece.id === ignorePieceId) continue;
       if (buildPiecesConflict(candidate, piece)) return true;
     }
     for (const site of Object.values(page.buildSites)) {
@@ -450,6 +453,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: command.x,
         z: command.z,
         rotY: command.rotY || 0,
+        material: resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material),
         makerId: LOCAL_MAKER_ID,
         page: command.pageId,
       };
@@ -525,11 +529,43 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: activeSite.x,
         z: activeSite.z,
         rotY: activeSite.rotY,
+        material: resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material),
         makerId: activeSite.makerId,
         page: activeSite.page,
       };
       delete page.buildSites[activeSite.id];
       return { ok: true, allocation, message: `Built the ${def.label}.` };
+    }
+
+    case 'updatePlacedPiece': {
+      // Moving/rotating an already-built piece, or restyling it, is one
+      // command either way — the caller decides whether a rebuild timer ran
+      // first. No tool or materials are spent: you already paid for this
+      // piece once, at its original build.
+      const page = state.world.pages[command.pageId];
+      const piece = page?.placedPieces[command.id];
+      if (!piece) return { ok: false, reason: 'That piece is no longer there.' };
+      if (piece.makerId !== LOCAL_MAKER_ID) {
+        return { ok: false, reason: 'Only its maker can change that.' };
+      }
+      if (!Number.isFinite(command.x) || !Number.isFinite(command.z) || !Number.isFinite(command.rotY)) {
+        return { ok: false, reason: 'That spot could not be measured.' };
+      }
+      const rotY = command.rotY || 0;
+      const candidate = { templateKey: piece.templateKey, x: command.x, z: command.z, rotY };
+      // Same resolver-agrees-with-command arrangement as a fresh placement,
+      // just excluding the piece's own old footprint from the conflict check.
+      if (piecePlacementBlocker(state, candidate, undefined, piece.id)) {
+        return { ok: false, reason: 'That is too close to something you have already placed.' };
+      }
+      const def = buildPieceDef(piece.templateKey);
+      const material = resolveBuildMaterial(piece.templateKey as BuildPieceKey, command.material ?? piece.material);
+      const restyled = material !== piece.material;
+      piece.x = command.x;
+      piece.z = command.z;
+      piece.rotY = rotY;
+      piece.material = material;
+      return { ok: true, message: restyled ? `Restyled the ${def.label}.` : `Moved the ${def.label}.` };
     }
 
     case 'selectSeed': {

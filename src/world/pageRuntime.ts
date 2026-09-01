@@ -28,6 +28,7 @@ import { RESOURCE_DEFS } from './resources';
 import { buildTerrainPlantVisual } from './plantRuntime';
 import { buildPlacedPieceVisual } from './buildPieceVisuals';
 import { registerTerrainPlant } from '../game/plantInteractions';
+import { registerPlacedPieceVisual } from '../game/placedPieceInteractions';
 import { treeSpeciesOf } from './treeRuntime';
 import { registerTrimmableTree } from '../game/treeInteractions';
 
@@ -425,6 +426,7 @@ function buildPlacedPieceVisuals(pageId: string, group: THREE.Group) {
       const visual = buildPlacedPieceVisual(piece);
       visual.position.set(piece.x, sampleTerrainHeight(piece.x, piece.z) + 0.01, piece.z);
       visuals.add(visual);
+      registerPlacedPieceVisual(piece.id, visual);
     }
   }
   group.add(visuals);
@@ -449,7 +451,12 @@ function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
       const plant = buildTerrainPlantVisual(edit);
       if (plant) {
         edits.add(plant);
-        if (edit.state === 'planted' && edit.plantedSeedId === 'buttonbloom-seeds') {
+        // Every planted crop needs its seed-drop-ready flag polled and its
+        // pickup made clickable/walkable — not just the starter flower this
+        // was originally wired for. `buildTerrainPlantVisual` already builds
+        // a correct produce-basket pickup for any seed id; registering here
+        // is the only step that was still buttonbloom-only.
+        if (edit.state === 'planted') {
           registerTerrainPlant({
             id: `${pageId}:${cellKey}`,
             object: plant,

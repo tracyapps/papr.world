@@ -136,6 +136,11 @@ export function sanitizePlacePiece(raw: unknown): PlacePieceIntent | null {
     z: value.z,
     rotY: isFiniteNumber(value.rotY) ? value.rotY : 0,
     page: typeof value.page === 'string' ? value.page.slice(0, 32) : '',
+    // Bounded the same defensive way as templateKey. Whether this string is
+    // one of that piece type's real material options is checked downstream
+    // (resolveBuildMaterial), same as templateKey's own membership in
+    // BUILD_PIECE_DEFS is checked downstream rather than here.
+    material: typeof value.material === 'string' ? value.material.slice(0, 64) : '',
   };
 }
 

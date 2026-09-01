@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { createSheet, createWall } from '../render/builders';
-import { getMaterial } from '../render/materials';
+import { getMaterial, type MaterialKey } from '../render/materials';
 import type { PlacedPiece } from '../../shared/src/index';
+import { resolveBuildMaterial } from '../sim/catalogs/building';
 import { BUILD_PIECE_DEFS } from './buildPieces';
 import type { BuildPieceKey } from './buildPieces';
 
@@ -16,35 +17,42 @@ export function buildPlacedPieceVisual(piece: PlacedPiece): THREE.Group {
   const group = new THREE.Group();
   group.name = `placed:${piece.id}`;
   if (!(piece.templateKey in BUILD_PIECE_DEFS)) return group;
-  buildVisual(group, piece.templateKey as BuildPieceKey);
+  const key = piece.templateKey as BuildPieceKey;
+  // A stray/malformed material (an older save, a client on an older
+  // protocol) falls back to that piece's original hardcoded look rather than
+  // an invalid `getMaterial` lookup.
+  const material = resolveBuildMaterial(key, piece.material) as MaterialKey;
+  buildVisual(group, key, material);
   group.rotation.y = piece.rotY ?? 0;
   return group;
 }
 
-function buildVisual(group: THREE.Group, key: BuildPieceKey) {
+function buildVisual(group: THREE.Group, key: BuildPieceKey, material: MaterialKey) {
   switch (key) {
     case 'paper-bench':
-      buildBench(group);
+      buildBench(group, material);
       break;
     case 'planter-box':
-      buildPlanter(group);
+      buildPlanter(group, material);
       break;
     case 'path-plank':
-      buildPlank(group);
+      buildPlank(group, material);
       break;
     case 'paper-lamp':
-      buildLamp(group);
+      buildLamp(group, material);
       break;
   }
 }
 
-function buildBench(group: THREE.Group) {
-  const warm = getMaterial('paper.brown.warm');
+function buildBench(group: THREE.Group, material: MaterialKey) {
+  // Seat and backrest follow the chosen material; the legs stay a fixed dark
+  // wood accent regardless of what the rest is built from.
+  const chosen = getMaterial(material);
   const dark = getMaterial('paper.brown');
 
   // Seat, then the backrest tilted back a little over it.
-  group.add(createSheet(1.15, 0.4, warm, [0, 0.42, 0]));
-  const back = createSheet(1.15, 0.32, warm, [0, 0.75, -0.27]);
+  group.add(createSheet(1.15, 0.4, chosen, [0, 0.42, 0]));
+  const back = createSheet(1.15, 0.32, chosen, [0, 0.75, -0.27]);
   back.rotation.x = 0.12;
   group.add(back);
 
@@ -56,8 +64,10 @@ function buildBench(group: THREE.Group) {
   }
 }
 
-function buildPlanter(group: THREE.Group) {
-  const wood = getMaterial('paper.cork');
+function buildPlanter(group: THREE.Group, material: MaterialKey) {
+  // The box follows the chosen material; the soil fill stays soil-coloured
+  // no matter what the box itself is built from.
+  const wood = getMaterial(material);
   const soil = getMaterial('paper.brown.warm');
 
   // Long faces front and back, then the short side faces rotated flat-on.
@@ -70,12 +80,14 @@ function buildPlanter(group: THREE.Group) {
   group.add(createSheet(0.72, 0.34, soil, [0, 0.44, 0]));
 }
 
-function buildPlank(group: THREE.Group) {
-  group.add(createSheet(1.7, 0.62, getMaterial('paper.plaid'), [0, 0.018, 0]));
+function buildPlank(group: THREE.Group, material: MaterialKey) {
+  group.add(createSheet(1.7, 0.62, getMaterial(material), [0, 0.018, 0]));
 }
 
-function buildLamp(group: THREE.Group) {
-  const wood = getMaterial('paper.brown');
+function buildLamp(group: THREE.Group, material: MaterialKey) {
+  // The pole follows the chosen material; the base and shade stay fixed —
+  // a lamp's paper shade shouldn't turn to cork just because the pole did.
+  const wood = getMaterial(material);
   const warm = getMaterial('paper.brown.warm');
   const shade = getMaterial('paper.notebook');
 

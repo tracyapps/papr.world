@@ -13,6 +13,7 @@ import { TERRAIN_CELL_RADIUS, TERRAIN_CELL_SIZE, terrainCellAt } from './terrain
 import { findDigFootprintBlocker } from '../world/footprints';
 import { sampleBaseTerrainHeight, sampleTerrainHeight } from '../world/terrain';
 import { resolveDigDiscovery } from './catalogs/geology';
+import { DEFAULT_BUILD_MATERIAL } from './catalogs/building';
 
 const SHALLOW_DISCOVERY = {
   geologySeed: 123,
@@ -789,8 +790,9 @@ describe('placing build pieces', () => {
     now: number,
     pageId = '0,0',
     rotY = 0,
+    material?: string,
   ) {
-    return applyGameCommand(state, { type: 'placePiece', templateKey, x, z, rotY, pageId, now });
+    return applyGameCommand(state, { type: 'placePiece', templateKey, x, z, rotY, pageId, now, material });
   }
 
   it('records a piece on the page and says what was placed', () => {
@@ -806,6 +808,27 @@ describe('placing build pieces', () => {
       templateKey: 'paper-bench', x: 6.5, z: -2.2, page: '0,0',
     });
     expect(pieces[0]?.makerId).toBeTruthy();
+  });
+
+  it('defaults an unrequested material to that piece type\'s original look', () => {
+    const state = createDefaultGameState();
+
+    place(state, 'paper-bench', 6.5, -2.2, 1000);
+
+    const piece = Object.values(state.world.pages['0,0'].placedPieces)[0];
+    expect(piece.material).toBe(DEFAULT_BUILD_MATERIAL['paper-bench']);
+  });
+
+  it('honours a requested material and falls back on a bogus one', () => {
+    const state = createDefaultGameState();
+
+    place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'paper.grey');
+    place(state, 'planter-box', 10, 0, 1000, '1,0', 0, 'not-a-real-material');
+
+    const pieces = Object.values(state.world.pages['0,0'].placedPieces);
+    expect(pieces[0]?.material).toBe('paper.grey');
+    const bogus = Object.values(state.world.pages['1,0'].placedPieces)[0];
+    expect(bogus.material).toBe(DEFAULT_BUILD_MATERIAL['planter-box']);
   });
 
   it('creates the page state on demand', () => {
@@ -901,6 +924,27 @@ describe('placing build pieces', () => {
     expect(Object.values(state.world.pages['0,0'].buildSites)).toHaveLength(0);
   });
 
+  it('stores the requested material on a completed timed build, defaulting when none is given', () => {
+    const state = createDefaultGameState();
+    state.player.tools['squeaky-hammer'] = 1;
+    state.player.equippedTool = 'squeaky-hammer';
+
+    applyGameCommand(state, {
+      type: 'completeBuildStep', templateKey: 'path-plank', stepId: 'build',
+      x: 1, z: 1, rotY: 0, pageId: '0,0', now: 1000,
+    });
+    applyGameCommand(state, {
+      type: 'completeBuildStep', templateKey: 'path-plank', stepId: 'build',
+      x: 5, z: 5, rotY: 0, pageId: '0,0', now: 2000, material: 'paper.grey',
+    });
+
+    const pieces = Object.values(state.world.pages['0,0'].placedPieces);
+    const undirected = pieces.find((piece) => piece.x === 1);
+    const chosen = pieces.find((piece) => piece.x === 5);
+    expect(undirected?.material).toBe(DEFAULT_BUILD_MATERIAL['path-plank']);
+    expect(chosen?.material).toBe('paper.grey');
+  });
+
   it('refuses an out-of-order or invented assembly step without creating a site', () => {
     const state = createDefaultGameState();
     state.player.tools['squeaky-hammer'] = 1;
@@ -920,5 +964,94 @@ describe('placing build pieces', () => {
     expect(result.ok).toBe(false);
     expect(Object.values(state.world.pages['0,0'].buildSites)).toHaveLength(0);
     expect(Object.values(state.world.pages['0,0'].placedPieces)).toHaveLength(0);
+  });
+
+  describe('moving and restyling an already-placed piece', () => {
+    function placedPieceId(state: ReturnType<typeof createDefaultGameState>, pageId = '0,0') {
+      return Object.values(state.world.pages[pageId].placedPieces)[0].id;
+    }
+
+    it('moves and rotates a piece instantly, keeping its material', () => {
+      const state = createDefaultGameState();
+      place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'paper.grey');
+      const id = placedPieceId(state);
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 3, z: 4, rotY: Math.PI / 2, pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.message).toBe('Moved the Paper bench.');
+      const piece = state.world.pages['0,0'].placedPieces[id];
+      expect(piece).toMatchObject({ x: 3, z: 4, rotY: Math.PI / 2, material: 'paper.grey' });
+    });
+
+    it('restyles a piece when a different material is requested, reporting the change', () => {
+      const state = createDefaultGameState();
+      place(state, 'paper-bench', 0, 0, 1000);
+      const id = placedPieceId(state);
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 0, z: 0, rotY: 0, material: 'paper.plaid', pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.message).toBe('Restyled the Paper bench.');
+      expect(state.world.pages['0,0'].placedPieces[id]?.material).toBe('paper.plaid');
+    });
+
+    // Consistent with placePiece/completeBuildStep: an invalid material
+    // request falls back to the piece type's original look, the same
+    // resolveBuildMaterial rule everywhere else, rather than a bespoke
+    // "leave it alone" rule that would only apply to this one command.
+    it('falls back to the piece type\'s default look when the requested material is bogus', () => {
+      const state = createDefaultGameState();
+      place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'paper.grey');
+      const id = placedPieceId(state);
+
+      applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 0, z: 0, rotY: 0, material: 'not-a-real-material', pageId: '0,0',
+      });
+
+      expect(state.world.pages['0,0'].placedPieces[id]?.material).toBe(DEFAULT_BUILD_MATERIAL['paper-bench']);
+    });
+
+    it('refuses to move a piece into another piece\'s footprint, leaving it where it was', () => {
+      const state = createDefaultGameState();
+      place(state, 'paper-bench', 0, 0, 1000);
+      place(state, 'paper-lamp', 5, 5, 1000);
+      const benchId = placedPieceId(state);
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id: benchId, x: 5, z: 5, rotY: 0, pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(false);
+      expect(state.world.pages['0,0'].placedPieces[benchId]).toMatchObject({ x: 0, z: 0 });
+    });
+
+    it('does not refuse a move for conflicting with the piece\'s own old spot', () => {
+      const state = createDefaultGameState();
+      place(state, 'paper-bench', 0, 0, 1000);
+      const id = placedPieceId(state);
+
+      // A tiny nudge would otherwise "conflict" with the piece's own previous
+      // footprint if the check did not exclude the piece being moved.
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 0.05, z: 0, rotY: 0, pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(true);
+    });
+
+    it('refuses to move a piece that is no longer there', () => {
+      const state = createDefaultGameState();
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id: 'piece-ghost', x: 0, z: 0, rotY: 0, pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(false);
+    });
   });
 });

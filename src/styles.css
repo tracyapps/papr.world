@@ -1067,6 +1067,44 @@ body {
   line-height: 1.35;
 }
 
+.build-material-heading {
+  margin-top: 12px;
+}
+
+.build-material-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.build-material-item {
+  aspect-ratio: 1;
+  background-color: #ffffff;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 200%;
+  border: 2px solid rgb(62 49 35 / 0.25);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.build-material-item:hover {
+  border-color: rgb(62 49 35 / 0.55);
+  transform: scale(1.06);
+}
+
+.build-material-item.is-selected {
+  border-color: rgb(67 91 45 / 0.85);
+  box-shadow: 0 0 0 2px rgb(224 238 198 / 0.9);
+}
+
+.build-material-item:focus-visible {
+  outline: 2px solid #43602d;
+  outline-offset: 2px;
+}
+
 .maker-prompt[hidden] {
   display: none;
 }

@@ -385,6 +385,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     piece.x = intent.x;
     piece.z = intent.z;
     piece.rotY = intent.rotY;
+    piece.material = intent.material;
     piece.makerId = player.accountId; // durable credit, never the session id
     piece.page = intent.page || player.page;
 
@@ -596,6 +597,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         x: p.x,
         z: p.z,
         rotY: p.rotY,
+        material: p.material,
         makerId: p.makerId,
         page: p.page,
       });
@@ -627,6 +629,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       piece.x = p.x;
       piece.z = p.z;
       piece.rotY = p.rotY;
+      // Absent on saves written before this field existed.
+      piece.material = p.material ?? '';
       piece.makerId = p.makerId;
       piece.page = p.page;
       this.state.pieces.set(piece.id, piece);

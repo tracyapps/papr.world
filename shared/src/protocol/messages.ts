@@ -66,6 +66,8 @@ export type PlacePieceIntent = {
   z: number;
   rotY: number;
   page: string;
+  /** Which material option the piece was built from; see PlacedPiece. */
+  material: string;
 };
 
 export type GatherIntent = {
