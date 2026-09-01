@@ -38,17 +38,36 @@ export type Settings = {
   collapsedHudWidgets: string[];
   /** Hide the Professor's coarse time label without hiding reading/idle state. */
   showLearningTimer: boolean;
+  /**
+   * Multiplier on interface text size (HUD panels, menus, overlays), applied
+   * via a `--ui-text-scale` custom property on the document root. This is
+   * deliberately separate from any panel's own width/height — resizing the
+   * minimap, for instance, never touches this, and this never resizes a
+   * panel's box. It stacks with the browser's own page zoom/text size,
+   * rather than replacing it.
+   *
+   * Rollout note: only stylesheet rules written in `rem` respond to this.
+   * That's the HUD surfaces sized in `rem` so far (minimap, saved places,
+   * activity log, neighborhood chat, the help/settings overlays) — not yet
+   * every panel in the game.
+   */
+  uiTextScale: number;
 };
 
 /** Slider bounds. Wide enough to matter at both ends, never zero. */
 export const CAMERA_SENSITIVITY_MIN = 0.3;
 export const CAMERA_SENSITIVITY_MAX = 2;
 
+/** Text-size slider bounds — modest range, since this stacks with browser zoom. */
+export const UI_TEXT_SCALE_MIN = 0.85;
+export const UI_TEXT_SCALE_MAX = 1.4;
+
 const DEFAULTS: Settings = {
   cameraDragMode: 'grab-world',
   cameraSensitivity: 1,
   collapsedHudWidgets: [],
   showLearningTimer: true,
+  uiTextScale: 1,
 };
 
 const STORAGE_KEY = 'pencil-and-paper.settings.v1';
@@ -79,6 +98,12 @@ function load(): Settings {
       }
       if (typeof parsed.showLearningTimer === 'boolean') {
         settings.showLearningTimer = parsed.showLearningTimer;
+      }
+      if (typeof parsed.uiTextScale === 'number' && Number.isFinite(parsed.uiTextScale)) {
+        settings.uiTextScale = Math.min(
+          UI_TEXT_SCALE_MAX,
+          Math.max(UI_TEXT_SCALE_MIN, parsed.uiTextScale),
+        );
       }
     }
   } catch {

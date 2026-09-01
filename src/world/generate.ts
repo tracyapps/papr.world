@@ -1,5 +1,5 @@
 import { createRng, hashCoords } from '../core/math';
-import { PAGE_SIZE, pageId, type Biome, type PageData, type PropData, type TerrainPatchData, type TreeKind } from './types';
+import { PAGE_SIZE, pageId, type Biome, type DecorKind, type PageData, type PropData, type TerrainPatchData, type TreeKind } from './types';
 import { BIOME_RESOURCES, RESOURCE_DEFS } from './resources';
 import { BIOME_GROUND_MATERIALS, biomeConfidenceAt, dominantBiomeAt, elevationBandAt } from './fields';
 import {
@@ -15,6 +15,11 @@ import {
 const TREES: TreeKind[] = ['pine-medium-1', 'pine-medium-2', 'pine-tall', 'leafy-1', 'leafy-2'];
 const REDWOODS: TreeKind[] = [
   'redwood-1', 'redwood-2', 'redwood-3', 'redwood-4', 'redwood-5', 'redwood-6', 'redwood-7',
+];
+// Dunes pages scatter cactus instead of pine/leafy trees — same slot in the
+// per-page budget, just desert-appropriate scenery.
+const CACTI: DecorKind[] = [
+  'cactus-1', 'cactus-2', 'cactus-3', 'cactus-4', 'cactus-5', 'cactus-6', 'cactus-7', 'cactus-8',
 ];
 
 /**
@@ -95,6 +100,18 @@ export function generatePage(px: number, pz: number): PageData {
     const confidence = biomeConfidenceAt(x, z);
     if (localBiome !== biome && rng() > confidence * 0.35) continue;
     if (rng() > 0.35 + confidence * 0.65) continue;
+
+    if (biome === 'dunes') {
+      props.push({
+        kind: 'decor',
+        art: CACTI[Math.floor(rng() * CACTI.length)],
+        x,
+        z,
+        rotY: rng() * Math.PI * 2,
+        height: 1.8 + rng() * 2.2,
+      });
+      continue;
+    }
 
     const redwood = biome === 'forest' && rng() < 0.16;
     const giant = !redwood && biome === 'forest' && rng() < 0.08;

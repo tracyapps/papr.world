@@ -15,6 +15,11 @@
   /* Bottom space owned by the scrapbook dock, including the cover in its
      raised (open) position. Anything bottom-anchored clears this. */
   --hud-dock-reserve: 272px;
+  /* "UI size" setting (game/settings.ts's `uiTextScale`), applied in
+     hudMenus.ts. Only rules written in `rem` respond to it — see the
+     rollout note on that setting for which surfaces that is so far. */
+  --ui-text-scale: 1;
+  font-size: calc(16px * var(--ui-text-scale));
 }
 
 * {
@@ -35,7 +40,7 @@ body {
   border-radius: 11px;
   box-shadow: 0 12px 30px rgb(54 39 27 / 0.2);
   color: #3f3428;
-  font: 14px/1.35 Georgia, serif;
+  font: 0.875rem/1.35 Georgia, serif;
   overflow: hidden;
   pointer-events: auto;
   position: fixed;
@@ -58,7 +63,7 @@ body {
 
 .shared-chat-title span {
   color: #826e58;
-  font: 600 11px/1.6 system-ui, sans-serif;
+  font: 600 0.6875rem/1.6 system-ui, sans-serif;
 }
 
 .shared-chat-title span[data-connected='true'] { color: #46683c; }
@@ -94,7 +99,7 @@ body {
 .shared-chat-form button {
   border: 1px solid rgb(72 54 36 / 0.34);
   border-radius: 7px;
-  font: 13px/1.2 system-ui, sans-serif;
+  font: 0.8125rem/1.2 system-ui, sans-serif;
   min-width: 0;
   padding: 7px 8px;
 }
@@ -1218,8 +1223,40 @@ body {
 }
 
 .mini-map-currently {
+  align-items: center;
   color: #5b4634;
-  font: 700 11px/1.25 system-ui, sans-serif;
+  display: flex;
+  font: 700 0.6875rem/1.25 system-ui, sans-serif;
+  gap: 5px;
+  overflow: hidden;
+}
+
+/* A location pin, drawn in CSS like the settings cog above, stands in for
+   the word "Currently" — it changes as you walk exactly like the text did,
+   which reads as self-explanatory without spending width on a label. */
+.mini-map-currently-icon {
+  background: currentcolor;
+  border-radius: 50% 50% 50% 0;
+  display: block;
+  flex: none;
+  height: 10px;
+  position: relative;
+  transform: rotate(-45deg);
+  width: 10px;
+}
+
+.mini-map-currently-icon::after {
+  background: rgb(255 252 240 / 0.92);
+  border-radius: 50%;
+  content: "";
+  height: 4px;
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  width: 4px;
+}
+
+.mini-map-currently-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1228,7 +1265,11 @@ body {
 .mini-map-body {
   border-radius: 4px;
   flex: none;
-  height: 156px;
+  /* Set by hud.ts when the widget is resized ('dimensions' mode) — a real
+     pixel height, never a `transform: scale()`, so the map's own font-sized
+     content (there isn't any here, but sibling rows in the same widget rely
+     on the same mechanism) never grows or shrinks with it. */
+  height: var(--hud-widget-height, 156px);
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -1768,7 +1809,7 @@ body {
 }
 
 .activity-log-header h2 {
-  font: 700 18px/1.2 Georgia, serif;
+  font: 700 1.125rem/1.2 Georgia, serif;
   margin: 0;
   padding-right: 28px;
 }
@@ -1776,7 +1817,7 @@ body {
 .activity-log-note {
   color: #7d6753;
   flex: none;
-  font: 12px/1.4 system-ui, sans-serif;
+  font: 0.75rem/1.4 system-ui, sans-serif;
   margin: 0;
 }
 
@@ -1796,14 +1837,14 @@ body {
   gap: 6px;
 }
 
-.places-label { color: #7d6753; font: 600 11px/1 system-ui, sans-serif; }
+.places-label { color: #7d6753; font: 600 0.6875rem/1 system-ui, sans-serif; }
 
 .places-select {
   background: rgb(255 252 239 / 0.95);
   border: 1px solid rgb(72 54 36 / 0.24);
   border-radius: 6px;
   color: #3f3026;
-  font: 12px/1.3 system-ui, sans-serif;
+  font: 0.75rem/1.3 system-ui, sans-serif;
   padding: 5px;
   width: 100%;
 }
@@ -1816,7 +1857,7 @@ body {
   border-radius: 999px;
   color: #49372a;
   cursor: pointer;
-  font: 650 10.5px/1 system-ui, sans-serif;
+  font: 650 0.65625rem/1 system-ui, sans-serif;
   padding: 5px 8px;
 }
 
@@ -1824,7 +1865,7 @@ body {
 
 .places-status {
   color: #6d5947;
-  font: 11px/1.35 system-ui, sans-serif;
+  font: 0.6875rem/1.35 system-ui, sans-serif;
   margin: 0;
 }
 
@@ -2088,7 +2129,7 @@ body {
   border: 0;
   color: #6d5644;
   cursor: pointer;
-  font: 400 24px/1 system-ui, sans-serif;
+  font: 400 1.5rem/1 system-ui, sans-serif;
   padding: 4px 8px;
   position: absolute;
   right: 10px;
@@ -2102,17 +2143,17 @@ body {
 
 .hud-overlay-kicker {
   color: #8a7460;
-  font: 700 10px/1 system-ui, sans-serif;
+  font: 700 0.625rem/1 system-ui, sans-serif;
   letter-spacing: 0.14em;
   margin: 0 0 4px;
   text-transform: uppercase;
 }
 
-.hud-overlay-card h2 { font: 700 26px/1.1 Georgia, serif; margin: 0 0 14px; }
+.hud-overlay-card h2 { font: 700 1.625rem/1.1 Georgia, serif; margin: 0 0 14px; }
 
 .hud-overlay-subhead {
   color: #6d5644;
-  font: 700 11px/1 system-ui, sans-serif;
+  font: 700 0.6875rem/1 system-ui, sans-serif;
   letter-spacing: 0.1em;
   margin: 18px 0 8px;
   text-transform: uppercase;
@@ -2128,7 +2169,7 @@ body {
 }
 
 .hud-controls-row dt { margin: 0; }
-.hud-controls-row dd { color: #5c4938; font-size: 13px; margin: 0; }
+.hud-controls-row dd { color: #5c4938; font-size: 0.8125rem; margin: 0; }
 
 .hud-controls-row kbd {
   background: rgb(255 253 244 / 0.95);
@@ -2137,7 +2178,7 @@ body {
   border-radius: 5px;
   color: #453324;
   display: inline-block;
-  font: 600 11px/1.3 system-ui, sans-serif;
+  font: 600 0.6875rem/1.3 system-ui, sans-serif;
   padding: 3px 7px;
 }
 
@@ -2149,8 +2190,8 @@ body {
 }
 
 .hud-setting input { margin-top: 3px; }
-.hud-setting strong { display: block; font: 600 14px/1.3 system-ui, sans-serif; }
-.hud-setting small { color: #7d6753; display: block; font-size: 12px; }
+.hud-setting strong { display: block; font: 600 0.875rem/1.3 system-ui, sans-serif; }
+.hud-setting small { color: #7d6753; display: block; font-size: 0.75rem; }
 
 /* A setting that opens something rather than toggling something: the button
    stacks over its explanation instead of sitting beside it like a checkbox. */
@@ -2165,7 +2206,7 @@ body {
   border-radius: 8px;
   color: #453324;
   cursor: pointer;
-  font: 600 14px/1.3 system-ui, sans-serif;
+  font: 600 0.875rem/1.3 system-ui, sans-serif;
   margin-bottom: 4px;
   padding: 8px 14px;
 }
@@ -2190,14 +2231,14 @@ body {
 
 .hud-slider-end {
   color: #8a7460;
-  font: 500 11px/1 system-ui, sans-serif;
+  font: 500 0.6875rem/1 system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .hud-slider-row output {
   color: #5c4938;
-  font: 600 13px/1 system-ui, sans-serif;
+  font: 600 0.8125rem/1 system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -2216,7 +2257,7 @@ body {
 
 .hud-overlay-note {
   color: #8a7460;
-  font: italic 12px/1.5 Georgia, serif;
+  font: italic 0.75rem/1.5 Georgia, serif;
   margin: 18px 0 0;
 }
 

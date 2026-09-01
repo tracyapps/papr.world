@@ -70,17 +70,23 @@ export function renderMiniMap(avatarPosition: THREE.Vector3) {
   const rect = miniMapCanvas.getBoundingClientRect();
   const width = rect.width;
   const height = rect.height;
-  const size = Math.min(width, height);
   const centerX = avatarPosition.x;
   const centerZ = avatarPosition.z;
-  const visibleMinX = centerX - VIEW_RADIUS;
-  const visibleMaxX = centerX + VIEW_RADIUS;
+
+  // The widget can now be resized wider than it is tall (see hud.ts's
+  // 'dimensions' resize mode), so this can no longer assume a square
+  // canvas. Vertical view radius stays fixed and pixels-per-world-unit is
+  // derived from it; a wider canvas just reveals more world horizontally,
+  // at the same undistorted scale, rather than squishing or cropping it.
+  const cellScreenSize = height / (VIEW_RADIUS * 2);
+  const viewRadiusX = (width / 2) / cellScreenSize;
+  const visibleMinX = centerX - viewRadiusX;
+  const visibleMaxX = centerX + viewRadiusX;
   const visibleMinZ = centerZ - VIEW_RADIUS;
   const visibleMaxZ = centerZ + VIEW_RADIUS;
-  const cellScreenSize = size / (VIEW_RADIUS * 2);
 
-  const toMapX = (x: number) => ((x - visibleMinX) / (VIEW_RADIUS * 2)) * size;
-  const toMapY = (z: number) => ((z - visibleMinZ) / (VIEW_RADIUS * 2)) * size;
+  const toMapX = (x: number) => (x - visibleMinX) * cellScreenSize;
+  const toMapY = (z: number) => (z - visibleMinZ) * cellScreenSize;
   const isInView = (x: number, z: number, radius: number) => (
     x + radius >= visibleMinX
     && x - radius <= visibleMaxX
@@ -91,7 +97,7 @@ export function renderMiniMap(avatarPosition: THREE.Vector3) {
   // Unexplored paper-dark base.
   miniMapContext.clearRect(0, 0, width, height);
   miniMapContext.fillStyle = '#201a17';
-  miniMapContext.fillRect(0, 0, size, size);
+  miniMapContext.fillRect(0, 0, width, height);
 
   // Explored terrain cells, tinted by biome ground with hills highlighted.
   const minColumn = Math.floor(visibleMinX / CELL_SIZE);
@@ -167,20 +173,21 @@ export function renderMiniMap(avatarPosition: THREE.Vector3) {
     }
   }
 
-  // Player arrow.
+  // Player arrow. Always screen-centre — that's centerX/centerZ by
+  // construction, which is (width/2, height/2) in canvas pixels.
   miniMapContext.fillStyle = '#f8f1d4';
   miniMapContext.strokeStyle = '#332a24';
   miniMapContext.lineWidth = 1.5;
   miniMapContext.beginPath();
-  miniMapContext.moveTo(size / 2, size / 2 - 5);
-  miniMapContext.lineTo(size / 2 + 4, size / 2 + 4);
-  miniMapContext.lineTo(size / 2, size / 2 + 2);
-  miniMapContext.lineTo(size / 2 - 4, size / 2 + 4);
+  miniMapContext.moveTo(width / 2, height / 2 - 5);
+  miniMapContext.lineTo(width / 2 + 4, height / 2 + 4);
+  miniMapContext.lineTo(width / 2, height / 2 + 2);
+  miniMapContext.lineTo(width / 2 - 4, height / 2 + 4);
   miniMapContext.closePath();
   miniMapContext.fill();
   miniMapContext.stroke();
 
   miniMapContext.strokeStyle = 'rgb(255 252 240 / 0.38)';
   miniMapContext.lineWidth = 1;
-  miniMapContext.strokeRect(0.5, 0.5, size - 1, size - 1);
+  miniMapContext.strokeRect(0.5, 0.5, width - 1, height - 1);
 }

@@ -22,7 +22,7 @@ import {
 } from './terrain';
 import { buildWaterSurface, getWaterBody, isInWater, registerPageWater } from './water';
 import { BIOME_GROUND_MATERIALS } from './fields';
-import type { Biome, PageData, PropData, TreeKind } from './types';
+import type { Biome, DecorKind, PageData, PropData, TreeKind } from './types';
 import { getGameState } from '../sim/state';
 import { RESOURCE_DEFS } from './resources';
 import { buildTerrainPlantVisual } from './plantRuntime';
@@ -48,6 +48,18 @@ export const TREE_DEFS: Record<TreeKind, { url: string; aspectRatio: number; map
   'redwood-5': { url: '/assets/runtime/props/redwood5.png', aspectRatio: aspect(787, 2385), mapColor: '#1c5b34' },
   'redwood-6': { url: '/assets/runtime/props/redwood6.png', aspectRatio: aspect(787, 2385), mapColor: '#17613a' },
   'redwood-7': { url: '/assets/runtime/props/redwood7.png', aspectRatio: aspect(787, 2385), mapColor: '#24572c' },
+};
+
+/** Desert scenery cutouts. Rendered like trees, but never trimmable. */
+export const DECOR_DEFS: Record<DecorKind, { url: string; aspectRatio: number; mapColor: string }> = {
+  'cactus-1': { url: '/assets/runtime/props/cactus-01.png', aspectRatio: aspect(277, 520), mapColor: '#4f8a3d' },
+  'cactus-2': { url: '/assets/runtime/props/cactus-02.png', aspectRatio: aspect(394, 500), mapColor: '#548f3f' },
+  'cactus-3': { url: '/assets/runtime/props/cactus-03.png', aspectRatio: aspect(465, 529), mapColor: '#4a8639' },
+  'cactus-4': { url: '/assets/runtime/props/cactus-04.png', aspectRatio: aspect(516, 527), mapColor: '#5a9445' },
+  'cactus-5': { url: '/assets/runtime/props/cactus-05.png', aspectRatio: aspect(277, 520), mapColor: '#4f8a3d' },
+  'cactus-6': { url: '/assets/runtime/props/cactus-06.png', aspectRatio: aspect(444, 500), mapColor: '#4d8d41' },
+  'cactus-7': { url: '/assets/runtime/props/cactus-07.png', aspectRatio: aspect(342, 352), mapColor: '#57923f' },
+  'cactus-8': { url: '/assets/runtime/props/cactus-08.png', aspectRatio: aspect(209, 471), mapColor: '#4a8339' },
 };
 
 const GROUND_MAP_COLORS: Record<string, string> = {
@@ -214,6 +226,34 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         kind: 'tree',
         radiusX: 0.28,
         radiusZ: 0.28,
+        shape: 'circle',
+        x: prop.x,
+        z: prop.z,
+      });
+      break;
+    }
+
+    case 'decor': {
+      // Same cutout treatment as a tree, but intentionally skips
+      // `registerTrimmableTree` — desert scenery like cactus isn't part of
+      // the tree-growth/harvest economy.
+      const def = DECOR_DEFS[prop.art];
+      const height = prop.height ?? 2.4;
+      const baseY = sampleTerrainHeight(prop.x, prop.z);
+      const decor = createCutout({
+        aspectRatio: def.aspectRatio,
+        height,
+        position: [prop.x, groundedCutoutY(baseY, height), prop.z],
+        rotationY: prop.rotY ?? 0,
+        textureUrl: def.url,
+      });
+      group.add(decor);
+      registerMapFeature({
+        color: prop.mapColor ?? def.mapColor,
+        id: featureId,
+        kind: 'tree',
+        radiusX: 0.24,
+        radiusZ: 0.24,
         shape: 'circle',
         x: prop.x,
         z: prop.z,

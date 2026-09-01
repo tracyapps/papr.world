@@ -524,20 +524,42 @@ function buildChannelDetails(body: ChannelWaterBody): THREE.Group {
       // Marsh banks mix in loose grass tufts alongside cattail clusters for
       // visual variety; woodland banks (which borrow this same roll every
       // other point) keep the original cattail-only look.
-      const useMarshGrass = body.bankStyle === 'marsh' && rng() < 0.45;
-      const variants = useMarshGrass ? MARSH_GRASS : CATTAILS;
-      const variant = Math.floor(rng() * variants.length);
-      const [artWidth, artHeight] = variants[variant];
-      const height = 0.85 + rng() * 0.55;
-      details.add(createCutout({
-        textureUrl: useMarshGrass
-          ? `/assets/runtime/props/marsh-grass-tuft-0${variant + 1}.png`
-          : `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`,
-        aspectRatio: artWidth / artHeight,
-        height,
-        position: [bankX, groundedCutoutY(sampleTerrainHeight(bankX, bankZ), height), bankZ],
-        rotationY: rng() * Math.PI,
-      }));
+      const placeGrassOrCattail = (px: number, pz: number) => {
+        const useMarshGrass = body.bankStyle === 'marsh' && rng() < 0.45;
+        const variants = useMarshGrass ? MARSH_GRASS : CATTAILS;
+        const variant = Math.floor(rng() * variants.length);
+        const [artWidth, artHeight] = variants[variant];
+        const height = 0.85 + rng() * 0.55;
+        details.add(createCutout({
+          textureUrl: useMarshGrass
+            ? `/assets/runtime/props/marsh-grass-tuft-0${variant + 1}.png`
+            : `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`,
+          aspectRatio: artWidth / artHeight,
+          height,
+          position: [px, groundedCutoutY(sampleTerrainHeight(px, pz), height), pz],
+          rotationY: rng() * Math.PI,
+        }));
+      };
+
+      placeGrassOrCattail(bankX, bankZ);
+
+      // These banks read too sparse at one tuft per sampled point. Rather
+      // than shortening the sample step (which would also thicken the rock
+      // and lily/driftwood scatter below, since they share this same loop),
+      // add a second tuft on the *opposite* bank at this same point along
+      // the channel — doubling marsh/cattail density on its own.
+      const oppositeSide = -side;
+      const oppositeBankX = x + normalX * (width / 2 + 0.28) * oppositeSide;
+      const oppositeBankZ = z + normalZ * (width / 2 + 0.28) * oppositeSide;
+      if (
+        !body.crossing
+        || (
+          !pointInCrossing(body.crossing, oppositeBankX, oppositeBankZ, 0.8)
+          && Math.hypot(oppositeBankX - body.crossing.x, oppositeBankZ - body.crossing.z) >= body.crossing.length / 2 + 1
+        )
+      ) {
+        placeGrassOrCattail(oppositeBankX, oppositeBankZ);
+      }
     }
 
     if (body.bankStyle === 'rock' || (body.bankStyle === 'sand' && index % 4 === 0)) {

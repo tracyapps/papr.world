@@ -24,6 +24,9 @@ type HudWidgetState = {
   scale: number;
   x: number;
   y: number;
+  /** Only set for `resizeMode: 'dimensions'` widgets (see below). */
+  width?: number;
+  height?: number;
 };
 
 export type HudWidgetConfig = {
@@ -34,12 +37,30 @@ export type HudWidgetConfig = {
   defaultScale: number;
   defaultPosition: () => Pick<HudWidgetState, 'x' | 'y'>;
   afterApply?: () => void;
+  /**
+   * Most widgets resize by scaling the whole element uniformly — the box
+   * and every bit of text inside it grow together via `--hud-scale`. The
+   * minimap needs the opposite: a wider box at the *same* text size, so it
+   * can go wide without also blowing up its font. `'dimensions'` widgets
+   * resize by setting real `width`/`height` in pixels instead (see
+   * `applyHudWidgetState`), and never touch `--hud-scale`.
+   */
+  resizeMode?: 'scale' | 'dimensions';
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  /** Evaluated lazily so it can see the viewport (and any responsive CSS
+   * default) at the moment a `'dimensions'` widget first needs a size. */
+  defaultSize?: () => { width: number; height: number };
 };
 
 type HudWidgetInteraction = {
   id: HudWidgetId;
   kind: 'drag' | 'resize';
   originScale: number;
+  originWidth?: number;
+  originHeight?: number;
   originX: number;
   originY: number;
   pointerId: number;
@@ -67,9 +88,21 @@ const hudWidgetConfigs: HudWidgetConfig[] = [
   {
     id: 'miniMap',
     element: miniMapWidget,
-    minScale: 0.9,
-    maxScale: 2.35,
+    resizeMode: 'dimensions',
+    // Scale is unused in dimensions mode, but still needs valid bounds.
+    minScale: 1,
+    maxScale: 1,
     defaultScale: 1,
+    minWidth: 130,
+    maxWidth: 480,
+    // Deliberately a much narrower range than width: the whole point is a
+    // box that can go wide to fit a long place name without also getting
+    // tall.
+    minHeight: 110,
+    maxHeight: 200,
+    defaultSize: () => (
+      window.innerWidth <= 680 ? { width: 118, height: 118 } : { width: 156, height: 156 }
+    ),
     defaultPosition: () => ({
       x: window.innerWidth - ((miniMapWidget?.offsetWidth ?? 156) + 16),
       y: 16,
@@ -102,10 +135,15 @@ function getHudWidgetStorageKey(id: HudWidgetId) {
 }
 
 function getDefaultHudWidgetState(config: HudWidgetConfig): HudWidgetState {
-  return {
+  const base: HudWidgetState = {
     ...config.defaultPosition(),
     scale: config.defaultScale,
   };
+  if (config.resizeMode === 'dimensions') {
+    const size = config.defaultSize?.() ?? { width: 1, height: 1 };
+    return { ...base, width: size.width, height: size.height };
+  }
+  return base;
 }
 
 function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
@@ -118,15 +156,37 @@ function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
     const parsed = JSON.parse(stored) as Partial<HudWidgetState>;
     const parsedX = parsed.x;
     const parsedY = parsed.y;
-    const parsedScale = parsed.scale;
     if (
       typeof parsedX !== 'number'
       || typeof parsedY !== 'number'
-      || typeof parsedScale !== 'number'
       || !Number.isFinite(parsedX)
       || !Number.isFinite(parsedY)
-      || !Number.isFinite(parsedScale)
     ) {
+      return fallback;
+    }
+
+    if (config.resizeMode === 'dimensions') {
+      const parsedWidth = parsed.width;
+      const parsedHeight = parsed.height;
+      if (
+        typeof parsedWidth !== 'number'
+        || typeof parsedHeight !== 'number'
+        || !Number.isFinite(parsedWidth)
+        || !Number.isFinite(parsedHeight)
+      ) {
+        return fallback;
+      }
+      return {
+        scale: 1,
+        x: parsedX,
+        y: parsedY,
+        width: parsedWidth,
+        height: parsedHeight,
+      };
+    }
+
+    const parsedScale = parsed.scale;
+    if (typeof parsedScale !== 'number' || !Number.isFinite(parsedScale)) {
       return fallback;
     }
 
@@ -153,10 +213,34 @@ function saveHudWidgetState(id: HudWidgetId) {
 
 function clampHudWidgetState(config: HudWidgetConfig, state: HudWidgetState): HudWidgetState {
   const element = config.element;
+  const margin = 8;
+
+  if (config.resizeMode === 'dimensions') {
+    const minWidth = config.minWidth ?? 1;
+    const minHeight = config.minHeight ?? 1;
+    // Also cap against the current viewport, so a size chosen on a wide
+    // screen never traps the widget off-screen after the window shrinks.
+    const maxWidthAllowed = Math.min(config.maxWidth ?? Infinity, window.innerWidth - margin * 2);
+    const maxHeightAllowed = Math.min(config.maxHeight ?? Infinity, window.innerHeight - margin * 2);
+    const fallbackWidth = element?.offsetWidth || minWidth;
+    const fallbackHeight = element?.offsetHeight || minHeight;
+    const width = clamp(state.width ?? fallbackWidth, minWidth, Math.max(minWidth, maxWidthAllowed));
+    const height = clamp(state.height ?? fallbackHeight, minHeight, Math.max(minHeight, maxHeightAllowed));
+    const maxX = Math.max(margin, window.innerWidth - width - margin);
+    const maxY = Math.max(margin, window.innerHeight - height - margin);
+
+    return {
+      scale: 1,
+      width,
+      height,
+      x: clamp(state.x, margin, maxX),
+      y: clamp(state.y, margin, maxY),
+    };
+  }
+
   const baseWidth = element?.offsetWidth ?? 1;
   const baseHeight = element?.offsetHeight ?? 1;
   const scale = clamp(state.scale, config.minScale, config.maxScale);
-  const margin = 8;
   const maxX = Math.max(margin, window.innerWidth - baseWidth * scale - margin);
   const maxY = Math.max(margin, window.innerHeight - baseHeight * scale - margin);
 
@@ -174,7 +258,22 @@ function applyHudWidgetState(config: HudWidgetConfig, state: HudWidgetState) {
   hudWidgetStates.set(config.id, clampedState);
   config.element.style.left = `${clampedState.x}px`;
   config.element.style.top = `${clampedState.y}px`;
-  config.element.style.setProperty('--hud-scale', String(clampedState.scale));
+
+  if (config.resizeMode === 'dimensions') {
+    // Pinned at 1 (identity) rather than removed, so nothing downstream has
+    // to special-case a missing custom property.
+    config.element.style.setProperty('--hud-scale', '1');
+    if (clampedState.width != null) config.element.style.width = `${clampedState.width}px`;
+    // A generic name: whichever widget uses dimensions mode decides in its
+    // own CSS what "height" actually means for it. For the minimap that's
+    // the map body, not the whole card (the "Currently" line and the "Go
+    // to" controls below it keep their own natural height either way).
+    if (clampedState.height != null) {
+      config.element.style.setProperty('--hud-widget-height', `${clampedState.height}px`);
+    }
+  } else {
+    config.element.style.setProperty('--hud-scale', String(clampedState.scale));
+  }
   config.afterApply?.();
 }
 
@@ -204,6 +303,22 @@ function handleHudWidgetPointerMove(event: PointerEvent) {
       scale: hudWidgetInteraction.originScale,
       x: hudWidgetInteraction.originX + deltaX,
       y: hudWidgetInteraction.originY + deltaY,
+    });
+    return;
+  }
+
+  if (config.resizeMode === 'dimensions') {
+    // Independent axes, unlike scale mode: dragging straight across only
+    // widens the box, and vertical growth is separately capped (small
+    // `maxHeight` in the minimap's config) so "wider" never means "taller".
+    const originWidth = hudWidgetInteraction.originWidth ?? config.element.offsetWidth;
+    const originHeight = hudWidgetInteraction.originHeight ?? config.element.offsetHeight;
+    applyHudWidgetState(config, {
+      scale: 1,
+      width: originWidth + deltaX,
+      height: originHeight + deltaY,
+      x: hudWidgetInteraction.originX,
+      y: hudWidgetInteraction.originY,
     });
     return;
   }
@@ -265,6 +380,8 @@ function wireHudWidget(config: HudWidgetConfig) {
       id: config.id,
       kind: isResize ? 'resize' : 'drag',
       originScale: currentState.scale,
+      originWidth: currentState.width,
+      originHeight: currentState.height,
       originX: currentState.x,
       originY: currentState.y,
       pointerId: event.pointerId,

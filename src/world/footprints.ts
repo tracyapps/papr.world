@@ -106,6 +106,9 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
       return null;
     case 'ribbon':
     case 'unique':
+    case 'decor':
+      // Flat desert scenery (cactus): nothing to dig around, nothing solid
+      // to bump into — same treatment as the other pure-decoration props.
       return null;
   }
 }

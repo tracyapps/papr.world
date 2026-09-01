@@ -58,6 +58,21 @@ export type TreeKind =
   | 'redwood-6'
   | 'redwood-7';
 
+/**
+ * Non-interactive scenery cutouts: decorative like a tree, but never
+ * trimmable/harvestable/growable. Cactus lives here rather than in
+ * `TreeKind` so desert scenery never enters the tree-growth economy.
+ */
+export type DecorKind =
+  | 'cactus-1'
+  | 'cactus-2'
+  | 'cactus-3'
+  | 'cactus-4'
+  | 'cactus-5'
+  | 'cactus-6'
+  | 'cactus-7'
+  | 'cactus-8';
+
 export type HarvestVisual = 'fiberTuft' | 'stoneCluster' | 'twigBundle';
 
 export type WaterBankStyle = 'marsh' | 'rock' | 'sand' | 'woodland';
@@ -120,6 +135,16 @@ export type PropData = { id?: string } & (
   | {
       kind: 'tree';
       tree: TreeKind;
+      x: number;
+      z: number;
+      rotY?: number;
+      height?: number;
+      mapColor?: string;
+    }
+  | {
+      /** Decorative cutout scenery (e.g. desert cactus): no trim/growth. */
+      kind: 'decor';
+      art: DecorKind;
       x: number;
       z: number;
       rotY?: number;

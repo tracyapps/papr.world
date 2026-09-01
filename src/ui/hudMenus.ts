@@ -1,7 +1,10 @@
 import {
   CAMERA_SENSITIVITY_MAX,
   CAMERA_SENSITIVITY_MIN,
+  UI_TEXT_SCALE_MAX,
+  UI_TEXT_SCALE_MIN,
   getSetting,
+  onSettingsChanged,
   setSetting,
 } from '../game/settings';
 import { openAvatarLookEditor } from '../game/avatarLook';
@@ -96,6 +99,29 @@ function buildSettingsOverlay(): HTMLElement {
       <button class="hud-overlay-close" type="button" aria-label="Close settings">×</button>
       <p class="hud-overlay-kicker">Pencil and Paper</p>
       <h2 id="hud-settings-title">Settings</h2>
+      <h3 class="hud-overlay-subhead">Display</h3>
+      <div class="hud-setting hud-setting-slider">
+        <label for="setting-ui-text-scale">
+          <strong>UI size</strong>
+          <small id="setting-ui-text-scale-hint">
+            Resizes text in the map, chat, and menus — the browser's own text-size or zoom
+            setting works alongside this
+          </small>
+        </label>
+        <div class="hud-slider-row">
+          <span class="hud-slider-end" aria-hidden="true">Smaller</span>
+          <input
+            type="range"
+            id="setting-ui-text-scale"
+            min="${UI_TEXT_SCALE_MIN}"
+            max="${UI_TEXT_SCALE_MAX}"
+            step="0.05"
+            aria-describedby="setting-ui-text-scale-hint"
+          >
+          <span class="hud-slider-end" aria-hidden="true">Larger</span>
+          <output for="setting-ui-text-scale" id="setting-ui-text-scale-value"></output>
+        </div>
+      </div>
       <h3 class="hud-overlay-subhead">Camera feel</h3>
       <label class="hud-setting">
         <input type="checkbox" id="setting-drag-mode">
@@ -159,7 +185,7 @@ function buildSettingsOverlay(): HTMLElement {
       </div>
       <p class="hud-overlay-note">
         Coming here later: key remapping, gamepad mapping, invert stick look,
-        audio, and text size.
+        and audio.
       </p>
     </div>`;
 
@@ -195,6 +221,26 @@ function buildSettingsOverlay(): HTMLElement {
     });
     // Arrow keys inside the overlay must not also drive the world.
     sensitivity.addEventListener('keydown', (event) => event.stopPropagation());
+  }
+
+  const textScale = overlay.querySelector<HTMLInputElement>('#setting-ui-text-scale');
+  const textScaleValue = overlay.querySelector<HTMLOutputElement>('#setting-ui-text-scale-value');
+  if (textScale) {
+    const describe = (value: number) => `${Math.round(value * 100)}% text size`;
+    const reflect = (value: number) => {
+      textScale.setAttribute('aria-valuetext', describe(value));
+      if (textScaleValue) textScaleValue.textContent = `${Math.round(value * 100)}%`;
+    };
+
+    textScale.value = String(getSetting('uiTextScale'));
+    reflect(getSetting('uiTextScale'));
+
+    textScale.addEventListener('input', () => {
+      const value = Number(textScale.value);
+      setSetting('uiTextScale', value);
+      reflect(value);
+    });
+    textScale.addEventListener('keydown', (event) => event.stopPropagation());
   }
 
   const changeLook = overlay.querySelector<HTMLButtonElement>('#setting-change-look');
@@ -278,6 +324,15 @@ export function openHudMenu(menu: MenuId) {
   overlay.querySelector<HTMLElement>('.hud-overlay-close')?.focus();
 }
 
+/**
+ * Applies the "UI size" setting to the whole document via one custom
+ * property, rather than each panel reading the setting itself. Only rules
+ * written in `rem` respond — see the rollout note on `Settings.uiTextScale`.
+ */
+function applyUiTextScale() {
+  document.documentElement.style.setProperty('--ui-text-scale', String(getSetting('uiTextScale')));
+}
+
 export function initializeHudMenus() {
   helpButton?.addEventListener('click', () => openHudMenu('help'));
   settingsButton?.addEventListener('click', () => openHudMenu('settings'));
@@ -287,4 +342,7 @@ export function initializeHudMenus() {
       button?.addEventListener(eventName, (event) => event.stopPropagation());
     }
   }
+
+  applyUiTextScale();
+  onSettingsChanged(applyUiTextScale);
 }
