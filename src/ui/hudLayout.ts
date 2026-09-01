@@ -139,12 +139,17 @@ function measureRailScale(): number {
 }
 
 /**
- * The top of the right-hand panel rail: below the minimap and compass, which
- * are user-draggable and therefore not part of the automatic stack. Their
- * *defaults* live in this band, so the rail starts underneath them.
+ * The top of the right-hand panel rail: below the minimap, which is
+ * user-draggable and therefore not part of the automatic stack. Its
+ * *default* lives in this band, so the rail starts underneath it.
+ *
+ * The minimap grew a "Currently:" line, the compass (previously a second
+ * floating widget below it), and the "Go to:" guidance controls all packed
+ * into one taller widget — this number is that widget's default height
+ * plus its own top margin, with a little slack.
  */
 function railTop(): number {
-  return smallViewport() ? 168 : 268;
+  return smallViewport() ? 220 : 340;
 }
 
 /**

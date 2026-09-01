@@ -172,6 +172,17 @@ export function openMultiplayerPanel(): void {
     : name)?.focus();
 }
 
+/**
+ * The connection-status button, so a caller that builds a different home for
+ * it (the neighborhood chat panel, once it exists) can move it there. It
+ * starts in `#hud-actions` because it must exist and show *something* the
+ * instant multiplayer initializes, well before a shared session — and
+ * therefore a chat panel — might ever appear.
+ */
+export function getMultiplayerStatusButton(): HTMLButtonElement | null {
+  return statusButton;
+}
+
 export function closeMultiplayerPanel(): boolean {
   if (!overlay?.classList.contains('is-open')) return false;
   overlay.classList.remove('is-open');

@@ -13,9 +13,7 @@ import { getGameState, onGameStateChanged } from '../sim/state';
 import { SEED_DEFS, type SeedId } from '../sim/catalogs/seeds';
 import { setActionMode } from '../game/actionMode';
 import { getToolArt } from '../game/toolPresentation';
-import { buildPlacesControls } from './placesPanel';
 import { requestHudLayout } from './hudLayout';
-import { openFeedbackPanel } from './feedbackPanel';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
 // a pop-up book. Rationale:
@@ -35,7 +33,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'map' | 'plans' | 'activity' | 'feedback';
+type TabId = ResourceCategoryId | 'tools' | 'plans';
 
 type TabDefinition = {
   id: TabId;
@@ -46,10 +44,6 @@ type TabDefinition = {
 
 let scrapbookOpen = false;
 let activeTab: TabId = 'sticks';
-/** The places controls are stateful (live distance readout, current
- *  selection), so they are built once and re-parented rather than
- *  re-created on every tab switch. */
-let placesContainer: HTMLElement | null = null;
 
 function resourcesInCategory(category: ResourceCategoryId) {
   return (Object.values(RESOURCE_DEFS) as typeof RESOURCE_DEFS[ResourceId][])
@@ -73,10 +67,7 @@ const TABS: TabDefinition[] = [
     },
   })),
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
-  { id: 'map', label: 'Map', summary: () => null },
   { id: 'plans', label: 'Plans', summary: () => null },
-  { id: 'activity', label: 'Activity', summary: () => null },
-  { id: 'feedback', label: 'Feedback', summary: () => null },
 ];
 
 function renderTabs() {
@@ -179,56 +170,11 @@ function renderPlansTab() {
   }).join('')}</ul>`;
 }
 
-function relativeActivityTime(at: number): string {
-  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - at) / 1000));
-  if (elapsedSeconds < 60) return 'just now';
-  const minutes = Math.floor(elapsedSeconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
-function renderActivityTab() {
-  const entries = getGameState().player.activityLog;
-  if (entries.length === 0) {
-    return '<p class="scrapbook-empty">Quiet garden and harvest updates will be pressed here.</p>';
-  }
-  return `
-    <p class="scrapbook-panel-note">Things that happened without needing to interrupt you.</p>
-    <ol class="scrapbook-activity-list">
-      ${entries.map((entry) => `
-        <li class="scrapbook-activity-entry" data-activity-kind="${entry.kind}">
-          <span class="scrapbook-activity-mark" aria-hidden="true"></span>
-          <span>${entry.message}</span>
-          <time datetime="${new Date(entry.at).toISOString()}">${relativeActivityTime(entry.at)}</time>
-        </li>`).join('')}
-    </ol>`;
-}
-
 function renderPanel() {
   if (!panelElement) return;
 
-  // The map tab hosts live, stateful controls. Detach rather than destroy, so
-  // the distance readout and current selection survive tab switches.
-  if (placesContainer?.parentElement === panelElement) placesContainer.remove();
-
-  if (activeTab === 'map') {
-    panelElement.innerHTML = '';
-    if (!placesContainer) placesContainer = buildPlacesControls();
-    panelElement.append(placesContainer);
-    return;
-  }
-
-  if (activeTab === 'feedback') {
-    panelElement.innerHTML = `
-      <div class="scrapbook-feedback">
-        <span>Found a wrinkle in the world, or imagined something lovely?</span>
-        <button class="scrapbook-item-action" type="button" data-open-feedback>Send feedback…</button>
-      </div>`;
-  } else if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
+  if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
-  else if (activeTab === 'activity') panelElement.innerHTML = renderActivityTab();
   else panelElement.innerHTML = renderMaterialsTab(activeTab);
 }
 
@@ -292,15 +238,6 @@ export function initializeScrapbook() {
 
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
-
-    if (target.closest('[data-open-feedback]')) {
-      setScrapbookOpen(false);
-      // Give the feedback dialog a visible focus-return target; the button
-      // just clicked is inside the strip that is now hidden.
-      scrapbookToggle?.focus();
-      openFeedbackPanel();
-      return;
-    }
 
     const seedId = target.closest<HTMLButtonElement>('[data-select-seed]')?.dataset.selectSeed as SeedId | undefined;
     if (seedId && seedId in SEED_DEFS) {

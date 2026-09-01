@@ -10,6 +10,8 @@
 // of the page inert — four things a hand-rolled menu reliably gets wrong.
 
 import type { ChatBroadcast, RemovedNotice } from '../../shared/src/index';
+import { registerDraggableHudWidget } from './hud';
+import { getMultiplayerStatusButton } from './multiplayerPanel';
 
 export type SharedChatHandlers = {
   onSend: (text: string) => void;
@@ -49,20 +51,46 @@ export function initializeSharedChat(
   let subject: ChatBroadcast | null = null;
 
   const aside = document.createElement('aside');
-  aside.className = 'shared-chat';
+  aside.id = 'chat-widget';
+  aside.className = 'shared-chat hud-widget';
   aside.setAttribute('aria-label', 'Neighborhood chat');
   aside.innerHTML = `
-    <details open>
-      <summary>Neighborhood <span data-role="status">connecting…</span></summary>
-      <ol class="shared-chat-log" data-role="log" role="log" aria-live="polite" aria-relevant="additions"></ol>
-      <form class="shared-chat-form" data-role="form">
-        <label class="sr-only" for="shared-chat-message">Message the neighborhood</label>
-        <input id="shared-chat-message" name="message" maxlength="240" autocomplete="off" placeholder="Say hello…">
-        <button type="submit">Send</button>
-      </form>
-    </details>
+    <div class="hud-drag-grip" aria-hidden="true"></div>
+    <div class="shared-chat-header">
+      <span class="shared-chat-title">Neighborhood <span data-role="status">connecting…</span></span>
+      <span class="shared-chat-status-slot" data-role="status-slot"></span>
+    </div>
+    <ol class="shared-chat-log" data-role="log" role="log" aria-live="polite" aria-relevant="additions" data-hud-widget-interactive></ol>
+    <form class="shared-chat-form" data-role="form">
+      <label class="sr-only" for="shared-chat-message">Message the neighborhood</label>
+      <input id="shared-chat-message" name="message" maxlength="240" autocomplete="off" placeholder="Say hello…">
+      <button type="submit">Send</button>
+    </form>
+    <button class="hud-resize-handle" type="button" aria-label="Resize chat" data-hud-resize="chat"></button>
   `;
   document.body.append(aside);
+
+  // The connection-status button used to sit alone in the top-right corner;
+  // now that the chat has a stable home of its own, it belongs attached to
+  // it instead — one less thing floating independently near the HUD icons.
+  const statusSlot = aside.querySelector<HTMLElement>('[data-role="status-slot"]');
+  const statusButton = getMultiplayerStatusButton();
+  if (statusSlot && statusButton) statusSlot.append(statusButton);
+
+  registerDraggableHudWidget({
+    id: 'chat',
+    element: aside,
+    minScale: 0.75,
+    maxScale: 1.75,
+    defaultScale: 1,
+    // Bottom-right by default — clear of the scrapbook dock and the tool
+    // rail, and the corner most players asked for. Still fully draggable;
+    // this is only where it starts.
+    defaultPosition: () => ({
+      x: window.innerWidth - (aside.offsetWidth + 16),
+      y: window.innerHeight - (aside.offsetHeight + 16),
+    }),
+  });
 
   const dialog = document.createElement('dialog');
   dialog.className = 'chat-actions';

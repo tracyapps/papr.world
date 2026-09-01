@@ -1055,3 +1055,52 @@ describe('placing build pieces', () => {
     });
   });
 });
+
+describe('planting inside a planter box', () => {
+  function placedPlanterBoxTarget(state: ReturnType<typeof createDefaultGameState>) {
+    applyGameCommand(state, { type: 'placePiece', templateKey: 'planter-box', x: 6, z: 6, rotY: 0, pageId: '0,0', now: 1000 });
+    const target = terrainCellAt(6, 6, () => '0,0');
+    return { pageId: target.pageId, cellKey: target.cellKey, x: target.x, z: target.z };
+  }
+
+  it('plants straight into a placed planter box with no shovel dig first', () => {
+    const state = createDefaultGameState();
+    const target = placedPlanterBoxTarget(state);
+
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey]).toBeUndefined();
+
+    const result = applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'buttonbloom-seeds', now: 2000 });
+
+    expect(result.ok).toBe(true);
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey]).toMatchObject({
+      state: 'planted', plantedSeedId: 'buttonbloom-seeds', depth: 0,
+    });
+  });
+
+  it('refuses a plant just outside the planter box footprint', () => {
+    const state = createDefaultGameState();
+    placedPlanterBoxTarget(state);
+    const farTarget = terrainCellAt(6 + 4, 6, () => '0,0');
+
+    const result = applyGameCommand(state, { type: 'plantTerrain', target: farTarget, seedId: 'buttonbloom-seeds', now: 2000 });
+
+    expect(result.ok).toBe(false);
+  });
+
+  it('lifts and freely re-closes a planter-box bed, same as any shallow dug bed', () => {
+    const state = createDefaultGameState();
+    const target = placedPlanterBoxTarget(state);
+    state.player.tools['creased-hoe'] = 1;
+    state.player.equippedTool = 'creased-hoe';
+    applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'mend-me-seeds', now: 2000 });
+
+    const lifted = applyGameCommand(state, { type: 'liftPlant', target, now: 2100 });
+    expect(lifted.ok).toBe(true);
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey]?.state).toBe('dug');
+
+    // A raised box needs no soil to close back up — it was never a hole.
+    const refilled = applyGameCommand(state, { type: 'refillTerrain', target, now: 2200 });
+    expect(refilled.ok).toBe(true);
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey]).toBeUndefined();
+  });
+});

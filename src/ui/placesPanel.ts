@@ -12,14 +12,13 @@ import {
 import { distanceInPages, formatPageDistance } from '../world/distance';
 
 // Saved places and the guidance picker. These used to float in their own
-// panel on the right edge; they now live in the scrapbook's Map tab, because
-// they are navigation rather than settings and the goal is to keep the
-// number of persistent overlays as low as possible.
+// panel on the right edge, then moved into the scrapbook's Map tab; they now
+// live attached to the minimap instead, since "where am I going" is a map
+// question and belongs next to the map rather than a tap away in a book.
 //
-// This module owns the controls; the scrapbook owns where they appear.
-// buildPlacesControls() returns a detached element the scrapbook parents into
-// its panel, and updatePlacesPanel() keeps working whether or not that
-// element is currently in the document.
+// This module owns the controls; main.ts parents the returned element into
+// the minimap widget, and updatePlacesPanel() keeps working whether or not
+// that element is currently in the document.
 //
 // Accessibility: native controls, real labels, focus outlines left alone,
 // and a polite live region for the distance readout.
@@ -29,6 +28,13 @@ let renameButton: HTMLButtonElement | null = null;
 let removeButton: HTMLButtonElement | null = null;
 let statusElement: HTMLParagraphElement | null = null;
 let lastAnnouncedDistance = -1;
+/** Clears the guide a moment after arrival — see updatePlacesPanel(). */
+let arrivalClearTimer: number | undefined;
+
+function cancelArrivalClear() {
+  window.clearTimeout(arrivalClearTimer);
+  arrivalClearTimer = undefined;
+}
 
 function stopGameEvents(element: HTMLElement) {
   element.addEventListener('pointerdown', (event) => event.stopPropagation());
@@ -76,6 +82,7 @@ export function markCurrentSpot() {
   // Select the new place. You're standing on it, so no arrows appear —
   // the status line just confirms "You're at <name>."
   if (selectElement) {
+    cancelArrivalClear();
     selectElement.value = place.id;
     setGuidanceTarget(place.id);
     lastAnnouncedDistance = -1;
@@ -94,13 +101,14 @@ export function buildPlacesControls(): HTMLElement {
 
   const label = document.createElement('label');
   label.className = 'places-label';
-  label.textContent = 'Guide me to';
+  label.textContent = 'Go to:';
   label.htmlFor = 'places-select';
 
   selectElement = document.createElement('select');
   selectElement.id = 'places-select';
   selectElement.className = 'places-select';
   selectElement.addEventListener('change', () => {
+    cancelArrivalClear();
     setGuidanceTarget(selectElement?.value || null);
     lastAnnouncedDistance = -1;
     updateActionButtons();
@@ -117,7 +125,7 @@ export function buildPlacesControls(): HTMLElement {
     return button;
   };
 
-  const markButton = makeButton('Mark this spot (M)');
+  const markButton = makeButton('Mark spot (M)');
   markButton.addEventListener('click', markCurrentSpot);
 
   renameButton = makeButton('Rename');
@@ -168,6 +176,7 @@ export function updatePlacesPanel() {
 
   const distance = getGuidanceDistance(avatar.position);
   if (distance === null) {
+    cancelArrivalClear();
     if (lastAnnouncedDistance !== -1) {
       statusElement.textContent = '';
       lastAnnouncedDistance = -1;
@@ -179,9 +188,18 @@ export function updatePlacesPanel() {
     if (lastAnnouncedDistance !== 0) {
       statusElement.textContent = `You’re at ${getGuidanceTarget()?.name ?? 'your place'}.`;
       lastAnnouncedDistance = 0;
+      // Give the arrival message a moment to be read, then clear the guide
+      // automatically — "Go to:" is about reaching a place, not leaving it
+      // parked as your destination once you're standing on it.
+      cancelArrivalClear();
+      arrivalClearTimer = window.setTimeout(() => setGuidanceTarget(null), 2200);
     }
     return;
   }
+
+  // Back outside arrival range (a quick overshoot, a turn to look around):
+  // a pending auto-clear from a moment ago no longer applies.
+  cancelArrivalClear();
 
   // Announce tenths of a page and only rewrite when that value changes,
   // so screen readers aren't flooded.

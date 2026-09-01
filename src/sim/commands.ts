@@ -39,7 +39,7 @@ import {
   trimProfileForTier,
   type TreeAddress,
 } from './catalogs/trees';
-import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, type BuildPieceKey } from '../world/buildPieces';
+import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, planterBoxAt, type BuildPieceKey } from '../world/buildPieces';
 import { buildAssemblyDef, nextBuildStep, resolveBuildMaterial } from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
@@ -581,7 +581,26 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       if (!seed || (state.player.inventory[command.seedId] ?? 0) <= 0) {
         return { ok: false, reason: 'That seed packet is empty.' };
       }
-      const edit = state.world.pages[command.target.pageId]?.terrainEdits[command.target.cellKey];
+      const page = state.world.pages[command.target.pageId] ??= emptyPageState();
+      let edit = page.terrainEdits[command.target.cellKey];
+      if (!edit && planterBoxAt(page.placedPieces, command.target.x, command.target.z)) {
+        // A placed planter box is a raised bed the instant it exists — no
+        // shovel dig needed first. Its ground behaves exactly like a
+        // shallow, freshly-dug bed from here on (lifting, mending, the
+        // free refill once it is empty again).
+        edit = page.terrainEdits[command.target.cellKey] = {
+          kind: 'dug',
+          state: 'dug',
+          x: command.target.x,
+          z: command.target.z,
+          depth: 0,
+          radius: TERRAIN_CELL_RADIUS,
+          toolTier: 0,
+          geologySeed: 0,
+          revealedLayers: [],
+          changedAt: command.now,
+        };
+      }
       if (!edit || edit.state !== 'dug') {
         return { ok: false, reason: 'Seeds need an empty dug paper-soil bed.' };
       }

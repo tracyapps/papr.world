@@ -9,10 +9,7 @@
     <div id="app">
       <canvas id="game"></canvas>
       <div class="hud" aria-label="Prototype status">
-        <div class="chip">The Paper Clearing</div>
-        <div id="maker-interaction-prompt" class="hint maker-prompt" hidden>Click the Thing Maker or press E</div>
         <div id="seed-store-interaction-prompt" class="hint maker-prompt" hidden>Visit Pip’s seed counter or press E</div>
-        <div id="equipped-tool-chip" class="hint equipped-tool-chip">Hands free</div>
       </div>
       <div id="hud-actions" class="hud-actions">
         <button id="hud-help" class="hud-icon-button" type="button" aria-label="Help and controls" aria-expanded="false">
@@ -24,21 +21,23 @@
       </div>
       <div id="mini-map-widget" class="mini-map hud-widget" aria-label="Explored paper map" data-hud-widget="miniMap">
         <div class="hud-drag-grip" aria-hidden="true"></div>
-        <canvas id="mini-map" width="156" height="156"></canvas>
-        <button class="hud-resize-handle" type="button" aria-label="Resize minimap" data-hud-resize="miniMap"></button>
-      </div>
-      <div id="compass-widget" class="compass hud-widget" aria-label="Compass heading" data-hud-widget="compass">
-        <div class="hud-drag-grip" aria-hidden="true"></div>
-        <div class="compass-tilt">
-          <div id="compass-rose" class="compass-rose" aria-hidden="true">
-            <span class="compass-arrow compass-arrow-n"></span>
-            <span class="compass-arrow compass-arrow-e"></span>
-            <span class="compass-arrow compass-arrow-s"></span>
-            <span class="compass-arrow compass-arrow-w"></span>
+        <div id="mini-map-currently" class="mini-map-currently"></div>
+        <div class="mini-map-body">
+          <canvas id="mini-map" width="156" height="156"></canvas>
+          <div class="mini-map-compass-slot">
+            <div class="compass-tilt" aria-label="Compass heading">
+              <div id="compass-rose" class="compass-rose" aria-hidden="true">
+                <span class="compass-arrow compass-arrow-n"></span>
+                <span class="compass-arrow compass-arrow-e"></span>
+                <span class="compass-arrow compass-arrow-s"></span>
+                <span class="compass-arrow compass-arrow-w"></span>
+              </div>
+              <div id="compass-heading" class="compass-heading">N</div>
+            </div>
           </div>
-          <div id="compass-heading" class="compass-heading">N</div>
         </div>
-        <button class="hud-resize-handle" type="button" aria-label="Resize compass" data-hud-resize="compass"></button>
+        <div id="mini-map-goto" class="mini-map-goto" data-hud-widget-interactive></div>
+        <button class="hud-resize-handle" type="button" aria-label="Resize minimap" data-hud-resize="miniMap"></button>
       </div>
       <div id="professor-widget" class="professor-widget hud-widget" data-hud-widget="professor">
         <div class="hud-drag-grip" aria-hidden="true"></div>

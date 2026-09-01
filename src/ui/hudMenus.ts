@@ -73,7 +73,18 @@ function buildHelpOverlay(): HTMLElement {
               <dd>${description}</dd>
             </div>`).join('')}
         </dl>`).join('')}
+      <h3 class="hud-overlay-subhead">Alpha notebook</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="help-send-feedback">
+          Send feedback…
+        </button>
+        <small>Report a bug, suggest an improvement, or leave a new idea. Notes survive an offline spell.</small>
+      </div>
     </div>`;
+  overlay.querySelector<HTMLButtonElement>('#help-send-feedback')?.addEventListener('click', () => {
+    closeHudMenu();
+    openFeedbackPanel();
+  });
   return overlay;
 }
 

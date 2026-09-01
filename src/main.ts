@@ -39,8 +39,9 @@ import {
 } from './ui/hud';
 import { renderMiniMap, resizeMiniMapCanvas, revealMiniMapAround } from './ui/minimap';
 import { initializeScrapbook, isScrapbookOpen, setScrapbookOpen } from './ui/scrapbook';
-import { markCurrentSpot, updatePlacesPanel } from './ui/placesPanel';
+import { buildPlacesControls, markCurrentSpot, updatePlacesPanel } from './ui/placesPanel';
 import { closeHudMenu, initializeHudMenus } from './ui/hudMenus';
+import { initializeActivityLog, isActivityLogOpen, setActivityLogOpen } from './ui/activityLog';
 import { initializePlaces } from './world/places';
 import { initializeRegionBanner, updateRegionBanner } from './ui/regionBanner';
 import { hasOrbitBlockingInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
@@ -132,6 +133,11 @@ renderSeedStorePanel();
 initializeScrapbook();
 initializeHudWidgets();
 initializeHudMenus();
+initializeActivityLog();
+// The "go to" guidance controls live attached to the minimap now, not
+// tucked in a scrapbook tab — built once here rather than by the minimap's
+// own module, since placesPanel.ts already owns their stateful behaviour.
+document.querySelector('#mini-map-goto')?.append(buildPlacesControls());
 // Wear the saved cutout (or, for a brand-new player, offer the editor once).
 // After the HUD so the world is already there behind the overlay.
 initializeAvatarLook();
@@ -266,6 +272,10 @@ initializeInput({
     }
     if (isScrapbookOpen()) {
       setScrapbookOpen(false);
+      return true;
+    }
+    if (isActivityLogOpen()) {
+      setActivityLogOpen(false);
       return true;
     }
     if (getActionMode() !== 'interact') {

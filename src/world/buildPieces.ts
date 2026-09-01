@@ -192,3 +192,28 @@ export function placedPieceFootprint(piece: PlacedPiece): DigFootprint {
     solid: def.solid,
   };
 }
+
+/**
+ * The placed planter box a point sits inside, if any.
+ *
+ * A planter box is placed like any other piece, but its whole purpose is a
+ * raised bed you can plant straight into — no shovel required. The garden
+ * tool's preview (`gardenActions.ts`) and the `plantTerrain` command both
+ * need the same answer to "is this point inside one?", so it lives here next
+ * to `placedPieceFootprint` rather than being worked out twice.
+ */
+export function planterBoxAt(
+  placedPieces: Record<string, PlacedPiece> | undefined,
+  x: number,
+  z: number,
+): PlacedPiece | null {
+  if (!placedPieces) return null;
+  for (const piece of Object.values(placedPieces)) {
+    if (piece.templateKey !== 'planter-box') continue;
+    const footprint = placedPieceFootprint(piece);
+    const dx = (x - footprint.x) / footprint.radiusX;
+    const dz = (z - footprint.z) / footprint.radiusZ;
+    if (dx * dx + dz * dz < 1) return piece;
+  }
+  return null;
+}

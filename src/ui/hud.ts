@@ -2,16 +2,23 @@ import * as THREE from 'three';
 import { clamp } from '../core/math';
 import { resizeMiniMapCanvas } from './minimap';
 
-// Draggable/resizable HUD widgets (minimap, compass, the Professor) with
+// Draggable/resizable HUD widgets (the minimap — with the compass now
+// attached to its corner rather than floating separately — the Professor,
+// and, once a shared session connects, the neighborhood chat) with
 // localStorage persistence, plus the compass rose readout.
 //
 // Repositioning here was pointer-drag-only until the Professor needed a
 // keyboard path too (knowledge-tree.md: "Repositioning needs a keyboard
 // path, not drag-only"). The nudge below is generic across every widget in
-// `hudWidgetConfigs`, so minimap and compass get it for free rather than the
-// Professor quietly being the one accessible widget among three.
+// `hudWidgetConfigs`, so every widget gets it for free rather than the
+// Professor quietly being the one accessible widget among the rest.
+//
+// Widgets present from page load are wired in `initializeHudWidgets()`; one
+// that only exists once something else happens (the chat, once a shared
+// session connects) joins the same system late through
+// `registerDraggableHudWidget()` instead.
 
-type HudWidgetId = 'compass' | 'miniMap' | 'professor';
+type HudWidgetId = 'miniMap' | 'professor' | 'chat';
 
 type HudWidgetState = {
   scale: number;
@@ -19,7 +26,7 @@ type HudWidgetState = {
   y: number;
 };
 
-type HudWidgetConfig = {
+export type HudWidgetConfig = {
   id: HudWidgetId;
   element: HTMLElement | null;
   minScale: number;
@@ -41,7 +48,6 @@ type HudWidgetInteraction = {
 };
 
 const miniMapWidget = document.querySelector<HTMLElement>('#mini-map-widget');
-const compassWidget = document.querySelector<HTMLElement>('#compass-widget');
 const compassRoseElement = document.querySelector<HTMLElement>('#compass-rose');
 const compassHeadingElement = document.querySelector<HTMLElement>('#compass-heading');
 const professorWidget = document.querySelector<HTMLElement>('#professor-widget');
@@ -69,24 +75,6 @@ const hudWidgetConfigs: HudWidgetConfig[] = [
       y: 16,
     }),
     afterApply: resizeMiniMapCanvas,
-  },
-  {
-    id: 'compass',
-    element: compassWidget,
-    minScale: 0.9,
-    maxScale: 2.6,
-    defaultScale: 1,
-    // Defaults into the right-hand column, directly beneath the minimap.
-    // It previously defaulted to dead centre at y:76, which is exactly where
-    // the region banner and the pet toast also lived — three overlays in one
-    // strip, with the compass (z:8) losing to both. Top-centre is now
-    // reserved for the region banner alone.
-    // This is a default, not a constraint: the widget stays draggable, and a
-    // player who has already moved it keeps their saved position.
-    defaultPosition: () => ({
-      x: window.innerWidth - ((compassWidget?.offsetWidth ?? 76) + 16),
-      y: 16 + (miniMapWidget?.offsetHeight ?? 156) + 12,
-    }),
   },
   {
     id: 'professor',
@@ -244,77 +232,99 @@ function finishHudWidgetInteraction(event: PointerEvent) {
   event.stopPropagation();
 }
 
+function wireHudWidget(config: HudWidgetConfig) {
+  const element = config.element;
+  if (!element) return;
+
+  const state = loadHudWidgetState(config);
+  applyHudWidgetState(config, state);
+
+  element.addEventListener('pointerdown', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    // An ordinary interactive control inside the widget (the Professor's
+    // open/collapse buttons; the chat's message input, send button, and
+    // scrollable log) wants its own click or drag, not a widget drag. Only
+    // the resize handle is a button that should still begin an interaction —
+    // everything else falls through to native behaviour, and dragging stays
+    // reachable via the grip. `[data-hud-widget-interactive]` is the escape
+    // hatch for anything else a widget adds that isn't a native control —
+    // the chat log, so it can be scrolled or its text selected.
+    const interactiveTarget = target.closest(
+      'button:not([data-hud-resize]), input, textarea, select, a[href], [data-hud-widget-interactive]',
+    );
+    if (interactiveTarget) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    const isResize = target.closest('[data-hud-resize]');
+    const currentState = hudWidgetStates.get(config.id) ?? getDefaultHudWidgetState(config);
+    hudWidgetInteraction = {
+      id: config.id,
+      kind: isResize ? 'resize' : 'drag',
+      originScale: currentState.scale,
+      originX: currentState.x,
+      originY: currentState.y,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+    };
+    element.setPointerCapture(event.pointerId);
+    element.classList.toggle('is-dragging', !isResize);
+    element.classList.toggle('is-resizing', Boolean(isResize));
+  });
+
+  element.addEventListener('wheel', (event) => {
+    event.stopPropagation();
+  });
+
+  // Keyboard reposition: Alt+Arrow nudges, Alt+Shift+Arrow nudges finer.
+  // Plain arrow keys are left alone, since inside an open widget (the
+  // Professor's tree view, a future minimap detail) they belong to that
+  // content, not to moving the widget's own frame around the screen.
+  element.addEventListener('keydown', (event) => {
+    if (!event.altKey) return;
+    const delta: Record<string, [number, number]> = {
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+    };
+    const direction = delta[event.key];
+    if (!direction) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    const step = event.shiftKey ? HUD_NUDGE_STEP_FINE : HUD_NUDGE_STEP;
+    const current = hudWidgetStates.get(config.id) ?? getDefaultHudWidgetState(config);
+    applyHudWidgetState(config, {
+      scale: current.scale,
+      x: current.x + direction[0] * step,
+      y: current.y + direction[1] * step,
+    });
+    saveHudWidgetState(config.id);
+  });
+}
+
+/**
+ * Add a widget to the same drag/resize/keyboard-nudge system after startup.
+ *
+ * The neighborhood chat only exists once a shared session actually connects
+ * (solo play never builds its DOM at all), long after
+ * `initializeHudWidgets()` has already wired up the widgets that exist from
+ * page load. This lets it join the same system late rather than needing a
+ * second, smaller copy of the drag/resize logic.
+ */
+export function registerDraggableHudWidget(config: HudWidgetConfig) {
+  if (getHudWidgetConfig(config.id)) return;
+  hudWidgetConfigs.push(config);
+  wireHudWidget(config);
+}
+
 export function initializeHudWidgets() {
-  for (const config of hudWidgetConfigs) {
-    const element = config.element;
-    if (!element) continue;
-
-    const state = loadHudWidgetState(config);
-    applyHudWidgetState(config, state);
-
-    element.addEventListener('pointerdown', (event) => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      // An ordinary button inside the widget (the Professor's open/collapse
-      // controls; minimap and compass have none) wants its own click, not a
-      // drag start. Only the resize handle is a button that should still
-      // begin an interaction — everything else falls through to native
-      // button behaviour, and dragging stays reachable via the grip.
-      const interactiveButton = target.closest('button:not([data-hud-resize])');
-      if (interactiveButton) return;
-
-      event.stopPropagation();
-      event.preventDefault();
-
-      const isResize = target.closest('[data-hud-resize]');
-      const currentState = hudWidgetStates.get(config.id) ?? getDefaultHudWidgetState(config);
-      hudWidgetInteraction = {
-        id: config.id,
-        kind: isResize ? 'resize' : 'drag',
-        originScale: currentState.scale,
-        originX: currentState.x,
-        originY: currentState.y,
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-      };
-      element.setPointerCapture(event.pointerId);
-      element.classList.toggle('is-dragging', !isResize);
-      element.classList.toggle('is-resizing', Boolean(isResize));
-    });
-
-    element.addEventListener('wheel', (event) => {
-      event.stopPropagation();
-    });
-
-    // Keyboard reposition: Alt+Arrow nudges, Alt+Shift+Arrow nudges finer.
-    // Plain arrow keys are left alone, since inside an open widget (the
-    // Professor's tree view, a future minimap detail) they belong to that
-    // content, not to moving the widget's own frame around the screen.
-    element.addEventListener('keydown', (event) => {
-      if (!event.altKey) return;
-      const delta: Record<string, [number, number]> = {
-        ArrowUp: [0, -1],
-        ArrowDown: [0, 1],
-        ArrowLeft: [-1, 0],
-        ArrowRight: [1, 0],
-      };
-      const direction = delta[event.key];
-      if (!direction) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      const step = event.shiftKey ? HUD_NUDGE_STEP_FINE : HUD_NUDGE_STEP;
-      const current = hudWidgetStates.get(config.id) ?? getDefaultHudWidgetState(config);
-      applyHudWidgetState(config, {
-        scale: current.scale,
-        x: current.x + direction[0] * step,
-        y: current.y + direction[1] * step,
-      });
-      saveHudWidgetState(config.id);
-    });
-  }
+  for (const config of hudWidgetConfigs) wireHudWidget(config);
 
   window.addEventListener('pointermove', handleHudWidgetPointerMove);
   window.addEventListener('pointerup', finishHudWidgetInteraction);

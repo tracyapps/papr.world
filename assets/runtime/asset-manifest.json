@@ -608,6 +608,78 @@
       "size": "148x150"
     },
     {
+      "key": "props.cactus-01",
+      "source": "assets/source/props/cactus-01.svg",
+      "runtime": "assets/runtime/props/cactus-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "277x520",
+      "size": "277x520"
+    },
+    {
+      "key": "props.cactus-02",
+      "source": "assets/source/props/cactus-02.svg",
+      "runtime": "assets/runtime/props/cactus-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "394x500",
+      "size": "394x500"
+    },
+    {
+      "key": "props.cactus-03",
+      "source": "assets/source/props/cactus-03.svg",
+      "runtime": "assets/runtime/props/cactus-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "465x529",
+      "size": "465x529"
+    },
+    {
+      "key": "props.cactus-04",
+      "source": "assets/source/props/cactus-04.svg",
+      "runtime": "assets/runtime/props/cactus-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "516x527",
+      "size": "516x527"
+    },
+    {
+      "key": "props.cactus-05",
+      "source": "assets/source/props/cactus-05.svg",
+      "runtime": "assets/runtime/props/cactus-05.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "277x520",
+      "size": "277x520"
+    },
+    {
+      "key": "props.cactus-06",
+      "source": "assets/source/props/cactus-06.svg",
+      "runtime": "assets/runtime/props/cactus-06.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "444x500",
+      "size": "444x500"
+    },
+    {
+      "key": "props.cactus-07",
+      "source": "assets/source/props/cactus-07.svg",
+      "runtime": "assets/runtime/props/cactus-07.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "342x352",
+      "size": "342x352"
+    },
+    {
+      "key": "props.cactus-08",
+      "source": "assets/source/props/cactus-08.svg",
+      "runtime": "assets/runtime/props/cactus-08.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "209x471",
+      "size": "209x471"
+    },
+    {
       "key": "props.cardboard-tear-dark",
       "source": "assets/source/props/cardboard-tear-dark.svg",
       "runtime": "assets/runtime/props/cardboard-tear-dark.png",
@@ -732,6 +804,42 @@
       "usage": "prop",
       "sourceSize": "1106x953",
       "size": "1106x953"
+    },
+    {
+      "key": "props.marsh-grass-tuft-01",
+      "source": "assets/source/props/marsh-grass-tuft-01.svg",
+      "runtime": "assets/runtime/props/marsh-grass-tuft-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "701x605",
+      "size": "701x605"
+    },
+    {
+      "key": "props.marsh-grass-tuft-02",
+      "source": "assets/source/props/marsh-grass-tuft-02.svg",
+      "runtime": "assets/runtime/props/marsh-grass-tuft-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "701x605",
+      "size": "701x605"
+    },
+    {
+      "key": "props.marsh-grass-tuft-03",
+      "source": "assets/source/props/marsh-grass-tuft-03.svg",
+      "runtime": "assets/runtime/props/marsh-grass-tuft-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "701x605",
+      "size": "701x605"
+    },
+    {
+      "key": "props.marsh-grass-tuft-04",
+      "source": "assets/source/props/marsh-grass-tuft-04.svg",
+      "runtime": "assets/runtime/props/marsh-grass-tuft-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "701x605",
+      "size": "701x605"
     },
     {
       "key": "props.mountain-line-01",
@@ -1049,18 +1157,18 @@
       "size": "493x169"
     },
     {
-      "key": "tools.garden-hoe-alt",
-      "source": "assets/source/tools/garden-hoe-alt.svg",
-      "runtime": "assets/runtime/tools/garden-hoe-alt.png",
+      "key": "tools.garden-hoe",
+      "source": "assets/source/tools/garden-hoe.svg",
+      "runtime": "assets/runtime/tools/garden-hoe.png",
       "type": "texture",
       "usage": "asset",
       "sourceSize": "599x169",
       "size": "599x169"
     },
     {
-      "key": "tools.garden-hoe",
-      "source": "assets/source/tools/garden-hoe.svg",
-      "runtime": "assets/runtime/tools/garden-hoe.png",
+      "key": "tools.garden-hoe-alt",
+      "source": "assets/source/tools/garden-hoe-alt.svg",
+      "runtime": "assets/runtime/tools/garden-hoe-alt.png",
       "type": "texture",
       "usage": "asset",
       "sourceSize": "599x169",

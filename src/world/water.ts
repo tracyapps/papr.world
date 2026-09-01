@@ -454,6 +454,9 @@ const CATTAILS = [
 ] as const;
 const WATER_LILIES = [[978.2, 592.43], [912.12, 456.44], [912.12, 456.44]] as const;
 const DRIFTWOOD = [[907.12, 627.84], [940.14, 442.56], [886.85, 585.89]] as const;
+const MARSH_GRASS = [
+  [701, 605], [701, 605], [701, 605], [701, 605],
+] as const;
 
 function flatWaterProp(url: string, aspectRatio: number, width: number): THREE.Mesh {
   const entry = getCutoutMaterial(url);
@@ -518,11 +521,18 @@ function buildChannelDetails(body: ChannelWaterBody): THREE.Group {
     ) continue;
 
     if (body.bankStyle === 'marsh' || (body.bankStyle === 'woodland' && index % 2 === 0)) {
-      const variant = Math.floor(rng() * CATTAILS.length);
-      const [artWidth, artHeight] = CATTAILS[variant];
+      // Marsh banks mix in loose grass tufts alongside cattail clusters for
+      // visual variety; woodland banks (which borrow this same roll every
+      // other point) keep the original cattail-only look.
+      const useMarshGrass = body.bankStyle === 'marsh' && rng() < 0.45;
+      const variants = useMarshGrass ? MARSH_GRASS : CATTAILS;
+      const variant = Math.floor(rng() * variants.length);
+      const [artWidth, artHeight] = variants[variant];
       const height = 0.85 + rng() * 0.55;
       details.add(createCutout({
-        textureUrl: `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`,
+        textureUrl: useMarshGrass
+          ? `/assets/runtime/props/marsh-grass-tuft-0${variant + 1}.png`
+          : `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`,
         aspectRatio: artWidth / artHeight,
         height,
         position: [bankX, groundedCutoutY(sampleTerrainHeight(bankX, bankZ), height), bankZ],

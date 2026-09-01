@@ -4,6 +4,7 @@ import { findCrowdingPlant, refillCost } from '../sim/commands';
 import { getGameState, type GameState, type TerrainEditCellState } from '../sim/state';
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
+import { planterBoxAt } from '../world/buildPieces';
 
 // What the hoe would do at a given cell, and why it can or cannot.
 //
@@ -83,10 +84,18 @@ export function resolveGardenAction(
   if (!options.inReach) return { kind: 'none', ok: false, blocker: { kind: 'out-of-reach' } };
 
   const edit = editAt(state, target);
-  if (!edit) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
+
+  // A placed planter box is a raised bed the instant it exists — planting
+  // into it never needed a shovel dig, so an empty cell still counts as a
+  // valid bed when it sits inside one. There is nothing stored to rake
+  // closed yet, though, so an empty hoe over an untouched planter finds
+  // nothing to do until a seed has actually gone in.
+  const insidePlanterBox = !edit
+    && Boolean(planterBoxAt(state.world.pages[target.pageId]?.placedPieces, target.x, target.z));
+  if (!edit && !insidePlanterBox) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
 
   // Something is growing here: the only thing the hoe can do is lift it.
-  if (edit.state !== 'dug' && edit.plantedSeedId) {
+  if (edit && edit.state !== 'dug' && edit.plantedSeedId) {
     return {
       kind: 'lift',
       ok: true,
@@ -99,6 +108,7 @@ export function resolveGardenAction(
 
   const seedId = selectedSeed(state);
   if (!seedId) {
+    if (!edit) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
     // Empty hands over an empty bed: rake it closed.
     const cost = refillCost(edit.depth);
     const available = soilOnHand(state);
