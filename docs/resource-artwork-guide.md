@@ -43,7 +43,7 @@ several rows sharing a `Visual` are the exact confusion being reported.
 | Confetti stones | Stones | meadow, scrapflats | stoneCluster | paper.purple | swatch |
 | Graphite cardstone | Stones | forest, scrapflats | stoneCluster | paper.grey | swatch |
 | Bluefold pebbles | Stones | meadow | stoneCluster | paper.aqua | swatch |
-| **Terracotta pebbles** *(new, 2026-09-01)* | Stones | **dunes** | stoneCluster | paper.orangewrap | swatch |
+| **Terracotta pebbles** *(new + real art, 2026-09-01)* | Stones | **dunes** | stoneCluster | paper.orangewrap | **real art** |
 | Sunbaked cardboard | Cardboard | dunes, scrapflats | stoneCluster | paper.brown.warm | swatch |
 | Ochre paperclay | Soil | (dug only) | stoneCluster | paper.brown.warm | swatch |
 | Carbon soil | Soil | (dug only) | stoneCluster | paper.grey | swatch |
@@ -98,19 +98,47 @@ assets/runtime/resources/<id>.png
         ▼
 src/game/resourcePresentation.ts  ←── getResourceArt(resourceId)
         │
-        ├─→ world/pageRuntime.ts   — the ground harvestable cutout
+        ├─→ world/pageRuntime.ts   — the ground harvestable pile
         ├─→ ui/scrapbook.ts        — the scrapbook thumbnail
         └─→ tools/build-reference.mjs — the public reference site card
 ```
 
-`resourcePresentation.ts` now exists (this session), wired into all three
-consumers, and is **deliberately empty** — no resource has real art yet. A
-resource with no entry keeps exactly its current look (generic primitive
-cluster on the ground, color swatch in the scrapbook, no image on the
-reference site). Nothing breaks by this being empty; a resource simply gets
+`resourcePresentation.ts` now has its first real entry — **terracotta
+pebbles** (2026-09-01) — proving the pipeline end to end, alongside a
+placeholder-quality drawing you should feel entirely free to replace. Every
+other resource still keeps its current look (generic primitive cluster on
+the ground, color swatch in the scrapbook, no image on the reference site).
+Nothing breaks by an entry being missing; a resource simply gets
 better-looking the moment its entry lands, with zero changes anywhere else.
 This is the identical "ships playable, gets better when the art lands" rule
 `toolPresentation.ts`'s own doc comment states for tools.
+
+### Ground piles: one drawing, scattered — not one drawing of the whole pile
+
+This is the one real difference between resource categories, and it's about
+orientation, not process. `world/pageRuntime.ts` already scatters several
+small primitive meshes per pile (five twigs, five stones, seven blades) —
+adding real art keeps that exact scatter, it just swaps each primitive mesh
+for a copy of your one drawing at a random position/rotation/scale. So:
+
+- **You always draw a single item** — one twig, one pebble, one blade —
+  never a composed pile scene. The game builds the pile out of copies.
+- **Sticks and stones (`twigBundle`/`stoneCluster`) lie flat on the
+  ground**, so they're drawn as seen from directly above (like a simple
+  top-down icon) and laid flat by `createGroundCutout()` — a new primitive
+  in `render/builders.ts` alongside the standing `createCutout()` trees and
+  cactus already use. Nothing else differs between "sticks" and "rocks" —
+  same file format, same top-down framing, same registration step. Draw
+  whatever silhouette actually reads as a twig vs. a pebble; the pipeline
+  doesn't care.
+- **Fiber, seeds, and food (`fiberTuft`) stand up**, like a tiny blade of
+  grass or a little seedling, so they're drawn from the side and stood up
+  with the same `createCutout()` trees use, just small.
+
+Which one a resource gets is decided by its existing `visual` field in
+`world/resources.ts` (`RESOURCE_WORLD_DEFS`) — that's already set for every
+resource today, so there's nothing new to configure. You only ever touch
+`resourcePresentation.ts`.
 
 **Not wired to this (a deliberate open question, not an oversight):** the
 build-material picker (`BUILD_MATERIAL_OPTIONS`/`BUILD_MATERIAL_LABELS` in
@@ -128,11 +156,17 @@ deliberately isn't made here. Worth a conversation before touching it.
 
 Exactly the workflow already used for the cactus and marsh-grass props this
 session (`docs/paper-artwork-guide.md` has the full art-direction rules —
-craft-table materials, torn edges, no flat digital gradients):
+craft-table materials, torn edges, no flat digital gradients), now proven
+end to end by `terracotta-pebbles.svg` — open it alongside this list as a
+worked example, and see the note inside that file for format specifics
+(no `<defs>`/CSS classes needed, plain `fill="#hex"` per `<path>`).
 
-1. **Draw the cutout SVG.** One resource, one file, any size/proportion —
-   portrait for something tall like a stick bundle, roughly square for a
-   stone or seed cluster. Save it to
+1. **Draw one item**, not a pile — one twig, one pebble, one blade. Sticks
+   and stones are drawn from directly above (top-down, like a little icon,
+   since they'll lie flat on the ground); fiber/seeds/food are drawn from
+   the side (since they'll stand up). Either way: any size, whatever
+   proportion the item actually has — the file's own width÷height *is* the
+   aspect ratio the game will use, nothing to set separately. Save it to
    `assets/source/resources/<resource-id>.svg` (e.g.
    `assets/source/resources/kraft-twigs.svg`), matching the resource's own
    id from `RESOURCE_CORE_DEFS` so the two are never in doubt.
@@ -141,27 +175,34 @@ craft-table materials, torn edges, no flat digital gradients):
    `assets/runtime/resources/<resource-id>.png`. If this device's Playwright
    is network-blocked (it was, this session — see
    `pencil-and-paper-sandbox-build` project memory), ImageMagick's
-   `rsvg-convert` delegate is a proven fallback with zero network needed:
+   `rsvg-convert` delegate is a proven fallback with zero network needed —
+   this is how `terracotta-pebbles.png` itself was produced:
    `convert -background none <src> -resize 4096x4096> <dst>`.
-3. **Register it** in `src/game/resourcePresentation.ts`:
+3. **Register it** in `src/game/resourcePresentation.ts`, following the
+   real `terracotta-pebbles` entry already there:
    ```ts
    'kraft-twigs': {
-     sourceUrl: new URL('../../assets/source/resources/kraft-twigs.svg', import.meta.url).href,
-     aspectRatio: 1.4, // width ÷ height of the source art
+     sourceUrl: '/assets/runtime/resources/kraft-twigs.png',
+     aspectRatio: 1.4, // width ÷ height, straight from the source SVG
    },
    ```
-   That's the entire change. The ground pile, the scrapbook thumbnail, and
-   the public reference site all pick it up the next time each is built —
-   nothing else to edit, and the "if adding a feature required editing the
-   docs site, the fact went in the wrong place" rule from
-   `docs/single-source-of-truth.md` holds here too.
+   (The path is root-relative — `assets/` is the Vite public directory —
+   not the `new URL(...)` form `toolPresentation.ts` uses; that form is for
+   a DOM `<img>` consumer, this one feeds a THREE.js scene texture, same as
+   `TREE_DEFS`/`DECOR_DEFS` already do.) That's the entire change. The
+   ground pile, the scrapbook thumbnail, and the public reference site all
+   pick it up the next time each is built — nothing else to edit, and the
+   "if adding a feature required editing the docs site, the fact went in
+   the wrong place" rule from `docs/single-source-of-truth.md` holds here
+   too.
 4. **Verify**: `npx tsc --noEmit`, `npx vitest run`, `npx vite build` in
    `~/pp-build` per the usual sandbox routine, plus `npm run docs:build` to
-   confirm the reference site picks up the new art. None of the visual
-   result (does the cutout actually look right in the world, does the
-   thumbnail crop sensibly) can be confirmed from either sandbox — that
-   needs the owner's own `npm run dev` playtest, same as every other art
-   change this project has shipped.
+   confirm the reference site picks up the new art (the terracotta-pebbles
+   card there now has a real thumbnail — search `docs-site/index.html` for
+   `card-art` to see it). None of the visual result (does the ground decal
+   actually sit right, does the thumbnail crop sensibly) can be confirmed
+   from either sandbox — that needs your own `npm run dev` playtest, same
+   as every other art change this project has shipped.
 
 ### What "extracted from" means for the chart above
 
@@ -180,6 +221,8 @@ pile" cell to fill in for them in the chart, and that's correct, not a gap.
 Not prescriptive — art direction is yours — but the chart above suggests an
 order: the seven `fiberTuft` seed/food rows sharing one texture are the
 single biggest "everything looks the same" cluster, so they'd buy the most
-clarity per drawing. Terracotta pebbles (new, no art anywhere yet) is the
-newest desert-exclusive material and has no existing swatch expectations to
-preserve. Either is a reasonable first real test of the pipeline above.
+clarity per drawing. Terracotta pebbles already has its first pass (a
+placeholder worth replacing whenever you get to it) and proves the
+`stoneCluster` half of the pipeline works end to end; a `fiberTuft` resource
+— say `raspberry-bush-seeds` or `mend-me-seeds` — would be a good next test,
+since it exercises the standing-cutout half instead of the flat one.

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="190" viewBox="0 0 240 190">
+<!--
+  Resource artwork example — terracotta-pebbles (Stones, dunes-exclusive).
+  Drawn top-down, as seen lying on the ground: this is the "sticks/stones"
+  half of the pipeline, laid flat by createGroundCutout rather than stood
+  up like a tree. One pebble per file; the game scatters several copies
+  per pile at random rotation/scale — you never draw the whole pile.
+
+  This is a structural placeholder (flat cut-paper shapes, no gradients,
+  matching the craft-table art direction in docs/paper-artwork-guide.md)
+  meant to prove the pipeline end to end, not final art — replace the
+  three paths below with real drawing whenever you get to it.
+
+  Format notes for your own resources:
+    * No <defs>/<style>/CSS classes needed — plain fill="#hex" per <path>.
+    * viewBox proportions ARE the aspectRatio the game will use (see the
+      RESOURCE_ART entry in src/game/resourcePresentation.ts) — draw at
+      whatever size is comfortable, the ratio is what travels.
+    * Keep the silhouette a closed, filled shape near the top of the file
+      (paint order = document order, same as everywhere else in the game's
+      art), with any darker crease/lighter highlight detail layered after.
+-->
+<path d="M 40 95 C 25 60, 55 20, 110 15 C 165 10, 215 35, 225 85 C 232 120, 205 165, 150 175 C 95 185, 50 155, 40 95 Z" fill="#bd6b3c"/>
+<path d="M 150 175 C 180 165, 205 145, 220 115 C 215 140, 195 165, 165 178 C 158 179, 152 178, 150 175 Z" fill="#8f4d29"/>
+<path d="M 75 45 C 70 35, 85 28, 95 33 C 105 38, 100 50, 88 52 C 80 53, 78 50, 75 45 Z" fill="#d98f5f"/>
+</svg>

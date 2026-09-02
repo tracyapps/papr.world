@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-eyes-sleepy" transform="translate(48 51.61) scale(1 -1) translate(-48 -51.61)">
+<g class="layer-path">
+<path d="M 16 53.23 C 22 59.68 38 59.68 44 53.23 C 37 57.26 23 57.26 16 53.23 C 16 53.23 16 53.23 16 53.23 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 56 53.23 C 62 59.68 78 59.68 84 53.23 C 77 57.26 63 57.26 56 53.23 C 56 53.23 56 53.23 56 53.23 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-freckles">
+<g class="layer-circle">
+<ellipse cx="15" cy="32.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="29" cy="42.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="21" cy="52.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="77" cy="32.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="85" cy="44.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="69" cy="50.7" rx="4" ry="4" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="49" cy="58.7" rx="4" ry="4" fill="#000000"/>
+</g>
+</g>
+</svg>

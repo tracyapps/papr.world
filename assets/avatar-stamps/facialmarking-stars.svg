@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-sparkles">
+<g class="layer-path">
+<path d="M 33 9.2 C 36.2 26.8 41 31.6 58.6 34.8 C 41 38 36.2 42.8 33 60.4 C 29.8 42.8 25 38 7.4 34.8 C 25 31.6 29.8 26.8 33 9.2 C 33 9.2 33 9.2 33 9.2 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 75 43.2 C 77.2 55.3 80.5 58.6 92.6 60.8 C 80.5 63 77.2 66.3 75 78.4 C 72.8 66.3 69.5 63 57.4 60.8 C 69.5 58.6 72.8 55.3 75 43.2 C 75 43.2 75 43.2 75 43.2 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 38.2 65.2 C 39.8 74 42.2 76.4 51 78 C 42.2 79.6 39.8 82 38.2 90.8 C 36.6 82 34.2 79.6 25.4 78 C 34.2 76.4 36.6 74 38.2 65.2 C 38.2 65.2 38.2 65.2 38.2 65.2 Z" fill="#000000" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

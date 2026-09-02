@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-eyes-googly">
+<g class="layer-circle">
+<path d="M 32.24 33.38 C 39.48 33.38 47.55 32.77 48.58 34.58 C 50.21 37.42 49.9 40.01 49.9 43.76 C 49.9 58.58 42.34 69.07 32.65 69.07 C 22.96 69.07 14.81 58.58 14.81 43.76 C 14.81 39.7 15.42 35.63 16.48 33.79 C 17.55 31.96 25.21 33.38 32.24 33.38 Z" fill="#FFFFFF" stroke-linejoin="round"/>
+</g>
+<g class="layer-circle">
+<path d="M 67.8 32.66 C 75.07 32.66 82.13 30.93 83.66 34.43 C 85.19 37.93 84.83 39.77 84.83 43.66 C 84.83 58.48 77.31 69.03 67.46 69.03 C 57.6 69.03 49.14 58.48 49.14 43.66 C 49.14 39.94 49.72 37.85 50.61 34.83 C 51.5 31.81 60.43 32.66 67.8 32.66 Z" fill="#FFFFFF" stroke-linejoin="round"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="27.1" cy="54.69" rx="6.77" ry="7.12" fill="#000000"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="61.85" cy="54.29" rx="6.77" ry="7.12" fill="#000000"/>
+</g>
+</g>
+</svg>

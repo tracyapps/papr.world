@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { aspect, createRng } from '../core/math';
-import { createCutout, createSheet, groundedCutoutY } from '../render/builders';
+import { createCutout, createGroundCutout, createSheet, groundedCutoutY } from '../render/builders';
 import { getMaterial } from '../render/materials';
 import { registerHarvestable } from '../game/harvesting';
 import { getResourceArt } from '../game/resourcePresentation';
@@ -293,23 +293,32 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
       const node = new THREE.Group();
       node.position.set(prop.x, sampleTerrainHeight(prop.x, prop.z) + 0.035, prop.z);
 
-      // A resource with real art gets a cutout billboard instead of the
-      // generic primitive cluster below — same "playable before the art
-      // lands" rule as tools and decor. See resourcePresentation.ts and
-      // docs/resource-artwork-guide.md.
+      // A resource with real art gets that art scattered instead of the
+      // generic primitive pile below — same "playable before the art lands"
+      // rule as tools and decor. Which kind of art depends on how the thing
+      // actually sits in the world: twigBundle/stoneCluster resources lie
+      // flat on the ground, so their art lies flat too (createGroundCutout,
+      // viewed from above); fiberTuft resources stand up like a blade of
+      // grass, so theirs stands up too (createCutout, viewed from the side),
+      // same shape family used for a tiny seedling. See resourcePresentation.ts
+      // and docs/resource-artwork-guide.md.
       const art = getResourceArt(prop.resource);
-      if (art) {
-        const height = 0.34 + rng() * 0.1;
-        const cutout = createCutout({
-          aspectRatio: art.aspectRatio,
-          height,
-          position: [0, height / 2, 0],
-          rotationY: rng() * Math.PI * 2,
-          textureUrl: art.sourceUrl,
-        });
-        node.add(cutout);
-      } else if (prop.visual === 'twigBundle') {
+
+      if (prop.visual === 'twigBundle') {
         for (let twigIndex = 0; twigIndex < 5; twigIndex += 1) {
+          if (art) {
+            const width = 0.22 + rng() * 0.16;
+            node.add(
+              createGroundCutout({
+                aspectRatio: art.aspectRatio,
+                position: [(rng() - 0.5) * 0.4, 0.006 + twigIndex * 0.0015, (rng() - 0.5) * 0.32],
+                rotationY: rng() * Math.PI * 2,
+                textureUrl: art.sourceUrl,
+                width,
+              }),
+            );
+            continue;
+          }
           const length = 0.48 + rng() * 0.38;
           const twig = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.038, length, 7), material);
           twig.rotation.z = Math.PI / 2 + (rng() - 0.5) * 0.24;
@@ -320,6 +329,19 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         }
       } else if (prop.visual === 'stoneCluster') {
         for (let stoneIndex = 0; stoneIndex < 5; stoneIndex += 1) {
+          if (art) {
+            const width = 0.2 + rng() * 0.14;
+            node.add(
+              createGroundCutout({
+                aspectRatio: art.aspectRatio,
+                position: [(rng() - 0.5) * 0.55, 0.006 + stoneIndex * 0.0015, (rng() - 0.5) * 0.48],
+                rotationY: rng() * Math.PI * 2,
+                textureUrl: art.sourceUrl,
+                width,
+              }),
+            );
+            continue;
+          }
           const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.13 + rng() * 0.12, 0), material);
           stone.scale.set(1 + rng() * 0.35, 0.55 + rng() * 0.35, 0.85 + rng() * 0.35);
           stone.position.set((rng() - 0.5) * 0.55, 0.09 + rng() * 0.06, (rng() - 0.5) * 0.48);
@@ -329,8 +351,21 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         }
       } else {
         for (let bladeIndex = 0; bladeIndex < 7; bladeIndex += 1) {
-          const blade = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.46 + rng() * 0.25, 0.025), material);
           const angle = (bladeIndex / 7) * Math.PI * 2;
+          if (art) {
+            const height = 0.22 + rng() * 0.1;
+            node.add(
+              createCutout({
+                aspectRatio: art.aspectRatio,
+                height,
+                position: [Math.cos(angle) * 0.1, height / 2, Math.sin(angle) * 0.1],
+                rotationY: -angle + (rng() - 0.5) * 0.3,
+                textureUrl: art.sourceUrl,
+              }),
+            );
+            continue;
+          }
+          const blade = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.46 + rng() * 0.25, 0.025), material);
           blade.position.set(Math.cos(angle) * 0.14, 0.24, Math.sin(angle) * 0.14);
           blade.rotation.set((rng() - 0.5) * 0.25, -angle, (rng() - 0.5) * 0.42);
           blade.castShadow = true;

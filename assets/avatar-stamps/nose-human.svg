@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+<style>
+:root {
+  --green: #024E04;
+  --blue: #192443;
+  --gold: #B47C16;
+  --red: #3F0404;
+}
+</style>
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 33.32 60.64 C 32.28 60.64 31.89 61.52 30.95 62.34 C 27.19 70.81 31.93 75.35 35.4 73.63" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="layer-path" transform="translate(59.69 68) scale(-1 1) translate(-59.69 -68)">
+<path d="M 61.71 60.64 C 60.68 60.64 60.28 61.52 59.35 62.34 C 55.58 70.81 60.33 75.35 63.8 73.63" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 38.13 60.64 C 43.65 47.48 44.8 31.82 45.98 17.73" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="layer-path">
+<path d="M 38.13 74.08 C 39.7 72.96 38.84 73.42 40.73 72.71 C 43.07 72.81 43.07 73.33 44.48 74.82 C 46.94 74.56 48.21 72.71 50.42 71.66 C 52.58 72.17 51.91 71.58 52.52 73.34" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

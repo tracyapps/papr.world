@@ -7,9 +7,12 @@
   --red: #3F0404;
 }
 </style>
-<g class="layer-nose-beak">
-<g class="layer-path">
-<path d="M 20 34.19 C 20 34.19 80 34.19 80 34.19 C 80 34.19 50 63.07 50 63.07 C 50 63.07 20 34.19 20 34.19 Z" fill="#000000" stroke-linejoin="round"/>
+<g class="layer-eye-single">
+<g class="layer-circle">
+<ellipse cx="50" cy="50" rx="34" ry="34" fill="#FFFFFF"/>
+</g>
+<g class="layer-circle">
+<ellipse cx="53.06" cy="44" rx="15" ry="15" fill="#000000"/>
 </g>
 </g>
 </svg>

@@ -203,6 +203,41 @@ export function createRoofFace(
   return mesh;
 }
 
+export type GroundCutoutOptions = {
+  textureUrl: string;
+  /** Longest side on the ground, in world units. */
+  width: number;
+  position: THREE.Vector3Tuple;
+  /** Width ÷ height of the source art, same number a standing cutout would
+   *  use — here it maps to width ÷ depth instead, since the art is lying
+   *  flat rather than standing up. */
+  aspectRatio: number;
+  /** Spin around the vertical axis, for scatter variety. */
+  rotationY?: number;
+  alphaTest?: number;
+};
+
+/**
+ * A single small item lying flat on the ground — one twig, one pebble — as
+ * opposed to `createCutout`'s standing billboard. Trees and cactus read as
+ * cutouts because they stand upright in life; sticks and stones lie down,
+ * so their art is drawn as seen from above and laid flat here rather than
+ * propped up like a little sign. See docs/resource-artwork-guide.md.
+ */
+export function createGroundCutout(options: GroundCutoutOptions): THREE.Mesh {
+  const entry = getCutoutMaterial(options.textureUrl, options.alphaTest ?? 0.03, 1);
+  const depth = options.width / options.aspectRatio;
+  const geometry = new THREE.PlaneGeometry(options.width, depth);
+  geometry.rotateX(-Math.PI / 2);
+  const mesh = new THREE.Mesh(geometry, entry.material);
+  mesh.position.set(...options.position);
+  mesh.rotation.y = options.rotationY ?? 0;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.customDepthMaterial = entry.depthMaterial;
+  return mesh;
+}
+
 export function createCutout(options: CutoutOptions): THREE.Mesh {
   const entry = getCutoutMaterial(
     options.textureUrl,

@@ -7,9 +7,9 @@
   --red: #3F0404;
 }
 </style>
-<g class="layer-mouth-wiggle">
+<g class="layer-heart-token">
 <g class="layer-path">
-<path d="M 13 46 C 25 28 35 64 49 46 C 63 28 73 64 87 46 C 73 58 63 36 49 54 C 35 72 25 40 13 58 C 13 58 13 46 13 46 Z" fill="#000000" stroke-linejoin="round"/>
+<path d="M 50 84 C 20 62 10 44 18 30 C 26 16 44 20 50 34 C 56 20 74 16 82 30 C 90 44 80 62 50 84 C 50 84 50 84 50 84 Z" fill="#000000" stroke-linejoin="round"/>
 </g>
 </g>
 </svg>

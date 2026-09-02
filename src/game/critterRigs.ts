@@ -128,6 +128,18 @@ function sphere(radius: number, material: THREE.Material, w = 20, h = 14) {
   return shadowed(new THREE.Mesh(new THREE.SphereGeometry(radius, w, h), material));
 }
 
+/**
+ * A straight-sided barrel with rounded ends — unlike a stretched sphere,
+ * which tapers continuously in every direction no matter how it's scaled
+ * and always reads as a ball. `length` is the straight part only, along the
+ * capsule's own Y axis before any rotation.
+ */
+function capsule(radius: number, length: number, material: THREE.Material, capSegments = 6, radialSegments = 14) {
+  return shadowed(
+    new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, capSegments, radialSegments), material),
+  );
+}
+
 function buildSquirrel(params: CritterParams): CritterRig {
   const group = new THREE.Group();
   const coat = bodyMaterial(params);
@@ -433,13 +445,24 @@ function buildMeerkat(params: CritterParams): CritterRig {
   const torso = new THREE.Group();
   torso.position.set(0, 0.13, 0);
 
-  const body = sphere(0.2, coat, 22, 14);
-  body.scale.set(1, 1.35, 1.55);
-  body.position.set(0, 0, 0.02);
+  // Two overlapping capsule segments, not one stretched sphere — a sphere
+  // tapers continuously in every direction no matter how it's scaled, so it
+  // always reads as a ball. A capsule keeps a straight-sided barrel through
+  // its middle, which is what actually reads as "tubular." The rear segment
+  // (haunches) stays level and low; the front segment (ribcage) tilts
+  // upward toward the neck, so together they read as a gently arched spine
+  // — low in the back, lifted at the shoulders — rather than one rigid rod.
+  const haunches = capsule(0.088, 0.15, coat);
+  haunches.rotation.x = Math.PI / 2;
+  haunches.position.set(0, -0.02, 0.1);
 
-  const chest = sphere(0.1, cream, 16, 12);
-  chest.scale.set(0.85, 1.1, 0.75);
-  chest.position.set(0, -0.03, -0.18);
+  const ribcage = capsule(0.078, 0.17, coat);
+  ribcage.rotation.x = Math.PI / 2 + 0.34;
+  ribcage.position.set(0, 0.05, -0.1);
+
+  const chest = sphere(0.09, cream, 16, 12);
+  chest.scale.set(0.8, 1, 0.68);
+  chest.position.set(0, 0.03, -0.2);
 
   const head = sphere(0.115, coat, 20, 14);
   head.scale.set(0.92, 0.88, 1);
@@ -477,7 +500,7 @@ function buildMeerkat(params: CritterParams): CritterRig {
     ears.push(ear);
   }
 
-  torso.add(body, chest);
+  torso.add(haunches, ribcage, chest);
   const headGroup = makeHead(torso, [0, 0.27, -0.2], [head, snout, nose, ...eyePatches, ...eyes, ...ears]);
 
   // Short legs — the stance does the work, not leg length.
@@ -532,17 +555,30 @@ function buildMeerkat(params: CritterParams): CritterRig {
     },
     flourish: (progress, t) => {
       // Full sentry stance: rises upright on a tripod of hind legs and
-      // tail, paws clasped at the chest, scanning. The most meerkat thing a
-      // meerkat can do.
+      // tail, front legs lifting to bring the paws up to a clasp at the
+      // chest, scanning. Pushed further upright than the curious half-rise
+      // in animate() above, and the front legs now visibly travel with the
+      // paws instead of staying planted while the paws float free — the
+      // two read as one connected motion rather than the body rising out
+      // from under its own arms.
       const rise = Math.sin(Math.min(progress * 1.2, 1) * Math.PI);
-      torso.rotation.x = -1.15 * rise;
-      tail.rotation.x = 0.55 * rise;
+      torso.rotation.x = -1.35 * rise;
+      tail.rotation.x = 0.6 * rise;
+      // Front legs (index 0, 1) fold up toward the chest; rear legs
+      // (index 2, 3) brace forward slightly, planting the tripod that
+      // holds the rise up.
+      legs.forEach((leg, index) => {
+        leg.rotation.x = index < 2 ? -1.9 * rise : 0.22 * rise;
+      });
       const clasp = Math.sin(t * 10) * 0.02 * rise;
-      paws[0].position.set(-0.045 + clasp, 0.06 * rise + 0.03, -0.1 - 0.1 * rise);
-      paws[1].position.set(0.045 - clasp, 0.06 * rise + 0.03, -0.1 - 0.1 * rise);
+      paws[0].position.set(-0.045 + clasp, 0.09 * rise + 0.03, -0.14 - 0.06 * rise);
+      paws[1].position.set(0.045 - clasp, 0.09 * rise + 0.03, -0.14 - 0.06 * rise);
       if (progress >= 1) {
         torso.rotation.x = 0;
         tail.rotation.x = 0;
+        legs.forEach((leg) => {
+          leg.rotation.x = 0;
+        });
         paws[0].position.set(-0.075, 0.03, -0.14);
         paws[1].position.set(0.075, 0.03, -0.14);
       }

@@ -20,23 +20,34 @@ import type { ResourceId } from '../sim/catalogs/resources';
  * so it carries to the ground, the scrapbook, the build-material picker
  * (where applicable), and the public reference site from one entry.
  *
+ * One drawing, two possible orientations in the world — `world/pageRuntime.ts`
+ * picks per-resource by its existing `HarvestVisual` (`twigBundle`/
+ * `stoneCluster` lie flat on the ground and get scattered several-at-a-time
+ * as small ground decals; `fiberTuft` stands up like a blade of grass and
+ * gets scattered as small standing cutouts). You never draw a whole pile —
+ * one twig, one pebble, one blade per file — the game scatters copies.
+ *
  * Read through `getResourceArt()`, never indexed directly.
  */
 export type ResourceArt = {
   /** Compiled runtime PNG, same convention as `TOOL_ART`/`DECOR_DEFS`. */
   sourceUrl: string;
-  /** Width ÷ height of the source art, for cutout billboard sizing. */
+  /** Width ÷ height of the source art, exactly as drawn. */
   aspectRatio: number;
 };
 
 export const RESOURCE_ART = {
-  // Empty on purpose — see the doc comment above. The first entry might
-  // look like:
-  //
-  // 'kraft-twigs': {
-  //   sourceUrl: new URL('../../assets/source/resources/kraft-twigs.svg', import.meta.url).href,
-  //   aspectRatio: 1.4,
-  // },
+  // The first real example — see docs/resource-artwork-guide.md for how
+  // this one was made and what's different (nothing, structurally) between
+  // a "sticks" resource and a "stones" one.
+  'terracotta-pebbles': {
+    // Public-path convention, same as TREE_DEFS/DECOR_DEFS in pageRuntime.ts
+    // (assets/ is the Vite public dir, served as-is at /assets/...) — not
+    // the import.meta.url convention TOOL_ART uses, which is for a
+    // different consumer (a DOM <img>, not a THREE.js scene texture).
+    sourceUrl: '/assets/runtime/resources/terracotta-pebbles.png',
+    aspectRatio: 240 / 190,
+  },
 } as const satisfies Partial<Record<ResourceId, ResourceArt>>;
 
 /** Artwork for a resource, or null when it has none yet. */
