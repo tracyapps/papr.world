@@ -618,6 +618,614 @@
       "layer": "on",
       "defaultScale": 0.9,
       "file": "patch.svg"
+    },
+    {
+      "key": "brows-angry",
+      "label": "angry brows",
+      "category": "faces",
+      "spoken": "two sharp bars angled steeply down toward the middle, an angry glare",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "angry",
+        "mad",
+        "sharp"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-angry.svg"
+    },
+    {
+      "key": "brows-bushy",
+      "label": "bushy brows",
+      "category": "faces",
+      "spoken": "two thick curved tufts flaring outward, a wild bushy brow",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "bushy",
+        "thick",
+        "wild"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "brows-bushy.svg"
+    },
+    {
+      "key": "brows-questioning",
+      "label": "questioning brow",
+      "category": "faces",
+      "spoken": "one brow arched high and the other low, a skeptical raised look",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "questioning",
+        "skeptical",
+        "asymmetric"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-questioning.svg"
+    },
+    {
+      "key": "brows-shaped",
+      "label": "shaped brows",
+      "category": "faces",
+      "spoken": "two neatly arched brows tapering to a groomed point",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "arched",
+        "groomed",
+        "shaped"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-shaped.svg"
+    },
+    {
+      "key": "brows-surprise",
+      "label": "surprised brows",
+      "category": "faces",
+      "spoken": "two brows lifted high into tall curves, a surprised look",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "surprised",
+        "shocked",
+        "raised"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-surprise.svg"
+    },
+    {
+      "key": "brows-uni",
+      "label": "unibrow",
+      "category": "faces",
+      "spoken": "one solid bar stretching straight across, a single unbroken brow",
+      "keywords": [
+        "brows",
+        "eyebrows",
+        "unibrow",
+        "solid",
+        "straight"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "brows-uni.svg"
+    },
+    {
+      "key": "eyes-cat",
+      "label": "cat eyes",
+      "category": "eyes",
+      "spoken": "two tall almond eyes with narrow vertical slit pupils, a cat's eyes",
+      "keywords": [
+        "eyes",
+        "cat",
+        "slit",
+        "almond",
+        "feline"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-cat.svg"
+    },
+    {
+      "key": "eyes-grumpy",
+      "label": "grumpy eyes",
+      "category": "eyes",
+      "spoken": "two narrowed eyes under a low flat lid, a grumpy glare",
+      "keywords": [
+        "eyes",
+        "grumpy",
+        "narrow",
+        "glare",
+        "annoyed"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-grumpy.svg"
+    },
+    {
+      "key": "eyes-human",
+      "label": "realistic eyes",
+      "category": "eyes",
+      "spoken": "two almond eyes with a rounded iris, a realistic human look",
+      "keywords": [
+        "eyes",
+        "human",
+        "realistic",
+        "almond",
+        "iris"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-human.svg"
+    },
+    {
+      "key": "eyes-muppet",
+      "label": "muppet eyes",
+      "category": "eyes",
+      "spoken": "two mismatched round eyes set at different heights, a googly muppet look",
+      "keywords": [
+        "eyes",
+        "muppet",
+        "round",
+        "silly",
+        "mismatched"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-muppet.svg"
+    },
+    {
+      "key": "eyes-single",
+      "label": "one round eye",
+      "category": "eyes",
+      "spoken": "one simple round eye with a dark pupil, centered on the face",
+      "keywords": [
+        "eye",
+        "one",
+        "single",
+        "round",
+        "simple"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-single.svg"
+    },
+    {
+      "key": "eyes-squint",
+      "label": "squinting eyes",
+      "category": "eyes",
+      "spoken": "two narrow curved slits, eyes squeezed almost shut",
+      "keywords": [
+        "eyes",
+        "squint",
+        "narrow",
+        "shut",
+        "scrunched"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-squint.svg"
+    },
+    {
+      "key": "eyes-squintysmile",
+      "label": "beaming squinty eyes",
+      "category": "eyes",
+      "spoken": "two wide flat crescents curving up, a beaming squinty smile",
+      "keywords": [
+        "eyes",
+        "squint",
+        "smile",
+        "happy",
+        "beaming"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "eyes-squintysmile.svg"
+    },
+    {
+      "key": "eyes-undereyeshadow",
+      "label": "shadowed eyes",
+      "category": "eyes",
+      "spoken": "two round eyes with a soft shaded crescent beneath each, tired or dramatic",
+      "keywords": [
+        "eyes",
+        "shadow",
+        "tired",
+        "dramatic",
+        "undereye"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "eyes-undereyeshadow.svg"
+    },
+    {
+      "key": "facialhair-beard",
+      "label": "full beard",
+      "category": "faces",
+      "spoken": "a full beard of jagged tufts covering the jaw and chin",
+      "keywords": [
+        "beard",
+        "facial hair",
+        "jaw",
+        "chin",
+        "full"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "facialhair-beard.svg"
+    },
+    {
+      "key": "facialhair-evilbeard",
+      "label": "villain beard",
+      "category": "faces",
+      "spoken": "a long pointed goatee tapering down from the chin, a villain's beard",
+      "keywords": [
+        "beard",
+        "goatee",
+        "villain",
+        "pointed",
+        "facial hair"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.3,
+      "file": "facialhair-evilbeard.svg"
+    },
+    {
+      "key": "facialhair-gotee",
+      "label": "goatee",
+      "category": "faces",
+      "spoken": "a small tuft of hair on the chin, a neat goatee",
+      "keywords": [
+        "goatee",
+        "beard",
+        "chin",
+        "facial hair",
+        "small"
+      ],
+      "layer": "behind",
+      "defaultScale": 1.0,
+      "file": "facialhair-gotee.svg"
+    },
+    {
+      "key": "facialhair-mustache",
+      "label": "mustache",
+      "category": "faces",
+      "spoken": "a thin mustache with two tapered points above the lip",
+      "keywords": [
+        "mustache",
+        "facial hair",
+        "lip",
+        "thin",
+        "tapered"
+      ],
+      "layer": "on",
+      "defaultScale": 0.8,
+      "file": "facialhair-mustache.svg"
+    },
+    {
+      "key": "facialhair-rollie",
+      "label": "curled mustache",
+      "category": "faces",
+      "spoken": "a mustache with tightly curled ends on each side",
+      "keywords": [
+        "mustache",
+        "curled",
+        "facial hair",
+        "handlebar",
+        "fancy"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "facialhair-rollie.svg"
+    },
+    {
+      "key": "facialmarking-birthmark",
+      "label": "birthmark",
+      "category": "faces",
+      "spoken": "a single small dark dot placed on the cheek",
+      "keywords": [
+        "birthmark",
+        "mark",
+        "dot",
+        "small",
+        "mole"
+      ],
+      "layer": "on",
+      "defaultScale": 0.5,
+      "file": "facialmarking-birthmark.svg"
+    },
+    {
+      "key": "facialmarking-freckles",
+      "label": "scattered freckles",
+      "category": "faces",
+      "spoken": "a wide scatter of small dots spread across both cheeks",
+      "keywords": [
+        "freckles",
+        "dots",
+        "wide",
+        "scatter",
+        "spots"
+      ],
+      "layer": "on",
+      "defaultScale": 1.3,
+      "file": "facialmarking-freckles.svg"
+    },
+    {
+      "key": "facialmarking-nosering",
+      "label": "nose ring",
+      "category": "faces",
+      "spoken": "a small hoop ring worn through the nose",
+      "keywords": [
+        "nosering",
+        "piercing",
+        "hoop",
+        "ring",
+        "nose"
+      ],
+      "layer": "on",
+      "defaultScale": 0.6,
+      "file": "facialmarking-nosering.svg"
+    },
+    {
+      "key": "facialmarking-stars",
+      "label": "scattered stars",
+      "category": "faces",
+      "spoken": "three sparkling stars scattered at different spots on the face",
+      "keywords": [
+        "stars",
+        "sparkle",
+        "scatter",
+        "face",
+        "shine"
+      ],
+      "layer": "on",
+      "defaultScale": 1.1,
+      "file": "facialmarking-stars.svg"
+    },
+    {
+      "key": "facialmarking-whiskers",
+      "label": "sleek whisker lines",
+      "category": "faces",
+      "spoken": "three long straight lines crossing the face, sleek whisker marks",
+      "keywords": [
+        "whiskers",
+        "lines",
+        "sleek",
+        "straight",
+        "cat"
+      ],
+      "layer": "on",
+      "defaultScale": 1.2,
+      "file": "facialmarking-whiskers.svg"
+    },
+    {
+      "key": "mouth-fangs",
+      "label": "fanged grin",
+      "category": "faces",
+      "spoken": "an open grin with two pointed fangs on the top row",
+      "keywords": [
+        "mouth",
+        "fangs",
+        "vampire",
+        "teeth",
+        "sharp"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "mouth-fangs.svg"
+    },
+    {
+      "key": "mouth-lips",
+      "label": "full lips",
+      "category": "faces",
+      "spoken": "a full pair of lips with a defined upper and lower curve",
+      "keywords": [
+        "mouth",
+        "lips",
+        "full",
+        "defined",
+        "pucker"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-lips.svg"
+    },
+    {
+      "key": "mouth-meh",
+      "label": "meh mouth",
+      "category": "faces",
+      "spoken": "a short straight flat line, an unimpressed meh expression",
+      "keywords": [
+        "mouth",
+        "meh",
+        "flat",
+        "straight",
+        "unimpressed"
+      ],
+      "layer": "on",
+      "defaultScale": 0.7,
+      "file": "mouth-meh.svg"
+    },
+    {
+      "key": "mouth-opensmile",
+      "label": "open smile",
+      "category": "faces",
+      "spoken": "a wide open beaming smile with a rounded upper lip",
+      "keywords": [
+        "mouth",
+        "smile",
+        "open",
+        "beaming",
+        "happy"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "mouth-opensmile.svg"
+    },
+    {
+      "key": "mouth-smirk",
+      "label": "smirk",
+      "category": "faces",
+      "spoken": "a lopsided curve raised higher on one side, a sly smirk",
+      "keywords": [
+        "mouth",
+        "smirk",
+        "sly",
+        "lopsided",
+        "sneaky"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-smirk.svg"
+    },
+    {
+      "key": "mouth-squiggly",
+      "label": "wobbly squiggle",
+      "category": "faces",
+      "spoken": "a loose wandering squiggle for a mouth, a wobbly uncertain line",
+      "keywords": [
+        "mouth",
+        "squiggly",
+        "wobbly",
+        "uncertain",
+        "wavy"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-squiggly.svg"
+    },
+    {
+      "key": "mouth-teefs",
+      "label": "full grin",
+      "category": "faces",
+      "spoken": "a wide rectangular grin packed with a full row of even teeth",
+      "keywords": [
+        "mouth",
+        "teeth",
+        "grin",
+        "row",
+        "wide"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "mouth-teefs.svg"
+    },
+    {
+      "key": "mouth-tounge",
+      "label": "tongue out",
+      "category": "faces",
+      "spoken": "a mouth open to one side with the tongue sticking out",
+      "keywords": [
+        "mouth",
+        "tongue",
+        "silly",
+        "playful",
+        "sticking out"
+      ],
+      "layer": "on",
+      "defaultScale": 1.0,
+      "file": "mouth-tounge.svg"
+    },
+    {
+      "key": "mouth-unsure",
+      "label": "unsure mouth",
+      "category": "faces",
+      "spoken": "a long uneven wavy line, corners lifted unevenly in an unsure look",
+      "keywords": [
+        "mouth",
+        "unsure",
+        "wavy",
+        "uneven",
+        "hesitant"
+      ],
+      "layer": "on",
+      "defaultScale": 0.9,
+      "file": "mouth-unsure.svg"
+    },
+    {
+      "key": "nose-cat",
+      "label": "cat nose",
+      "category": "faces",
+      "spoken": "a small rounded triangle with soft curved edges, a cat's nose",
+      "keywords": [
+        "nose",
+        "cat",
+        "triangle",
+        "small",
+        "feline"
+      ],
+      "layer": "on",
+      "defaultScale": 0.5,
+      "file": "nose-cat.svg"
+    },
+    {
+      "key": "nose-human",
+      "label": "realistic nose",
+      "category": "faces",
+      "spoken": "two curved lines suggesting soft nostrils, a subtle realistic nose",
+      "keywords": [
+        "nose",
+        "human",
+        "subtle",
+        "realistic",
+        "line"
+      ],
+      "layer": "on",
+      "defaultScale": 0.6,
+      "file": "nose-human.svg"
+    },
+    {
+      "key": "nose-l",
+      "label": "profile nose",
+      "category": "faces",
+      "spoken": "a single bent line like a nose seen from the side",
+      "keywords": [
+        "nose",
+        "side",
+        "profile",
+        "line",
+        "simple"
+      ],
+      "layer": "on",
+      "defaultScale": 0.6,
+      "file": "nose-l.svg"
+    },
+    {
+      "key": "nose-triangle",
+      "label": "long triangle nose",
+      "category": "faces",
+      "spoken": "a tall narrow triangle pointing down, a long pointed nose",
+      "keywords": [
+        "nose",
+        "triangle",
+        "long",
+        "pointed",
+        "narrow"
+      ],
+      "layer": "on",
+      "defaultScale": 0.7,
+      "file": "nose-triangle.svg"
+    },
+    {
+      "key": "facialmarking-heart",
+      "label": "heart mark",
+      "category": "faces",
+      "spoken": "a small solid heart placed on the cheek as a face marking",
+      "keywords": [
+        "heart",
+        "mark",
+        "cheek",
+        "love",
+        "cute"
+      ],
+      "layer": "on",
+      "defaultScale": 0.5,
+      "file": "facialmarking-heart.svg"
     }
   ]
 }

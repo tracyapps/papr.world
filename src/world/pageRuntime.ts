@@ -296,12 +296,13 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
       // A resource with real art gets that art scattered instead of the
       // generic primitive pile below — same "playable before the art lands"
       // rule as tools and decor. Which kind of art depends on how the thing
-      // actually sits in the world: twigBundle/stoneCluster resources lie
-      // flat on the ground, so their art lies flat too (createGroundCutout,
-      // viewed from above); fiberTuft resources stand up like a blade of
-      // grass, so theirs stands up too (createCutout, viewed from the side),
-      // same shape family used for a tiny seedling. See resourcePresentation.ts
-      // and docs/resource-artwork-guide.md.
+      // actually sits in the world: twigBundle/stoneCluster/seedPile/
+      // harvestedFood resources all lie flat on the ground, so their art
+      // lies flat too (createGroundCutout, viewed from above); fiberTuft
+      // resources stand up like a blade of grass, so theirs stands up too
+      // (createCutout, viewed from the side), same shape family used for a
+      // tiny seedling. See resourcePresentation.ts and
+      // docs/resource-artwork-guide.md.
       const art = getResourceArt(prop.resource);
 
       if (prop.visual === 'twigBundle') {
@@ -326,6 +327,56 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
           twig.position.set((rng() - 0.5) * 0.38, 0.05 + twigIndex * 0.018, (rng() - 0.5) * 0.3);
           twig.castShadow = true;
           node.add(twig);
+        }
+      } else if (prop.visual === 'seedPile') {
+        // Small and round rather than jagged — the same scatter idea as
+        // stoneCluster below, just smaller pieces in a tighter cluster, so
+        // a pile of seeds doesn't read as a pile of tiny stones.
+        for (let seedIndex = 0; seedIndex < 8; seedIndex += 1) {
+          if (art) {
+            const width = 0.1 + rng() * 0.06;
+            node.add(
+              createGroundCutout({
+                aspectRatio: art.aspectRatio,
+                position: [(rng() - 0.5) * 0.26, 0.005 + seedIndex * 0.001, (rng() - 0.5) * 0.24],
+                rotationY: rng() * Math.PI * 2,
+                textureUrl: art.sourceUrl,
+                width,
+              }),
+            );
+            continue;
+          }
+          const seed = new THREE.Mesh(new THREE.SphereGeometry(0.035 + rng() * 0.025, 8, 6), material);
+          seed.scale.set(1, 0.7 + rng() * 0.3, 1 + rng() * 0.3);
+          seed.position.set((rng() - 0.5) * 0.24, 0.03 + rng() * 0.02, (rng() - 0.5) * 0.22);
+          seed.rotation.set(rng(), rng(), rng());
+          seed.castShadow = true;
+          node.add(seed);
+        }
+      } else if (prop.visual === 'harvestedFood') {
+        // Tumbled, rounded produce — what fruit or a root looks like once
+        // it's off the plant and sitting in the grass, not a stone (too
+        // angular) and not a blade (stands up, this lies where it fell).
+        for (let foodIndex = 0; foodIndex < 5; foodIndex += 1) {
+          if (art) {
+            const width = 0.16 + rng() * 0.1;
+            node.add(
+              createGroundCutout({
+                aspectRatio: art.aspectRatio,
+                position: [(rng() - 0.5) * 0.36, 0.006 + foodIndex * 0.0015, (rng() - 0.5) * 0.32],
+                rotationY: rng() * Math.PI * 2,
+                textureUrl: art.sourceUrl,
+                width,
+              }),
+            );
+            continue;
+          }
+          const piece = new THREE.Mesh(new THREE.IcosahedronGeometry(0.065 + rng() * 0.045, 0), material);
+          piece.scale.set(0.85 + rng() * 0.3, 0.75 + rng() * 0.25, 0.85 + rng() * 0.3);
+          piece.position.set((rng() - 0.5) * 0.34, 0.06 + rng() * 0.03, (rng() - 0.5) * 0.3);
+          piece.rotation.set(rng() * Math.PI, rng() * Math.PI, rng() * Math.PI);
+          piece.castShadow = true;
+          node.add(piece);
         }
       } else if (prop.visual === 'stoneCluster') {
         for (let stoneIndex = 0; stoneIndex < 5; stoneIndex += 1) {

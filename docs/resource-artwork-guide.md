@@ -16,8 +16,9 @@ But its *appearance* today comes from only two knobs, both in
 `src/world/resources.ts`'s `RESOURCE_WORLD_DEFS`:
 
 - `visual`: one of exactly three shapes (`HarvestVisual` in
-  `world/types.ts`) — `twigBundle`, `stoneCluster`, `fiberTuft`. That's the
-  entire shape vocabulary for every loose pile in the game.
+  `world/types.ts`) — `twigBundle`, `stoneCluster`, `fiberTuft`, plus two
+  added 2026-09-02: `seedPile` and `harvestedFood`. That's the entire shape
+  vocabulary for every loose pile in the game.
 - `material`: a flat paper texture from the shared `MaterialKey` registry
   (`render/materials.ts`) — the same registry terrain, buildings, and
   critter coats draw from.
@@ -48,14 +49,25 @@ several rows sharing a `Visual` are the exact confusion being reported.
 | Ochre paperclay | Soil | (dug only) | stoneCluster | paper.brown.warm | swatch |
 | Carbon soil | Soil | (dug only) | stoneCluster | paper.grey | swatch |
 | Carbon-copy shale | Stones | (dug only) | stoneCluster | paper.grey | swatch |
-| Buttonbloom seeds | Seeds | (grown only) | fiberTuft | paper.rainbow | swatch |
-| Mend-me seeds | Seeds | (grown only) | fiberTuft | paper.green | swatch |
-| Raspberry bush seeds | Seeds | clearing, meadow | fiberTuft | paper.green | swatch |
-| Crinkle-carrot seeds | Seeds | clearing, meadow | fiberTuft | paper.green | swatch |
-| Ribbon-corn seeds | Seeds | meadow, scrapflats | fiberTuft | paper.green | swatch |
-| Folded-cabbage seeds | Seeds | clearing, forest | fiberTuft | paper.green | swatch |
-| Paper-tomato seeds | Seeds | meadow, dunes | fiberTuft | paper.green | swatch |
-| Raspberries … paper-tomato (5 harvests) | Food | (grown only) | fiberTuft | paper.green | swatch |
+| Buttonbloom seeds | Seeds | (grown only) | seedPile | paper.rainbow | swatch |
+| Mend-me seeds | Seeds | (grown only) | seedPile | paper.green | swatch |
+| Raspberry bush seeds | Seeds | clearing, meadow | seedPile | paper.green | swatch |
+| Crinkle-carrot seeds | Seeds | clearing, meadow | seedPile | paper.green | swatch |
+| Ribbon-corn seeds | Seeds | meadow, scrapflats | seedPile | paper.green | swatch |
+| Folded-cabbage seeds | Seeds | clearing, forest | seedPile | paper.green | swatch |
+| Paper-tomato seeds | Seeds | meadow, dunes | seedPile | paper.green | swatch |
+| Raspberries … paper-tomato (5 harvests) | Food | (grown only) | harvestedFood | paper.green | swatch |
+| **Bound lumber** *(new, 2026-09-02)* | **Refined** | (crafted only, never scattered) | twigBundle | paper.brown.warm | swatch |
+
+Bound lumber is the first entry in a new **Refined** category: a resource
+you can never find lying in the world, only make at the Thing Maker from
+other resources (see `recipes.ts`'s `'resource'`-kind `RecipeOutput`, added
+2026-09-02, and the `bound-lumber` recipe — kraft-twigs + redwood-bark-curls
+in, bound lumber out). Once made, it behaves exactly like anything foraged:
+it stacks in the scrapbook's new "Refined Materials" tab and can itself be
+an ingredient in later recipes. Its `visual`/`material` are set the same as
+every other resource for type-completeness (and in case it's ever dropped
+or displayed), even though nothing currently puts it on the ground.
 
 Read down the "Ground texture" column for the seven seed/food rows: six of
 them are the literal same `paper.green` texture. They are seven different
@@ -123,22 +135,39 @@ for a copy of your one drawing at a random position/rotation/scale. So:
 
 - **You always draw a single item** — one twig, one pebble, one blade —
   never a composed pile scene. The game builds the pile out of copies.
-- **Sticks and stones (`twigBundle`/`stoneCluster`) lie flat on the
-  ground**, so they're drawn as seen from directly above (like a simple
-  top-down icon) and laid flat by `createGroundCutout()` — a new primitive
-  in `render/builders.ts` alongside the standing `createCutout()` trees and
-  cactus already use. Nothing else differs between "sticks" and "rocks" —
-  same file format, same top-down framing, same registration step. Draw
-  whatever silhouette actually reads as a twig vs. a pebble; the pipeline
-  doesn't care.
-- **Fiber, seeds, and food (`fiberTuft`) stand up**, like a tiny blade of
-  grass or a little seedling, so they're drawn from the side and stood up
-  with the same `createCutout()` trees use, just small.
+- **Sticks, stones, seeds, and food (`twigBundle`/`stoneCluster`/
+  `seedPile`/`harvestedFood`) all lie flat on the ground**, so they're drawn
+  as seen from directly above (like a simple top-down icon) and laid flat
+  by `createGroundCutout()` — a new primitive in `render/builders.ts`
+  alongside the standing `createCutout()` trees and cactus already use.
+  Nothing else differs between any of these four — same file format, same
+  top-down framing, same registration step. Draw whatever silhouette
+  actually reads as a twig vs. a pebble vs. a seed vs. a berry; the
+  pipeline doesn't care. `seedPile` scatters smaller/tighter than
+  `stoneCluster` (a seed pile shouldn't read as a rock pile), and
+  `harvestedFood` scatters a looser, rounder cluster (tumbled produce, not
+  a stone). Food resources don't actually spawn on the ground yet as of
+  2026-09-02 — see the note below — but their art will be ready the moment
+  that changes.
+- **Fiber (`fiberTuft`) stands up**, like a tiny blade of grass, so it's
+  drawn from the side and stood up with the same `createCutout()` trees
+  use, just small. This is now the one category that's genuinely different
+  from the rest — everything else lies flat.
 
 Which one a resource gets is decided by its existing `visual` field in
 `world/resources.ts` (`RESOURCE_WORLD_DEFS`) — that's already set for every
 resource today, so there's nothing new to configure. You only ever touch
 `resourcePresentation.ts`.
+
+**On food resources and the ground:** today a harvest never lies loose in
+the world — it only ever comes directly off a plant you grew
+(`plantRuntime.ts`), so `harvestedFood`'s ground rendering has no resource
+that actually reaches it yet. The owner has floated a real feature this
+would unlock: an unharvested wild plant "dropping" its ripe produce onto
+the ground after a few days if left unpicked, with an existing-drop check
+so a patch doesn't accumulate unbounded raspberries. Not built — noted here
+because `harvestedFood` is the rendering half of that idea already sitting
+ready, in case whoever picks it up next goes looking for it.
 
 **Not wired to this (a deliberate open question, not an oversight):** the
 build-material picker (`BUILD_MATERIAL_OPTIONS`/`BUILD_MATERIAL_LABELS` in
@@ -219,10 +248,16 @@ pile" cell to fill in for them in the chart, and that's correct, not a gap.
 ## Priority, if picking somewhere to start
 
 Not prescriptive — art direction is yours — but the chart above suggests an
-order: the seven `fiberTuft` seed/food rows sharing one texture are the
-single biggest "everything looks the same" cluster, so they'd buy the most
+order: the seven `seedPile`/`harvestedFood` seed and food rows sharing one
+`paper.green` texture are still the single biggest "everything looks the
+same" cluster (the shape split from 2026-09-02 fixed *how* they're scattered,
+not that they're still all the same green swatch), so they'd buy the most
 clarity per drawing. Terracotta pebbles already has its first pass (a
-placeholder worth replacing whenever you get to it) and proves the
-`stoneCluster` half of the pipeline works end to end; a `fiberTuft` resource
-— say `raspberry-bush-seeds` or `mend-me-seeds` — would be a good next test,
-since it exercises the standing-cutout half instead of the flat one.
+placeholder worth replacing whenever you get to it) and proves the flat
+ground-decal half of the pipeline works end to end; `mossy-paper-fiber` is
+now the *only* `fiberTuft` resource left, and would be a good next test
+since it's the one category that exercises the standing-cutout half instead
+of the flat one. Bound lumber is lowest priority of
+all — it never appears on the ground today, so its swatch is invisible to
+players; draw it only once something (crafting output display, a future
+drop/storage feature) actually shows it.

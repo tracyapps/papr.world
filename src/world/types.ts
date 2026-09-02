@@ -73,7 +73,15 @@ export type DecorKind =
   | 'cactus-7'
   | 'cactus-8';
 
-export type HarvestVisual = 'fiberTuft' | 'stoneCluster' | 'twigBundle';
+export type HarvestVisual =
+  | 'fiberTuft'
+  | 'stoneCluster'
+  | 'twigBundle'
+  // Small and round rather than jagged — a scatter of seeds, not pebbles.
+  | 'seedPile'
+  // Tumbled, rounded produce — what a berry or a root drops as, not a
+  // stone and not a blade of grass.
+  | 'harvestedFood';
 
 export type WaterBankStyle = 'marsh' | 'rock' | 'sand' | 'woodland';
 

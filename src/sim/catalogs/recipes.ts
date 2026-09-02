@@ -7,7 +7,13 @@ export type IngredientRequirement =
 
 export type RecipeOutput =
   | { kind: 'item'; itemId: string; label: string }
-  | { kind: 'tool'; toolId: ToolId; label: string };
+  | { kind: 'tool'; toolId: ToolId; label: string }
+  // A recipe that hands back raw material rather than a tool or a one-off
+  // item — grants into `player.inventory`, stacks like anything gathered
+  // in the world. This is how multi-step "refined" materials work: gather
+  // → craft → the result sits in the scrapbook as its own resource, usable
+  // as an ingredient in later recipes just like anything foraged.
+  | { kind: 'resource'; resource: ResourceId; quantity: number; label: string };
 
 /**
  * Whether a recipe is playable yet.
@@ -183,6 +189,25 @@ export const RECIPE_DEFS = {
       { kind: 'family', family: 'fiber', quantity: 4 },
     ],
     output: { kind: 'tool', toolId: 'standard-hammer', label: 'Standard Hammer' },
+  },
+  // --- Refined materials ----------------------------------------------------
+  // Output is a resource, not a tool or item — see the `resource` variant of
+  // `RecipeOutput` above. First entry in what should grow into its own
+  // multi-step-materials tier (twigs + bark curls -> lumber; more later).
+  'bound-lumber': {
+    id: 'bound-lumber',
+    name: 'Bound Lumber',
+    planName: 'Plan: twigs and bark, bound and squared',
+    planSource: 'starter',
+    description: 'Twigs and bark curls, bundled and pressed flat into a sturdier building material.',
+    status: 'ready',
+    durationSeconds: 8,
+    minimumMakerLevel: 1,
+    ingredients: [
+      { kind: 'exact', resource: 'kraft-twigs', quantity: 4 },
+      { kind: 'exact', resource: 'redwood-bark-curls', quantity: 2 },
+    ],
+    output: { kind: 'resource', resource: 'bound-lumber', quantity: 2, label: 'Bound Lumber' },
   },
   // --- Not playable yet ----------------------------------------------------
   // Kept for their costs and artwork; hidden everywhere by `status`.

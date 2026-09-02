@@ -375,6 +375,15 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: true, message: `Picked up the ${recipe.output.label}. It is in your hands.` };
       }
 
+      if (recipe.output.kind === 'resource') {
+        // Refined materials stack in the same bag as anything foraged, not
+        // the separate `items` bag — so they show up in the scrapbook's
+        // materials tabs and count toward later recipes' ingredients.
+        state.player.inventory[recipe.output.resource] =
+          (state.player.inventory[recipe.output.resource] ?? 0) + recipe.output.quantity;
+        return { ok: true, message: `Picked up ${recipe.output.quantity}x ${recipe.output.label}.` };
+      }
+
       state.player.items[recipe.output.itemId] = (state.player.items[recipe.output.itemId] ?? 0) + 1;
       return { ok: true, message: `Picked up the ${recipe.output.label}.` };
     }

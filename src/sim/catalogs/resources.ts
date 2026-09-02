@@ -15,10 +15,13 @@ export const RESOURCE_CATEGORIES = {
   soil: { id: 'soil', label: 'Paper Soil & Clay', singularLabel: 'scoop', description: 'Regional paper earth lifted from shallow beds and folded hills.', iconKey: 'resource-category.soil', color: '#8c6748' },
   seeds: { id: 'seeds', label: 'Seeds & Starts', singularLabel: 'seed', description: 'Tiny folded beginnings for gardens and careful ground-mending.', iconKey: 'resource-category.seeds', color: '#778f4d' },
   food: { id: 'food', label: 'Harvests & Food', singularLabel: 'harvest', description: 'Paper fruits and vegetables picked from plants you grew.', iconKey: 'resource-category.food', color: '#c45d4a' },
+  // Crafted, never found loose — see recipes.ts's 'resource'-kind
+  // RecipeOutput. First entry: bound-lumber (2026-09-02).
+  refined: { id: 'refined', label: 'Refined Materials', singularLabel: 'piece', description: 'Multi-step supplies worked up from raw finds at the Thing Maker.', iconKey: 'resource-category.refined', color: '#7a5c3e' },
 } as const satisfies Record<string, ResourceCategoryDefinition>;
 
 export type ResourceCategoryId = keyof typeof RESOURCE_CATEGORIES;
-export const RESOURCE_CATEGORY_ORDER: ResourceCategoryId[] = ['sticks', 'stones', 'fiber', 'cardboard', 'soil', 'seeds', 'food'];
+export const RESOURCE_CATEGORY_ORDER: ResourceCategoryId[] = ['sticks', 'stones', 'fiber', 'cardboard', 'soil', 'seeds', 'food', 'refined'];
 
 export type ResourceCoreDefinition = {
   id: string;
@@ -57,6 +60,9 @@ export const RESOURCE_CORE_DEFS = {
   'ribbon-corn': { id: 'ribbon-corn', label: 'Ribbon corn', shortLabel: 'Ribbon corn', category: 'food', iconKey: 'resource.ribbon-corn' },
   'folded-cabbage': { id: 'folded-cabbage', label: 'Folded cabbage', shortLabel: 'Folded cabbage', category: 'food', iconKey: 'resource.folded-cabbage' },
   'paper-tomato': { id: 'paper-tomato', label: 'Paper tomatoes', shortLabel: 'Paper tomatoes', category: 'food', iconKey: 'resource.paper-tomato' },
+  // Crafted at the Thing Maker, never found loose in the world — see
+  // recipes.ts's 'resource'-kind RecipeOutput. First refined material.
+  'bound-lumber': { id: 'bound-lumber', label: 'Bound lumber', shortLabel: 'Bound lumber', category: 'refined', iconKey: 'resource.bound-lumber' },
 } as const satisfies Record<string, ResourceCoreDefinition>;
 
 export type ResourceId = keyof typeof RESOURCE_CORE_DEFS;

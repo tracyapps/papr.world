@@ -65,43 +65,56 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'l
   'carbon-copy-shale': {
     material: 'paper.grey', visual: 'stoneCluster', mapColor: '#53616a',
   },
+  // Small and round, not a standing blade of grass — a seed is closer in
+  // shape to a tiny stone than to fiber. See seedPile in world/types.ts.
   'buttonbloom-seeds': {
-    material: 'paper.rainbow', visual: 'fiberTuft', mapColor: '#d27891',
+    material: 'paper.rainbow', visual: 'seedPile', mapColor: '#d27891',
   },
   'mend-me-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#759457',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#759457',
   },
   'raspberry-bush-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#c75a6a',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#c75a6a',
   },
   'crinkle-carrot-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d98a52',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#d98a52',
   },
   'ribbon-corn-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d3b454',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#d3b454',
   },
   'folded-cabbage-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#8aa86f',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#8aa86f',
   },
   'paper-tomato-seeds': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d2654f',
+    material: 'paper.green', visual: 'seedPile', mapColor: '#d2654f',
   },
-  // The harvests themselves never lie loose on the ground — they come off a
-  // plant you grew. These entries exist so the scrapbook has a swatch.
+  // The harvests themselves don't spawn as a loose ground pile today — they
+  // come off a plant you grew, not off the ground directly. `harvestedFood`
+  // is set here anyway (rather than the wrong-shaped fiberTuft) so these
+  // entries are correct the moment anything ever does drop them loose —
+  // e.g. an unharvested plant shedding its ripe produce after a few days,
+  // which is not built (see docs/resource-artwork-guide.md's note on this).
   'raspberries': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#c73e52',
+    material: 'paper.green', visual: 'harvestedFood', mapColor: '#c73e52',
   },
   'crinkle-carrots': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#e07b3a',
+    material: 'paper.green', visual: 'harvestedFood', mapColor: '#e07b3a',
   },
   'ribbon-corn': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#e3bd45',
+    material: 'paper.green', visual: 'harvestedFood', mapColor: '#e3bd45',
   },
   'folded-cabbage': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#7fa06a',
+    material: 'paper.green', visual: 'harvestedFood', mapColor: '#7fa06a',
   },
   'paper-tomato': {
-    material: 'paper.green', visual: 'fiberTuft', mapColor: '#d14a35',
+    material: 'paper.green', visual: 'harvestedFood', mapColor: '#d14a35',
+  },
+  // Never spawns loose in the world (crafted-only, see recipes.ts) — visual
+  // is set for type-completeness and in case it's ever dropped/stored. A
+  // bundle of finished lumber is closer in shape to twigBundle than any
+  // other flat-lying pile, just a tidier, more uniform one.
+  'bound-lumber': {
+    material: 'paper.brown.warm', visual: 'twigBundle', mapColor: '#6b4423',
   },
 };
 

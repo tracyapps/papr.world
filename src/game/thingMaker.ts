@@ -327,7 +327,9 @@ function renderRecipeRung(recipeId: RecipeId, makerLevel: number, activeCraft: R
   const blockers = craftBlockersFor(recipeId);
   const owned = recipe.output.kind === 'tool'
     ? state.player.tools[recipe.output.toolId] ?? 0
-    : state.player.items[recipe.output.itemId] ?? 0;
+    : recipe.output.kind === 'resource'
+      ? state.player.inventory[recipe.output.resource] ?? 0
+      : state.player.items[recipe.output.itemId] ?? 0;
   const tool = recipe.output.kind === 'tool' ? TOOL_DEFS[recipe.output.toolId] : null;
   const duration = getCraftDuration(recipe, makerLevel).toFixed(1);
   const working = activeCraft === recipeId;
@@ -426,6 +428,7 @@ export function setMakerPanelOpen(open: boolean) {
 function addOutputThingVisual(recipe: RecipeDefinition, stackIndex: number) {
   if (!thingMaker) return;
   const colors: Record<string, string> = {
+    'bound-lumber': '#6b4423',
     'crease-scout': '#446c9d',
     'flimsy-shovel': '#9a623b',
     'folding-hook': '#d78f38',
@@ -742,7 +745,9 @@ export function wireThingMakerDom() {
       const state = getGameState();
       const owned = output.kind === 'tool'
         ? state.player.tools[output.toolId] ?? 0
-        : state.player.items[output.itemId] ?? 0;
+        : output.kind === 'resource'
+          ? state.player.inventory[output.resource] ?? 0
+          : state.player.items[output.itemId] ?? 0;
       // A spare to give away is a fair thing to want; losing a full set of
       // materials to a misread row is not. Owning one turns the first press
       // into a question.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T05:05:05.575Z",
+  "generatedAt": "2026-09-02T04:37:19.059Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -1130,6 +1130,15 @@
       "size": "241x309"
     },
     {
+      "key": "resources.terracotta-pebbles",
+      "source": "assets/source/resources/terracotta-pebbles.svg",
+      "runtime": "assets/runtime/resources/terracotta-pebbles.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "240x190",
+      "size": "240x190"
+    },
+    {
       "key": "tools.basic-mallet",
       "source": "assets/source/tools/basic-mallet.svg",
       "runtime": "assets/runtime/tools/basic-mallet.png",
@@ -1157,18 +1166,18 @@
       "size": "493x169"
     },
     {
-      "key": "tools.garden-hoe",
-      "source": "assets/source/tools/garden-hoe.svg",
-      "runtime": "assets/runtime/tools/garden-hoe.png",
+      "key": "tools.garden-hoe-alt",
+      "source": "assets/source/tools/garden-hoe-alt.svg",
+      "runtime": "assets/runtime/tools/garden-hoe-alt.png",
       "type": "texture",
       "usage": "asset",
       "sourceSize": "599x169",
       "size": "599x169"
     },
     {
-      "key": "tools.garden-hoe-alt",
-      "source": "assets/source/tools/garden-hoe-alt.svg",
-      "runtime": "assets/runtime/tools/garden-hoe-alt.png",
+      "key": "tools.garden-hoe",
+      "source": "assets/source/tools/garden-hoe.svg",
+      "runtime": "assets/runtime/tools/garden-hoe.png",
       "type": "texture",
       "usage": "asset",
       "sourceSize": "599x169",
