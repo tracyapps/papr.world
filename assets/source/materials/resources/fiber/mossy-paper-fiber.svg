@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="886" height="792" viewBox="0 0 886 792">
+<style>
+:root {
+  --background: #1C5940;
+  --foreground-01: #86E036;
+}
+</style>
+<defs>
+  <pattern id="pat62c77360e7c9429aa109d0472dd78c79" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="2.1"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="2.1" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="2.1" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="2.1" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="2.1" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="2.1" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+  <pattern id="pat1e2ebfa73e884d5db0d2681da3b05fb8" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="4.2"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+  <pattern id="patda9a19027ca747ba967bce0d35c24fec" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="6.3"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="6.3" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="6.3" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="6.3" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="6.3" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="6.3" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+  <pattern id="patd3991a0e192c4c4fab167bf3ae448f50" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="8.4"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="8.4" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="8.4" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="8.4" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="8.4" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="8.4" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+  <pattern id="pate62e302afd644d2b9796c18ddd23b1db" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="10.5"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+  <pattern id="pat05e503ef96a8475cb798ebf88da46245" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1.17 0.14 -0.14 1.17 -63.35 -272.21)">
+<g class="layer-group">
+<g class="layer-b">
+<g class="layer-rectangle">
+<rect x="-9" y="-9" width="99" height="99" fill="var(--background)" stroke="var(--foreground-01)" stroke-width="12.6"/>
+</g>
+<g class="layer-path">
+<path d="M -49 -9 C -49 -9 59 99 59 99" fill="none" stroke="var(--foreground-01)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -29 -9 C -29 -9 79 99 79 99" fill="none" stroke="var(--foreground-01)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -9 -9 C -9 -9 99 99 99 99" fill="none" stroke="var(--foreground-01)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 11 -9 C 11 -9 119 99 119 99" fill="none" stroke="var(--foreground-01)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 31 -9 C 31 -9 139 99 139 99" fill="none" stroke="var(--foreground-01)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+</defs>
+<g class="layer-jagged-alternations">
+<g class="layer-rectangle">
+<rect x="-85.9" y="-6.54" width="1106" height="832" fill="var(--background)"/>
+</g>
+<g class="layer-group" transform="rotate(2.59 444.18 621.41)">
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 675.29 -795.04 C 675.29 -795.04 704.33 -450.56 704.33 -450.56 C 703.85 -172.95 696.6 -258.67 735.67 -46.6 C 756.01 68.58 736.64 147.66 739.39 233.3 C 779.77 563.49 736.48 548.71 766.5 700.06 C 804.01 859.25 790.24 890.32 787.75 996.87 C 779.95 1137.03 859.61 1251.09 834.92 1379.62 C 821.54 1430.81 808.07 1473.69 808.31 1533.22 C 805.27 1735.24 899.43 1920.2 876.5 2118.66 C 832.62 2331.14 880.9 2293.07 883.82 2443.94 C 859.52 2676.2 901.28 2589.94 912.51 2720.14 C 904.24 2922.5 914.04 2862.78 930.76 2997.01 C 931.45 3154.14 925.92 3253.88 925.92 3253.88 C 925.92 3253.88 675.79 3270.09 675.79 3270.09 C 675.79 3270.09 680.36 3134.08 679.79 3083.32 C 700.5 2654.71 616.81 2740.98 642.06 2572.58 C 644.6 2536.52 628.1 2412.78 624.09 2376.69 C 540.32 1863.16 649.13 1989.39 612.3 1813.09 C 477.06 1307.62 624.94 1214.23 543.4 910.27 C 502.75 700.93 600.27 737.68 530.57 524.92 C 487.66 370.01 483.88 177.61 501.45 116.52 C 509.43 90.62 517.01 72.19 520.37 42.21 C 537.6 -184.35 470.52 -251.05 467.36 -315.21 C 464.21 -379.37 498.68 -386.8 493.07 -476.2 C 487.46 -565.6 446.02 -780.58 446.02 -780.58 C 446.02 -780.58 675.29 -795.04 675.29 -795.04 C 675.29 -795.04 675.29 -795.04 675.29 -795.04 Z" fill="url(#pat62c77360e7c9429aa109d0472dd78c79)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 851.04 3396.95 C 851.04 3396.95 836.78 3051.53 836.78 3051.53 C 801.59 2776.17 809.51 2860.61 821.77 2645.31 C 827.54 2528.48 794.04 2453.98 786.06 2368.67 C 784.84 2036 743.73 2056.11 754.6 1902.18 C 771.91 1739.54 754.36 1710.43 738.57 1605.04 C 713.31 1466.97 778.08 1343.8 737.51 1219.39 C 717.83 1170.28 699.11 1129.43 691.91 1070.34 C 663.63 870.29 733.92 674.97 686.36 480.95 C 616.26 275.65 655.11 292.72 652.97 157.88 C 650.83 23.03 665.81 66.08 660.67 -64.51 C 627.17 -264.23 630.56 -262.02 630.37 -397.29 C 611.4 -553.27 593.45 -651.53 593.45 -651.53 C 593.45 -651.53 343.27 -636.19 343.27 -636.19 C 343.27 -636.19 364.8 -501.82 370.59 -451.4 C 444.72 -28.76 350.91 -103.84 397.01 60.06 C 404.04 95.52 403.14 220.35 403.67 256.66 C 384.77 776.67 476.95 637.76 462.45 817.3 C 391.47 1335.78 549.86 1409.85 506.98 1721.66 C 492.82 1934.46 584.97 1885.74 542.43 2105.58 C 519.22 2264.66 539.53 2456.02 564.59 2514.42 C 575.75 2539.11 585.58 2556.44 592.66 2585.76 C 638.08 2808.38 579.86 2882.98 584.76 2947.03 C 589.65 3011.08 624.78 3014.12 630.4 3103.52 C 636.01 3192.91 621.77 3411.41 621.77 3411.41 C 621.77 3411.41 851.04 3396.95 851.04 3396.95 C 851.04 3396.95 851.04 3396.95 851.04 3396.95 Z" fill="url(#pat1e2ebfa73e884d5db0d2681da3b05fb8)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-path">
+<path d="M 477.62 -1175.99 C 477.62 -1175.99 506.66 -831.5 506.66 -831.5 C 506.18 -553.9 503.48 -638.66 542.56 -426.6 C 562.89 -311.42 557.78 -228.05 560.54 -142.41 C 600.92 187.79 538.81 167.76 568.83 319.11 C 606.34 478.3 592.57 509.38 590.08 615.92 C 582.28 756.08 661.95 870.14 637.25 998.67 C 623.87 1049.86 610.4 1092.74 610.64 1152.27 C 607.6 1354.3 701.76 1539.25 678.84 1737.71 C 634.96 1950.2 683.23 1912.12 686.15 2062.99 C 661.85 2295.25 703.61 2209 714.84 2339.2 C 706.58 2541.55 716.37 2481.83 733.09 2616.06 C 733.78 2773.19 728.25 2872.93 728.25 2872.93 C 728.25 2872.93 478.12 2889.14 478.12 2889.14 C 478.12 2889.14 482.69 2753.13 482.12 2702.38 C 502.83 2273.76 419.14 2360.03 444.39 2191.63 C 446.93 2155.57 430.43 2031.83 426.42 1995.75 C 342.65 1482.21 451.46 1608.45 414.63 1432.14 C 279.39 926.67 427.27 833.28 345.74 529.32 C 305.08 319.98 402.6 356.74 332.91 143.97 C 289.99 -10.94 286.21 -203.34 303.78 -264.43 C 311.76 -290.33 319.34 -308.75 322.7 -338.74 C 339.93 -565.3 272.85 -632 269.69 -696.16 C 266.54 -760.32 301.02 -767.75 295.4 -857.15 C 289.79 -946.55 248.35 -1161.53 248.35 -1161.53 C 248.35 -1161.53 477.62 -1175.99 477.62 -1175.99 C 477.62 -1175.99 477.62 -1175.99 477.62 -1175.99 Z" fill="url(#patda9a19027ca747ba967bce0d35c24fec)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 581.22 1881.6 C 581.22 1881.6 566.97 1536.18 566.97 1536.18 C 531.78 1260.82 539.7 1345.26 551.95 1129.95 C 557.72 1013.13 524.22 938.62 516.24 853.31 C 515.02 520.65 473.91 540.75 484.78 386.83 C 502.09 224.18 484.54 195.08 468.75 89.69 C 481.65 -50.35 508.26 -171.56 467.7 -295.97 C 448.02 -345.08 429.29 -385.93 422.09 -445.01 C 393.81 -645.07 464.1 -840.39 416.55 -1034.41 C 346.44 -1239.7 399.1 -1208 383.13 -1358.04 C 329.99 -1585.42 382.2 -1505.09 377.06 -1635.67 C 343.56 -1835.39 360.74 -1777.37 360.55 -1912.65 C 341.59 -2068.63 323.63 -2166.88 323.63 -2166.88 C 323.63 -2166.88 73.45 -2151.54 73.45 -2151.54 C 73.45 -2151.54 94.99 -2017.18 100.77 -1966.75 C 174.9 -1544.12 81.09 -1619.2 127.19 -1455.29 C 134.22 -1419.84 133.32 -1295 133.86 -1258.7 C 114.95 -738.69 207.13 -877.6 192.63 -698.05 C 121.66 -179.57 280.05 -105.5 237.16 206.3 C 223 419.1 315.16 370.38 272.61 590.23 C 249.4 749.3 269.71 940.66 294.78 999.06 C 305.94 1023.75 315.76 1041.09 322.84 1070.41 C 368.26 1293.02 310.05 1367.62 314.94 1431.67 C 319.84 1495.72 354.97 1498.76 360.58 1588.16 C 366.19 1677.56 351.95 1896.05 351.95 1896.05 C 351.95 1896.05 581.22 1881.6 581.22 1881.6 C 581.22 1881.6 581.22 1881.6 581.22 1881.6 Z" fill="url(#patd3991a0e192c4c4fab167bf3ae448f50)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-path">
+<path d="M 239.66 -2168.59 C 239.66 -2168.59 268.71 -1824.11 268.71 -1824.11 C 268.22 -1546.5 265.52 -1631.27 304.6 -1419.2 C 324.94 -1304.02 301.01 -1225.89 303.77 -1140.25 C 344.15 -810.06 300.85 -824.84 330.88 -673.5 C 368.39 -514.31 354.61 -483.23 352.13 -376.68 C 344.33 -236.52 407.35 -117.74 393.42 13.31 C 380.04 64.5 372.45 100.14 372.69 159.67 C 369.64 361.69 463.8 546.64 440.88 745.11 C 397 957.59 445.28 919.52 448.19 1070.39 C 423.9 1302.65 465.66 1216.39 476.88 1346.59 C 468.62 1548.95 478.41 1489.23 495.13 1623.46 C 495.83 1780.59 490.29 1880.33 490.29 1880.33 C 490.29 1880.33 240.17 1896.54 240.17 1896.54 C 240.17 1896.54 244.73 1760.53 244.17 1709.77 C 264.88 1281.16 181.19 1367.43 206.43 1199.03 C 208.98 1162.97 192.47 1039.23 188.46 1003.14 C 104.69 489.61 213.51 615.84 176.67 439.54 C 41.43 -65.94 189.32 -159.32 107.78 -463.28 C 67.12 -672.62 164.65 -635.87 94.95 -848.63 C 52.03 -1003.54 48.26 -1195.94 65.82 -1257.03 C 73.81 -1282.93 81.39 -1301.36 84.75 -1331.34 C 101.97 -1557.9 34.89 -1624.6 31.74 -1688.76 C 28.58 -1752.92 63.06 -1760.35 57.45 -1849.75 C 51.84 -1939.15 10.39 -2154.13 10.39 -2154.13 C 10.39 -2154.13 239.66 -2168.59 239.66 -2168.59 C 239.66 -2168.59 239.66 -2168.59 239.66 -2168.59 Z" fill="url(#pate62e302afd644d2b9796c18ddd23b1db)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 464.68 2808.37 C 464.68 2808.37 450.43 2462.95 450.43 2462.95 C 415.24 2187.59 423.16 2272.03 435.41 2056.73 C 441.18 1939.9 407.68 1865.4 399.7 1780.09 C 398.48 1447.42 357.37 1467.52 368.24 1313.6 C 385.55 1150.96 368 1121.85 352.21 1016.46 C 326.95 878.39 391.72 755.21 351.16 630.8 C 331.48 581.7 312.75 540.85 305.55 481.76 C 277.27 281.71 356.37 88.16 308.82 -105.86 C 238.71 -311.15 282.56 -281.23 266.59 -431.27 C 213.45 -658.65 265.66 -578.32 260.52 -708.9 C 227.02 -908.62 244.2 -850.6 244.01 -985.87 C 225.05 -1141.86 207.09 -1240.11 207.09 -1240.11 C 207.09 -1240.11 -43.09 -1224.77 -43.09 -1224.77 C -43.09 -1224.77 -21.55 -1090.4 -15.77 -1039.98 C 58.36 -617.34 -35.45 -692.42 10.65 -528.52 C 17.68 -493.06 63.23 -368.13 63.76 -331.82 C 44.86 188.19 90.59 49.18 76.09 228.72 C 5.12 747.2 163.51 821.27 120.62 1133.08 C 106.46 1345.87 198.62 1297.16 156.07 1517 C 132.86 1676.08 153.17 1867.44 178.24 1925.84 C 189.4 1950.53 199.22 1967.86 206.3 1997.18 C 251.72 2219.8 193.51 2294.39 198.4 2358.44 C 203.3 2422.5 238.43 2425.53 244.04 2514.93 C 249.65 2604.33 235.41 2822.83 235.41 2822.83 C 235.41 2822.83 464.68 2808.37 464.68 2808.37 C 464.68 2808.37 464.68 2808.37 464.68 2808.37 Z" fill="url(#pat05e503ef96a8475cb798ebf88da46245)" stroke="var(--background)" stroke-width="12.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

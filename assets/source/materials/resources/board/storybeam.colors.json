@@ -1,0 +1,38 @@
+{
+  "pink": {
+    "label": "Pink",
+    "vars": { "--foreground": "#ffffff", "--background": "#BF0958" }
+  },
+  "green": {
+    "label": "Green",
+    "vars": { "--foreground": "#ffffff", "--background": "#09BF18" }
+  },
+  "blue": {
+    "label": "Blue",
+    "vars": { "--foreground": "#4446E1", "--background": "#00FBFF" }
+  },
+  "purple": {
+    "label": "Purple",
+    "vars": { "--foreground": "#BA8FEE", "--background": "#620BE5" }
+  },
+  "orange": {
+    "label": "Orange",
+    "vars": { "--foreground": "#AF0000", "--background": "#E35D10" }
+  },
+  "darkblue": {
+    "label": "Darkblue",
+    "vars": { "--foreground": "#13F5D0", "--background": "#0128D5" }
+  },
+  "yellow": {
+    "label": "Yellow",
+    "vars": { "--foreground": "#09895C", "--background": "#FFF316" }
+  },
+  "greyish": {
+    "label": "Greyish",
+    "vars": { "--foreground": "#8CFF00", "--background": "#37565C" }
+  },
+  "black": {
+    "label": "Black",
+    "vars": { "--foreground": "#ffffff", "--background": "#1B0F14" }
+  }
+}

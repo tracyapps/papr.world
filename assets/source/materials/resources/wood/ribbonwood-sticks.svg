@@ -1,17 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="350" height="250" viewBox="0 0 350 250">
 <style>
 :root {
-  --green: #024E04;
-  --blue: #192443;
-  --gold: #B47C16;
-  --red: #3F0404;
+  --background: #001055;
+  --foreground-01: #00ACFF;
+  --foreground-02: #FF00D6;
 }
 </style>
 <defs>
   <linearGradient id="grad0" x1="0" y1="0.5" x2="1" y2="0.5">
-    <stop offset="0" stop-color="#00ACFF"/>
-    <stop offset="0.54" stop-color="#FF00D6"/>
-    <stop offset="1" stop-color="#00ACFF"/>
+    <stop offset="0" stop-color="var(--foreground-01)"/>
+    <stop offset="0.54" stop-color="var(--foreground-02)"/>
+    <stop offset="1" stop-color="var(--foreground-01)"/>
   </linearGradient>
   <clipPath id="maskclip1" clipPathUnits="userSpaceOnUse">
     <path d="M -2.44 8.9 L 352.88 8.9 L 352.88 208.77 L -2.44 208.77 L -2.44 8.9 Z"/>
@@ -19,7 +18,7 @@
 </defs>
 <g class="layer-easing-stripes">
 <g class="layer-rectangle">
-<rect x="-2.44" y="-15.2" width="355.33" height="266.18" fill="#001055"/>
+<rect x="-2.44" y="-15.2" width="355.33" height="266.18" fill="var(--background)"/>
 </g>
 </g>
 <g class="layer-mask">

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="42" height="23" viewBox="0 0 42 23">
+<style>
+:root {
+  --ribbon: #D25615;
+  --ribbon-outline: #F7F7F7;
+  --background: #5A4011;
+  --foreground-01: #000000;
+  --foreground-02: #FFFFFF;
+}
+</style>
+<defs>
+  <pattern id="pat56c2c4a0f55144ae963ed04fb17a4f79" width="100" height="80" patternUnits="userSpaceOnUse" patternTransform="matrix(0.2 0 0 0.2 40 32)">
+<g class="layer-group">
+<g class="layer-path">
+<path d="M -25 10 C 0 10 0 35 25 35 C 50 35 50 10 75 10 C 100 10 100 35 125 35 C 125 35 125 15 125 15 C 100 15 100 -10 75 -10 C 50 -10 50 15 25 15 C 0 15 0 -10 -25 -10 C -25 -10 -25 10 -25 10 C -25 10 -25 10 -25 10 Z" fill="var(--ribbon)" stroke="var(--ribbon-outline)" stroke-width="0.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -25 -30 C 0 -30 0 -5 25 -5 C 50 -5 50 -30 75 -30 C 100 -30 100 -5 125 -5 C 125 -5 125 -25 125 -25 C 100 -25 100 -50 75 -50 C 50 -50 50 -25 25 -25 C 0 -25 0 -50 -25 -50 C -25 -50 -25 -30 -25 -30 C -25 -30 -25 -30 -25 -30 Z" fill="var(--ribbon)" stroke="var(--ribbon-outline)" stroke-width="0.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -25 50 C 0 50 0 75 25 75 C 50 75 50 50 75 50 C 100 50 100 75 125 75 C 125 75 125 55 125 55 C 100 55 100 30 75 30 C 50 30 50 55 25 55 C 0 55 0 30 -25 30 C -25 30 -25 50 -25 50 C -25 50 -25 50 -25 50 Z" fill="var(--ribbon)" stroke="var(--ribbon-outline)" stroke-width="0.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M -25 90 C 0 90 0 115 25 115 C 50 115 50 90 75 90 C 100 90 100 115 125 115 C 125 115 125 95 125 95 C 100 95 100 70 75 70 C 50 70 50 95 25 95 C 0 95 0 70 -25 70 C -25 70 -25 90 -25 90 C -25 90 -25 90 -25 90 Z" fill="var(--ribbon)" stroke="var(--ribbon-outline)" stroke-width="0.6" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-path" opacity="0.27">
+<path d="M -9 -52 C -9 -52 96 -52 96 -52 C 96 -52 96 117 96 117 C 96 117 -9 117 -9 117 C -9 117 -9 -52 -9 -52 Z" fill="url(#grad1)" stroke-linejoin="miter"/>
+</g>
+  </pattern>
+  <linearGradient id="grad1" x1="0" y1="0" x2="0.96" y2="0">
+    <stop offset="0" stop-color="var(--foreground-01)" stop-opacity="0"/>
+    <stop offset="0.12" stop-color="var(--foreground-01)" stop-opacity="0.6"/>
+    <stop offset="0.25" stop-color="var(--foreground-01)" stop-opacity="0.7"/>
+    <stop offset="0.37" stop-color="var(--foreground-01)" stop-opacity="0.6"/>
+    <stop offset="0.49" stop-color="var(--ribbon)"/>
+    <stop offset="0.5" stop-color="var(--foreground-02)" stop-opacity="0"/>
+    <stop offset="0.62" stop-color="var(--foreground-02)" stop-opacity="0.6"/>
+    <stop offset="0.75" stop-color="var(--foreground-02)" stop-opacity="0.7"/>
+    <stop offset="0.87" stop-color="var(--foreground-02)" stop-opacity="0.6"/>
+    <stop offset="1" stop-color="var(--foreground-02)" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+<g class="layer-striped-fabric">
+<g class="layer-rectangle">
+<rect x="-15.69" y="-2.42" width="100" height="80" fill="var(--background)"/>
+</g>
+<g class="layer-rectangle">
+<rect x="-15.69" y="-2.42" width="100" height="80" fill="url(#pat56c2c4a0f55144ae963ed04fb17a4f79)"/>
+</g>
+</g>
+</svg>

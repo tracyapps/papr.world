@@ -1,0 +1,26 @@
+{
+  "brown": {
+    "label": "Brown",
+    "vars": { "--ribbon": "#D25615", "--ribbon-outline": "#F7F7F7", "--background": "#5A4011"}
+  },
+  "green": {
+    "label": "Green",
+    "vars": { "--ribbon": "#35D215", "--ribbon-outline": "#F7F7F7", "--background": "#115A1C"}
+  },
+  "purple": {
+    "label": "Purple",
+    "vars": { "--ribbon": "#994AFF", "--ribbon-outline": "#F7F7F7", "--background": "#3A115A"}
+  },
+  "blue": {
+    "label": "Blue",
+    "vars": { "--ribbon": "#4E98DD", "--ribbon-outline": "#F7F7F7", "--background": "#11405A"}
+  },
+  "teal": {
+    "label": "Teal",
+    "vars": { "--ribbon": "#22F5BC", "--ribbon-outline": "#154C3B", "--background": "#209B74"}
+  },
+  "pink": {
+    "label": "Pink",
+    "vars": { "--ribbon": "#FC6EE0", "--ribbon-outline": "#F7F7F7", "--background": "#C900AB"}
+  }
+}

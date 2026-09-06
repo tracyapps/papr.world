@@ -1,0 +1,26 @@
+{
+  "terracotta": {
+    "label": "Terracotta",
+    "vars": { "--ground": "#7A3B22", "--figure": "#F0C9A0" }
+  },
+  "kraft": {
+    "label": "Kraft",
+    "vars": { "--ground": "#391D54", "--figure": "#AFFF67" }
+  },
+  "moss": {
+    "label": "Moss",
+    "vars": { "--figure": "#BFD16A" }
+  },
+  "browns": {
+	"label": "Brown",
+	"vars": { "--ground": "#54411D", "--figure": "#C3AF84" }
+  },
+  "maroon": {
+	"label": "Maroon",
+	"vars": { "--ground": "#6F066D", "--figure": "#38D4FF" }
+  },
+  "mint": {
+	"label": "Mint",
+	"vars": { "--ground": "#00B156", "--figure": "#DDFF1C" }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "purple": {
+    "label": "Purple",
+    "vars": { "--background": "#4A1488", "--foreground-01": "#FFFFFF", "--foreground-02": "#0788FF" }
+  },
+  "blue": {
+    "label": "Blue",
+    "vars": { "--background": "#1564CC", "--foreground-01": "#FFFFFF", "--foreground-02": "#99FF14" }
+  },
+  "teal": {
+    "label": "Teal",
+    "vars": { "--background": "#148871", "--foreground-01": "#314B5E", "--foreground-02": "#321652" }
+  },
+  "pink": {
+    "label": "Pink",
+    "vars": { "--background": "#B71199", "--foreground-01": "#FFFFFF", "--foreground-02": "#8FFF07" }
+  },
+  "yellow": {
+    "label": "Yellow",
+    "vars": { "--background": "#D0E208", "--foreground-01": "#5934AF", "--foreground-02": "#4A065A" }
+  },
+  "red": {
+    "label": "Red",
+    "vars": { "--background": "#881414", "--foreground-01": "#FFFFFF", "--foreground-02": "#CCFA01" }
+  },
+  "green": {
+    "label": "Green",
+    "vars": { "--background": "#00CB07", "--foreground-01": "#FFFFFF", "--foreground-02": "#2C07FF" }
+  }
+}

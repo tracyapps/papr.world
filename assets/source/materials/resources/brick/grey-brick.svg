@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="407" height="324" viewBox="0 0 407 324">
 <style>
 :root {
-  --green: #024E04;
-  --blue: #192443;
-  --gold: #B47C16;
-  --red: #3F0404;
+  --background: #464646;
+  --foreground-01: #2D2929;
 }
 </style>
 <defs>
@@ -334,116 +332,116 @@
   </filter>
 </defs>
 <g class="layer-rectangle">
-<rect x="-2" y="-3" width="411" height="341" fill="#464646"/>
+<rect x="-2" y="-3" width="411" height="341" fill="var(--background)"/>
 </g>
 <g class="layer-group">
 <g class="layer-rectangle" filter="url(#fx0)">
-<rect x="254" y="165" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="254" y="165" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx1)">
-<rect x="55" y="164" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="55" y="164" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx2)">
-<rect x="358" y="1.5" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="358" y="1.5" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx3)">
-<rect x="-39" y="1.5" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="-39" y="1.5" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx4)">
-<rect x="259" y="83" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="259" y="83" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx5)">
-<rect x="3" y="123" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="3" y="123" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx6)">
-<rect x="357" y="245" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="357" y="245" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx7)">
-<rect x="-40" y="245" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="-40" y="245" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx8)">
-<rect x="307" y="205" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="307" y="205" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx9)">
-<rect x="210.5" y="286" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="210.5" y="286" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx10)">
-<rect x="6.5" y="286" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="6.5" y="286" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx11)">
-<rect x="6.5" y="41" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="6.5" y="41" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx12)">
-<rect x="105" y="124" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="105" y="124" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx13)">
-<rect x="211" y="42" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="211" y="42" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx14)">
-<rect x="161.5" y="1" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="161.5" y="1" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx15)">
-<rect x="311.5" y="286" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="311.5" y="286" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx16)">
-<rect x="60" y="246" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="60" y="246" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx17)">
-<rect x="261" y="1" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="261" y="1" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx18)">
-<rect x="312" y="41" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="312" y="41" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx19)">
-<rect x="258" y="245" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="258" y="245" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx20)">
-<rect x="208" y="124.5" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="208" y="124.5" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx21)">
-<rect x="105" y="205" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="105" y="205" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx22)">
-<rect x="108.5" y="42" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="108.5" y="42" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx23)">
-<rect x="351.5" y="165" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="351.5" y="165" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx24)">
-<rect x="-44" y="165" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="-44" y="165" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx25)">
-<rect x="159" y="246" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="159" y="246" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx26)">
-<rect x="158" y="82" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="158" y="82" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx27)">
-<rect x="308.5" y="124" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="308.5" y="124" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx28)">
-<rect x="156" y="165" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="156" y="165" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx29)">
-<rect x="358" y="82" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="358" y="82" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx30)">
-<rect x="-39" y="82" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="-39" y="82" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx31)">
-<rect x="3" y="205" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="3" y="205" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx32)">
-<rect x="61.5" y="1.5" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="61.5" y="1.5" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx33)">
-<rect x="58" y="82" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="58" y="82" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx34)">
-<rect x="205.5" y="205" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="205.5" y="205" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-rectangle" filter="url(#fx35)">
-<rect x="108" y="286" width="93" height="36" rx="1" fill="#2D2929"/>
+<rect x="108" y="286" width="93" height="36" rx="1" fill="var(--foreground-01)"/>
 </g>
 </g>
 </svg>

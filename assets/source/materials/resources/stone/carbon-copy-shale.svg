@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="268" viewBox="0 0 450 268">
+<style>
+:root {
+  --background: #FFFFFF;
+  --foreground-01: #000000;
+  --foreground-02: #FF0068;
+  --foreground-03: #FF9120;
+  --foreground-04: #FFFF00;
+  --foreground-05: #00F9BF;
+  --foreground-06: #00CCFF;
+  --foreground-07: #0086FC;
+  --foreground-08: #7700BB;
+  --foreground-09: #D30093;
+}
+</style>
+<defs>
+  <pattern id="patf7bd44dd0a0344b094a407a303ad083f" width="500" height="100" patternUnits="userSpaceOnUse" patternTransform="matrix(0.9 0 0 0.9 75 50)">
+<g class="layer-group">
+<g class="layer-c">
+<g class="layer-path">
+<path d="M 0.63 100 C 0.63 100 -0.63 100 -0.63 100 C -0.63 100 0 101 0 101 C 0 101 0.63 100 0.63 100 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-02)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 0.63 0 C 0.63 0 -0.63 0 -0.63 0 C -0.63 0 0 1 0 1 C 0 1 0.63 0 0.63 0 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-02)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-d">
+<g class="layer-path">
+<path d="M 61.88 31.5 C 61.88 31.5 63.13 31.5 63.13 31.5 C 63.13 31.5 62.5 30.5 62.5 30.5 C 62.5 30.5 61.88 31.5 61.88 31.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-03)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 61.88 131.5 C 61.88 131.5 63.13 131.5 63.13 131.5 C 63.13 131.5 62.5 130.5 62.5 130.5 C 62.5 130.5 61.88 131.5 61.88 131.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-03)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-c">
+<g class="layer-path">
+<path d="M 125.63 100 C 125.63 100 124.38 100 124.38 100 C 124.38 100 125 101 125 101 C 125 101 125.63 100 125.63 100 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-04)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 125.63 0 C 125.63 0 124.38 0 124.38 0 C 124.38 0 125 1 125 1 C 125 1 125.63 0 125.63 0 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-04)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-d">
+<g class="layer-path">
+<path d="M 186.88 31.5 C 186.88 31.5 188.13 31.5 188.13 31.5 C 188.13 31.5 187.5 30.5 187.5 30.5 C 187.5 30.5 186.88 31.5 186.88 31.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-05)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 186.88 131.5 C 186.88 131.5 188.13 131.5 188.13 131.5 C 188.13 131.5 187.5 130.5 187.5 130.5 C 187.5 130.5 186.88 131.5 186.88 131.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-05)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-c">
+<g class="layer-path">
+<path d="M 250.63 100 C 250.63 100 249.38 100 249.38 100 C 249.38 100 250 101 250 101 C 250 101 250.63 100 250.63 100 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-06)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 250.63 0 C 250.63 0 249.38 0 249.38 0 C 249.38 0 250 1 250 1 C 250 1 250.63 0 250.63 0 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-06)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-d">
+<g class="layer-path">
+<path d="M 311.88 31.5 C 311.88 31.5 313.13 31.5 313.13 31.5 C 313.13 31.5 312.5 30.5 312.5 30.5 C 312.5 30.5 311.88 31.5 311.88 31.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-07)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 311.88 131.5 C 311.88 131.5 313.13 131.5 313.13 131.5 C 313.13 131.5 312.5 130.5 312.5 130.5 C 312.5 130.5 311.88 131.5 311.88 131.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-07)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-c">
+<g class="layer-path">
+<path d="M 375.63 100 C 375.63 100 374.38 100 374.38 100 C 374.38 100 375 101 375 101 C 375 101 375.63 100 375.63 100 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-08)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 375.63 0 C 375.63 0 374.38 0 374.38 0 C 374.38 0 375 1 375 1 C 375 1 375.63 0 375.63 0 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-08)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-d">
+<g class="layer-path">
+<path d="M 436.88 31.5 C 436.88 31.5 438.13 31.5 438.13 31.5 C 438.13 31.5 437.5 30.5 437.5 30.5 C 437.5 30.5 436.88 31.5 436.88 31.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-09)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 436.88 131.5 C 436.88 131.5 438.13 131.5 438.13 131.5 C 438.13 131.5 437.5 130.5 437.5 130.5 C 437.5 130.5 436.88 131.5 436.88 131.5 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-09)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+<g class="layer-c">
+<g class="layer-path">
+<path d="M 500.63 100 C 500.63 100 499.38 100 499.38 100 C 499.38 100 500 101 500 101 C 500 101 500.63 100 500.63 100 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-02)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 500.63 0 C 500.63 0 499.38 0 499.38 0 C 499.38 0 500 1 500 1 C 500 1 500.63 0 500.63 0 Z" fill="var(--foreground-01)" fill-opacity="0" stroke="var(--foreground-02)" stroke-width="60" stroke-linecap="butt" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+</defs>
+<g class="layer-spectrum-triangles">
+<g class="layer-rectangle">
+<rect x="-41.29" y="-72.03" width="1500" height="1000" fill="var(--background)"/>
+</g>
+<g class="layer-rectangle">
+<rect x="-41.29" y="-72.03" width="1500" height="1000" fill="url(#patf7bd44dd0a0344b094a407a303ad083f)"/>
+</g>
+</g>
+</svg>

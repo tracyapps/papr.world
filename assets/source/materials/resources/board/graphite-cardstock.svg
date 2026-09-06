@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+<style>
+:root {
+  --background: #57351D;
+  --foreground-01: #593920;
+  --foreground-02: #785E17;
+  --foreground-03: #B22771;
+  --foreground-04: #FF00C2;
+  --foreground-05: #6D4429;
+  --foreground-06: #654D1F;
+  --foreground-07: #5A3D22;
+  --foreground-08: #837704;
+}
+</style>
+<defs>
+  <pattern id="patdd005da8a5ae40d088e7e81cb01e62af" width="1000" height="1000" patternUnits="userSpaceOnUse" patternTransform="matrix(0.5 0 0 0.5 500 500)">
+<g class="layer-b">
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 500 250 C 500 388.1 388.1 500 250 500 C 250 500 250 250 250 250 C 250 250 500 250 500 250 C 500 250 500 250 500 250 Z" fill="var(--foreground-01)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 250 500 C 111.9 500 0 388.1 0 250 C 0 250 250 250 250 250 C 250 250 250 500 250 500 C 250 500 250 500 250 500 Z" fill="var(--foreground-02)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 0 250 C 0 111.9 111.9 0 250 0 C 250 0 250 250 250 250 C 250 250 0 250 0 250 C 0 250 0 250 0 250 Z" fill="var(--foreground-03)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 250 0 C 388.1 0 500 111.9 500 250 C 500 250 250 250 250 250 C 250 250 250 0 250 0 C 250 0 250 0 250 0 Z" fill="var(--foreground-04)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 750 0 C 750 138.1 638.1 250 500 250 C 500 250 500 0 500 0 C 500 0 750 0 750 0 C 750 0 750 0 750 0 Z" fill="var(--foreground-05)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 1000 250 C 861.9 250 750 138.1 750 0 C 750 0 1000 0 1000 0 C 1000 0 1000 250 1000 250 C 1000 250 1000 250 1000 250 Z" fill="var(--foreground-06)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 750 500 C 750 361.9 861.9 250 1000 250 C 1000 250 1000 500 1000 500 C 1000 500 750 500 750 500 C 750 500 750 500 750 500 Z" fill="var(--foreground-07)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 500 250 C 638.1 250 750 361.9 750 500 C 750 500 500 500 500 500 C 500 500 500 250 500 250 C 500 250 500 250 500 250 Z" fill="var(--foreground-08)" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+<g class="layer-b">
+<g class="layer-group">
+<g class="layer-path">
+<path d="M 500 750 C 500 611.9 611.9 500 750 500 C 750 500 750 750 750 750 C 750 750 500 750 500 750 C 500 750 500 750 500 750 Z" fill="var(--foreground-01)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 750 500 C 888.1 500 1000 611.9 1000 750 C 1000 750 750 750 750 750 C 750 750 750 500 750 500 C 750 500 750 500 750 500 Z" fill="var(--foreground-02)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 1000 750 C 1000 888.1 888.1 1000 750 1000 C 750 1000 750 750 750 750 C 750 750 1000 750 1000 750 C 1000 750 1000 750 1000 750 Z" fill="var(--foreground-03)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 750 1000 C 611.9 1000 500 888.1 500 750 C 500 750 750 750 750 750 C 750 750 750 1000 750 1000 C 750 1000 750 1000 750 1000 Z" fill="var(--foreground-04)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 250 1000 C 250 861.9 361.9 750 500 750 C 500 750 500 1000 500 1000 C 500 1000 250 1000 250 1000 C 250 1000 250 1000 250 1000 Z" fill="var(--foreground-05)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 0 750 C 138.1 750 250 861.9 250 1000 C 250 1000 0 1000 0 1000 C 0 1000 0 750 0 750 C 0 750 0 750 0 750 Z" fill="var(--foreground-06)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 250 500 C 250 638.1 138.1 750 0 750 C 0 750 0 500 0 500 C 0 500 250 500 250 500 C 250 500 250 500 250 500 Z" fill="var(--foreground-07)" stroke-linejoin="miter"/>
+</g>
+<g class="layer-path">
+<path d="M 500 750 C 361.9 750 250 638.1 250 500 C 250 500 500 500 500 500 C 500 500 500 750 500 750 C 500 750 500 750 500 750 Z" fill="var(--foreground-08)" stroke-linejoin="miter"/>
+</g>
+</g>
+</g>
+  </pattern>
+</defs>
+<g class="layer-quarter-orbs">
+<g class="layer-rectangle">
+<rect x="-553" y="-438" width="2000" height="2000" fill="var(--background)"/>
+</g>
+<g class="layer-rectangle">
+<rect x="-553" y="-438" width="2000" height="2000" fill="url(#patdd005da8a5ae40d088e7e81cb01e62af)"/>
+</g>
+</g>
+</svg>

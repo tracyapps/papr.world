@@ -45,6 +45,27 @@ chosen values. This is not a grayscale-plus-tint approximation: every colour in
 the pattern stays independently controllable, and a multiply-tint's inability
 to lighten a dark ground never comes up.
 
+## Naming (settled 2026-09-06)
+
+`--background` for the canvas colour, `--foreground-01`, `-02`, `-03`… for
+everything drawn on it, numbered in order of first appearance. A sidecar can
+then target one colour by number without reading the artwork.
+
+All 27 remaining resource tiles were converted to this on 2026-09-06 and the
+default render of every one was verified pixel-identical before and after.
+Files that already used their own names — `bound-lumber`'s `--ribbon` /
+`--ribbon-outline`, `crossbound-timber`'s HSV set, `kraft-twigs`'
+`--ground` / `--figure` — kept them, because their sidecars already name them.
+Use the convention above for anything new.
+
+**When a drawing has a lot of colours**, the honest conversion produces a lot
+of variables — a traced stone like `iron-rock` ends up with 41. Every one stays
+independently controllable, which is the point, but it is a poor thing to hand
+a sidecar. `crossbound-timber` shows the alternative worth reaching for when
+the colours are all tints of one hue: factor them into a hue, a saturation, and
+a list of brightness values, and the whole drawing recolours from three
+numbers.
+
 ## The one authoring rule
 
 **Declare every tweakable value on `:root` and read it back with `var()`.**

@@ -86,6 +86,19 @@ function drawnFiles() {
 
 const catalog = readCatalog();
 const drawn = drawnFiles();
+
+/**
+ * Two files claiming one resource id is a hard compile failure — the compiler
+ * refuses, because a resource may have only one default tile and it cannot
+ * guess which. Worth catching here, before a compile burns a browser launch on
+ * it, and worth reporting as its own thing: to a checklist that only keeps the
+ * last file it saw, a duplicate looks like a misfiled drawing.
+ */
+const duplicates = [...drawn.reduce((byId, entry) => {
+  byId.set(entry.id, [...(byId.get(entry.id) ?? []), entry]);
+  return byId;
+}, new Map())].filter(([, entries]) => entries.length > 1);
+
 const drawnById = new Map(drawn.map((entry) => [entry.id, entry]));
 const catalogIds = new Set(catalog.map((entry) => entry.id));
 
@@ -139,6 +152,15 @@ const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`;
 line();
 line(`Resource artwork — ${plural(catalog.length, 'material', 'materials')} in the catalog`);
 line('='.repeat(64));
+
+if (duplicates.length) {
+  line();
+  line(`WILL FAIL TO COMPILE — ${plural(duplicates.length, 'resource id is', 'resource ids are')} claimed by more than one drawing`);
+  for (const [id, entries] of duplicates) {
+    line(`  ✗ ${id}`);
+    for (const entry of entries) line(`      ${entry.path}`);
+  }
+}
 
 line();
 line(`DONE — ${plural(done.length, 'material has', 'materials have')} art the compiler will pick up`);
@@ -198,5 +220,5 @@ if (strays.length) {
 }
 
 line();
-line(`Summary: ${done.length} done · ${misfiled.length} misfiled · ${missing.length} to draw · ${noTemplate.length} awaiting a silhouette · ${unclaimed.length} not yet a material`);
+line(`Summary: ${done.length} done · ${duplicates.length} duplicate ${duplicates.length === 1 ? 'id' : 'ids'} · ${misfiled.length} misfiled · ${missing.length} to draw · ${noTemplate.length} awaiting a silhouette · ${unclaimed.length} not yet a material`);
 line();

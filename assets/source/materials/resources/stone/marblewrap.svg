@@ -1,31 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="190" height="190" viewBox="0 0 190 190">
 <style>
 :root {
-  --green: #024E04;
-  --blue: #192443;
-  --gold: #B47C16;
-  --red: #3F0404;
+  --background: #4F004F;
+  --foreground-01: #00F2FF;
+  --foreground-02: #C9AB01;
 }
 </style>
 <g class="layer-polka-dots">
 <g class="layer-rectangle">
-<rect x="0" y="0" width="190" height="190" fill="#4F004F"/>
+<rect x="0" y="0" width="190" height="190" fill="var(--background)"/>
 </g>
 <g class="layer-circle">
-<ellipse cx="95" cy="95" rx="27.44" ry="27.44" fill="#00F2FF"/>
+<ellipse cx="95" cy="95" rx="27.44" ry="27.44" fill="var(--foreground-01)"/>
 </g>
 <g class="layer-group">
 <g class="layer-circle">
-<ellipse cx="0" cy="190" rx="48.56" ry="48.56" fill="#C9AB01"/>
+<ellipse cx="0" cy="190" rx="48.56" ry="48.56" fill="var(--foreground-02)"/>
 </g>
 <g class="layer-circle">
-<ellipse cx="190" cy="190" rx="48.56" ry="48.56" fill="#C9AB01"/>
+<ellipse cx="190" cy="190" rx="48.56" ry="48.56" fill="var(--foreground-02)"/>
 </g>
 <g class="layer-circle">
-<ellipse cx="190" cy="0" rx="48.56" ry="48.56" fill="#C9AB01"/>
+<ellipse cx="190" cy="0" rx="48.56" ry="48.56" fill="var(--foreground-02)"/>
 </g>
 <g class="layer-circle">
-<ellipse cx="0" cy="0" rx="48.56" ry="48.56" fill="#C9AB01"/>
+<ellipse cx="0" cy="0" rx="48.56" ry="48.56" fill="var(--foreground-02)"/>
 </g>
 </g>
 </g>
