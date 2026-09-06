@@ -1,9 +1,18 @@
 import * as THREE from 'three';
 import { aspect, createRng } from '../core/math';
 import { createCutout, createGroundCutout, createSheet, groundedCutoutY } from '../render/builders';
-import { getMaterial } from '../render/materials';
+import { getMaterial, getResourceSurfaceMaterial } from '../render/materials';
 import { registerHarvestable } from '../game/harvesting';
-import { getResourceArt } from '../game/resourcePresentation';
+import { getResourceArt, getResourceSurfaceUrl, resourceArtVariant } from '../game/resourcePresentation';
+
+/**
+ * How many times a resource's tile repeats across one loose piece.
+ *
+ * One tile per face reads as "this pebble is cut from that paper", which is
+ * the intent. A motif drawn large — a full medallion, say — may need 2 or 3
+ * here before a pebble stops looking like a coaster.
+ */
+const PATTERN_REPEAT: [number, number] = [1, 1];
 import { buildCritters, populatePageCritters } from '../game/critters';
 import { buildThingMaker } from '../game/thingMaker';
 import { buildSeedStore } from '../game/seedStore';
@@ -304,24 +313,61 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
       // tiny seedling. See resourcePresentation.ts and
       // docs/resource-artwork-guide.md.
       const art = getResourceArt(prop.resource);
+      const looseArt = (pieceIndex: number) => art
+        ? resourceArtVariant(art, prop.seed + pieceIndex)
+        : null;
+
+      /**
+       * A drawn pattern belongs *on* the thing, not instead of it.
+       *
+       * Flat cutouts standing in for a pile lose the one thing the primitive
+       * shapes got right — that a stone is a lump with faces the light falls
+       * across differently. So when a resource has a compiled tiling surface,
+       * the pile keeps its real geometry and wears that tile; only a resource
+       * whose art has no tiling form (seeds, authored as direct cutouts) still
+       * scatters flat drawings.
+       *
+       * `PATTERN_REPEAT` is the knob for motif scale on a small object: raise
+       * it if a drawing's motif is too large to read as stone or bark.
+       */
+      const surfaceUrl = getResourceSurfaceUrl(prop.resource);
+      const pieceMaterial = surfaceUrl
+        ? getResourceSurfaceMaterial(surfaceUrl, PATTERN_REPEAT)
+        : material;
+
+      /**
+       * How far one piece leans off the ground.
+       *
+       * Loose art used to be laid perfectly flat, which made a pile read as
+       * a decal printed on the terrain rather than as things lying on it —
+       * the primitive fallbacks looked more solid than the real artwork,
+       * which is backwards. Most pieces get a real lean; roughly every
+       * third settles nearly flat, so a heap has a base to rest on instead
+       * of every piece standing at the same jaunty angle.
+       */
+      const pieceLean = (steepest: number) => (rng() < 0.34
+        ? rng() * 0.12
+        : 0.3 + rng() * (steepest - 0.3));
 
       if (prop.visual === 'twigBundle') {
         for (let twigIndex = 0; twigIndex < 5; twigIndex += 1) {
-          if (art) {
+          const pieceArt = looseArt(twigIndex);
+          if (!surfaceUrl && pieceArt) {
             const width = 0.22 + rng() * 0.16;
             node.add(
               createGroundCutout({
-                aspectRatio: art.aspectRatio,
+                aspectRatio: pieceArt.aspectRatio,
                 position: [(rng() - 0.5) * 0.4, 0.006 + twigIndex * 0.0015, (rng() - 0.5) * 0.32],
                 rotationY: rng() * Math.PI * 2,
-                textureUrl: art.sourceUrl,
+                tilt: pieceLean(0.75),
+                textureUrl: pieceArt.sourceUrl,
                 width,
               }),
             );
             continue;
           }
           const length = 0.48 + rng() * 0.38;
-          const twig = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.038, length, 7), material);
+          const twig = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.038, length, 7), pieceMaterial);
           twig.rotation.z = Math.PI / 2 + (rng() - 0.5) * 0.24;
           twig.rotation.y = (rng() - 0.5) * 0.9;
           twig.position.set((rng() - 0.5) * 0.38, 0.05 + twigIndex * 0.018, (rng() - 0.5) * 0.3);
@@ -333,20 +379,22 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         // stoneCluster below, just smaller pieces in a tighter cluster, so
         // a pile of seeds doesn't read as a pile of tiny stones.
         for (let seedIndex = 0; seedIndex < 8; seedIndex += 1) {
-          if (art) {
+          const pieceArt = looseArt(seedIndex);
+          if (!surfaceUrl && pieceArt) {
             const width = 0.1 + rng() * 0.06;
             node.add(
               createGroundCutout({
-                aspectRatio: art.aspectRatio,
+                aspectRatio: pieceArt.aspectRatio,
                 position: [(rng() - 0.5) * 0.26, 0.005 + seedIndex * 0.001, (rng() - 0.5) * 0.24],
                 rotationY: rng() * Math.PI * 2,
-                textureUrl: art.sourceUrl,
+                tilt: pieceLean(0.55),
+                textureUrl: pieceArt.sourceUrl,
                 width,
               }),
             );
             continue;
           }
-          const seed = new THREE.Mesh(new THREE.SphereGeometry(0.035 + rng() * 0.025, 8, 6), material);
+          const seed = new THREE.Mesh(new THREE.SphereGeometry(0.035 + rng() * 0.025, 8, 6), pieceMaterial);
           seed.scale.set(1, 0.7 + rng() * 0.3, 1 + rng() * 0.3);
           seed.position.set((rng() - 0.5) * 0.24, 0.03 + rng() * 0.02, (rng() - 0.5) * 0.22);
           seed.rotation.set(rng(), rng(), rng());
@@ -358,20 +406,22 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         // it's off the plant and sitting in the grass, not a stone (too
         // angular) and not a blade (stands up, this lies where it fell).
         for (let foodIndex = 0; foodIndex < 5; foodIndex += 1) {
-          if (art) {
+          const pieceArt = looseArt(foodIndex);
+          if (!surfaceUrl && pieceArt) {
             const width = 0.16 + rng() * 0.1;
             node.add(
               createGroundCutout({
-                aspectRatio: art.aspectRatio,
+                aspectRatio: pieceArt.aspectRatio,
                 position: [(rng() - 0.5) * 0.36, 0.006 + foodIndex * 0.0015, (rng() - 0.5) * 0.32],
                 rotationY: rng() * Math.PI * 2,
-                textureUrl: art.sourceUrl,
+                tilt: pieceLean(0.7),
+                textureUrl: pieceArt.sourceUrl,
                 width,
               }),
             );
             continue;
           }
-          const piece = new THREE.Mesh(new THREE.IcosahedronGeometry(0.065 + rng() * 0.045, 0), material);
+          const piece = new THREE.Mesh(new THREE.IcosahedronGeometry(0.065 + rng() * 0.045, 0), pieceMaterial);
           piece.scale.set(0.85 + rng() * 0.3, 0.75 + rng() * 0.25, 0.85 + rng() * 0.3);
           piece.position.set((rng() - 0.5) * 0.34, 0.06 + rng() * 0.03, (rng() - 0.5) * 0.3);
           piece.rotation.set(rng() * Math.PI, rng() * Math.PI, rng() * Math.PI);
@@ -380,20 +430,22 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         }
       } else if (prop.visual === 'stoneCluster') {
         for (let stoneIndex = 0; stoneIndex < 5; stoneIndex += 1) {
-          if (art) {
+          const pieceArt = looseArt(stoneIndex);
+          if (!surfaceUrl && pieceArt) {
             const width = 0.2 + rng() * 0.14;
             node.add(
               createGroundCutout({
-                aspectRatio: art.aspectRatio,
+                aspectRatio: pieceArt.aspectRatio,
                 position: [(rng() - 0.5) * 0.55, 0.006 + stoneIndex * 0.0015, (rng() - 0.5) * 0.48],
                 rotationY: rng() * Math.PI * 2,
-                textureUrl: art.sourceUrl,
+                tilt: pieceLean(0.6),
+                textureUrl: pieceArt.sourceUrl,
                 width,
               }),
             );
             continue;
           }
-          const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.13 + rng() * 0.12, 0), material);
+          const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.13 + rng() * 0.12, 0), pieceMaterial);
           stone.scale.set(1 + rng() * 0.35, 0.55 + rng() * 0.35, 0.85 + rng() * 0.35);
           stone.position.set((rng() - 0.5) * 0.55, 0.09 + rng() * 0.06, (rng() - 0.5) * 0.48);
           stone.rotation.set(rng(), rng(), rng());
@@ -403,15 +455,16 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
       } else {
         for (let bladeIndex = 0; bladeIndex < 7; bladeIndex += 1) {
           const angle = (bladeIndex / 7) * Math.PI * 2;
-          if (art) {
+          const pieceArt = looseArt(bladeIndex);
+          if (pieceArt) {
             const height = 0.22 + rng() * 0.1;
             node.add(
               createCutout({
-                aspectRatio: art.aspectRatio,
+                aspectRatio: pieceArt.aspectRatio,
                 height,
                 position: [Math.cos(angle) * 0.1, height / 2, Math.sin(angle) * 0.1],
                 rotationY: -angle + (rng() - 0.5) * 0.3,
-                textureUrl: art.sourceUrl,
+                textureUrl: pieceArt.sourceUrl,
               }),
             );
             continue;

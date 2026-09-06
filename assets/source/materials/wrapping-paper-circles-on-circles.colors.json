@@ -1,0 +1,14 @@
+{
+  "terracotta": {
+    "label": "Terracotta",
+    "vars": { "--ground": "#7A3B22", "--figure": "#F0C9A0" }
+  },
+  "kraft": {
+    "label": "Kraft",
+    "vars": { "--ground": "#54411D", "--figure": "#C3AF84" }
+  },
+  "moss": {
+    "label": "Moss",
+    "vars": { "--figure": "#BFD16A" }
+  }
+}

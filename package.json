@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "assets:compile": "node tools/compile-assets.mjs",
+    "art:check": "node tools/check-resource-art.mjs",
     "assets:sample": "node tools/generate-sample-assets.mjs",
     "avatar:preview": "node tools/preview-avatar-design.mjs",
     "build": "npm run content:check && npm run styles:check && tsc && vite build",

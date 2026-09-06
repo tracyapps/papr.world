@@ -1,5 +1,11 @@
 # Resource Artwork Guide
 
+> **2026-09-04 update:** New tiled resources use the folder-driven generator in
+> `docs/resource-asset-pipeline.md`. It creates both the surface texture and
+> several loose variants from one default-color SVG. The manual one-cutout
+> workflow below remains useful for legacy art and exceptional hand-drawn
+> resources, but it is no longer the default path.
+
 Written 2026-09-01, after a playtest report that ground materials were hard
 to tell apart — "sometimes I walk over some stones and they are a certain
 kind of seed, other times they are something else." This doc is the answer

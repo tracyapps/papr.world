@@ -1,6 +1,8 @@
 import { BIOME_IDS, type Biome } from './biomes';
 import { DIG_TABLES } from './geology';
+import { RECIPE_DEFS, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
+import { SEED_STORE, SEED_STORE_BARTER, seedStoreSellPrice, type ShopId } from './shops';
 import { TOOL_DEFS, toolsInFamily, type ToolId } from './tools';
 import { SPECIES_YIELD, type TreeSpecies } from './trees';
 
@@ -31,8 +33,20 @@ export type ObtainRoute =
   | { kind: 'trimmed'; species: TreeSpecies; minimumTier: 1 | 2 | 3 }
   /** Grown in a garden bed. */
   | { kind: 'grown'; from: ResourceId }
-  /** Made at the Thing Maker. */
-  | { kind: 'crafted' };
+  /** Made at the Thing Maker. `recipe` is the one that produces it. */
+  | { kind: 'crafted'; recipe: RecipeId }
+  /**
+   * Bought over a shop counter. `barter` is the equal-value trade a player
+   * with an empty pouch can make instead, where the shop offers one.
+   */
+  | {
+      kind: 'bought';
+      shop: ShopId;
+      /** Carried here so nothing downstream has to hand-type a shop's name. */
+      shopName: string;
+      price: number;
+      barter: { resource: ResourceId; quantity: number } | null;
+    };
 
 /**
  * Where loose piles of each material generate.
@@ -117,6 +131,28 @@ export function obtainRoutesFor(resource: ResourceId): ObtainRoute[] {
 
   const grown = GROWN_FROM[resource];
   if (grown) routes.push({ kind: 'grown', from: grown });
+
+  // Crafting and buying were the two routes this table could not describe.
+  // Both existed in the game and neither could be said out loud, which is
+  // how `mend-me-seeds` — sold at Pip's counter since the first shop — read
+  // as a material with no way to get it, and why the reference page needed a
+  // hand-written seed exception to look right. Derived, like the rest.
+  for (const recipeId of Object.keys(RECIPE_DEFS) as RecipeId[]) {
+    const output = RECIPE_DEFS[recipeId].output;
+    if (output.kind === 'resource' && output.resource === resource) {
+      routes.push({ kind: 'crafted', recipe: recipeId });
+    }
+  }
+
+  if ((SEED_STORE.sells as readonly ResourceId[]).includes(resource)) {
+    routes.push({
+      kind: 'bought',
+      shop: SEED_STORE.id,
+      shopName: SEED_STORE.name,
+      price: seedStoreSellPrice(resource as (typeof SEED_STORE.sells)[number]),
+      barter: { resource: SEED_STORE_BARTER.resource, quantity: SEED_STORE_BARTER.quantity },
+    });
+  }
 
   return routes;
 }

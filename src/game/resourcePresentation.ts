@@ -1,4 +1,5 @@
 import type { ResourceId } from '../sim/catalogs/resources';
+import { GENERATED_RESOURCE_ART } from './resourceArt.generated';
 
 /**
  * Artwork for resources that have it.
@@ -12,31 +13,32 @@ import type { ResourceId } from '../sim/catalogs/resources';
  * current generic treatment — a `HarvestVisual` primitive cluster on the
  * ground (`world/pageRuntime.ts`), a flat `mapColor` swatch in the
  * scrapbook (`ui/scrapbook.ts`) — and simply gets better-looking the moment
- * its entry lands here. Nothing needs to change at any of those call
+ * generated art lands here. Nothing needs to change at any of those call
  * sites when that happens; they already read through `getResourceArt()`.
  *
- * See `docs/resource-artwork-guide.md` for the full picture: what each
- * consumer currently shows, and the exact steps to add one resource's art
- * so it carries to the ground, the scrapbook, the build-material picker
- * (where applicable), and the public reference site from one entry.
+ * `npm run assets:compile` fills several standard loose silhouettes from a
+ * tile at `materials/resources/<form>/<resource-id>.svg`, then writes
+ * `resourceArt.generated.ts`. Direct seed cutouts are generated from
+ * `resources/seeds/<resource-id>.svg`. The legacy map below is only a bridge
+ * for art that has not moved into that pipeline yet.
  *
- * One drawing, two possible orientations in the world — `world/pageRuntime.ts`
- * picks per-resource by its existing `HarvestVisual` (`twigBundle`/
- * `stoneCluster` lie flat on the ground and get scattered several-at-a-time
- * as small ground decals; `fiberTuft` stands up like a blade of grass and
- * gets scattered as small standing cutouts). You never draw a whole pile —
- * one twig, one pebble, one blade per file — the game scatters copies.
+ * See `docs/resource-asset-pipeline.md` for the artist workflow.
  *
  * Read through `getResourceArt()`, never indexed directly.
  */
-export type ResourceArt = {
+export type ResourceArtVariant = {
   /** Compiled runtime PNG, same convention as `TOOL_ART`/`DECOR_DEFS`. */
   sourceUrl: string;
   /** Width ÷ height of the source art, exactly as drawn. */
   aspectRatio: number;
 };
 
-export const RESOURCE_ART = {
+export type ResourceArt = ResourceArtVariant & {
+  /** Deterministic alternatives generated from the same default tile. */
+  variants: readonly ResourceArtVariant[];
+};
+
+const LEGACY_RESOURCE_ART = {
   // The first real example — see docs/resource-artwork-guide.md for how
   // this one was made and what's different (nothing, structurally) between
   // a "sticks" resource and a "stones" one.
@@ -47,10 +49,57 @@ export const RESOURCE_ART = {
     // different consumer (a DOM <img>, not a THREE.js scene texture).
     sourceUrl: '/assets/runtime/resources/terracotta-pebbles.png',
     aspectRatio: 240 / 190,
+    variants: [{
+      sourceUrl: '/assets/runtime/resources/terracotta-pebbles.png',
+      aspectRatio: 240 / 190,
+    }],
   },
 } as const satisfies Partial<Record<ResourceId, ResourceArt>>;
 
+type GeneratedArtRecord = {
+  /** The tiling surface the loose pieces were cut from. Null for seeds,
+   *  which are drawn as direct cutouts and have no tiling form. */
+  surfaceUrl: string | null;
+  variants: readonly ResourceArtVariant[];
+};
+
+const generatedResourceArt = GENERATED_RESOURCE_ART as Partial<Record<ResourceId, GeneratedArtRecord>>;
+
+/**
+ * Generated folder-driven art wins over a legacy hand-authored entry. Keeping
+ * the old map as a fallback lets resources migrate one tile at a time without
+ * making existing saves or artwork disappear between compiler runs.
+ */
+export const RESOURCE_ART: Partial<Record<ResourceId, ResourceArt>> = {
+  ...LEGACY_RESOURCE_ART,
+  ...Object.fromEntries(Object.entries(generatedResourceArt).flatMap(([resource, generated]) => {
+    const first = generated?.variants[0];
+    if (!first || !generated) return [];
+    return [[resource, { ...first, variants: generated.variants }]];
+  })),
+};
+
 /** Artwork for a resource, or null when it has none yet. */
 export function getResourceArt(resource: ResourceId): ResourceArt | null {
-  return (RESOURCE_ART as Partial<Record<ResourceId, ResourceArt>>)[resource] ?? null;
+  return RESOURCE_ART[resource] ?? null;
+}
+
+/**
+ * The resource's tiling material, when it has one.
+ *
+ * This is what lets a drawn pattern become the *surface of the thing* rather
+ * than a picture of the thing: a pile of pebbles keeps its real geometry and
+ * wears this tile, the same way a wall or a floor does. Null for a resource
+ * with no art yet, and for seeds — those are authored as direct cutouts and
+ * genuinely have no tiling form.
+ */
+export function getResourceSurfaceUrl(resource: ResourceId): string | null {
+  return generatedResourceArt[resource]?.surfaceUrl ?? null;
+}
+
+/** Select one stable loose drawing without changing scrapbook/reference art. */
+export function resourceArtVariant(art: ResourceArt, seed: number): ResourceArtVariant {
+  const variants = art.variants.length > 0 ? art.variants : [art];
+  const index = Math.abs(Math.trunc(seed)) % variants.length;
+  return variants[index];
 }

@@ -73,12 +73,20 @@ function describeRoute(route, toolsById) {
       return 'Gathered from a plant you grew.';
     case 'crafted':
       return 'Made at the Thing Maker.';
+    case 'bought': {
+      const barter = route.barter
+        ? `, or bartered for ${route.barter.quantity} × ${resourceLabel(route.barter.resource)}`
+        : '';
+      return `Sold at ${route.shopName} for ${route.price} chips${barter}.`;
+    }
     default:
       return 'Unknown.';
   }
 }
 
 const toolsById = Object.fromEntries(reference.tools.map((tool) => [tool.id, tool]));
+/** A resource's own label, so no page hand-types a material name. */
+const resourceLabel = (id) => reference.resources.find((entry) => entry.id === id)?.shortLabel ?? id;
 const ready = (entry) => entry.status === 'ready';
 const planned = (entry) => entry.status !== 'ready';
 

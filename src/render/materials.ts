@@ -123,6 +123,35 @@ export function materialTextureUrl(key: MaterialKey): string {
   return MATERIAL_DEFS[key].textureUrl;
 }
 
+const resourceSurfaceCache = new Map<string, THREE.MeshStandardMaterial>();
+
+/**
+ * A material made from a compiled resource tile, addressed by URL rather than
+ * by registry key.
+ *
+ * Resource tiles are generated (`resourceArt.generated.ts`) and arrive one
+ * drawing at a time, so they cannot be members of the hand-written
+ * `MaterialKey` union — but they are otherwise ordinary tiling paper, and the
+ * point of drawing one is that the material it describes should be visible on
+ * the actual thing in the world. Same cache-by-key discipline as
+ * `getMaterial`, so a pile of eight pebbles is still one material.
+ *
+ * `repeat` is the knob for how big the motif reads on a small object: 1 shows
+ * roughly one tile across a face.
+ */
+export function getResourceSurfaceMaterial(
+  textureUrl: string,
+  repeat: [number, number] = [1, 1],
+): THREE.MeshStandardMaterial {
+  const key = `${textureUrl}|${repeat[0]}x${repeat[1]}`;
+  let material = resourceSurfaceCache.get(key);
+  if (!material) {
+    material = createPaperMaterial({ repeat, textureUrl });
+    resourceSurfaceCache.set(key, material);
+  }
+  return material;
+}
+
 /** Cached lookup by registry key. Pages should always use this. */
 export function getMaterial(key: MaterialKey): THREE.MeshStandardMaterial {
   let material = paperCache.get(key);

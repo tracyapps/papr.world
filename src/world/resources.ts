@@ -7,6 +7,7 @@ import {
   type ResourceId,
 } from '../sim/catalogs/resources';
 import { BIOME_SCATTER } from '../sim/catalogs/obtaining';
+import type { MaterialTag, ProcessStage, StructuralClass } from '../sim/catalogs/materials';
 import type { Biome, HarvestVisual } from './types';
 
 export { RESOURCE_CATEGORIES, RESOURCE_CATEGORY_ORDER };
@@ -21,9 +22,19 @@ export type ResourceDefinition = {
   mapColor: string;
   category: ResourceCategoryId;
   iconKey: string;
+  // Carried through from the renderer-free core definition so one joined
+  // resource can be read — and validated — as a whole. See catalogs/materials.ts.
+  processStage: ProcessStage;
+  structuralClass: StructuralClass;
+  tags: readonly MaterialTag[];
 };
 
-const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'label' | 'shortLabel' | 'category' | 'iconKey'>> = {
+type ResourceWorldDefinition = Omit<
+  ResourceDefinition,
+  'id' | 'label' | 'shortLabel' | 'category' | 'iconKey' | 'processStage' | 'structuralClass' | 'tags'
+>;
+
+const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'kraft-twigs': {
     material: 'paper.brown', visual: 'twigBundle', mapColor: '#8b5f38',
   },
@@ -118,12 +129,19 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, Omit<ResourceDefinition, 'id' | 'l
   },
 };
 
-export const RESOURCE_DEFS = Object.fromEntries(
-  (Object.keys(RESOURCE_CORE_DEFS) as ResourceId[]).map((id) => [
-    id,
-    { ...RESOURCE_CORE_DEFS[id], ...RESOURCE_WORLD_DEFS[id] },
-  ]),
-) as Record<ResourceId, ResourceDefinition>;
+// Built with an explicit loop rather than `Object.fromEntries(...) as
+// Record<...>`: the cast silently accepted whatever the join produced, so a
+// core field the joined type didn't know about would never have been caught.
+// Assigning into a typed record checks each merged definition for real.
+function joinResourceDefs(): Record<ResourceId, ResourceDefinition> {
+  const joined = {} as Record<ResourceId, ResourceDefinition>;
+  for (const id of Object.keys(RESOURCE_CORE_DEFS) as ResourceId[]) {
+    joined[id] = { ...RESOURCE_CORE_DEFS[id], ...RESOURCE_WORLD_DEFS[id] };
+  }
+  return joined;
+}
+
+export const RESOURCE_DEFS = joinResourceDefs();
 
 /**
  * What the generator scatters as loose piles, per biome.

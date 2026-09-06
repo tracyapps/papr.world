@@ -92,7 +92,9 @@ export function referenceResources(): ReferenceResource[] {
       usedIn: recipesUsing(id),
       // A material with no route is one the game defines but cannot yet
       // hand you — it belongs on the roadmap, not the materials page.
-      status: routes.length > 0 || id in SEED_DEFS ? 'ready' : 'planned',
+      // This used to need `|| id in SEED_DEFS` bolted on, because obtaining
+      // could not describe a shop counter. It can now.
+      status: routes.length > 0 ? 'ready' : 'planned',
     };
   });
 }

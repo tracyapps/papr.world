@@ -214,6 +214,17 @@ export type GroundCutoutOptions = {
   aspectRatio: number;
   /** Spin around the vertical axis, for scatter variety. */
   rotationY?: number;
+  /**
+   * Lean off the ground, in radians. `0` lies perfectly flat.
+   *
+   * A pile of cutouts all lying at exactly 0 reads as a sticker printed on
+   * the terrain, however good the drawing is — there is no silhouette, no
+   * self-shadowing, and nothing for the light to catch. A few degrees of
+   * lean per piece is what makes a heap look like objects resting on the
+   * ground instead. The mesh is lifted by whatever the lean raises it, so
+   * its low edge still touches down.
+   */
+  tilt?: number;
   alphaTest?: number;
 };
 
@@ -230,8 +241,14 @@ export function createGroundCutout(options: GroundCutoutOptions): THREE.Mesh {
   const geometry = new THREE.PlaneGeometry(options.width, depth);
   geometry.rotateX(-Math.PI / 2);
   const mesh = new THREE.Mesh(geometry, entry.material);
-  mesh.position.set(...options.position);
+  const tilt = options.tilt ?? 0;
+  const [x, y, z] = options.position;
+  // Spin first, then lean — 'YXZ' so the lean is always about the piece's
+  // own edge rather than a world axis it happens to have been spun onto.
+  mesh.rotation.order = 'YXZ';
   mesh.rotation.y = options.rotationY ?? 0;
+  mesh.rotation.x = tilt;
+  mesh.position.set(x, y + Math.abs(Math.sin(tilt)) * depth * 0.5, z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.customDepthMaterial = entry.depthMaterial;
