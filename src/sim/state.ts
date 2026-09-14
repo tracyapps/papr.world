@@ -66,6 +66,8 @@ export type ActiveLearningState = {
 
 export type PageModificationState = {
   terrainEdits: Record<string, TerrainEditCellState>;
+  /** One-time material piles made by digging or trimming, waiting in-world. */
+  resourceDrops?: Record<string, ResourceDropState>;
   /**
    * Only trees that have actually been cut appear here. An absent key means
    * an untouched, flourishing tree, so a forest page costs nothing to store
@@ -78,6 +80,15 @@ export type PageModificationState = {
   placedPieces: Record<string, PlacedPiece>;
   /** Incomplete multi-step builds, kept so a player can leave and resume. */
   buildSites: Record<string, BuildSiteState>;
+};
+
+export type ResourceDropState = {
+  id: string;
+  resource: ResourceId;
+  amount: number;
+  x: number;
+  z: number;
+  createdAt: number;
 };
 
 export type BuildSiteState = {
@@ -95,10 +106,12 @@ export type BuildSiteState = {
 
 export type TerrainEditCellState = {
   kind: 'dug';
-  state: 'dug' | 'planted' | 'mending';
+  state: 'dug' | 'planted' | 'mending' | 'filled' | 'raised';
   x: number;
   z: number;
   depth: number;
+  /** Persistent height above the original sheet for a landscaped mound. */
+  height?: number;
   radius: number;
   toolTier: number;
   geologySeed: number;
@@ -106,6 +119,8 @@ export type TerrainEditCellState = {
   plantedSeedId?: SeedId;
   plantedAt?: number;
   mendsAt?: number;
+  /** Fresh fill stays visibly earthy until this time, then reveals biome ground. */
+  surfaceRestoresAt?: number;
   lastTendedAt?: number;
   tendCount?: number;
   nextSeedDropAt?: number;
@@ -256,12 +271,16 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
         }];
       })
       : [];
+    const state = cell.state === 'planted' || cell.state === 'mending'
+      || cell.state === 'filled' || cell.state === 'raised' ? cell.state : 'dug';
     result[cellKey] = {
       kind: 'dug',
-      state: cell.state === 'planted' || cell.state === 'mending' ? cell.state : 'dug',
+      state,
       x: cell.x,
       z: cell.z,
       depth: Math.max(0, Math.min(1.5, cell.depth)),
+      height: typeof cell.height === 'number' && Number.isFinite(cell.height)
+        ? Math.max(0, Math.min(1.5, cell.height)) : undefined,
       radius: Math.max(0.2, Math.min(2.5, cell.radius)),
       toolTier: typeof cell.toolTier === 'number' ? Math.max(1, Math.min(3, Math.floor(cell.toolTier))) : 1,
       geologySeed: typeof cell.geologySeed === 'number' && Number.isFinite(cell.geologySeed) ? cell.geologySeed : 0,
@@ -270,6 +289,8 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
         ? cell.plantedSeedId as SeedId : undefined,
       plantedAt: typeof cell.plantedAt === 'number' && Number.isFinite(cell.plantedAt) ? cell.plantedAt : undefined,
       mendsAt: typeof cell.mendsAt === 'number' && Number.isFinite(cell.mendsAt) ? cell.mendsAt : undefined,
+      surfaceRestoresAt: typeof cell.surfaceRestoresAt === 'number' && Number.isFinite(cell.surfaceRestoresAt)
+        ? cell.surfaceRestoresAt : undefined,
       lastTendedAt: typeof cell.lastTendedAt === 'number' && Number.isFinite(cell.lastTendedAt) ? cell.lastTendedAt : undefined,
       tendCount: typeof cell.tendCount === 'number' && Number.isFinite(cell.tendCount)
         ? Math.max(0, Math.floor(cell.tendCount)) : 0,
@@ -281,6 +302,26 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
       observedStage: typeof cell.observedStage === 'string' && PLANT_STAGE_ORDER.includes(cell.observedStage as PlantStage)
         ? cell.observedStage as PlantStage : undefined,
       changedAt: typeof cell.changedAt === 'number' && Number.isFinite(cell.changedAt) ? cell.changedAt : 0,
+    };
+  }
+  return result;
+}
+
+function normalizeResourceDrops(value: unknown): Record<string, ResourceDropState> {
+  const result: Record<string, ResourceDropState> = {};
+  for (const [id, rawDrop] of Object.entries(safeObject(value))) {
+    const drop = safeObject(rawDrop);
+    if (typeof drop.resource !== 'string' || !(drop.resource in RESOURCE_CORE_DEFS)) continue;
+    if (typeof drop.amount !== 'number' || !Number.isFinite(drop.amount) || drop.amount < 1) continue;
+    if (typeof drop.x !== 'number' || !Number.isFinite(drop.x)) continue;
+    if (typeof drop.z !== 'number' || !Number.isFinite(drop.z)) continue;
+    result[id] = {
+      id,
+      resource: drop.resource as ResourceId,
+      amount: Math.max(1, Math.min(999, Math.floor(drop.amount))),
+      x: drop.x,
+      z: drop.z,
+      createdAt: typeof drop.createdAt === 'number' && Number.isFinite(drop.createdAt) ? drop.createdAt : 0,
     };
   }
   return result;
@@ -383,6 +424,7 @@ function normalizePageModifications(value: unknown): Record<string, PageModifica
     const page = safeObject(rawPage);
     result[pageId] = {
       terrainEdits: normalizeTerrainEdits(page.terrainEdits),
+      resourceDrops: normalizeResourceDrops(page.resourceDrops),
       treeGrowth: normalizeTreeGrowth(page.treeGrowth),
       plantedCells: safeObject(page.plantedCells),
       placedEntities: safeObject(page.placedEntities),

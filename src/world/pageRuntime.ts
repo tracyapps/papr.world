@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { aspect, createRng } from '../core/math';
 import { createCutout, createGroundCutout, createSheet, groundedCutoutY } from '../render/builders';
 import { getMaterial, getResourceSurfaceMaterial } from '../render/materials';
-import { registerHarvestable } from '../game/harvesting';
+import { registerHarvestable, registerWorldDrop } from '../game/harvesting';
 import { getResourceArt, getResourceSurfaceUrl, resourceArtVariant } from '../game/resourcePresentation';
 
 /**
@@ -41,6 +41,7 @@ import { registerTerrainPlant } from '../game/plantInteractions';
 import { registerPlacedPieceVisual } from '../game/placedPieceInteractions';
 import { treeSpeciesOf } from './treeRuntime';
 import { registerTrimmableTree } from '../game/treeInteractions';
+import { buildResourceDropVisual } from './resourceDropVisual';
 
 // Turns serializable PageData into a Three.js group.
 // Authored data and generated data flow through the exact same path.
@@ -598,6 +599,7 @@ export function buildPageGroup(page: PageData): THREE.Group {
   });
 
   buildTerrainEditVisuals(page.id, group);
+  buildResourceDropVisuals(page.id, group);
   buildPlacedPieceVisuals(page.id, group);
 
   // The clearing's residents come from its 'critters' unique prop;
@@ -637,7 +639,13 @@ function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
   const previous = group.getObjectByName('terrain-edit-visuals');
   if (previous) {
     previous.traverse((object) => {
-      if (object instanceof THREE.Mesh) object.geometry.dispose();
+      if (object instanceof THREE.Mesh) {
+        object.geometry.dispose();
+        if (object.userData.terrainRecovery) {
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => material.dispose());
+        }
+      }
     });
     group.remove(previous);
   }
@@ -647,8 +655,12 @@ function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
   if (pageState) {
     for (const [cellKey, edit] of Object.entries(pageState.terrainEdits)) {
       const revealed = edit.revealedLayers.at(-1);
-      const material = revealed ? RESOURCE_DEFS[revealed.resource].material : 'paper.brown.warm';
-      edits.add(createDugCellMesh(edit, getMaterial(material)));
+      const material = edit.state === 'filled' || edit.state === 'raised'
+        ? 'paper.brown.warm'
+        : revealed ? RESOURCE_DEFS[revealed.resource].material : 'paper.brown.warm';
+      if (edit.state !== 'raised' || edit.surfaceRestoresAt) {
+        edits.add(createDugCellMesh(edit, getMaterial(material)));
+      }
       const plant = buildTerrainPlantVisual(edit);
       if (plant) {
         edits.add(plant);
@@ -673,9 +685,36 @@ function buildTerrainEditVisuals(pageId: string, group: THREE.Group) {
   group.add(edits);
 }
 
+function buildResourceDropVisuals(pageId: string, group: THREE.Group) {
+  const previous = group.getObjectByName('resource-drop-visuals');
+  if (previous) {
+    previous.traverse((object) => {
+      if (object instanceof THREE.Mesh) object.geometry.dispose();
+    });
+    group.remove(previous);
+  }
+  const visuals = new THREE.Group();
+  visuals.name = 'resource-drop-visuals';
+  const drops = getGameState().world.pages[pageId]?.resourceDrops ?? {};
+  for (const drop of Object.values(drops)) {
+    const visual = buildResourceDropVisual(drop);
+    visuals.add(visual);
+    registerWorldDrop({
+      id: `world-drop:${pageId}:${drop.id}`,
+      object: visual,
+      resource: drop.resource,
+      amount: drop.amount,
+      pageId,
+      dropId: drop.id,
+    });
+  }
+  group.add(visuals);
+}
+
 export function refreshPageTerrain(pageId: string, group: THREE.Group) {
   refreshTerrainSurfaceMeshes(group);
   buildTerrainEditVisuals(pageId, group);
+  buildResourceDropVisuals(pageId, group);
   buildPlacedPieceVisuals(pageId, group);
 }
 

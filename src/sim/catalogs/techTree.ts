@@ -184,7 +184,7 @@ export const TECH_DEFS = {
     learningHours: 6,
     tasks: [
       { kind: 'own-tool', toolId: 'flimsy-shovel', weight: 1 },
-      { kind: 'make', recipeId: 'flimsy-shovel', quantity: 2, weight: 2 },
+      { kind: 'make', recipeId: 'flimsy-shovel', quantity: 1, weight: 1 },
     ],
     grants: ['okayish-shovel'],
   },
@@ -345,7 +345,7 @@ export const TECH_DEFS = {
     learningHours: 8,
     tasks: [
       { kind: 'own-tool', toolId: 'kids-scissors', weight: 1 },
-      { kind: 'make', recipeId: 'kids-scissors', quantity: 2, weight: 2 },
+      { kind: 'make', recipeId: 'kids-scissors', quantity: 1, weight: 1 },
     ],
     grants: ['sturdy-scissors'],
   },
@@ -370,7 +370,7 @@ export const TECH_DEFS = {
     learningHours: 7,
     tasks: [
       { kind: 'own-tool', toolId: 'squeaky-hammer', weight: 1 },
-      { kind: 'make', recipeId: 'squeaky-hammer', quantity: 2, weight: 2 },
+      { kind: 'make', recipeId: 'squeaky-hammer', quantity: 1, weight: 1 },
     ],
     grants: ['basic-mallet'],
   },

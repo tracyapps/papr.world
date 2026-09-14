@@ -75,11 +75,9 @@ import {
   isWheelInsideSeedStorePanel,
   renderSeedStorePanel,
   setSeedStorePanelOpen,
-  updateSeedStore,
   updateSeedStorePrompt,
   wireSeedStoreDom,
 } from './game/seedStore';
-import { GREENHOUSE_PAGE } from './world/seedStoreLayout';
 import {
   cancelTimedAction,
   initializeTimedAction,
@@ -101,7 +99,6 @@ import { initializeMultiplayerPanel } from './ui/multiplayerPanel';
 // original clearing and streams in around the spawn point.
 
 const CLEARING_PAGE = pageId(0, 0);
-const SEED_STORE_PAGE = pageId(GREENHOUSE_PAGE.px, GREENHOUSE_PAGE.pz);
 
 const SPAWN_X = -1.5;
 const SPAWN_Z = -2.2;
@@ -360,9 +357,7 @@ function animate(animationTime = 0) {
   }
 
   const clearingActive = isPageActive(CLEARING_PAGE);
-  const seedStoreActive = isPageActive(SEED_STORE_PAGE);
   updateThingMaker(delta, elapsed, avatar.position, clearingActive);
-  updateSeedStore(delta, elapsed, seedStoreActive);
   updateCritters(delta, elapsed, avatar.position);
   updateMakerPrompt(avatar.position);
   updateSeedStorePrompt(avatar.position);

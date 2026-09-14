@@ -198,6 +198,16 @@ exact material gated behind that grant. The useful invariant formerly housed in
 the plan-siting test now lives with tool progression, where it applies to the
 actual acquisition route.
 
+### 1.7 Sturdy-tool play-test path — ✅ built (2026-09-14)
+
+The tier-2 digging and trimming lessons are both available from a fresh save
+once their starter plans are present, and a catalog test holds that path open.
+Their doing route now asks the player to own and make the starter tool once,
+rather than manufacturing two extra copies, so the Okayish Shovel and Sturdy
+Scissors can be reached in an ordinary play-test session without weakening the
+real-world learning-clock alternative. Concept-only nodes remain visibly on the
+roadmap and do not pretend to grant systems that have not been built.
+
 ---
 
 ## Phase 2 — Critter knowledge

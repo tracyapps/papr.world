@@ -6,10 +6,10 @@ import {
 } from './resourcePresentation';
 
 describe('resource presentation', () => {
-  test('keeps legacy art available while resources migrate to generated tiles', () => {
+  test('prefers compiled loose variants after a legacy resource migrates to generated tiles', () => {
     const art = getResourceArt('terracotta-pebbles');
-    expect(art?.sourceUrl).toBe('/assets/runtime/resources/terracotta-pebbles.png');
-    expect(art?.variants).toHaveLength(1);
+    expect(art?.sourceUrl).toBe('/assets/runtime/resources/terracotta-pebbles/loose-01.png');
+    expect(art?.variants).toHaveLength(6);
   });
 
   test('selects generated loose variants deterministically', () => {

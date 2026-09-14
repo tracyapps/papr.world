@@ -32,6 +32,8 @@ function trim(state: GameState, options: {
       pageId: '0,0',
       treeKey: options.treeKey ?? 'tree:1.000:2.000',
       species: options.species ?? 'leafy',
+      x: 1,
+      z: 2,
     },
     now: options.now ?? NOW,
   });
@@ -101,8 +103,9 @@ describe('trimming', () => {
     const spent = MAX_TREE_GROWTH - trimProfileForTier(1).cost;
     expect(recordFor(state)?.growth).toBe(spent);
     expect(recordFor(state)?.trims).toBe(1);
-    const granted = Object.values(result.grants ?? {}).reduce((sum, count) => sum + count, 0);
-    expect(granted).toBeGreaterThan(0);
+    const dropped = Object.values(result.drops ?? {}).reduce((sum, count) => sum + count, 0);
+    expect(dropped).toBeGreaterThan(0);
+    expect(Object.values(state.world.pages['0,0'].resourceDrops ?? {})).not.toHaveLength(0);
   });
 
   it('never destroys the tree, however many times it is cut', () => {

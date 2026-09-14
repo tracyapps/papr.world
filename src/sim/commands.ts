@@ -9,7 +9,7 @@ import {
   type RecipeId,
 } from './catalogs/recipes';
 import type { ToolId } from './catalogs/tools';
-import { getGameState, updateGameState, type GameState } from './state';
+import { getGameState, updateGameState, type GameState, type ResourceDropState } from './state';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import { TOOL_DEFS } from './catalogs/tools';
 import { TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
@@ -55,10 +55,12 @@ export type ResourceAllocation = Partial<Record<ResourceId, number>>;
 export type GameCommand =
   | { type: 'buySeed'; shopId: ShopId; seedId: SeedId; payment: 'chips' | 'barter'; quantity?: number }
   | { type: 'collectResource'; resource: ResourceId; amount: number }
+  | { type: 'collectWorldDrop'; pageId: string; dropId: string }
   | { type: 'collectPlantSeed'; target: TerrainCellAddress; now: number }
   | { type: 'collectOutput'; index: number }
   | { type: 'completeCraft'; now: number }
   | { type: 'completeMending'; target: TerrainCellAddress; now: number }
+  | { type: 'completeTerrainRecovery'; target: TerrainCellAddress; now: number }
   | { type: 'completeBuildStep'; templateKey: string; stepId: string; x: number; z: number; rotY: number; pageId: string; now: number; material?: string }
   | { type: 'digTerrain'; target: TerrainCellAddress; discovery: DigDiscovery; now: number }
   | { type: 'equipTool'; toolId: ToolId | null }
@@ -67,17 +69,18 @@ export type GameCommand =
   | { type: 'placePiece'; templateKey: string; x: number; z: number; rotY: number; pageId: string; now: number; material?: string }
   | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number }
   | { type: 'refillTerrain'; target: TerrainCellAddress; now: number }
+  | { type: 'raiseTerrain'; target: TerrainCellAddress; now: number }
   | { type: 'selectSeed'; seedId: SeedId | null }
   | { type: 'sellResource'; shopId: ShopId; resource: ResourceId; quantity: number }
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
   | { type: 'tendPlant'; target: TerrainCellAddress; now: number }
-  | { type: 'trimTree'; target: TreeAddress; now: number }
+  | { type: 'trimTree'; target: TreeAddress & { x: number; z: number }; now: number }
   | { type: 'updatePlacedPiece'; id: string; x: number; z: number; rotY: number; material?: string; pageId: string }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
   | { type: 'upgradeThingMaker' };
 
 export type CommandResult =
-  | { ok: true; allocation?: ResourceAllocation; grants?: ResourceAllocation; message: string }
+  | { ok: true; allocation?: ResourceAllocation; grants?: ResourceAllocation; drops?: ResourceAllocation; message: string }
   | { ok: false; reason: string };
 
 function resourceIds() {
@@ -177,8 +180,22 @@ const ACTIVITY_LOG_LIMIT = 80;
 
 function emptyPageState() {
   return {
-    terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
+    terrainEdits: {}, resourceDrops: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
   };
+}
+
+function addWorldDrop(
+  page: ReturnType<typeof emptyPageState> | GameState['world']['pages'][string],
+  resource: ResourceId,
+  amount: number,
+  x: number,
+  z: number,
+  now: number,
+  suffix: string,
+) {
+  const drops: Record<string, ResourceDropState> = page.resourceDrops ??= {};
+  const id = `drop-${now.toString(36)}-${suffix}`;
+  drops[id] = { id, resource, amount, x, z, createdAt: now };
 }
 
 function piecePlacementBlocker(
@@ -212,14 +229,10 @@ function appendActivity(
   return true;
 }
 
-/**
- * Depth at or below which a hole rakes closed for nothing.
- *
- * A tier-1 scoop is a scuff you can push back with the side of a hoe. Deeper
- * excavations are a real hole and need real fill, which is what gives dug
- * soil a sink and makes terracing a project rather than a free action.
- */
-export const FREE_REFILL_DEPTH = 0.14;
+/** Fresh fill blends away visually; authored height remains for raised cells. */
+export const TERRAIN_SURFACE_RECOVERY_MS = 5 * 60 * 1000;
+export const TERRAIN_RAISE_STEP = 0.13;
+export const MAX_BASIC_HILL_HEIGHT = TERRAIN_RAISE_STEP * 3;
 
 /** Soil-family resources, most plentiful first — what refilling spends. */
 function soilOnHand(state: GameState): ResourceId[] {
@@ -229,9 +242,25 @@ function soilOnHand(state: GameState): ResourceId[] {
     .sort((a, b) => (state.player.inventory[b] ?? 0) - (state.player.inventory[a] ?? 0) || a.localeCompare(b));
 }
 
-/** How much fill a hole of this depth needs. Shallow scoops are free. */
+/** How much carried soil a hole of this depth needs. Every real scoop uses fill. */
 export function refillCost(depth: number): number {
-  return depth <= FREE_REFILL_DEPTH ? 0 : Math.ceil((depth - FREE_REFILL_DEPTH) / 0.13);
+  return Math.max(1, Math.ceil(Math.max(0, depth) / TERRAIN_RAISE_STEP));
+}
+
+function spendSoil(state: GameState, cost: number): ResourceAllocation | null {
+  const available = soilOnHand(state);
+  const total = available.reduce((sum, resource) => sum + (state.player.inventory[resource] ?? 0), 0);
+  if (total < cost) return null;
+  let remaining = cost;
+  const spent: ResourceAllocation = {};
+  for (const resource of available) {
+    if (remaining <= 0) break;
+    const take = Math.min(remaining, state.player.inventory[resource] ?? 0);
+    state.player.inventory[resource] = (state.player.inventory[resource] ?? 0) - take;
+    spent[resource] = (spent[resource] ?? 0) + take;
+    remaining -= take;
+  }
+  return spent;
 }
 
 /**
@@ -353,6 +382,19 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       return { ok: true, message: `Collected ${amount} ${RESOURCE_CORE_DEFS[command.resource].shortLabel}.` };
     }
 
+    case 'collectWorldDrop': {
+      const page = state.world.pages[command.pageId];
+      const drop = page?.resourceDrops?.[command.dropId];
+      if (!page || !drop) return { ok: false, reason: 'That loose material is no longer there.' };
+      state.player.inventory[drop.resource] = (state.player.inventory[drop.resource] ?? 0) + drop.amount;
+      delete page.resourceDrops![command.dropId];
+      return {
+        ok: true,
+        grants: { [drop.resource]: drop.amount },
+        message: `Picked up ${drop.amount} ${RESOURCE_CORE_DEFS[drop.resource].shortLabel}.`,
+      };
+    }
+
     case 'startCraft': {
       const recipe = RECIPE_DEFS[command.recipeId];
       if (!recipe) return { ok: false, reason: 'That plan is unknown.' };
@@ -440,7 +482,8 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       }
       const page = state.world.pages[target.pageId] ??= emptyPageState();
       const existing = page.terrainEdits[target.cellKey];
-      if (existing && existing.toolTier >= tool.tier) {
+      if (existing && (existing.state === 'dug' || existing.state === 'planted' || existing.state === 'mending')
+        && existing.toolTier >= tool.tier) {
         return { ok: false, reason: 'This little patch is already as deep as that shovel can manage.' };
       }
       page.terrainEdits[target.cellKey] = {
@@ -457,11 +500,11 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         revealedLayers: [...(existing?.revealedLayers ?? []), discovery],
         changedAt: command.now,
       };
-      state.player.inventory[discovery.resource] = (state.player.inventory[discovery.resource] ?? 0) + discovery.quantity;
+      addWorldDrop(page, discovery.resource, discovery.quantity, target.x + 0.42, target.z + 0.18, command.now, `dig-${target.cellKey}`);
       return {
         ok: true,
-        grants: { [discovery.resource]: discovery.quantity },
-        message: `Found ${discovery.quantity} ${RESOURCE_CORE_DEFS[discovery.resource].shortLabel}. The shallow bed is ready for planting.`,
+        drops: { [discovery.resource]: discovery.quantity },
+        message: `Found ${discovery.quantity} ${RESOURCE_CORE_DEFS[discovery.resource].shortLabel}. It is lying beside the new bed.`,
       };
     }
 
@@ -717,33 +760,71 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'Lift what is growing here before filling the bed in.' };
       }
 
-      const cost = refillCost(edit.depth);
-      if (cost > 0) {
-        // Spend from the most plentiful soil first, so a player is not
-        // silently drained of a rare regional clay to close an ordinary hole.
-        const available = soilOnHand(state);
-        const total = available.reduce((sum, resource) => sum + (state.player.inventory[resource] ?? 0), 0);
-        if (total < cost) {
-          return {
-            ok: false,
-            reason: `That hole needs ${cost} scoop${cost === 1 ? '' : 's'} of paper soil to fill. Dig some up first.`,
-          };
-        }
-        let remaining = cost;
-        const spent: ResourceAllocation = {};
-        for (const resource of available) {
-          if (remaining <= 0) break;
-          const take = Math.min(remaining, state.player.inventory[resource] ?? 0);
-          state.player.inventory[resource] = (state.player.inventory[resource] ?? 0) - take;
-          spent[resource] = (spent[resource] ?? 0) + take;
-          remaining -= take;
-        }
-        delete page.terrainEdits[command.target.cellKey];
-        return { ok: true, allocation: spent, message: 'You rake the soil back and press it flat.' };
+      // A planter-box bed was never cut out of the terrain, so closing its
+      // temporary garden record needs no carried soil.
+      const cost = edit.toolTier === 0 && edit.depth === 0 ? 0 : refillCost(edit.depth);
+      const spent = spendSoil(state, cost);
+      if (!spent) {
+        return {
+          ok: false,
+          reason: `That hole needs ${cost} scoop${cost === 1 ? '' : 's'} of paper soil to fill. Pick some up first.`,
+        };
       }
+      if (cost === 0) {
+        delete page.terrainEdits[command.target.cellKey];
+        return { ok: true, allocation: {}, message: 'You smooth the planter soil level again.' };
+      }
+      edit.state = 'filled';
+      edit.depth = 0;
+      edit.height = 0;
+      edit.surfaceRestoresAt = command.now + TERRAIN_SURFACE_RECOVERY_MS;
+      edit.changedAt = command.now;
+      return { ok: true, allocation: spent, message: 'You rake the soil back and press it flat. The fresh patch will settle into the surrounding ground.' };
+    }
 
-      delete page.terrainEdits[command.target.cellKey];
-      return { ok: true, message: 'You nudge the loose soil back into the scuff.' };
+    case 'raiseTerrain': {
+      const equippedTool = state.player.equippedTool;
+      const tool = equippedTool ? TOOL_DEFS[equippedTool] : null;
+      if (!tool || tool.verb !== 'plant' || (state.player.tools[equippedTool!] ?? 0) <= 0) {
+        return { ok: false, reason: 'Hold a hoe to shape carried soil into a hill.' };
+      }
+      if (!command.target.pageId || !command.target.cellKey
+        || !Number.isFinite(command.target.x) || !Number.isFinite(command.target.z)) {
+        return { ok: false, reason: 'That patch of ground could not be found.' };
+      }
+      const page = state.world.pages[command.target.pageId] ??= emptyPageState();
+      const existing = page.terrainEdits[command.target.cellKey];
+      if (existing && existing.state !== 'filled' && existing.state !== 'raised') {
+        return { ok: false, reason: 'Finish with this bed before building the ground up.' };
+      }
+      const height = existing?.height ?? 0;
+      if (height >= MAX_BASIC_HILL_HEIGHT - 0.001) {
+        return { ok: false, reason: 'This little hill is as high as the basic hoe can safely shape it.' };
+      }
+      const spent = spendSoil(state, 1);
+      if (!spent) return { ok: false, reason: 'Pick up a scoop of paper soil before building a hill.' };
+      page.terrainEdits[command.target.cellKey] = {
+        kind: 'dug', state: 'raised', x: command.target.x, z: command.target.z,
+        depth: 0, height: Math.min(MAX_BASIC_HILL_HEIGHT, height + TERRAIN_RAISE_STEP),
+        radius: TERRAIN_CELL_RADIUS, toolTier: 1,
+        geologySeed: existing?.geologySeed ?? Math.abs(Math.imul(command.target.cellKey.length + 1, 2654435761)),
+        revealedLayers: existing?.revealedLayers ?? [],
+        surfaceRestoresAt: command.now + TERRAIN_SURFACE_RECOVERY_MS,
+        changedAt: command.now,
+      };
+      return { ok: true, allocation: spent, message: 'You shape a scoop of soil into the hill. Its fresh dirt will slowly blend into this biome.' };
+    }
+
+    case 'completeTerrainRecovery': {
+      const page = state.world.pages[command.target.pageId];
+      const edit = page?.terrainEdits[command.target.cellKey];
+      if (!page || !edit?.surfaceRestoresAt || command.now < edit.surfaceRestoresAt) {
+        return { ok: false, reason: 'That fresh ground is still settling.' };
+      }
+      if (edit.state === 'filled') delete page.terrainEdits[command.target.cellKey];
+      else if (edit.state === 'raised') edit.surfaceRestoresAt = undefined;
+      else return { ok: false, reason: 'That ground has nothing to settle.' };
+      return { ok: true, message: 'The fresh soil has blended into the surrounding ground.' };
     }
 
     case 'liftPlant': {
@@ -828,7 +909,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'Hold a pair of scissors to trim a tree.' };
       }
       const { target } = command;
-      if (!target.pageId || !target.treeKey) {
+      if (!target.pageId || !target.treeKey || !Number.isFinite(target.x) || !Number.isFinite(target.z)) {
         return { ok: false, reason: 'That tree could not be found.' };
       }
       const profile = trimProfileForTier(tool.tier);
@@ -861,16 +942,20 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       const remaining = Math.max(0, treeGrowthAt(record, command.now) - profile.cost);
       page.treeGrowth[target.treeKey] = { growth: remaining, trimmedAt: command.now, trims };
 
-      const grants: ResourceAllocation = {};
-      for (const entry of yields) {
-        state.player.inventory[entry.resource] = (state.player.inventory[entry.resource] ?? 0) + entry.quantity;
-        grants[entry.resource] = (grants[entry.resource] ?? 0) + entry.quantity;
+      const drops: ResourceAllocation = {};
+      for (const [index, entry] of yields.entries()) {
+        drops[entry.resource] = (drops[entry.resource] ?? 0) + entry.quantity;
+        const angle = ((index + trims * 0.37) / Math.max(1, yields.length)) * Math.PI * 2;
+        addWorldDrop(page, entry.resource, entry.quantity,
+          target.x + Math.cos(angle) * (0.55 + index * 0.12),
+          target.z + Math.sin(angle) * (0.55 + index * 0.12),
+          command.now, `trim-${target.treeKey}-${index}`);
       }
 
       return {
         ok: true,
-        grants,
-        message: `${describeTrimYield(yields)}. ${TRIM_STAGE_RESPONSES[treeStageFor(remaining)]}`,
+        drops,
+        message: `${describeTrimYield(yields)} fell beside the tree. ${TRIM_STAGE_RESPONSES[treeStageFor(remaining)]}`,
       };
     }
 

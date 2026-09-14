@@ -114,6 +114,23 @@ export function tryPlantAt(clientX: number, clientY: number) {
       return true;
     }
 
+    case 'raise': {
+      startTimedAction({
+        steps: [{ kind: 'plant', label: 'Shaping hill', durationMs: 1_300 }],
+        onComplete: () => {
+          const result = dispatchGameCommand({ type: 'raiseTerrain', target, now: Date.now() });
+          if (!result.ok) {
+            showPetToast(result.reason);
+            return;
+          }
+          refreshBuiltTerrainNear(target.x, target.z);
+          playCozySound('plop');
+          showPetToast(result.message);
+        },
+      });
+      return true;
+    }
+
     default:
       return false;
   }
@@ -147,6 +164,14 @@ export function updatePlanting() {
         if (now >= edit.mendsAt) {
           dispatchGameCommand({ type: 'completeMending', target, now });
           builtStages.delete(id);
+        }
+        refreshBuiltTerrainNear(edit.x, edit.z);
+        continue;
+      }
+
+      if ((edit.state === 'filled' || edit.state === 'raised') && edit.surfaceRestoresAt) {
+        if (now >= edit.surfaceRestoresAt) {
+          dispatchGameCommand({ type: 'completeTerrainRecovery', target, now });
         }
         refreshBuiltTerrainNear(edit.x, edit.z);
         continue;

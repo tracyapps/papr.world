@@ -257,7 +257,7 @@ function syncCellField(avatarPosition: THREE.Vector3) {
       const target = terrainCellAt(x, z, pageIdAt);
       const action = resolveGardenAction(target, { inReach: true, state });
       const edit = state.world.pages[target.pageId]?.terrainEdits[target.cellKey];
-      const material = action.kind === 'plant' && action.ok
+      const material = action.ok
         ? validCellMaterial
         : edit
           ? blockedCellMaterial

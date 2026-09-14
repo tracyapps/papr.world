@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { recipeForTool } from './catalogs/recipes';
 import { techNodeStatus } from './catalogs/techTree';
-import { dispatchGameCommand } from './commands';
+import { craftBlockers, dispatchGameCommand } from './commands';
 import {
   getLearningProgress,
   reconcileTechLearningState,
@@ -17,6 +17,35 @@ import {
 afterEach(() => setGameStateForTests(null));
 
 describe('one-at-a-time tech learning', () => {
+  it('exposes both sturdy-tool lessons from a fresh save', () => {
+    for (const nodeId of ['digging-2', 'trimming-2'] as const) {
+      const state = createDefaultGameState();
+      expect(techNodeStatus(nodeId, state)).toBe('available');
+      expect(startTechLearningState(state, nodeId, 1_000).ok).toBe(true);
+    }
+  });
+
+  it('makes both tier-two tools craftable through their short doing route', () => {
+    const cases = [
+      { nodeId: 'digging-2', starter: 'flimsy-shovel', recipe: 'okayish-shovel' },
+      { nodeId: 'trimming-2', starter: 'kids-scissors', recipe: 'sturdy-scissors' },
+    ] as const;
+    for (const entry of cases) {
+      const state = createDefaultGameState();
+      state.world.thingMaker.level = 2;
+      state.player.tools[entry.starter] = 1;
+      state.player.inventory['kraft-twigs'] = 99;
+      state.player.inventory['sunbaked-cardboard'] = 99;
+      state.player.inventory['graphite-cardstone'] = 99;
+      startTechLearningState(state, entry.nodeId, 1_000);
+      state.world.thingMaker.completedOutputs.push(entry.starter);
+
+      expect(reconcileTechLearningState(state, 2_000)).toBe(entry.nodeId);
+      expect(state.player.plans).toContain(entry.recipe);
+      expect(craftBlockers(state, entry.recipe)).toEqual([]);
+    }
+  });
+
   it('starts an available node and refuses a second one', () => {
     const state = createDefaultGameState();
 
@@ -62,15 +91,10 @@ describe('one-at-a-time tech learning', () => {
     startTechLearningState(state, 'digging-2', 1_000);
     let progress = getLearningProgress(state, 1_000);
     expect(progress?.tasks.map((task) => task.completed)).toEqual([true, false]);
-    expect(progress?.fraction).toBeCloseTo(1 / 3, 4);
+    expect(progress?.fraction).toBeCloseTo(1 / 2, 4);
 
     state.world.thingMaker.completedOutputs.push('flimsy-shovel');
-    expect(reconcileTechLearningState(state, 2_000)).toBeNull();
-    progress = getLearningProgress(state, 2_000);
-    expect(progress?.tasks[1]).toMatchObject({ completed: false, current: 1, target: 2 });
-
-    state.world.thingMaker.completedOutputs.push('flimsy-shovel');
-    expect(reconcileTechLearningState(state, 3_000)).toBe('digging-2');
+    expect(reconcileTechLearningState(state, 2_000)).toBe('digging-2');
     expect(state.player.activeLearning).toBeNull();
   });
 
@@ -96,14 +120,6 @@ describe('one-at-a-time tech learning', () => {
       completesAt: 2_000,
     };
     expect(dispatchGameCommand({ type: 'completeCraft', now: 2_000 }).ok).toBe(true);
-    expect(getLearningProgress(state, 2_000)?.tasks[1].current).toBe(1);
-
-    state.world.thingMaker.activeCraft = {
-      recipeId: 'flimsy-shovel',
-      startedAt: 2_500,
-      completesAt: 3_000,
-    };
-    expect(dispatchGameCommand({ type: 'completeCraft', now: 3_000 }).ok).toBe(true);
     expect(state.player.activeLearning).toBeNull();
     expect(state.player.plans).toContain(recipeForTool('okayish-shovel'));
   });

@@ -9,6 +9,7 @@ import { showPetToast } from './petting';
 import { getGameState, updateGameState } from '../sim/state';
 import { getToastStack } from '../ui/hudLayout';
 import { startTimedAction } from './timedAction';
+import { dispatchGameCommand } from '../sim/commands';
 
 const HARVEST_REACH = 3.4;
 /** Walking across the visible bundle gathers it without another input. */
@@ -20,8 +21,10 @@ type Harvestable = {
   object: THREE.Group;
   resource: ResourceId;
   amount: number;
-  respawnSeconds: number;
+  respawnSeconds: number | null;
   respawnAt: number;
+  pageId?: string;
+  dropId?: string;
 };
 
 const harvestables: Harvestable[] = [];
@@ -39,10 +42,31 @@ function loadState(): HarvestState {
 }
 
 export function registerHarvestable(options: Omit<Harvestable, 'respawnAt'>) {
-  if (harvestables.some((entry) => entry.id === options.id)) return;
+  const existing = harvestables.find((entry) => entry.id === options.id);
+  if (existing) {
+    existing.object = options.object;
+    existing.resource = options.resource;
+    existing.amount = options.amount;
+    existing.respawnSeconds = options.respawnSeconds;
+    existing.pageId = options.pageId;
+    existing.dropId = options.dropId;
+    existing.object.visible = existing.respawnAt <= Date.now();
+    return;
+  }
   const respawnAt = loadState()[options.id] ?? 0;
   options.object.visible = respawnAt <= Date.now();
   harvestables.push({ ...options, respawnAt });
+}
+
+export function registerWorldDrop(options: {
+  id: string;
+  object: THREE.Group;
+  resource: ResourceId;
+  amount: number;
+  pageId: string;
+  dropId: string;
+}) {
+  registerHarvestable({ ...options, respawnSeconds: null });
 }
 
 function pickHarvestableAt(clientX: number, clientY: number): Harvestable | null {
@@ -129,8 +153,25 @@ export function tryHarvestAt(clientX: number, clientY: number): boolean {
 
 function collectHarvestable(harvestable: Harvestable) {
   if (!harvestable.object.visible) return;
-  addResource(harvestable.resource, harvestable.amount);
+  if (harvestable.dropId && harvestable.pageId) {
+    const result = dispatchGameCommand({
+      type: 'collectWorldDrop', pageId: harvestable.pageId, dropId: harvestable.dropId,
+    });
+    if (!result.ok) return;
+  } else {
+    addResource(harvestable.resource, harvestable.amount);
+  }
   harvestable.object.visible = false;
+  if (harvestable.respawnSeconds === null) {
+    harvestable.object.removeFromParent();
+    const index = harvestables.indexOf(harvestable);
+    if (index >= 0) harvestables.splice(index, 1);
+    walkOverlaps.delete(harvestable.id);
+    pendingHarvests.delete(harvestable.id);
+    playCozySound(harvestable.resource.includes('stone') || harvestable.resource.includes('pebble') ? 'plop' : 'rustle');
+    showResourceGain(harvestable.resource, harvestable.amount);
+    return;
+  }
   harvestable.respawnAt = Date.now() + harvestable.respawnSeconds * 1000;
   updateGameState((state) => {
     state.world.harvestRespawns[harvestable.id] = harvestable.respawnAt;
@@ -157,7 +198,8 @@ export function updateHarvestables() {
     if (isOverlapping) walkOverlaps.add(harvestable.id);
     else walkOverlaps.delete(harvestable.id);
 
-    if (harvestable.object.visible || harvestable.respawnAt <= 0 || now < harvestable.respawnAt) continue;
+    if (harvestable.respawnSeconds === null
+      || harvestable.object.visible || harvestable.respawnAt <= 0 || now < harvestable.respawnAt) continue;
     harvestable.respawnAt = 0;
     harvestable.object.visible = true;
     delete loadState()[harvestable.id];

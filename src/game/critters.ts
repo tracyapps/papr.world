@@ -11,6 +11,9 @@ import { getBoldnessBoost } from './friendship';
 import { isInWater } from '../world/water';
 import { isSolidAt } from '../world/footprints';
 import { nudgeToFreeSpot } from '../core/placement';
+import { createColorMaterial } from '../render/materials';
+import type { CritterParams } from './critterVariation';
+import type { CritterRig } from './critterRigs';
 
 // Critter system: deterministic spawning per page, seeded individual
 // variation, and a single update loop that only animates critters on
@@ -60,15 +63,19 @@ function spawnCritter(
   x: number,
   z: number,
   nameOverride?: string,
+  configureParams?: (params: CritterParams) => void,
+  configureRig?: (rig: CritterRig) => void,
 ): Critter {
   const params = generateCritterParams(species, seed);
   if (nameOverride) params.name = nameOverride;
+  configureParams?.(params);
 
   // Friendship makes critters bolder and more attentive from farther away.
   const boldness = getBoldnessBoost(id);
   params.shyness *= 1 - boldness * 0.7;
 
   const rig = buildCritterRig(species, params);
+  configureRig?.(rig);
 
   // Land critters seeded onto water or inside a wall get walked out to the
   // nearest free ground. Spawn points come from seeded page coordinates that
@@ -147,6 +154,41 @@ export function buildCritters(parent: THREE.Group) {
 
 export function buildWoodMillResident(parent: THREE.Group, x: number, z: number) {
   return spawnCritter(parent, '-2,0#woodchuck', 'woodchuck', hashCoords(-2, 0, 1881), x, z, 'Chisel');
+}
+
+/** Pip shares the resident movement system, but keeps his authored coat marks. */
+export function buildSeedStoreResident(parent: THREE.Group, x: number, z: number, wanderRadius: number) {
+  return spawnCritter(
+    parent,
+    '1,0#pip',
+    'squirrel',
+    7319,
+    x,
+    z,
+    'Pip',
+    (params) => {
+      params.scale = 0.9;
+      params.wanderRadius = wanderRadius;
+      params.bodyTextureUrl = null;
+      params.bodyColor = '#b87946';
+      params.accentColor = '#f0d5a1';
+    },
+    (rig) => {
+      const body = rig.parts.body;
+      if (!body) return;
+      const stripeMaterial = createColorMaterial('#55351f', 0.86);
+      for (const [index, localX] of [-0.14, 0, 0.14].entries()) {
+        const stripe = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.052, index === 1 ? 0.24 : 0.2),
+          stripeMaterial,
+        );
+        stripe.name = 'pip-back-stripe';
+        stripe.position.set(localX, 0.282, 0.025);
+        stripe.rotation.x = -Math.PI / 2;
+        body.add(stripe);
+      }
+    },
+  );
 }
 
 /** Deterministic critter population for generated/authored pages. */

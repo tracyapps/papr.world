@@ -298,13 +298,33 @@ describe('terrain commands', () => {
     expect(state.world.pages['0,0'].terrainEdits['2,3']).toMatchObject({
       kind: 'dug', state: 'dug', x: 2.5, z: 3.75, toolTier: 1, radius: TERRAIN_CELL_RADIUS,
     });
-    expect(state.player.inventory['ochre-paperclay']).toBe(2);
+    expect(state.player.inventory['ochre-paperclay']).toBeUndefined();
+    expect(Object.values(state.world.pages['0,0'].resourceDrops ?? {})).toEqual([
+      expect.objectContaining({ resource: 'ochre-paperclay', amount: 2 }),
+    ]);
     expect(state.world.pages['0,0'].terrainEdits['2,3'].revealedLayers).toEqual([SHALLOW_DISCOVERY]);
 
     const digDepth = state.world.pages['0,0'].terrainEdits['2,3'].depth;
     setGameStateForTests(state);
     expect(sampleTerrainHeight(2.5, 3.75)).toBeCloseTo(sampleBaseTerrainHeight(2.5, 3.75) - digDepth, 5);
     setGameStateForTests(null);
+  });
+
+  it('moves a dug material into inventory only when its ground pile is collected', () => {
+    const state = createDefaultGameState();
+    state.player.tools['flimsy-shovel'] = 1;
+    state.player.equippedTool = 'flimsy-shovel';
+    const target = { pageId: '0,0', cellKey: '3,3', x: 3.75, z: 3.75 };
+
+    applyGameCommand(state, { type: 'digTerrain', target, discovery: SHALLOW_DISCOVERY, now: 1000 });
+    const [drop] = Object.values(state.world.pages['0,0'].resourceDrops ?? {});
+    expect(drop).toMatchObject({ resource: 'ochre-paperclay', amount: 2 });
+    expect(state.player.inventory['ochre-paperclay']).toBeUndefined();
+
+    const collected = applyGameCommand(state, { type: 'collectWorldDrop', pageId: '0,0', dropId: drop.id });
+    expect(collected.ok).toBe(true);
+    expect(state.player.inventory['ochre-paperclay']).toBe(2);
+    expect(state.world.pages['0,0'].resourceDrops?.[drop.id]).toBeUndefined();
   });
 
   it('resolves repeatable regional geology and hill quantity bonuses', () => {
@@ -590,17 +610,51 @@ describe('hoe: refilling and lifting', () => {
     expect(state.world.pages['0,0'].terrainEdits['1,1']).toBeDefined();
   });
 
-  it('rakes a shallow scoop closed for free', () => {
+  it('uses picked-up soil to close a shallow scoop and leaves a fading fill patch', () => {
     const state = hoeState();
     const target = digCell(state, '1,1', 0.5, 0.5);
     state.player.equippedTool = 'creased-hoe';
-    const soilBefore = state.player.inventory['ochre-paperclay'];
+    state.player.inventory['ochre-paperclay'] = 1;
 
     const result = applyGameCommand(state, { type: 'refillTerrain', target, now: 2000 });
 
     expect(result.ok).toBe(true);
+    expect(state.world.pages['0,0'].terrainEdits['1,1']).toMatchObject({ state: 'filled', depth: 0 });
+    expect(state.world.pages['0,0'].terrainEdits['1,1'].surfaceRestoresAt).toBeGreaterThan(2000);
+    expect(state.player.inventory['ochre-paperclay']).toBe(0);
+  });
+
+  it('settles a filled patch back into ordinary ground after its recovery time', () => {
+    const state = hoeState();
+    const target = digCell(state, '1,1', 0.5, 0.5);
+    state.player.equippedTool = 'creased-hoe';
+    state.player.inventory['ochre-paperclay'] = 1;
+    applyGameCommand(state, { type: 'refillTerrain', target, now: 2000 });
+    const restoresAt = state.world.pages['0,0'].terrainEdits['1,1'].surfaceRestoresAt!;
+
+    expect(applyGameCommand(state, { type: 'completeTerrainRecovery', target, now: restoresAt - 1 }).ok).toBe(false);
+    expect(applyGameCommand(state, { type: 'completeTerrainRecovery', target, now: restoresAt }).ok).toBe(true);
     expect(state.world.pages['0,0'].terrainEdits['1,1']).toBeUndefined();
-    expect(state.player.inventory['ochre-paperclay']).toBe(soilBefore);
+  });
+
+  it('uses carried soil to build a persistent hill that keeps its shape after the dirt blends', () => {
+    const state = hoeState();
+    const target = { pageId: '0,0', cellKey: '12,12', x: 15, z: 15 };
+    state.player.equippedTool = 'creased-hoe';
+    state.player.inventory['ochre-paperclay'] = 2;
+
+    expect(applyGameCommand(state, { type: 'raiseTerrain', target, now: 2000 }).ok).toBe(true);
+    expect(applyGameCommand(state, { type: 'raiseTerrain', target, now: 2100 }).ok).toBe(true);
+    const edit = state.world.pages['0,0'].terrainEdits[target.cellKey];
+    expect(edit).toMatchObject({ state: 'raised', height: 0.26 });
+    setGameStateForTests(state);
+    expect(sampleTerrainHeight(target.x, target.z)).toBeCloseTo(sampleBaseTerrainHeight(target.x, target.z) + 0.26, 5);
+    setGameStateForTests(null);
+
+    const restoresAt = edit.surfaceRestoresAt!;
+    expect(applyGameCommand(state, { type: 'completeTerrainRecovery', target, now: restoresAt }).ok).toBe(true);
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey]).toMatchObject({ state: 'raised', height: 0.26 });
+    expect(state.world.pages['0,0'].terrainEdits[target.cellKey].surfaceRestoresAt).toBeUndefined();
   });
 
   it('charges soil for a deeper hole and refuses when short', () => {

@@ -5,6 +5,9 @@ import { getGameState, type GameState, type TerrainEditCellState } from '../sim/
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
 import { planterBoxAt } from '../world/buildPieces';
+import { findDigFootprintBlocker } from '../world/footprints';
+import { isInWater } from '../world/water';
+import { TERRAIN_CELL_RADIUS } from '../sim/terrainCells';
 
 // What the hoe would do at a given cell, and why it can or cannot.
 //
@@ -19,7 +22,7 @@ import { planterBoxAt } from '../world/buildPieces';
 // way, which is how you end up with a cursor that says yes and a click that
 // says no. One resolver, three readers.
 
-export type GardenActionKind = 'plant' | 'lift' | 'refill' | 'none';
+export type GardenActionKind = 'plant' | 'lift' | 'refill' | 'raise' | 'none';
 
 /** Shared reach for input and the always-visible hoe overlay. */
 export const GARDEN_REACH = 3.1;
@@ -31,6 +34,7 @@ export type GardenBlocker =
   | { kind: 'crowded'; by: SeedId; distance: number; required: number }
   | { kind: 'no-seed' }
   | { kind: 'needs-fill'; required: number; available: number }
+  | { kind: 'blocked'; label: string }
   | { kind: 'occupied'; by: SeedId };
 
 export type GardenAction = {
@@ -92,8 +96,6 @@ export function resolveGardenAction(
   // nothing to do until a seed has actually gone in.
   const insidePlanterBox = !edit
     && Boolean(planterBoxAt(state.world.pages[target.pageId]?.placedPieces, target.x, target.z));
-  if (!edit && !insidePlanterBox) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
-
   // Something is growing here: the only thing the hoe can do is lift it.
   if (edit && edit.state !== 'dug' && edit.plantedSeedId) {
     return {
@@ -108,14 +110,33 @@ export function resolveGardenAction(
 
   const seedId = selectedSeed(state);
   if (!seedId) {
-    if (!edit) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
+    if (!edit || edit.state === 'filled' || edit.state === 'raised') {
+      if (insidePlanterBox) return { kind: 'none', ok: false, blocker: { kind: 'no-bed' } };
+      if (isInWater(target.x, target.z)) {
+        return { kind: 'raise', ok: false, blocker: { kind: 'blocked', label: 'water' } };
+      }
+      const footprint = findDigFootprintBlocker(target.x, target.z, TERRAIN_CELL_RADIUS);
+      if (footprint) {
+        return { kind: 'raise', ok: false, blocker: { kind: 'blocked', label: footprint.label } };
+      }
+      const available = soilOnHand(state);
+      if (available < 1) {
+        return { kind: 'raise', ok: false, cost: 1, blocker: { kind: 'needs-fill', required: 1, available } };
+      }
+      return { kind: 'raise', ok: true, cost: 1 };
+    }
     // Empty hands over an empty bed: rake it closed.
-    const cost = refillCost(edit.depth);
+    const cost = edit.toolTier === 0 && edit.depth === 0 ? 0 : refillCost(edit.depth);
     const available = soilOnHand(state);
     if (cost > available) {
       return { kind: 'refill', ok: false, cost, blocker: { kind: 'needs-fill', required: cost, available } };
     }
     return { kind: 'refill', ok: true, cost };
+  }
+
+  if (!edit && !insidePlanterBox) return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
+  if (edit?.state === 'filled' || edit?.state === 'raised') {
+    return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
   }
 
   const crowding = findCrowdingPlant(state, target, seedId);

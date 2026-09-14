@@ -25,8 +25,7 @@ import {
   groundedLocalY,
 } from '../world/seedStoreLayout';
 import { sampleTerrainHeight } from '../world/terrain';
-import { buildCritterRig, type CritterRig } from './critterRigs';
-import { generateCritterParams } from './critterVariation';
+import { buildSeedStoreResident } from './critters';
 import { registerCozyObject } from './cozyInteractions';
 import { setMakerPanelOpen } from './thingMaker';
 
@@ -39,7 +38,6 @@ const promptElement = document.querySelector<HTMLElement>('#seed-store-interacti
 
 let panelOpen = false;
 let message = '“Every garden starts folded up small.” — Pip';
-let shopkeeperRig: CritterRig | null = null;
 const buyQuantities = new Map<SeedId, number>();
 const sellQuantities = new Map<ResourceId, number>();
 
@@ -146,33 +144,6 @@ function seedPacket(seedId: SeedId, x: number, y: number, z: number) {
   packet.position.set(x, y, z);
   packet.rotation.x = -0.08;
   return packet;
-}
-
-function buildPip() {
-  const params = generateCritterParams('squirrel', 7319);
-  params.name = 'Pip';
-  params.scale = 0.9;
-  params.bodyTextureUrl = null;
-  params.bodyColor = '#b87946';
-  params.accentColor = '#f0d5a1';
-  const rig = buildCritterRig('squirrel', params);
-
-  // Three paper marks sit on the back surface. These used to be long boxes
-  // added to the root rig, so they passed straight through Pip whenever his
-  // body breathed or posed — more skewers than stripes.
-  const stripeMaterial = createColorMaterial('#55351f', 0.86);
-  const body = rig.parts.body;
-  if (body) {
-    for (const [index, x] of [-0.14, 0, 0.14].entries()) {
-      const stripeLength = index === 1 ? 0.24 : 0.2;
-      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.052, stripeLength), stripeMaterial);
-      stripe.name = 'pip-back-stripe';
-      stripe.position.set(x, 0.282, 0.025);
-      stripe.rotation.x = -Math.PI / 2;
-      body.add(stripe);
-    }
-  }
-  return rig;
 }
 
 export function buildSeedStore(parent: THREE.Group) {
@@ -299,15 +270,6 @@ export function buildSeedStore(parent: THREE.Group) {
   signPost.position.set(signX + 0.03, signGround + 1.13, signZ);
   store.add(signPost, sign);
 
-  shopkeeperRig = buildPip();
-  shopkeeperRig.group.position.set(
-    PIP_LOCAL_POSITION.x,
-    localTerrainY(PIP_LOCAL_POSITION.x, PIP_LOCAL_POSITION.z, shopkeeperRig.groundOffset),
-    PIP_LOCAL_POSITION.z,
-  );
-  shopkeeperRig.group.rotation.y = Math.PI / 2;
-  store.add(shopkeeperRig.group);
-
   // Two overlapping interaction volumes cover the long house while keeping
   // each volume's origin within cozy-interaction reach from its half.
   const interactionTargets = [-1, 1].map((side) => {
@@ -320,6 +282,13 @@ export function buildSeedStore(parent: THREE.Group) {
     return target;
   });
   parent.add(store);
+  const pipHome = greenhouseWorldPoint(0, 0);
+  buildSeedStoreResident(
+    parent,
+    pipHome.x,
+    pipHome.z,
+    Math.max(1.6, Math.min(GREENHOUSE_LENGTH / 2 - 1.1, GREENHOUSE_WIDTH / 2 - 0.6)),
+  );
 
   interactionTargets.forEach((target, index) => {
     registerCozyObject({
@@ -521,9 +490,4 @@ export function isWheelInsideSeedStorePanel(event: WheelEvent) {
 export function updateSeedStorePrompt(avatarPosition: THREE.Vector3) {
   if (!promptElement) return;
   promptElement.hidden = panelOpen || !isNearSeedStore(avatarPosition);
-}
-
-export function updateSeedStore(delta: number, elapsed: number, active: boolean) {
-  if (!active || !shopkeeperRig) return;
-  shopkeeperRig.animate(elapsed, delta, false, 0, false);
 }

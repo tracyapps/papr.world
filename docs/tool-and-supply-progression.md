@@ -221,7 +221,9 @@ good locations, but they are bonuses rather than the only valid dig targets.
 Digging is a small terrain-editing action, not a respawning resource-node click.
 Each action creates or deepens a shallow, irregular paper depression. Bare dug
 ground does **not** automatically return to normal. It remains part of the local
-landscape until the player plants it.
+landscape until the player fills or plants it. The material a shovel reveals is
+a saved loose pile beside the hole; it enters the scrapbook only when walked
+over or picked up.
 
 ### Spatial Model
 
@@ -348,8 +350,11 @@ Seeds declare `stageSeconds` (cumulative) alongside `spacing`.
 
 - Lifting returns the **seed** at seeded/sprout and the **plant** at
   bud/bloom, plus any seed already dropped beside it. The bed survives.
-- Refilling is free at or below `FREE_REFILL_DEPTH` (a tier-1 scoop) and
-  costs paper soil beyond it, spending the most plentiful variety first.
+- Refilling a terrain hole always consumes carried paper soil, spending the
+  most plentiful variety first. An empty planter-box bed remains free to close
+  because it was never excavated from the world.
+- With no seed selected, the hoe can also spend one carried scoop at a time to
+  raise an untouched or already-raised cell into a small hill.
   This is the promised cut-and-fill conservation rule in its first form.
 
 ### Planting and Ground Recovery
@@ -365,9 +370,11 @@ from a scar into a purposeful bed:
 3. Deep cells take longer or require more than one seed stage to mend, giving
    depth a visual consequence without creating a permanent mistake.
 
-There is no automatic dirt regrowth timer. The player's planting choice changes
-the landscape, which makes gardening, digging, and settlement design part of the
-same creative system.
+Filled ground and new hills look like fresh dirt for five minutes, then that
+surface fades away to reveal the ordinary biome paper underneath. A filled hole
+becomes an untouched flat cell; a hill keeps its authored height after the grass,
+forest paper, sand, or scrap-flat surface has reclaimed it. Dug beds themselves
+remain persistent until the player deliberately fills or plants them.
 
 ### Rendering and Simulation
 
@@ -447,7 +454,8 @@ Players always have alternatives:
 
 Terraforming should conserve material in a readable, forgiving way:
 
-- Digging produces regional soil/card fill in the scrapbook.
+- Digging and trimming produce saved loose piles on the ground; walking over a
+  pile moves it into the scrapbook.
 - Raising or repairing terrain consumes compatible fill.
 - Plant roots can slowly lift a dug cell without requiring fill.
 - Precision tools reduce waste or let one unit of fill affect a slightly larger

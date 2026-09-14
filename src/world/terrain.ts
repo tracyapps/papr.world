@@ -85,6 +85,7 @@ export function digInfluence(distance: number, radius: number): number {
 
 /** Effective depth of one edit right now, accounting for planting/mending. */
 function currentEditDepth(edit: TerrainEditCellState): number {
+  if (edit.state === 'filled' || edit.state === 'raised') return 0;
   if (edit.state === 'planted') return edit.depth * 0.55;
   if (edit.state === 'mending') {
     const duration = Math.max(1, (edit.mendsAt ?? edit.changedAt) - (edit.plantedAt ?? edit.changedAt));
@@ -92,6 +93,10 @@ function currentEditDepth(edit: TerrainEditCellState): number {
     return edit.depth * 0.55 * remaining;
   }
   return edit.depth;
+}
+
+function currentEditHeight(edit: TerrainEditCellState): number {
+  return edit.state === 'raised' ? edit.height ?? 0 : 0;
 }
 
 export function sampleTerrainHeight(x: number, z: number): number {
@@ -108,12 +113,23 @@ export function sampleTerrainHeight(x: number, z: number): number {
   // `max` makes overlapping scoops read as one worked patch at the depth of
   // the deepest tool used, which is also the physically sensible answer.
   let deepest = 0;
+  let highest = 0;
   for (const edit of terrainEditsNear(x, z)) {
     const distance = Math.hypot(x - edit.x, z - edit.z);
     if (distance >= edit.radius) continue;
-    deepest = Math.max(deepest, currentEditDepth(edit) * digInfluence(distance, edit.radius));
+    const influence = digInfluence(distance, edit.radius);
+    deepest = Math.max(deepest, currentEditDepth(edit) * influence);
+    highest = Math.max(highest, currentEditHeight(edit) * influence);
   }
-  return height - deepest;
+  return height + highest - deepest;
+}
+
+/** Fresh fill opacity; the deformed terrain below already carries biome paper. */
+export function terrainSurfaceRecoveryOpacity(edit: TerrainEditCellState, now = Date.now()): number {
+  if (edit.state !== 'filled' && edit.state !== 'raised') return 1;
+  if (!edit.surfaceRestoresAt) return 0;
+  const duration = Math.max(1, edit.surfaceRestoresAt - edit.changedAt);
+  return Math.max(0, Math.min(1, (edit.surfaceRestoresAt - now) / duration));
 }
 
 export function createTerrainPageMesh(page: PageData, material: THREE.Material, segments = 80): THREE.Mesh {
@@ -275,8 +291,17 @@ export function createDugCellMesh(edit: TerrainEditCellState, material: THREE.Ma
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
-  const mesh = new THREE.Mesh(geometry, material);
+  let surfaceMaterial = material;
+  const opacity = terrainSurfaceRecoveryOpacity(edit);
+  if (opacity < 1) {
+    surfaceMaterial = material.clone();
+    surfaceMaterial.transparent = true;
+    surfaceMaterial.opacity = opacity;
+    surfaceMaterial.depthWrite = opacity > 0.85;
+  }
+  const mesh = new THREE.Mesh(geometry, surfaceMaterial);
   mesh.receiveShadow = true;
+  mesh.userData.terrainRecovery = edit.state === 'filled' || edit.state === 'raised';
   return mesh;
 }
 

@@ -15,7 +15,6 @@ import { showPetToast } from './petting';
 import { resolveDigDiscovery } from '../sim/catalogs/geology';
 import { getPage } from '../world/pages';
 import { sampleBaseTerrainHeight } from '../world/terrain';
-import { showResourceGain } from './harvesting';
 import { SEED_DEFS } from '../sim/catalogs/seeds';
 import { getActionMode, onActionModeChanged } from './actionMode';
 
@@ -127,7 +126,8 @@ function assessDigTarget(clientX: number, clientY: number): DigAssessment {
     return { status: 'too-steep', tool, target, message: 'That fold is too steep for a flimsy shovel' };
   }
   const existing = getGameState().world.pages[target.pageId]?.terrainEdits[target.cellKey];
-  if (existing && existing.toolTier >= tool.tier) {
+  if (existing && (existing.state === 'dug' || existing.state === 'planted' || existing.state === 'mending')
+    && existing.toolTier >= tool.tier) {
     return { status: 'already-dug', tool, target, message: 'This little patch is already as deep as that shovel can manage' };
   }
   return { status: 'valid', tool, target };
@@ -162,8 +162,7 @@ export function tryToolActionAt(clientX: number, clientY: number) {
   }
   refreshBuiltTerrainNear(target.x, target.z);
   playCozySound('rustle');
-  showResourceGain(discovery.resource, discovery.quantity);
-  showPetToast('The exposed paper-soil bed is ready for planting');
+  showPetToast(result.message);
   return true;
 }
 

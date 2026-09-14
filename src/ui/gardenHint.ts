@@ -40,18 +40,24 @@ function describe(action: GardenAction): CardContent | null {
 
     case 'needs-fill':
       return {
-        title: 'Not enough soil to fill this in',
-        body: 'Deeper holes need paper soil to fill. Dig somewhere else to gather more, then come back.',
+        title: 'Not enough carried soil',
+        body: 'Pick up the loose paper soil from digging, then use it to fill holes or shape hills.',
         facts: [
           ['Soil needed', `${blocker.required}`],
           ['Soil on hand', `${blocker.available}`],
         ],
       };
 
+    case 'blocked':
+      return {
+        title: 'That ground is occupied',
+        body: `There is ${blocker.label} here. Shape the soil on an open patch instead.`,
+      };
+
     case 'no-bed':
       return {
         title: 'Nothing to work here',
-        body: 'The hoe sows, lifts, and rakes — but it needs a bed the shovel has already opened.',
+        body: 'Seeds need a bed the shovel has opened. Put seeds away to use carried soil for landscaping.',
       };
 
     case 'out-of-reach':
@@ -63,7 +69,7 @@ function describe(action: GardenAction): CardContent | null {
     case 'no-tool':
       return {
         title: 'You need a hoe for that',
-        body: 'Make a Basic Garden Hoe at the Thing Maker to sow, lift, and fill.',
+        body: 'Make a Basic Garden Hoe at the Thing Maker to sow, lift, fill, and shape hills.',
       };
 
     case 'no-seed':

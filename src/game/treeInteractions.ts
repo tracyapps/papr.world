@@ -15,9 +15,9 @@ import { TOOL_DEFS } from '../sim/catalogs/tools';
 import { applyTreeStageVisual } from '../world/treeRuntime';
 import { getActionMode } from './actionMode';
 import { avatar } from './avatar';
+import { refreshBuiltTerrainNear } from '../world/streaming';
 import { playCozySound } from './cozyAudio';
 import { showPetToast } from './petting';
-import { showResourceGain } from './harvesting';
 
 /**
  * Trimming: the world side of the renewable tree model.
@@ -237,7 +237,7 @@ export function tryTrimAt(clientX: number, clientY: number): boolean {
   const entry = assessment.entry!;
   const result = dispatchGameCommand({
     type: 'trimTree',
-    target: { pageId: entry.pageId, treeKey: entry.treeKey, species: entry.species },
+    target: { pageId: entry.pageId, treeKey: entry.treeKey, species: entry.species, x: entry.x, z: entry.z },
     now: Date.now(),
   });
   if (!result.ok) {
@@ -247,14 +247,8 @@ export function tryTrimAt(clientX: number, clientY: number): boolean {
 
   recovering.add(entry.id);
   restage(entry, Date.now());
+  refreshBuiltTerrainNear(entry.x, entry.z);
   playCozySound('rustle');
-  // One chip, not one per material. The chip is a single element on a timer,
-  // so looping over a mixed yield would flash each in turn and leave only the
-  // last visible — the largest is the one worth counting, and the toast below
-  // already names everything the cut gave.
-  const largest = Object.entries(result.grants ?? {})
-    .sort((a, b) => b[1] - a[1])[0];
-  if (largest) showResourceGain(largest[0] as Parameters<typeof showResourceGain>[0], largest[1]);
   showPetToast(result.message);
   return true;
 }

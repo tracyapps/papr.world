@@ -343,7 +343,7 @@ describe('derived unlock icons — never hand-authored', () => {
 
 describe('tech task presentation', () => {
   it('does not add another s to an already plural tool name', () => {
-    expect(describeTechTask(TECH_DEFS['trimming-2'].tasks[1])).toBe("Make 2 Kid's Scissors");
+    expect(describeTechTask(TECH_DEFS['trimming-2'].tasks[1])).toBe("Make 1 Kid's Scissors");
   });
 });
 
