@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T20:00:41.227Z",
+  "generatedAt": "2026-09-14T21:22:51.358Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -82,7 +82,7 @@
       "runtime": "assets/runtime/materials/building-blocks-brown.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "314x542",
+      "sourceSize": "314.2x542",
       "size": "314x542"
     },
     {
@@ -91,7 +91,7 @@
       "runtime": "assets/runtime/materials/building-blocks-darkgrey.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "192x331",
+      "sourceSize": "191.9x331",
       "size": "192x331"
     },
     {
@@ -100,7 +100,7 @@
       "runtime": "assets/runtime/materials/building-blocks-green.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "314x542",
+      "sourceSize": "314.2x542",
       "size": "314x542"
     },
     {
@@ -136,7 +136,7 @@
       "runtime": "assets/runtime/materials/clay-earth.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "463x462",
+      "sourceSize": "462.71x461.85",
       "size": "463x462"
     },
     {
@@ -280,7 +280,7 @@
       "runtime": "assets/runtime/materials/folded-stripes-blue-green-yellow.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "179x99",
+      "sourceSize": "179x99.4",
       "size": "179x99"
     },
     {
@@ -316,7 +316,7 @@
       "runtime": "assets/runtime/materials/mossy-wall.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": "460x460",
+      "sourceSize": "459.58x460.47",
       "size": "460x460"
     },
     {
@@ -379,8 +379,8 @@
           "--background": "#5A4011"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber.green",
@@ -397,8 +397,8 @@
           "--background": "#115A1C"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber.purple",
@@ -415,8 +415,8 @@
           "--background": "#3A115A"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber.blue",
@@ -433,8 +433,8 @@
           "--background": "#11405A"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber.teal",
@@ -451,8 +451,8 @@
           "--background": "#209B74"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber.pink",
@@ -469,8 +469,8 @@
           "--background": "#C900AB"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "materials.resources.board.bound-lumber",
@@ -478,8 +478,8 @@
       "runtime": "assets/runtime/materials/resources/board/bound-lumber.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "42x23",
+      "size": "42x23"
     },
     {
       "key": "resource.bound-lumber.loose-01",
@@ -492,7 +492,7 @@
         "looseTemplate": "board",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "42x23",
       "size": "520x260"
     },
     {
@@ -506,7 +506,7 @@
         "looseTemplate": "board",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "42x23",
       "size": "520x260"
     },
     {
@@ -520,7 +520,7 @@
         "looseTemplate": "board",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "42x23",
       "size": "520x260"
     },
     {
@@ -534,7 +534,7 @@
         "looseTemplate": "board",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "42x23",
       "size": "520x260"
     },
     {
@@ -543,8 +543,8 @@
       "runtime": "assets/runtime/materials/resources/board/graphite-cardstock.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "500x500",
+      "size": "500x500"
     },
     {
       "key": "resource.graphite-cardstock.loose-01",
@@ -557,7 +557,7 @@
         "looseTemplate": "board",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "500x500",
       "size": "520x260"
     },
     {
@@ -571,7 +571,7 @@
         "looseTemplate": "board",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "500x500",
       "size": "520x260"
     },
     {
@@ -585,7 +585,7 @@
         "looseTemplate": "board",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "500x500",
       "size": "520x260"
     },
     {
@@ -599,7 +599,7 @@
         "looseTemplate": "board",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "500x500",
       "size": "520x260"
     },
     {
@@ -617,8 +617,8 @@
           "--foreground-02": "#0788FF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.blue",
@@ -635,8 +635,8 @@
           "--foreground-02": "#99FF14"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.teal",
@@ -653,8 +653,8 @@
           "--foreground-02": "#321652"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.pink",
@@ -671,8 +671,8 @@
           "--foreground-02": "#8FFF07"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.yellow",
@@ -689,8 +689,8 @@
           "--foreground-02": "#4A065A"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.red",
@@ -707,8 +707,8 @@
           "--foreground-02": "#CCFA01"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard.green",
@@ -725,8 +725,8 @@
           "--foreground-02": "#2C07FF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.board.layerboard",
@@ -734,8 +734,8 @@
       "runtime": "assets/runtime/materials/resources/board/layerboard.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "resource.layerboard.loose-01",
@@ -748,7 +748,7 @@
         "looseTemplate": "board",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "520x260"
     },
     {
@@ -762,7 +762,7 @@
         "looseTemplate": "board",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "520x260"
     },
     {
@@ -776,7 +776,7 @@
         "looseTemplate": "board",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "520x260"
     },
     {
@@ -790,7 +790,7 @@
         "looseTemplate": "board",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "520x260"
     },
     {
@@ -807,8 +807,8 @@
           "--background": "#BF0958"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.green",
@@ -824,8 +824,8 @@
           "--background": "#09BF18"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.blue",
@@ -841,8 +841,8 @@
           "--background": "#00FBFF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.purple",
@@ -858,8 +858,8 @@
           "--background": "#620BE5"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.orange",
@@ -875,8 +875,8 @@
           "--background": "#E35D10"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.darkblue",
@@ -892,8 +892,8 @@
           "--background": "#0128D5"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.yellow",
@@ -909,8 +909,8 @@
           "--background": "#FFF316"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.greyish",
@@ -926,8 +926,8 @@
           "--background": "#37565C"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam.black",
@@ -943,8 +943,8 @@
           "--background": "#1B0F14"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "materials.resources.board.storybeam",
@@ -952,8 +952,8 @@
       "runtime": "assets/runtime/materials/resources/board/storybeam.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150x150",
+      "size": "150x150"
     },
     {
       "key": "resource.storybeam.loose-01",
@@ -966,7 +966,7 @@
         "looseTemplate": "board",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "150x150",
       "size": "520x260"
     },
     {
@@ -980,7 +980,7 @@
         "looseTemplate": "board",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "150x150",
       "size": "520x260"
     },
     {
@@ -994,7 +994,7 @@
         "looseTemplate": "board",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "150x150",
       "size": "520x260"
     },
     {
@@ -1008,7 +1008,7 @@
         "looseTemplate": "board",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "150x150",
       "size": "520x260"
     },
     {
@@ -1017,8 +1017,8 @@
       "runtime": "assets/runtime/materials/resources/brick/cream-city-brick.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "407x324",
+      "size": "407x324"
     },
     {
       "key": "resource.cream-city-brick.loose-01",
@@ -1031,7 +1031,7 @@
         "looseTemplate": "brick",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1045,7 +1045,7 @@
         "looseTemplate": "brick",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1059,7 +1059,7 @@
         "looseTemplate": "brick",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1073,7 +1073,7 @@
         "looseTemplate": "brick",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1082,8 +1082,8 @@
       "runtime": "assets/runtime/materials/resources/brick/grey-brick.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "407x324",
+      "size": "407x324"
     },
     {
       "key": "resource.grey-brick.loose-01",
@@ -1096,7 +1096,7 @@
         "looseTemplate": "brick",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1110,7 +1110,7 @@
         "looseTemplate": "brick",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1124,7 +1124,7 @@
         "looseTemplate": "brick",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1138,7 +1138,7 @@
         "looseTemplate": "brick",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1147,8 +1147,8 @@
       "runtime": "assets/runtime/materials/resources/brick/red-brick.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "407x324",
+      "size": "407x324"
     },
     {
       "key": "resource.red-brick.loose-01",
@@ -1161,7 +1161,7 @@
         "looseTemplate": "brick",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1175,7 +1175,7 @@
         "looseTemplate": "brick",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1189,7 +1189,7 @@
         "looseTemplate": "brick",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1203,7 +1203,7 @@
         "looseTemplate": "brick",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "407x324",
       "size": "420x280"
     },
     {
@@ -1212,8 +1212,8 @@
       "runtime": "assets/runtime/materials/resources/fiber/cattail.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "resource.cattail.loose-01",
@@ -1226,7 +1226,7 @@
         "looseTemplate": "fiber",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1240,7 +1240,7 @@
         "looseTemplate": "fiber",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1254,7 +1254,7 @@
         "looseTemplate": "fiber",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1268,7 +1268,7 @@
         "looseTemplate": "fiber",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1282,7 +1282,7 @@
         "looseTemplate": "fiber",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1296,7 +1296,7 @@
         "looseTemplate": "fiber",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "256x440"
     },
     {
@@ -1305,8 +1305,8 @@
       "runtime": "assets/runtime/materials/resources/fiber/marsh-grass.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "277x230.8",
+      "size": "277x231"
     },
     {
       "key": "resource.marsh-grass.loose-01",
@@ -1319,7 +1319,7 @@
         "looseTemplate": "fiber",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1333,7 +1333,7 @@
         "looseTemplate": "fiber",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1347,7 +1347,7 @@
         "looseTemplate": "fiber",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1361,7 +1361,7 @@
         "looseTemplate": "fiber",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1375,7 +1375,7 @@
         "looseTemplate": "fiber",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1389,7 +1389,7 @@
         "looseTemplate": "fiber",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "277x230.8",
       "size": "256x440"
     },
     {
@@ -1398,8 +1398,8 @@
       "runtime": "assets/runtime/materials/resources/fiber/mossy-paper-fiber.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "886x792",
+      "size": "886x792"
     },
     {
       "key": "resource.mossy-paper-fiber.loose-01",
@@ -1412,7 +1412,7 @@
         "looseTemplate": "fiber",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1426,7 +1426,7 @@
         "looseTemplate": "fiber",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1440,7 +1440,7 @@
         "looseTemplate": "fiber",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1454,7 +1454,7 @@
         "looseTemplate": "fiber",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1468,7 +1468,7 @@
         "looseTemplate": "fiber",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1482,7 +1482,7 @@
         "looseTemplate": "fiber",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "886x792",
       "size": "256x440"
     },
     {
@@ -1491,8 +1491,8 @@
       "runtime": "assets/runtime/materials/resources/fiber/shrub.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "1000x800",
+      "size": "1000x800"
     },
     {
       "key": "resource.shrub.loose-01",
@@ -1505,7 +1505,7 @@
         "looseTemplate": "fiber",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1519,7 +1519,7 @@
         "looseTemplate": "fiber",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1533,7 +1533,7 @@
         "looseTemplate": "fiber",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1547,7 +1547,7 @@
         "looseTemplate": "fiber",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1561,7 +1561,7 @@
         "looseTemplate": "fiber",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1575,7 +1575,7 @@
         "looseTemplate": "fiber",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "1000x800",
       "size": "256x440"
     },
     {
@@ -1584,8 +1584,8 @@
       "runtime": "assets/runtime/materials/resources/soil/ochre-paperclay.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "512x512",
+      "size": "512x512"
     },
     {
       "key": "resource.ochre-paperclay.loose-01",
@@ -1598,7 +1598,7 @@
         "looseTemplate": "soil",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "512x512",
       "size": "380x280"
     },
     {
@@ -1612,7 +1612,7 @@
         "looseTemplate": "soil",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "512x512",
       "size": "380x280"
     },
     {
@@ -1626,7 +1626,7 @@
         "looseTemplate": "soil",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "512x512",
       "size": "380x280"
     },
     {
@@ -1640,7 +1640,7 @@
         "looseTemplate": "soil",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "512x512",
       "size": "380x280"
     },
     {
@@ -1649,8 +1649,8 @@
       "runtime": "assets/runtime/materials/resources/stone/basalt.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "461.83x662.5",
+      "size": "462x663"
     },
     {
       "key": "resource.basalt.loose-01",
@@ -1663,7 +1663,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1677,7 +1677,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1691,7 +1691,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1705,7 +1705,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1719,7 +1719,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1733,7 +1733,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "461.83x662.5",
       "size": "360x300"
     },
     {
@@ -1742,8 +1742,8 @@
       "runtime": "assets/runtime/materials/resources/stone/bluefold-pebbles.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "200x200",
+      "size": "200x200"
     },
     {
       "key": "resource.bluefold-pebbles.loose-01",
@@ -1756,7 +1756,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1770,7 +1770,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1784,7 +1784,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1798,7 +1798,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1812,7 +1812,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1826,7 +1826,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "360x300"
     },
     {
@@ -1835,8 +1835,8 @@
       "runtime": "assets/runtime/materials/resources/stone/carbon-copy-shale.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "450x268",
+      "size": "450x268"
     },
     {
       "key": "resource.carbon-copy-shale.loose-01",
@@ -1849,7 +1849,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1863,7 +1863,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1877,7 +1877,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1891,7 +1891,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1905,7 +1905,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1919,7 +1919,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "450x268",
       "size": "360x300"
     },
     {
@@ -1928,8 +1928,8 @@
       "runtime": "assets/runtime/materials/resources/stone/confetti-stones.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "199.58x345.61",
+      "size": "200x346"
     },
     {
       "key": "resource.confetti-stones.loose-01",
@@ -1942,7 +1942,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -1956,7 +1956,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -1970,7 +1970,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -1984,7 +1984,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -1998,7 +1998,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -2012,7 +2012,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "199.58x345.61",
       "size": "360x300"
     },
     {
@@ -2021,8 +2021,8 @@
       "runtime": "assets/runtime/materials/resources/stone/foil.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "219x219",
+      "size": "219x219"
     },
     {
       "key": "resource.foil.loose-01",
@@ -2035,7 +2035,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2049,7 +2049,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2063,7 +2063,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2077,7 +2077,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2091,7 +2091,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2105,7 +2105,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "219x219",
       "size": "360x300"
     },
     {
@@ -2114,8 +2114,8 @@
       "runtime": "assets/runtime/materials/resources/stone/graphite-cardstone.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "1918x1072",
+      "size": "1918x1072"
     },
     {
       "key": "resource.graphite-cardstone.loose-01",
@@ -2128,7 +2128,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2142,7 +2142,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2156,7 +2156,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2170,7 +2170,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2184,7 +2184,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2198,7 +2198,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "1918x1072",
       "size": "360x300"
     },
     {
@@ -2207,8 +2207,8 @@
       "runtime": "assets/runtime/materials/resources/stone/iron-rock.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "462.81x462.39",
+      "size": "463x462"
     },
     {
       "key": "resource.iron-rock.loose-01",
@@ -2221,7 +2221,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2235,7 +2235,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2249,7 +2249,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2263,7 +2263,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2277,7 +2277,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2291,7 +2291,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "462.81x462.39",
       "size": "360x300"
     },
     {
@@ -2300,8 +2300,8 @@
       "runtime": "assets/runtime/materials/resources/stone/marblewrap.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "190x190",
+      "size": "190x190"
     },
     {
       "key": "resource.marblewrap.loose-01",
@@ -2314,7 +2314,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2328,7 +2328,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2342,7 +2342,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2356,7 +2356,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2370,7 +2370,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2384,7 +2384,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "190x190",
       "size": "360x300"
     },
     {
@@ -2393,8 +2393,8 @@
       "runtime": "assets/runtime/materials/resources/stone/quartz.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "462.96x463.23",
+      "size": "463x463"
     },
     {
       "key": "resource.quartz.loose-01",
@@ -2407,7 +2407,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2421,7 +2421,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2435,7 +2435,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2449,7 +2449,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2463,7 +2463,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2477,7 +2477,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "462.96x463.23",
       "size": "360x300"
     },
     {
@@ -2486,8 +2486,8 @@
       "runtime": "assets/runtime/materials/resources/stone/sandstone.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "463.95x463.1",
+      "size": "464x463"
     },
     {
       "key": "resource.sandstone.loose-01",
@@ -2500,7 +2500,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2514,7 +2514,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2528,7 +2528,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2542,7 +2542,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2556,7 +2556,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2570,7 +2570,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "463.95x463.1",
       "size": "360x300"
     },
     {
@@ -2579,8 +2579,8 @@
       "runtime": "assets/runtime/materials/resources/stone/slate.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "218.14x462.12",
+      "size": "218x462"
     },
     {
       "key": "resource.slate.loose-01",
@@ -2593,7 +2593,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2607,7 +2607,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2621,7 +2621,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2635,7 +2635,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2649,7 +2649,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2663,7 +2663,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "218.14x462.12",
       "size": "360x300"
     },
     {
@@ -2672,8 +2672,8 @@
       "runtime": "assets/runtime/materials/resources/stone/terracotta-pebbles.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "148x150",
+      "size": "148x150"
     },
     {
       "key": "resource.terracotta-pebbles.loose-01",
@@ -2686,7 +2686,7 @@
         "looseTemplate": "stone",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2700,7 +2700,7 @@
         "looseTemplate": "stone",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2714,7 +2714,7 @@
         "looseTemplate": "stone",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2728,7 +2728,7 @@
         "looseTemplate": "stone",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2742,7 +2742,7 @@
         "looseTemplate": "stone",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2756,7 +2756,7 @@
         "looseTemplate": "stone",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "148x150",
       "size": "360x300"
     },
     {
@@ -2773,8 +2773,8 @@
           "--background": "#87FF00"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.blue",
@@ -2790,8 +2790,8 @@
           "--background": "#00DDFF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.red",
@@ -2807,8 +2807,8 @@
           "--background": "#FF0048"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.purple",
@@ -2824,8 +2824,8 @@
           "--background": "#7300FF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.teal",
@@ -2841,8 +2841,8 @@
           "--background": "#06D691"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.yellow",
@@ -2858,8 +2858,8 @@
           "--background": "#FBFF00"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.darkblue",
@@ -2875,8 +2875,8 @@
           "--background": "#262554"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.orange",
@@ -2892,8 +2892,8 @@
           "--background": "#FF9100"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus.pink",
@@ -2909,8 +2909,8 @@
           "--background": "#B700FF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "materials.resources.wood.barrel-cactus",
@@ -2918,8 +2918,8 @@
       "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "263x239",
+      "size": "263x239"
     },
     {
       "key": "resource.barrel-cactus.loose-01",
@@ -2932,7 +2932,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -2946,7 +2946,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -2960,7 +2960,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -2974,7 +2974,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -2988,7 +2988,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -3002,7 +3002,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "263x239",
       "size": "512x192"
     },
     {
@@ -3011,8 +3011,8 @@
       "runtime": "assets/runtime/materials/resources/wood/column-cactus.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "200x200",
+      "size": "200x200"
     },
     {
       "key": "resource.column-cactus.loose-01",
@@ -3025,7 +3025,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3039,7 +3039,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3053,7 +3053,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3067,7 +3067,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3081,7 +3081,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3095,7 +3095,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "200x200",
       "size": "512x192"
     },
     {
@@ -3112,8 +3112,8 @@
           "--s": "59.6"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "materials.resources.wood.crossbound-timber.grey",
@@ -3129,8 +3129,8 @@
           "--s": "9.6"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "materials.resources.wood.crossbound-timber.red",
@@ -3146,8 +3146,8 @@
           "--s": "77.9"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "materials.resources.wood.crossbound-timber.blue",
@@ -3163,8 +3163,8 @@
           "--s": "40.2"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "materials.resources.wood.crossbound-timber.cream",
@@ -3180,8 +3180,8 @@
           "--s": "44.8"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "materials.resources.wood.crossbound-timber",
@@ -3189,8 +3189,8 @@
       "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
     },
     {
       "key": "resource.crossbound-timber.loose-01",
@@ -3203,7 +3203,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3217,7 +3217,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3231,7 +3231,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3245,7 +3245,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3259,7 +3259,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3273,7 +3273,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1000",
       "size": "512x192"
     },
     {
@@ -3290,8 +3290,8 @@
           "--figure": "#F0C9A0"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs.kraft",
@@ -3307,8 +3307,8 @@
           "--figure": "#AFFF67"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs.moss",
@@ -3323,8 +3323,8 @@
           "--figure": "#BFD16A"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs.browns",
@@ -3340,8 +3340,8 @@
           "--figure": "#C3AF84"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs.maroon",
@@ -3357,8 +3357,8 @@
           "--figure": "#38D4FF"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs.mint",
@@ -3374,8 +3374,8 @@
           "--figure": "#DDFF1C"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.resources.wood.kraft-twigs",
@@ -3383,8 +3383,8 @@
       "runtime": "assets/runtime/materials/resources/wood/kraft-twigs.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "resource.kraft-twigs.loose-01",
@@ -3397,7 +3397,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3411,7 +3411,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3425,7 +3425,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3439,7 +3439,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3453,7 +3453,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3467,7 +3467,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "300x300",
       "size": "512x192"
     },
     {
@@ -3476,8 +3476,8 @@
       "runtime": "assets/runtime/materials/resources/wood/leafy-tree.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "219.92x175.78",
+      "size": "220x176"
     },
     {
       "key": "resource.leafy-tree.loose-01",
@@ -3490,7 +3490,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3504,7 +3504,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3518,7 +3518,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3532,7 +3532,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3546,7 +3546,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3560,7 +3560,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "219.92x175.78",
       "size": "512x192"
     },
     {
@@ -3569,8 +3569,8 @@
       "runtime": "assets/runtime/materials/resources/wood/paddle-cactus.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "2000x1200",
+      "size": "2000x1200"
     },
     {
       "key": "resource.paddle-cactus.loose-01",
@@ -3583,7 +3583,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3597,7 +3597,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3611,7 +3611,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3625,7 +3625,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3639,7 +3639,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3653,7 +3653,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "2000x1200",
       "size": "512x192"
     },
     {
@@ -3662,8 +3662,8 @@
       "runtime": "assets/runtime/materials/resources/wood/redwood-bark-curls.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "150.72x87.47",
+      "size": "151x87"
     },
     {
       "key": "resource.redwood-bark-curls.loose-01",
@@ -3676,7 +3676,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3690,7 +3690,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3704,7 +3704,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3718,7 +3718,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3732,7 +3732,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3746,7 +3746,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "150.72x87.47",
       "size": "512x192"
     },
     {
@@ -3755,8 +3755,8 @@
       "runtime": "assets/runtime/materials/resources/wood/ribbonwood-sticks.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "350x250",
+      "size": "350x250"
     },
     {
       "key": "resource.ribbonwood-sticks.loose-01",
@@ -3769,7 +3769,7 @@
         "looseTemplate": "wood",
         "variant": 1
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3783,7 +3783,7 @@
         "looseTemplate": "wood",
         "variant": 2
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3797,7 +3797,7 @@
         "looseTemplate": "wood",
         "variant": 3
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3811,7 +3811,7 @@
         "looseTemplate": "wood",
         "variant": 4
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3825,7 +3825,7 @@
         "looseTemplate": "wood",
         "variant": 5
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3839,7 +3839,7 @@
         "looseTemplate": "wood",
         "variant": 6
       },
-      "sourceSize": null,
+      "sourceSize": "350x250",
       "size": "512x192"
     },
     {
@@ -3982,8 +3982,8 @@
           "--figure": "#F0C9A0"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.wrapping-paper-circles-on-circles.kraft",
@@ -3999,8 +3999,8 @@
           "--figure": "#C3AF84"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.wrapping-paper-circles-on-circles.moss",
@@ -4015,8 +4015,8 @@
           "--figure": "#BFD16A"
         }
       },
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.wrapping-paper-circles-on-circles",
@@ -4024,8 +4024,8 @@
       "runtime": "assets/runtime/materials/wrapping-paper-circles-on-circles.png",
       "type": "texture",
       "usage": "material",
-      "sourceSize": null,
-      "size": "4096x4096"
+      "sourceSize": "300x300",
+      "size": "300x300"
     },
     {
       "key": "materials.wrapping-paper-orange-01",
@@ -4042,7 +4042,7 @@
       "runtime": "assets/runtime/props/cactus-01.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "277x520",
+      "sourceSize": "277.14x519.84",
       "size": "277x520"
     },
     {
@@ -4051,7 +4051,7 @@
       "runtime": "assets/runtime/props/cactus-02.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "394x500",
+      "sourceSize": "393.65x499.66",
       "size": "394x500"
     },
     {
@@ -4060,7 +4060,7 @@
       "runtime": "assets/runtime/props/cactus-03.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "465x529",
+      "sourceSize": "464.85x528.9",
       "size": "465x529"
     },
     {
@@ -4069,7 +4069,7 @@
       "runtime": "assets/runtime/props/cactus-04.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "516x527",
+      "sourceSize": "515.57x526.64",
       "size": "516x527"
     },
     {
@@ -4078,7 +4078,7 @@
       "runtime": "assets/runtime/props/cactus-05.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "277x520",
+      "sourceSize": "277.14x519.84",
       "size": "277x520"
     },
     {
@@ -4087,7 +4087,7 @@
       "runtime": "assets/runtime/props/cactus-06.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "444x500",
+      "sourceSize": "443.93x499.66",
       "size": "444x500"
     },
     {
@@ -4096,7 +4096,7 @@
       "runtime": "assets/runtime/props/cactus-07.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "342x352",
+      "sourceSize": "342.44x351.8",
       "size": "342x352"
     },
     {
@@ -4105,7 +4105,7 @@
       "runtime": "assets/runtime/props/cactus-08.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "209x471",
+      "sourceSize": "208.71x471.39",
       "size": "209x471"
     },
     {
@@ -4132,7 +4132,7 @@
       "runtime": "assets/runtime/props/cattail-cluster-01.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "637x602",
+      "sourceSize": "637.08x602",
       "size": "637x602"
     },
     {
@@ -4141,7 +4141,7 @@
       "runtime": "assets/runtime/props/cattail-cluster-02.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "488x602",
+      "sourceSize": "488.03x602",
       "size": "488x602"
     },
     {
@@ -4150,7 +4150,7 @@
       "runtime": "assets/runtime/props/cattail-cluster-03.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "637x602",
+      "sourceSize": "637.08x602",
       "size": "637x602"
     },
     {
@@ -4159,7 +4159,7 @@
       "runtime": "assets/runtime/props/cattail-cluster-04.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "391x602",
+      "sourceSize": "390.63x602",
       "size": "391x602"
     },
     {
@@ -4168,7 +4168,7 @@
       "runtime": "assets/runtime/props/driftwood-01.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "907x628",
+      "sourceSize": "907.12x627.84",
       "size": "907x628"
     },
     {
@@ -4177,7 +4177,7 @@
       "runtime": "assets/runtime/props/driftwood-02.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "940x443",
+      "sourceSize": "940.14x442.56",
       "size": "940x443"
     },
     {
@@ -4186,7 +4186,7 @@
       "runtime": "assets/runtime/props/driftwood-03.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "887x586",
+      "sourceSize": "886.85x585.89",
       "size": "887x586"
     },
     {
@@ -4240,7 +4240,7 @@
       "runtime": "assets/runtime/props/marsh-grass-tuft-01.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "701x605",
+      "sourceSize": "700.6x605.21",
       "size": "701x605"
     },
     {
@@ -4249,7 +4249,7 @@
       "runtime": "assets/runtime/props/marsh-grass-tuft-02.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "701x605",
+      "sourceSize": "700.6x605.21",
       "size": "701x605"
     },
     {
@@ -4258,7 +4258,7 @@
       "runtime": "assets/runtime/props/marsh-grass-tuft-03.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "701x605",
+      "sourceSize": "700.6x605.21",
       "size": "701x605"
     },
     {
@@ -4267,7 +4267,7 @@
       "runtime": "assets/runtime/props/marsh-grass-tuft-04.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "701x605",
+      "sourceSize": "700.6x605.21",
       "size": "701x605"
     },
     {
@@ -4564,7 +4564,7 @@
       "runtime": "assets/runtime/props/water-lily-01.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "978x592",
+      "sourceSize": "978.2x592.43",
       "size": "978x592"
     },
     {
@@ -4573,7 +4573,7 @@
       "runtime": "assets/runtime/props/water-lily-02.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "912x456",
+      "sourceSize": "912.12x456.44",
       "size": "912x456"
     },
     {
@@ -4582,7 +4582,7 @@
       "runtime": "assets/runtime/props/water-lily-03.png",
       "type": "texture",
       "usage": "prop",
-      "sourceSize": "912x456",
+      "sourceSize": "912.12x456.44",
       "size": "912x456"
     },
     {

@@ -11,11 +11,22 @@ import {
   looseVariantRuntimePath,
   parseDirectResourcePath,
   parseResourceTilePath,
+  svgIntrinsicSize,
 } from './resource-asset-pipeline.mjs';
 
 const tile = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="#c96"/></svg>';
 
 describe('resource asset pipeline', () => {
+  test('reads SVG dimensions without rendering CSS-variable artwork', () => {
+    expect(svgIntrinsicSize(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--background)"/>
+      </svg>
+    `)).toBe('200x200');
+    expect(svgIntrinsicSize("<svg viewBox='0 0 1920 1080'></svg>")).toBe('1920x1080');
+    expect(svgIntrinsicSize('<svg width="100%" height="100%"></svg>')).toBeNull();
+  });
+
   test('discovers resource tiles from their loose-form folder', () => {
     expect(parseResourceTilePath('materials/resources/stone/slate.svg')).toEqual({
       looseTemplate: 'stone',

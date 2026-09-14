@@ -83,6 +83,47 @@ export const RESOURCE_LOOSE_TEMPLATES = {
 
 export const RESOURCE_TEMPLATE_IDS = Object.freeze(Object.keys(RESOURCE_LOOSE_TEMPLATES));
 
+/**
+ * Read an SVG's intrinsic pixel size without asking ImageMagick to render it.
+ *
+ * Some of the resource tiles use CSS custom properties for colorways.
+ * ImageMagick cannot resolve those variables: `identify` prints the correct
+ * dimensions but exits non-zero, which made the compiler discard the result
+ * and fall back to a 4096px viewport. Chromium then drew the small SVG at its
+ * intrinsic size in one corner of that viewport, leaving almost the entire
+ * runtime texture transparent/black.
+ *
+ * Width and height win when both are ordinary numeric/px lengths. A viewBox
+ * is the standards-friendly fallback for artwork without explicit dimensions.
+ */
+export function svgIntrinsicSize(sourceSvg) {
+  const root = /<svg\b([^>]*)>/i.exec(sourceSvg)?.[1];
+  if (!root) return null;
+
+  const attribute = (name) => {
+    const match = new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i').exec(root);
+    return match?.[2]?.trim() ?? null;
+  };
+  const pixelLength = (value) => {
+    const match = value?.match(/^([0-9]+(?:\.[0-9]+)?)\s*(?:px)?$/i);
+    const parsed = match ? Number(match[1]) : NaN;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  };
+
+  const width = pixelLength(attribute('width'));
+  const height = pixelLength(attribute('height'));
+  if (width && height) return `${width}x${height}`;
+
+  const viewBox = attribute('viewBox')
+    ?.split(/[\s,]+/)
+    .map(Number);
+  if (viewBox?.length === 4 && viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0) {
+    return `${viewBox[2]}x${viewBox[3]}`;
+  }
+
+  return null;
+}
+
 const DIRECT_RESOURCE_FOLDERS = {
   seeds: { orientation: 'flat' },
 };

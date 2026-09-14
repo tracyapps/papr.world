@@ -20,6 +20,7 @@ import {
   looseVariantRuntimePath,
   parseDirectResourcePath,
   parseResourceTilePath,
+  svgIntrinsicSize,
 } from './resource-asset-pipeline.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -377,7 +378,13 @@ try {
 
       const runtimePath = getRuntimePath(sourcePath, extension);
       mkdirSync(dirname(runtimePath), { recursive: true });
-      const sourceSize = extension === '.svg' || rasterExtensions.has(extension) ? getImageSize(sourcePath) : null;
+      // Do not use ImageMagick to discover SVG dimensions. It exits non-zero
+      // on the CSS variables used by colorway-ready resource tiles, even when
+      // it prints a valid size, and an unknown size expands the browser
+      // viewport to 4096px. The SVG itself is authoritative here.
+      const sourceSize = extension === '.svg'
+        ? svgIntrinsicSize(readFileSync(sourcePath, 'utf8'))
+        : rasterExtensions.has(extension) ? getImageSize(sourcePath) : null;
       const usage = inferUsage(relativeSourcePath, extension);
       const resourceTile = extension === '.svg' ? parseResourceTilePath(relativeSourcePath) : null;
       const directResource = extension === '.svg' ? parseDirectResourcePath(relativeSourcePath) : null;
