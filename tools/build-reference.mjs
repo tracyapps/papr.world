@@ -99,10 +99,12 @@ function materialCard(resource) {
   <article class="card" data-name="${esc(resource.label.toLowerCase())}" data-category="${esc(resource.category)}"
     data-biomes="${esc(resource.biomes.join(' '))}" data-exclusive="${resource.exclusive}"
     data-tool="${esc(resource.toolRequired ?? '')}">
-    <header>
+    <header class="with-art">
       ${art ? `<img class="card-art" src="${esc(art.sourceUrl)}" alt="" aria-hidden="true">` : ''}
-      <h3>${esc(resource.label)}</h3>
-      ${resource.exclusive ? `<span class="tag tag-exclusive">Only in ${esc(titleCase(resource.biomes[0]))}</span>` : ''}
+      <div class="card-title">
+        <h3>${esc(resource.label)}</h3>
+        ${resource.exclusive ? `<span class="tag tag-exclusive">Only in ${esc(titleCase(resource.biomes[0]))}</span>` : ''}
+      </div>
     </header>
     <p class="meta">${esc(resource.categoryLabel)}${resource.toolRequiredLabel ? ` · needs ${esc(resource.toolRequiredLabel)}` : ' · gathered by hand'}</p>
     <ul class="routes">${routes}</ul>
@@ -199,9 +201,16 @@ const page = `<!doctype html>
   .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
   .card header { align-items: baseline; display: flex; gap: 8px; justify-content: space-between; }
+  /* Material cards only (see materialCard()) — the thumbnail sits above the
+     name instead of beside it, so the grid reads as a set of pictures you
+     scan first and names you confirm second, not the reverse. */
+  .card header.with-art { align-items: stretch; flex-direction: column; gap: 8px; justify-content: flex-start; }
+  .card-title { align-items: baseline; display: flex; gap: 8px; justify-content: space-between; }
   .card h3 { font-size: 16px; margin: 0 0 2px; }
-  /* Empty until a resource has real art (docs/resource-artwork-guide.md) — first pass, worth an eyeball once art exists. */
-  .card-art { flex: none; height: 30px; object-fit: contain; width: 30px; }
+  /* Big enough to actually identify a material by its drawing, not just
+     confirm one you already read the name of. Still empty for anything
+     the art:check tool lists as "to draw" — see resource-artwork-guide.md. */
+  .card-art { align-self: center; height: 72px; object-fit: contain; width: 72px; }
   .card p { margin: 5px 0; }
   .meta { font-size: 13px; }
   .limitation { border-left: 2px solid var(--line); font-size: 14px; padding-left: 9px; }

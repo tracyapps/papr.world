@@ -40,7 +40,13 @@ import {
   type TreeAddress,
 } from './catalogs/trees';
 import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, planterBoxAt, type BuildPieceKey } from '../world/buildPieces';
-import { buildAssemblyDef, nextBuildStep, resolveBuildMaterial } from './catalogs/building';
+import {
+  buildAssemblyDef,
+  buildMaterialResource,
+  buildMaterialUnits,
+  nextBuildStep,
+  resolveBuildMaterial,
+} from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
 
@@ -119,6 +125,29 @@ function spendAllocation(state: GameState, allocation: ResourceAllocation) {
   for (const [resource, quantity] of Object.entries(allocation) as Array<[ResourceId, number]>) {
     state.player.inventory[resource] = Math.max(0, (state.player.inventory[resource] ?? 0) - quantity);
   }
+}
+
+/**
+ * A piece is made *of* something now, and that something comes out of the bag.
+ *
+ * Resources respawn, so this is friction rather than scarcity — the owner's
+ * own reasoning: consumption never stops anyone building, it turns into "I
+ * should go find more ribbonwood", and better, "hey neighbour, can I borrow
+ * some?". That last one is the point; it is a multiplayer pressure, not an
+ * economy sink.
+ *
+ * A piece built before materials were resources carries a retired paper key,
+ * which names no resource — those cost and refund nothing, and must not, or
+ * an old save would start charging for a choice it never made.
+ */
+function materialCost(material: string, units: number): { resource: ResourceId; units: number } | null {
+  const resource = buildMaterialResource(material);
+  if (!resource || units <= 0) return null;
+  return { resource, units };
+}
+
+function grantMaterial(state: GameState, resource: ResourceId, units: number) {
+  state.player.inventory[resource] = (state.player.inventory[resource] ?? 0) + units;
 }
 
 const TEND_COOLDOWN_MS = 12_000;
@@ -454,6 +483,17 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       if (piecePlacementBlocker(state, command)) {
         return { ok: false, reason: 'That is too close to something you have already placed.' };
       }
+      // Placing in one go skips the step-by-step build, so the whole piece is
+      // paid for here rather than a step at a time. Free placement would be a
+      // way around the material economy, not a shortcut through it.
+      const placedMaterial = resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material);
+      const placementCost = materialCost(placedMaterial, buildMaterialUnits(command.templateKey));
+      if (placementCost && (state.player.inventory[placementCost.resource] ?? 0) < placementCost.units) {
+        const short = RESOURCE_CORE_DEFS[placementCost.resource].shortLabel;
+        return { ok: false, reason: `Not enough ${short} — that takes ${placementCost.units}.` };
+      }
+      if (placementCost) spendAllocation(state, { [placementCost.resource]: placementCost.units });
+
       const page = state.world.pages[command.pageId] ??= emptyPageState();
       const id = `piece-${command.now.toString(36)}-${Math.floor(Math.random() * 0xffffff).toString(36)}`;
       page.placedPieces[id] = {
@@ -462,7 +502,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: command.x,
         z: command.z,
         rotY: command.rotY || 0,
-        material: resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material),
+        material: placedMaterial,
         makerId: LOCAL_MAKER_ID,
         page: command.pageId,
       };
@@ -504,7 +544,15 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       }
       const allocation = resolveIngredientAllocation(state.player.inventory, step.materials);
       if (!allocation) return { ok: false, reason: `More materials are needed for ${step.label.toLowerCase()}.` };
+
+      const chosen = resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material);
+      const cost = materialCost(chosen, step.materialUnits);
+      if (cost && (state.player.inventory[cost.resource] ?? 0) < cost.units) {
+        const short = RESOURCE_CORE_DEFS[cost.resource].shortLabel;
+        return { ok: false, reason: `Not enough ${short} — ${step.label.toLowerCase()} needs ${cost.units}.` };
+      }
       spendAllocation(state, allocation);
+      if (cost) spendAllocation(state, { [cost.resource]: cost.units });
 
       const activeSite = site ?? {
         id: `build-${command.now.toString(36)}-${Math.floor(Math.random() * 0xffffff).toString(36)}`,
@@ -538,7 +586,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         x: activeSite.x,
         z: activeSite.z,
         rotY: activeSite.rotY,
-        material: resolveBuildMaterial(command.templateKey as BuildPieceKey, command.material),
+        material: chosen,
         makerId: activeSite.makerId,
         page: activeSite.page,
       };
@@ -549,8 +597,10 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
     case 'updatePlacedPiece': {
       // Moving/rotating an already-built piece, or restyling it, is one
       // command either way — the caller decides whether a rebuild timer ran
-      // first. No tool or materials are spent: you already paid for this
-      // piece once, at its original build.
+      // first. Moving is still free: you already paid for this piece once.
+      // *Restyling* is not, because it genuinely swaps what the piece is made
+      // of — so it charges the new material and recycles the old one back into
+      // the bag, which is what the owner said they would expect to happen.
       const page = state.world.pages[command.pageId];
       const piece = page?.placedPieces[command.id];
       if (!piece) return { ok: false, reason: 'That piece is no longer there.' };
@@ -570,6 +620,17 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       const def = buildPieceDef(piece.templateKey);
       const material = resolveBuildMaterial(piece.templateKey as BuildPieceKey, command.material ?? piece.material);
       const restyled = material !== piece.material;
+      if (restyled) {
+        const units = buildMaterialUnits(piece.templateKey);
+        const charge = materialCost(material, units);
+        const refund = materialCost(piece.material, units);
+        if (charge && (state.player.inventory[charge.resource] ?? 0) < charge.units) {
+          const short = RESOURCE_CORE_DEFS[charge.resource].shortLabel;
+          return { ok: false, reason: `Not enough ${short} — restyling takes ${charge.units}.` };
+        }
+        if (charge) spendAllocation(state, { [charge.resource]: charge.units });
+        if (refund) grantMaterial(state, refund.resource, refund.units);
+      }
       piece.x = command.x;
       piece.z = command.z;
       piece.rotY = rotY;

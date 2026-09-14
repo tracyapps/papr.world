@@ -172,6 +172,26 @@ export const BIOME_SCATTER: Record<Biome, ResourceId[]> = Object.fromEntries(
 ) as Record<Biome, ResourceId[]>;
 
 /**
+ * Where each species actually grows.
+ *
+ * The generator decides this — see `world/generate.ts` — but two different
+ * readers need to know it: `biomesFor` below, and the critter dialogue that
+ * only offers a gathering tip if the tree is standing where you are. Both
+ * used to carry their own copy of "redwoods mean forest, everything else
+ * means the green biomes", so adding a species that grows somewhere new
+ * quietly made one of them wrong. One table now, read twice.
+ */
+export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
+  pine: ['clearing', 'forest', 'meadow'],
+  leafy: ['clearing', 'forest', 'meadow'],
+  redwood: ['forest'],
+  // Palms are dunes-only for now. When the tropical biome lands (see
+  // `docs/tropical-biome-plan.md`) it joins this list, and palm clippings
+  // stop being biome-exclusive on their own.
+  palm: ['dunes'],
+};
+
+/**
  * Biomes a material can be obtained in at all, across every route.
  *
  * A material whose answer is exactly one biome is *exclusive* to it — which
@@ -185,9 +205,7 @@ export function biomesFor(resource: ResourceId): Biome[] {
       for (const biome of route.biomes) found.add(biome);
     }
     if (route.kind === 'trimmed') {
-      // Redwoods only grow in forest; other trees are broader.
-      if (route.species === 'redwood') found.add('forest');
-      else for (const biome of ['clearing', 'forest', 'meadow'] as Biome[]) found.add(biome);
+      for (const biome of SPECIES_BIOMES[route.species]) found.add(biome);
     }
   }
   return BIOME_IDS.filter((biome) => found.has(biome));

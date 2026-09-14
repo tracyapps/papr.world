@@ -35,6 +35,7 @@ const REDWOOD_HEIGHT_DAMPING = 0.25;
 export function treeSpeciesOf(kind: TreeKind): TreeSpecies {
   if (kind.startsWith('redwood')) return 'redwood';
   if (kind.startsWith('pine')) return 'pine';
+  if (kind.startsWith('palm')) return 'palm';
   return 'leafy';
 }
 

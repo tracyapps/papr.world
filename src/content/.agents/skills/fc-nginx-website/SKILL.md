@@ -54,11 +54,15 @@ step on the server.
 - Does not work: SSR, API routes, databases, WebSocket servers, cron, or
   anything that needs a long-running process. Build to static output instead, or
   state plainly that this channel cannot host it — never fake a preview.
+- Does not load: anything the page pulls from another origin. A strict
+  Content-Security-Policy blocks CDN scripts, web fonts, remote images, and
+  third-party embeds — every asset must ship with the site (see below).
 - Client-side routing works: the managed config already falls back to
   `index.html`, so React Router / Vue Router deep links resolve.
 
 `nginx` 环境是**纯静态文件托管**：没有应用进程、没有请求处理函数、服务端不会构建。
 SSR、API、数据库、常驻进程都无法托管——请改为构建成静态产物，或直接如实说明限制。
+托管平台还会下发严格 CSP，外链资源一律加载不到，素材必须随站打包（见下文）。
 客户端路由无需额外配置：受控 nginx 配置已经回退到 `index.html`，深链可用。
 
 ## The entry file decides what gets uploaded / 入口文件决定上传范围
@@ -106,12 +110,63 @@ Rules / 规则:
 Optimize images and drop unused build artifacts before they become the reason a
 deployment is rejected. 提前压缩图片、清掉无用产物，避免因体积被拒。
 
+## Every asset ships with the site / 外链素材必须随站打包
+
+The serving platform returns a **strict Content-Security-Policy**, so anything the
+page loads from another origin is blocked: a framework or icon set off a CDN,
+Google Fonts, remote placeholder images, third-party `<iframe>` embeds, and
+requests to external APIs or analytics endpoints. It only shows up after
+deployment — the page looks right on your machine, then lands as unstyled text,
+empty image frames, and fallback fonts. Never link a CDN "just to get the preview
+working": the preview is the deployment.
+
+- Author self-contained pages, and download anything you would otherwise link
+  into the **site root** (`assets/`, `fonts/`, `vendor/`), rewriting the reference
+  to a relative path. With `entryFile: "dist/index.html"` that means inside
+  `dist/` — a file saved at the project root is not uploaded. Take only what the
+  page renders (the font weights actually used, not a whole icon library) so
+  localizing assets does not run into the limits above.
+- The design skeletons and example pages you may copy from are written for local
+  viewing, and many of them link Google Fonts or a CDN script. Localize those
+  references instead of inheriting them.
+- **Check before you touch `projects/projects.json`** — that write starts the
+  upload, so it is the last moment a fix is cheap. Search the site root for
+  `http://`, `https://`, and protocol-relative `//`, then clear every hit the
+  browser would fetch: `<script src>`, `<link rel="stylesheet"|"preload"|"icon">`,
+  `src` / `srcset` / `poster`, `<iframe src>`, `url(...)` / `@import` /
+  `@font-face` in CSS, and `fetch` / `XMLHttpRequest` targets. Inert hits are
+  fine — a link the user clicks, a comment, an XML namespace, JSON-LD. Re-run the
+  search after fixing, until only inert hits remain.
+- A feature that genuinely needs a third-party origin at runtime cannot work here.
+  Say so plainly or replace it with something static; do not ship it broken.
+
+托管平台会下发**严格 CSP**：页面从其他 origin 加载的资源一律被拦掉（CDN 上的框架 /
+图标库、Google Fonts、远程占位图、第三方 `<iframe>`，以及对外部 API、统计端点的请求），
+而且只在部署后才暴露——本机好看，线上变成无样式文本 + 空图框 + 回退字体。
+不要"先挂个 CDN 把预览跑通"，预览就是部署。所以：页面自包含，凡是要外链的素材都下载到
+**站点根目录**下（`assets/`、`fonts/`、`vendor/`）并改成相对路径引用——`entryFile` 是
+`dist/index.html` 时必须放进 `dist/`，放在项目根不会被上传；只下载真正用到的部分
+（用到的字重，而不是整个图标库），别撞上面的体积上限。可复用的 design skeleton /
+example 页面是给本地打开看的，里面大量挂着 Google Fonts 和 CDN 脚本，照抄过来必须
+一并改成本地文件。**更新
+`projects/projects.json` 之前必须自检**（那次写入就是上传信号）：在站点根目录里搜
+`http://`、`https://` 和 `//` 开头的引用，把浏览器真的会去取的逐个消除
+（`<script src>`、`<link rel=stylesheet|preload|icon>`、`src`/`srcset`/`poster`、
+`<iframe src>`、CSS 里的 `url(...)`/`@import`/`@font-face`、`fetch`/`XMLHttpRequest`
+目标）；纯文本性质的命中（用户点击的超链接、注释、XML 命名空间、JSON-LD）保留即可。
+修完再搜一遍，直到只剩这类命中。真的必须依赖第三方 origin 的功能在这里跑不起来：
+如实说明或换成静态实现，不要交付一个坏的。
+
 ## Troubleshooting the preview / 预览期排错
 
 - **Blank page or 404 on assets.** Almost always the site root: the entry file's
   directory did not contain the referenced files, or the page uses absolute
   paths that do not exist in the uploaded subtree. Use relative asset paths and
   keep everything under the site root. 白屏或资源 404：基本都是站点根目录问题。
+- **Styles, fonts, or images missing without a 404.** An external reference the
+  CSP blocked — the browser console shows a CSP violation, not a failed request.
+  Download it into the site root as above. 样式/字体/图片没生效但不是 404：外链被
+  CSP 拦了，下载到站点根目录里。
 - **404 on a specific page.** Client-side routing already falls back to
   `index.html`; a real 404 means the file is not in the uploaded subtree.
 - **Changes not visible.** The preview URL serves the latest upload; the stable

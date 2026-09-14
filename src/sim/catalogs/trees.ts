@@ -44,12 +44,12 @@ export type TreeStage = 'flourishing' | 'trimmed' | 'cropped' | 'resting';
 /**
  * Species groups, not drawings.
  *
- * There are twelve `TreeKind` cutouts but only three things a tree can be as
+ * There are sixteen `TreeKind` cutouts but only four things a tree can be as
  * far as growth and yield are concerned. Keying the model on the artwork
  * would mean every new drawing needed a yield entry, and would drag
  * renderer-side identities into the simulation.
  */
-export type TreeSpecies = 'pine' | 'leafy' | 'redwood';
+export type TreeSpecies = 'pine' | 'leafy' | 'redwood' | 'palm';
 
 /** Where a trimmable tree lives, in terms a server could validate. */
 export type TreeAddress = {
@@ -171,6 +171,16 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     // get them, which is the point.
     primary: 'redwood-bark-curls',
     secondary: 'ribbonwood-sticks',
+    variety: 'sunbaked-cardboard',
+  },
+  palm: {
+    // The only tree that grows where nothing else woody does, so both of its
+    // own materials are exclusive to it in the same way bark curls are to a
+    // redwood — you cannot pick palm clippings up off the ground anywhere.
+    // The variety find is the dunes' own board rather than a fourth new
+    // material: a flourishing palm sheds fronds that dry flat in the sun.
+    primary: 'palm-clippings',
+    secondary: 'palm-fiber',
     variety: 'sunbaked-cardboard',
   },
 };

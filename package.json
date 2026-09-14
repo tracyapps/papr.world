@@ -14,6 +14,7 @@
     "dev": "vite --host 0.0.0.0",
     "docs:build": "node tools/build-reference.mjs",
     "edge:check": "tsc -p tsconfig.edge.json",
+    "fields:sample": "node tools/sample-biome-fields.mjs",
     "hud:check": "node tools/check-hud-layout.mjs",
     "og:build": "node tools/build-og.mjs",
     "preview": "vite preview --host 0.0.0.0",

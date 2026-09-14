@@ -57,6 +57,13 @@
         "You interrupted my watch shift, but you are a much better view than the horizon.",
         "The whole mob says hello. I am translating on their behalf. They say hello.",
         "I stood up the moment I heard footsteps. It is mostly for style at this point."
+      ],
+      "fox": [
+        "I heard you before I saw you. The ears are not just for show.",
+        "You are upwind of me. I will allow it, just this once.",
+        "Careful. I already counted your pockets from here.",
+        "I was midway through pretending to be asleep. You caught me mid-nap-face.",
+        "Quiet feet. I respect that in a stranger."
       ]
     },
     "placeFacts": {
@@ -144,6 +151,12 @@
         "My tail counts as a third leg when I am on watch. Nobody question the math.",
         "I dig for grubs and gossip in roughly equal measure.",
         "The sun patches on the sand are reserved seating, and I reserved the best one."
+      ],
+      "fox": [
+        "I curl my tail over my nose to sleep. It doubles as a very small blanket.",
+        "My ears swivel independently. It is less useful than it sounds, but very charming.",
+        "I trot everywhere. Walking felt like a waste of legs this nice.",
+        "I am not sneaking. I am simply very quiet on purpose."
       ]
     },
     "traitReplies": {

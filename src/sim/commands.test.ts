@@ -831,6 +831,50 @@ describe('placing build pieces', () => {
     expect(bogus.material).toBe(DEFAULT_BUILD_MATERIAL['planter-box']);
   });
 
+  it('takes the material out of the bag when the piece is made of a real resource', () => {
+    const state = createDefaultGameState();
+    state.player.inventory['kraft-twigs'] = 10;
+
+    const result = place(state, 'paper-bench', 6.5, -2.2, 1000, '0,0', 0, 'kraft-twigs');
+
+    expect(result.ok).toBe(true);
+    // A bench is 4; resources respawn, so this is friction, not scarcity.
+    expect(state.player.inventory['kraft-twigs']).toBe(6);
+  });
+
+  it('refuses, and says how many, when the bag will not cover the piece', () => {
+    const state = createDefaultGameState();
+    state.player.inventory['kraft-twigs'] = 3;
+
+    const result = place(state, 'paper-bench', 6.5, -2.2, 1000, '0,0', 0, 'kraft-twigs');
+
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain('4');
+    expect(state.player.inventory['kraft-twigs']).toBe(3);
+    expect(Object.values(state.world.pages['0,0']?.placedPieces ?? {})).toHaveLength(0);
+  });
+
+  it('charges the resource, not the colorway — dyed paper is the same paper', () => {
+    const state = createDefaultGameState();
+    state.player.inventory['kraft-twigs'] = 10;
+
+    place(state, 'paper-bench', 6.5, -2.2, 1000, '0,0', 0, 'kraft-twigs.terracotta');
+
+    expect(state.player.inventory['kraft-twigs']).toBe(6);
+    const piece = Object.values(state.world.pages['0,0'].placedPieces)[0];
+    expect(piece.material).toBe('kraft-twigs.terracotta');
+  });
+
+  it('charges nothing for a piece built before materials were resources', () => {
+    const state = createDefaultGameState();
+    state.player.inventory['kraft-twigs'] = 10;
+
+    place(state, 'paper-bench', 6.5, -2.2, 1000, '0,0', 0, 'paper.grey');
+
+    // An old save would otherwise start paying for a choice it never made.
+    expect(state.player.inventory['kraft-twigs']).toBe(10);
+  });
+
   it('creates the page state on demand', () => {
     const state = createDefaultGameState();
 
@@ -970,6 +1014,53 @@ describe('placing build pieces', () => {
     function placedPieceId(state: ReturnType<typeof createDefaultGameState>, pageId = '0,0') {
       return Object.values(state.world.pages[pageId].placedPieces)[0].id;
     }
+
+    it('charges the new material and recycles the old one back', () => {
+      const state = createDefaultGameState();
+      state.player.inventory['kraft-twigs'] = 10;
+      state.player.inventory['confetti-stones'] = 10;
+      place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'kraft-twigs');
+      const id = placedPieceId(state);
+      expect(state.player.inventory['kraft-twigs']).toBe(6);
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 0, z: 0, rotY: 0, material: 'confetti-stones', pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(true);
+      // The bench is genuinely made of something else now: the stone is spent
+      // and the twigs it used to be come back to the bag.
+      expect(state.player.inventory['confetti-stones']).toBe(6);
+      expect(state.player.inventory['kraft-twigs']).toBe(10);
+    });
+
+    it('refuses a restyle the bag cannot cover, and changes nothing', () => {
+      const state = createDefaultGameState();
+      state.player.inventory['kraft-twigs'] = 10;
+      state.player.inventory['confetti-stones'] = 2;
+      place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'kraft-twigs');
+      const id = placedPieceId(state);
+
+      const result = applyGameCommand(state, {
+        type: 'updatePlacedPiece', id, x: 0, z: 0, rotY: 0, material: 'confetti-stones', pageId: '0,0',
+      });
+
+      expect(result.ok).toBe(false);
+      expect(state.world.pages['0,0'].placedPieces[id].material).toBe('kraft-twigs');
+      expect(state.player.inventory['confetti-stones']).toBe(2);
+      expect(state.player.inventory['kraft-twigs']).toBe(6);
+    });
+
+    it('charges nothing to move a piece, only to restyle it', () => {
+      const state = createDefaultGameState();
+      state.player.inventory['kraft-twigs'] = 10;
+      place(state, 'paper-bench', 0, 0, 1000, '0,0', 0, 'kraft-twigs');
+      const id = placedPieceId(state);
+
+      applyGameCommand(state, { type: 'updatePlacedPiece', id, x: 3, z: 4, rotY: 0, pageId: '0,0' });
+
+      expect(state.player.inventory['kraft-twigs']).toBe(6);
+    });
 
     it('moves and rotates a piece instantly, keeping its material', () => {
       const state = createDefaultGameState();

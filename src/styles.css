@@ -1110,6 +1110,51 @@ body {
   outline-offset: 2px;
 }
 
+/* How many of this material are in the bag. Small, quiet, and legible over
+   any pattern — the count is the difference between "a swatch" and "a thing
+   you have", so it earns the corner it sits in. */
+.build-material-count {
+  align-items: center;
+  background: rgb(28 22 16 / 0.72);
+  border-radius: 0 6px 0 6px;
+  bottom: 0;
+  color: #f6f1e6;
+  display: flex;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  line-height: 1;
+  min-width: 18px;
+  padding: 2px 4px;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+.build-material-item {
+  position: relative;
+}
+
+/* Not enough for the piece in hand. Still shown, because seeing that you have
+   three of something you need four of is the useful part. */
+.build-material-item.is-short {
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.5;
+}
+
+.build-material-item.is-short:hover {
+  border-color: rgb(62 49 35 / 0.25);
+  transform: none;
+}
+
+.build-material-empty {
+  color: rgb(62 49 35 / 0.72);
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+
 .maker-prompt[hidden] {
   display: none;
 }

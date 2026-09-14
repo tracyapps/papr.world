@@ -48,6 +48,8 @@ export const RESOURCE_CORE_DEFS = {
   // only come off a living redwood, and only to heavier shears. That is what
   // makes the tier-2 scissors worth making rather than a bigger number.
   'redwood-bark-curls': { id: 'redwood-bark-curls', label: 'Redwood bark curls', shortLabel: 'Bark curls', category: 'sticks', iconKey: 'resource.redwood-bark-curls', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood', 'long-fiber'] },
+  'palm-clippings': { id: 'palm-clippings', label: 'Palm clippings', shortLabel: 'Palm clippings', category: 'sticks', iconKey: 'resource.palm-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  'palm-fiber': { id: 'palm-fiber', label: 'Palm fiber', shortLabel: 'Palm fiber', category: 'fiber', iconKey: 'resource.palm-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber', 'long-fiber'] },
   'mossy-paper-fiber': { id: 'mossy-paper-fiber', label: 'Mossy paper fiber', shortLabel: 'Paper fiber', category: 'fiber', iconKey: 'resource.mossy-paper-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
   'confetti-stones': { id: 'confetti-stones', label: 'Confetti stones', shortLabel: 'Confetti stone', category: 'stones', iconKey: 'resource.confetti-stones', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'graphite-cardstone': { id: 'graphite-cardstone', label: 'Graphite cardstone', shortLabel: 'Cardstone', category: 'stones', iconKey: 'resource.graphite-cardstone', processStage: 0, structuralClass: 1, tags: ['stone'] },

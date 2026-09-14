@@ -12,6 +12,7 @@ import {
   biomesFor,
   isBiomeExclusive,
   obtainRoutesFor,
+  SPECIES_BIOMES,
   toolRequiredFor,
   type ObtainRoute,
 } from '../sim/catalogs/obtaining';
@@ -201,9 +202,7 @@ function rotateBySeed(lines: string[], seed: string): string[] {
 function routeAppliesHere(route: ObtainRoute, biome: Biome): boolean {
   if (route.kind === 'scattered' || route.kind === 'dug') return route.biomes.includes(biome);
   if (route.kind !== 'trimmed') return false;
-  return route.species === 'redwood'
-    ? biome === 'forest'
-    : biome === 'clearing' || biome === 'forest' || biome === 'meadow';
+  return SPECIES_BIOMES[route.species].includes(biome);
 }
 
 function localMaterialReplies(biome: Biome): string[] {

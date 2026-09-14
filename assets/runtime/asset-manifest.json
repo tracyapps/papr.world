@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T22:52:59.964Z",
+  "generatedAt": "2026-09-07T20:00:41.227Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -4316,6 +4316,51 @@
       "size": "2635x1058"
     },
     {
+      "key": "props.palm-01",
+      "source": "assets/source/props/palm-01.svg",
+      "runtime": "assets/runtime/props/palm-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1101x1581",
+      "size": "1101x1581"
+    },
+    {
+      "key": "props.palm-02",
+      "source": "assets/source/props/palm-02.svg",
+      "runtime": "assets/runtime/props/palm-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1101x1581",
+      "size": "1101x1581"
+    },
+    {
+      "key": "props.palm-03",
+      "source": "assets/source/props/palm-03.svg",
+      "runtime": "assets/runtime/props/palm-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1101x1581",
+      "size": "1101x1581"
+    },
+    {
+      "key": "props.palm-04",
+      "source": "assets/source/props/palm-04.svg",
+      "runtime": "assets/runtime/props/palm-04.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1121x1115",
+      "size": "1121x1115"
+    },
+    {
+      "key": "props.palm-05",
+      "source": "assets/source/props/palm-05.svg",
+      "runtime": "assets/runtime/props/palm-05.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "1007x1482",
+      "size": "1007x1482"
+    },
+    {
       "key": "props.paper-tear",
       "source": "assets/source/props/paper-tear.svg",
       "runtime": "assets/runtime/props/paper-tear.png",
@@ -4503,6 +4548,15 @@
       "usage": "prop",
       "sourceSize": "624x871",
       "size": "624x871"
+    },
+    {
+      "key": "props.tree-03",
+      "source": "assets/source/props/tree-03.svg",
+      "runtime": "assets/runtime/props/tree-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "825x952",
+      "size": "825x952"
     },
     {
       "key": "props.water-lily-01",

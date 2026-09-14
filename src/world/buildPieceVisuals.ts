@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { createSheet, createWall } from '../render/builders';
-import { getMaterial, type MaterialKey } from '../render/materials';
+import { getMaterial, getResourceSurfaceMaterial, type MaterialKey } from '../render/materials';
+import { getBuildSurfaceUrl } from '../game/resourcePresentation';
 import type { PlacedPiece } from '../../shared/src/index';
-import { resolveBuildMaterial } from '../sim/catalogs/building';
+import { isLegacyBuildMaterial, resolveBuildMaterial, DEFAULT_BUILD_MATERIAL } from '../sim/catalogs/building';
 import { BUILD_PIECE_DEFS } from './buildPieces';
 import type { BuildPieceKey } from './buildPieces';
 
@@ -18,16 +19,39 @@ export function buildPlacedPieceVisual(piece: PlacedPiece): THREE.Group {
   group.name = `placed:${piece.id}`;
   if (!(piece.templateKey in BUILD_PIECE_DEFS)) return group;
   const key = piece.templateKey as BuildPieceKey;
-  // A stray/malformed material (an older save, a client on an older
-  // protocol) falls back to that piece's original hardcoded look rather than
-  // an invalid `getMaterial` lookup.
-  const material = resolveBuildMaterial(key, piece.material) as MaterialKey;
-  buildVisual(group, key, material);
+  buildVisual(group, key, buildSurface(key, piece.material));
   group.rotation.y = piece.rotY ?? 0;
   return group;
 }
 
-function buildVisual(group: THREE.Group, key: BuildPieceKey, material: MaterialKey) {
+/**
+ * How many times a resource tile repeats across a built surface.
+ *
+ * The retired paper textures each carried their own repeat in `MATERIAL_DEFS`
+ * (1.6 to 4, by how big the motif was drawn); a resource tile has no such
+ * setting, so this is the one place it lives. Two reads as paper stock on
+ * furniture rather than a single stretched picture.
+ */
+const BUILD_SURFACE_REPEAT: [number, number] = [2, 2];
+
+/**
+ * The material a piece is actually built from.
+ *
+ * A resource-backed choice wears that resource's compiled tile. A retired
+ * paper key — every piece built before materials were resources — keeps
+ * rendering exactly as it always has. Anything else (a malformed value, a
+ * client on an older protocol, a resource nobody has drawn yet) falls back to
+ * this piece type's original look rather than an invalid lookup.
+ */
+function buildSurface(key: BuildPieceKey, requested?: string): THREE.MeshStandardMaterial {
+  const material = resolveBuildMaterial(key, requested);
+  const surfaceUrl = getBuildSurfaceUrl(material);
+  if (surfaceUrl) return getResourceSurfaceMaterial(surfaceUrl, BUILD_SURFACE_REPEAT);
+  if (isLegacyBuildMaterial(material)) return getMaterial(material as MaterialKey);
+  return getMaterial(DEFAULT_BUILD_MATERIAL[key] as MaterialKey);
+}
+
+function buildVisual(group: THREE.Group, key: BuildPieceKey, material: THREE.MeshStandardMaterial) {
   switch (key) {
     case 'paper-bench':
       buildBench(group, material);
@@ -44,10 +68,9 @@ function buildVisual(group: THREE.Group, key: BuildPieceKey, material: MaterialK
   }
 }
 
-function buildBench(group: THREE.Group, material: MaterialKey) {
+function buildBench(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
   // Seat and backrest follow the chosen material; the legs stay a fixed dark
   // wood accent regardless of what the rest is built from.
-  const chosen = getMaterial(material);
   const dark = getMaterial('paper.brown');
 
   // Seat, then the backrest tilted back a little over it.
@@ -64,10 +87,10 @@ function buildBench(group: THREE.Group, material: MaterialKey) {
   }
 }
 
-function buildPlanter(group: THREE.Group, material: MaterialKey) {
+function buildPlanter(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
   // The box follows the chosen material; the soil fill stays soil-coloured
   // no matter what the box itself is built from.
-  const wood = getMaterial(material);
+  const wood = chosen;
   const soil = getMaterial('paper.brown.warm');
 
   // Long faces front and back, then the short side faces rotated flat-on.
@@ -80,14 +103,14 @@ function buildPlanter(group: THREE.Group, material: MaterialKey) {
   group.add(createSheet(0.72, 0.34, soil, [0, 0.44, 0]));
 }
 
-function buildPlank(group: THREE.Group, material: MaterialKey) {
-  group.add(createSheet(1.7, 0.62, getMaterial(material), [0, 0.018, 0]));
+function buildPlank(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  group.add(createSheet(1.7, 0.62, chosen, [0, 0.018, 0]));
 }
 
-function buildLamp(group: THREE.Group, material: MaterialKey) {
+function buildLamp(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
   // The pole follows the chosen material; the base and shade stay fixed —
   // a lamp's paper shade shouldn't turn to cork just because the pole did.
-  const wood = getMaterial(material);
+  const wood = chosen;
   const warm = getMaterial('paper.brown.warm');
   const shade = getMaterial('paper.notebook');
 

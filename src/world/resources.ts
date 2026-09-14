@@ -47,6 +47,15 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'redwood-bark-curls': {
     material: 'paper.cork', visual: 'twigBundle', mapColor: '#8a4a33',
   },
+  // Also deliberately absent from `BIOME_RESOURCES`. A palm is the only
+  // woody thing on a dunes page, and both of its materials come off it with
+  // scissors — nothing palm ever lies loose to be walked over.
+  'palm-clippings': {
+    material: 'paper.orangewrap', visual: 'twigBundle', mapColor: '#b07a3c',
+  },
+  'palm-fiber': {
+    material: 'paper.hill', visual: 'fiberTuft', mapColor: '#7ca24c',
+  },
   'mossy-paper-fiber': {
     material: 'paper.monstera', visual: 'fiberTuft', mapColor: '#4f823f',
   },

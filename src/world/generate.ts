@@ -12,7 +12,7 @@ import {
 // Deterministic from page coordinates, so every client agrees.
 
 
-const TREES: TreeKind[] = ['pine-medium-1', 'pine-medium-2', 'pine-tall', 'leafy-1', 'leafy-2'];
+const TREES: TreeKind[] = ['pine-medium-1', 'pine-medium-2', 'pine-tall', 'leafy-1', 'leafy-2', 'leafy-3'];
 const REDWOODS: TreeKind[] = [
   'redwood-1', 'redwood-2', 'redwood-3', 'redwood-4', 'redwood-5', 'redwood-6', 'redwood-7',
 ];
@@ -21,6 +21,12 @@ const REDWOODS: TreeKind[] = [
 const CACTI: DecorKind[] = [
   'cactus-1', 'cactus-2', 'cactus-3', 'cactus-4', 'cactus-5', 'cactus-6', 'cactus-7', 'cactus-8',
 ];
+// Palms are the one trimmable tree that grows on dunes, and for now the only
+// place they grow at all. They get their own small budget rather than a share
+// of the cactus slot, so adding them does not thin the cactus out; a dunes
+// page has only two to four scenery pieces to begin with. The tropical biome
+// is where palms are meant to be common — see `docs/tropical-biome-plan.md`.
+const PALMS: TreeKind[] = ['palm-1', 'palm-2', 'palm-3', 'palm-4', 'palm-5'];
 
 /**
  * A page's biome is now just "whatever the field says at its centre".
@@ -127,6 +133,23 @@ export function generatePage(px: number, pz: number): PageData {
         : giant ? 10 + rng() * 8
         : biome === 'forest' ? 3.4 + rng() * 4.8
         : 2.15 + rng() * 1.2,
+    });
+  }
+
+  // Sparse palms on dunes: about one a page, never a grove.
+  const palmCount = biome === 'dunes' && rng() < 0.55 ? 1 + Math.floor(rng() * 2) : 0;
+  for (let i = 0; i < palmCount; i += 1) {
+    const { x, z } = spot();
+    // Same field check the trees use, so palms fade out where the dunes do
+    // rather than standing in the meadow on the far side of the boundary.
+    if (dominantBiomeAt(x, z) !== 'dunes') continue;
+    props.push({
+      kind: 'tree',
+      tree: PALMS[Math.floor(rng() * PALMS.length)],
+      x,
+      z,
+      rotY: rng() * 0.9 - 0.45,
+      height: 4.2 + rng() * 3.4,
     });
   }
 

@@ -984,6 +984,134 @@ function buildWoodchuck(params: CritterParams): CritterRig {
   };
 }
 
+function buildFox(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = bodyMaterial(params);
+  const dark = createColorMaterial(params.accentColor, 0.85);
+  const cream = createColorMaterial('#f6ecd8', 0.94);
+
+  // Torso pivots so the fox can tuck down into its curl-up flourish — the
+  // same articulation the raccoon uses to sit up, aimed the other way.
+  const torso = new THREE.Group();
+  torso.position.set(0, 0.16, 0.02);
+
+  // A capsule keeps a straight-sided barrel through the body's length no
+  // matter how it's scaled, which is what reads sleek and lean rather than
+  // round like the raccoon's stretched sphere.
+  const body = capsule(0.12, 0.3, coat, 6, 14);
+  body.rotation.x = Math.PI / 2;
+  body.scale.set(1, 0.9, 1.05);
+  body.position.set(0, 0.13, 0);
+
+  const chest = sphere(0.1, cream, 14, 10);
+  chest.scale.set(0.85, 0.7, 0.42);
+  chest.position.set(0, 0.08, -0.15);
+
+  const head = sphere(0.145, coat, 20, 14);
+  head.scale.set(0.95, 0.88, 0.92);
+  head.position.set(0, 0.34, -0.28);
+
+  // A long, pointed snout — the single most fox-specific silhouette cue.
+  const muzzle = sphere(0.075, coat, 14, 10);
+  muzzle.scale.set(0.85, 0.62, 1.55);
+  muzzle.position.set(0, 0.29, -0.45);
+
+  const muzzleTip = sphere(0.042, cream, 10, 8);
+  muzzleTip.scale.set(0.9, 0.58, 1);
+  muzzleTip.position.set(0, 0.255, -0.47);
+
+  const nose = sphere(0.027, dark, 8, 6);
+  nose.position.set(0, 0.275, -0.54);
+
+  const eyes: THREE.Mesh[] = [];
+  for (const x of [-0.06, 0.06]) {
+    const eye = sphere(0.022, dark, 10, 7);
+    eye.scale.set(1, 0.68, 0.6);
+    eye.position.set(x, 0.375, -0.41);
+    eyes.push(eye);
+  }
+
+  // Tall, sharply pointed ears with a dark inner patch.
+  const ears: THREE.Mesh[] = [];
+  for (const x of [-0.09, 0.09]) {
+    const ear = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.052, 0.15, 4), coat));
+    ear.position.set(x, 0.47, -0.28);
+    ear.rotation.z = x < 0 ? 0.16 : -0.16;
+    const inner = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.09, 4), dark));
+    inner.position.set(x, 0.455, -0.26);
+    inner.rotation.z = ear.rotation.z;
+    ears.push(ear, inner);
+  }
+
+  torso.add(body, chest);
+  const headGroup = makeHead(torso, [0, 0.32, -0.22], [head, muzzle, muzzleTip, nose, ...eyes, ...ears]);
+
+  // Slim black-socked legs — no separate paws; a fox's flourish is a
+  // whole-body curl, not a hand gesture.
+  const legs: THREE.Mesh[] = [];
+  for (const [index, x] of [-0.09, 0.09, -0.08, 0.08].entries()) {
+    const leg = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.028, 0.24, 8), dark));
+    leg.position.set(x, 0.1, index < 2 ? -0.14 : 0.14);
+    legs.push(leg);
+  }
+
+  // A long, low tail — the last two segments switch to the cream paper so
+  // it ends in the white tip a curled-up fox tucks its nose against.
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.2, 0.28);
+  const tailSegments = 5;
+  for (let index = 0; index < tailSegments; index += 1) {
+    const isTip = index >= tailSegments - 2;
+    const segment = sphere(0.1 - index * 0.01, isTip ? cream : coat, 14, 10);
+    segment.scale.set(0.82, 0.78, 1.05);
+    segment.position.set(0, index * 0.045, index * 0.11);
+    tail.add(segment);
+  }
+  const tailRestX = 0.32;
+  tail.rotation.x = tailRestX;
+
+  group.add(torso, ...legs, tail);
+
+  const o = params.animOffset;
+  return {
+    group,
+    parts: partsOf({ head: headGroup, body: torso, tail, ears }),
+    flying: false,
+    hopper: false,
+    groundOffset: 0.032,
+    hopHeight: 0,
+    animate: (t, _dt, moving, speedRatio, curious) => {
+      // A quick, low trot — legs sweep faster than the raccoon's waddle.
+      torso.rotation.z = moving ? Math.sin(t * 9 + o) * 0.05 * speedRatio : 0;
+      legs.forEach((leg, index) => {
+        leg.rotation.x = moving ? Math.sin(t * 13 + o + index * Math.PI) * 0.32 * speedRatio : 0;
+      });
+      tail.rotation.z = Math.sin(t * (moving ? 7 : 2.2) + o) * (moving ? 0.14 : 0.06);
+      // A slight forward lean when something interesting is nearby; head
+      // pose itself belongs to the idle action system.
+      const alert = curious ? 1 : 0;
+      torso.rotation.x = THREE.MathUtils.lerp(torso.rotation.x, -0.08 * alert, 0.1);
+      const blink = Math.sin(t * 1.6 + o) > 0.97 ? 0.2 : 1;
+      eyes.forEach((eye) => { eye.scale.y = 0.68 * blink; });
+    },
+    flourish: (progress, t) => {
+      // Curls into a ball and sweeps its tail up over its nose — a fox's
+      // sleeping pose, deliberately distinct from the cat's tail-wrap.
+      const curl = Math.sin(progress * Math.PI);
+      torso.rotation.x = 0.4 * curl;
+      headGroup.rotation.x = 0.3 * curl;
+      tail.rotation.x = tailRestX + 1.3 * curl;
+      tail.rotation.y = Math.sin(t * 6) * 0.05 * curl;
+      if (progress >= 1) {
+        torso.rotation.x = 0;
+        headGroup.rotation.x = 0;
+        tail.rotation.x = tailRestX;
+        tail.rotation.y = 0;
+      }
+    },
+  };
+}
+
 const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = {
   squirrel: buildSquirrel,
   butterfly: buildButterfly,
@@ -993,6 +1121,7 @@ const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = 
   cat: buildCat,
   woodchuck: buildWoodchuck,
   meerkat: buildMeerkat,
+  fox: buildFox,
 };
 
 export function buildCritterRig(species: CritterSpecies, params: CritterParams): CritterRig {

@@ -1,5 +1,6 @@
 import type { BuildPieceKey } from '../../world/buildPieces';
 import type { IngredientRequirement } from './recipes';
+import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 
 export type BuildStepVerb = 'assemble' | 'build' | 'decorate';
 export type BuildJoin = 'fold' | 'tape' | 'fastener';
@@ -10,6 +11,16 @@ export type BuildAssemblyStep = {
   verb: BuildStepVerb;
   durationSeconds: number;
   materials: readonly IngredientRequirement[];
+  /**
+   * Units of the piece's *chosen* material this step consumes.
+   *
+   * Separate from `materials` because the cost is not a fixed ingredient — it
+   * is however much of whatever you decided to build the thing out of. Kept
+   * per step rather than per piece so an advanced structure can charge more
+   * at its heavier steps without the small furniture getting more expensive
+   * too: modest now, room to grow.
+   */
+  materialUnits: number;
   /** Named intermediate part this step leaves at the site. */
   producesPart?: string;
   /** Named parts that must have been made at earlier steps. */
@@ -33,38 +44,56 @@ export type BuildAssemblyDefinition = {
 export const BUILD_ASSEMBLY_DEFS = {
   'paper-bench': {
     templateKey: 'paper-bench', minimumToolTier: 1,
-    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.4, materials: [] }],
+    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.4, materials: [], materialUnits: 4 }],
   },
   'planter-box': {
     templateKey: 'planter-box', minimumToolTier: 1,
-    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.1, materials: [] }],
+    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.1, materials: [], materialUnits: 3 }],
   },
   'path-plank': {
     templateKey: 'path-plank', minimumToolTier: 1,
-    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 1.4, materials: [] }],
+    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 1.4, materials: [], materialUnits: 2 }],
   },
   'paper-lamp': {
     templateKey: 'paper-lamp', minimumToolTier: 1,
-    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.2, materials: [] }],
+    steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.2, materials: [], materialUnits: 3 }],
   },
 } as const satisfies Record<BuildPieceKey, BuildAssemblyDefinition>;
+
+/** Everything a finished piece costs in its chosen material, across all steps. */
+export function buildMaterialUnits(templateKey: string): number {
+  const definition = BUILD_ASSEMBLY_DEFS[templateKey as BuildPieceKey];
+  return definition ? definition.steps.reduce((total, step) => total + step.materialUnits, 0) : 0;
+}
 
 export function buildAssemblyDef(templateKey: string): BuildAssemblyDefinition | null {
   return BUILD_ASSEMBLY_DEFS[templateKey as BuildPieceKey] ?? null;
 }
 
 /**
- * Materials a build piece can be made from.
+ * A build surface is a material you gathered.
  *
- * Plain strings on purpose — sim/ stays renderer-free by design (see this
- * file's own header comment), so this catalog does not import `MaterialKey`
- * from `render/materials.ts`. `buildPieceVisuals.ts` is the one place that
- * needs to know these strings double as real `MaterialKey`s, and it already
- * imports that type natively. Every entry here must already exist in
- * `MATERIAL_DEFS` — there is no asset work in offering a new one, only in
- * curating which existing paper textures make sense on furniture.
+ * The id is a `ResourceId`, optionally with a colorway after a dot —
+ * `kraft-twigs`, `kraft-twigs.terracotta`. It stays a plain string in the
+ * protocol (it always was), so nothing here costs a `PROTOCOL_VERSION` bump,
+ * and resource ids never contain a dot, which is what makes the split
+ * unambiguous against the legacy keys below.
+ *
+ * sim/ stays renderer-free: this validates that the resource *exists*, and
+ * nothing more. Which resources have compiled artwork, and what a colorway
+ * looks like, are presentation facts that belong to the render layer.
  */
-export const BUILD_MATERIAL_OPTIONS = [
+export type BuildMaterialId = string;
+
+/**
+ * The six curated paper textures the picker used to offer.
+ *
+ * They tied to no resource and cost nothing, which is the gap this replaces.
+ * They stay **valid** — every piece built before today records one, and an
+ * older client may still send one — so they keep rendering exactly as they
+ * always have. They are simply no longer offered. Do not add to this list.
+ */
+export const LEGACY_BUILD_MATERIALS = [
   'paper.brown.warm',
   'paper.brown',
   'paper.cork',
@@ -73,14 +102,14 @@ export const BUILD_MATERIAL_OPTIONS = [
   'paper.plaid',
 ] as const;
 
-export type BuildMaterialKey = (typeof BUILD_MATERIAL_OPTIONS)[number];
+export type LegacyBuildMaterial = (typeof LEGACY_BUILD_MATERIALS)[number];
 
-export function isBuildMaterial(value: string): value is BuildMaterialKey {
-  return (BUILD_MATERIAL_OPTIONS as readonly string[]).includes(value);
+export function isLegacyBuildMaterial(value: string): value is LegacyBuildMaterial {
+  return (LEGACY_BUILD_MATERIALS as readonly string[]).includes(value);
 }
 
-/** Player-facing name for each material option, for the build picker UI. */
-export const BUILD_MATERIAL_LABELS: Record<BuildMaterialKey, string> = {
+/** Player-facing names for the retired textures, still needed to label an old piece. */
+export const LEGACY_BUILD_MATERIAL_LABELS: Record<LegacyBuildMaterial, string> = {
   'paper.brown.warm': 'Warm Kraft',
   'paper.brown': 'Brown Paper',
   'paper.cork': 'Corkboard',
@@ -88,6 +117,30 @@ export const BUILD_MATERIAL_LABELS: Record<BuildMaterialKey, string> = {
   'paper.green': 'Construction Green',
   'paper.plaid': 'Blue Plaid',
 };
+
+/** The resource and colorway inside a build material id, or null if it names no real resource. */
+export function parseBuildMaterial(
+  value: string,
+): { resource: ResourceId; colorway: string | null } | null {
+  const dot = value.indexOf('.');
+  const head = dot === -1 ? value : value.slice(0, dot);
+  if (!(head in RESOURCE_CORE_DEFS)) return null;
+  const colorway = dot === -1 ? null : value.slice(dot + 1);
+  return { resource: head as ResourceId, colorway: colorway || null };
+}
+
+export function formatBuildMaterial(resource: ResourceId, colorway?: string | null): BuildMaterialId {
+  return colorway ? `${resource}.${colorway}` : resource;
+}
+
+/** The resource a piece is made of, or null when it predates resource-backed materials. */
+export function buildMaterialResource(value: string): ResourceId | null {
+  return parseBuildMaterial(value)?.resource ?? null;
+}
+
+export function isBuildMaterial(value: string): boolean {
+  return isLegacyBuildMaterial(value) || parseBuildMaterial(value) !== null;
+}
 
 /**
  * What every piece looked like before a `material` was ever recorded.
@@ -99,7 +152,7 @@ export const BUILD_MATERIAL_LABELS: Record<BuildMaterialKey, string> = {
  * each piece this default applies to (never all of a piece's materials —
  * e.g. a planter's soil and a lamp's shade are deliberately fixed).
  */
-export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, BuildMaterialKey> = {
+export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, LegacyBuildMaterial> = {
   'paper-bench': 'paper.brown.warm',
   'planter-box': 'paper.cork',
   'path-plank': 'paper.plaid',
@@ -108,7 +161,7 @@ export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, BuildMaterialKey> = {
 
 /** The material a piece should render/build with: the requested one if it's
  * real, otherwise that piece type's original look. */
-export function resolveBuildMaterial(templateKey: BuildPieceKey, requested?: string): BuildMaterialKey {
+export function resolveBuildMaterial(templateKey: BuildPieceKey, requested?: string): BuildMaterialId {
   if (requested && isBuildMaterial(requested)) return requested;
   return DEFAULT_BUILD_MATERIAL[templateKey];
 }

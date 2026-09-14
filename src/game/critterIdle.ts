@@ -268,6 +268,16 @@ const SPECIES_IDLE: Record<CritterSpecies, WeightedAction[]> = {
     { id: 'settle', weight: 2 },
     { id: 'stretch', weight: 1 },
   ],
+  // Ears and nose do most of the work — a fox reads as listening for
+  // something before it ever looks up.
+  fox: [
+    { id: 'ear-swivel', weight: 5 },
+    { id: 'sniff-ground', weight: 5 },
+    { id: 'look-around', weight: 3 },
+    { id: 'perk-up', weight: 3 },
+    { id: 'settle', weight: 2 },
+    { id: 'groom', weight: 2 },
+  ],
 };
 
 /**

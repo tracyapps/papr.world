@@ -29,7 +29,7 @@ type CritterSpecies = import('./critterVariation').CritterSpecies;
 // Nothing inside it ever moves.
 
 const SPECIES: CritterSpecies[] = [
-  'squirrel', 'butterfly', 'raccoon', 'bunny', 'bird', 'cat', 'woodchuck', 'meerkat',
+  'squirrel', 'butterfly', 'raccoon', 'bunny', 'bird', 'cat', 'woodchuck', 'meerkat', 'fox',
 ];
 
 function snapshotLocalPositions(root: THREE.Object3D) {

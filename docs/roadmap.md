@@ -466,6 +466,38 @@ Two paper fibers are an equal-value barter for any packet, so the loop is
 playable from a new save with no free currency. A bought packet becomes the
 selected seed immediately, connecting the counter directly to planting.
 
+### 3.3b Build materials come out of the bag — ✅ built (2026-09-07)
+
+<!-- site: summary: A bench is made of something you gathered. The picker offers the patterns you actually hold, building spends them, and restyling recycles what the piece used to be. -->
+
+Not originally numbered here — it belonged to the building slice and to
+`colorway-guide.md`'s material plan, and it is the piece that made both real.
+
+The build picker used to offer six curated paper textures that tied to no
+resource and cost nothing; its own doc comment admitted the only work in
+adding one was "curating which existing paper textures make sense on
+furniture". Now a build material **is** a resource you gathered — a
+`ResourceId`, optionally with a colorway after a dot (`kraft-twigs`,
+`kraft-twigs.terracotta`) — and:
+
+- the picker shows only patterns in your bag, with the count on each swatch
+  and the price in the heading, greying out what will not cover the piece;
+- placing spends it (bench 4, planter 3, lamp 3, plank 2 — modest, and held
+  **per step** so an advanced structure can charge more at its heavier steps
+  without the small furniture getting dearer);
+- restyling charges the new material and recycles the old one back, because
+  the piece is genuinely made of something else afterwards;
+- an empty bag stops the build with the number, rather than a shrug.
+
+**Nothing about this costs a `PROTOCOL_VERSION` bump** — `PlacedPiece.material`
+was always a string and always validated with a fallback. The six retired
+textures stay valid so every piece built before today, and any client on an
+older build, keeps rendering exactly as it always has. They are simply no
+longer offered.
+
+Still open: nothing consumes materials at a *step* granularity yet because
+every piece is one step; the seam is there for the first multi-step structure.
+
 ### 3.4 The owl-itect and finished creations — **M**
 
 Depends on 3.3 and the first ready furniture or decoration slice. The owl sells

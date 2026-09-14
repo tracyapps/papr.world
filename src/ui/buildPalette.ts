@@ -1,9 +1,6 @@
 import { BUILD_PIECE_DEFS, type BuildPieceKey } from '../world/buildPieces';
-import {
-  BUILD_MATERIAL_LABELS,
-  BUILD_MATERIAL_OPTIONS,
-  type BuildMaterialKey,
-} from '../sim/catalogs/building';
+import { buildMaterialUnits, type BuildMaterialId } from '../sim/catalogs/building';
+import { buildMaterialOffers } from '../game/buildMaterials';
 import { getActionMode, onActionModeChanged } from '../game/actionMode';
 import {
   getSelectedBuildMaterial,
@@ -14,7 +11,6 @@ import {
   setSelectedBuildMaterial,
   setSelectedBuildPiece,
 } from '../game/placement';
-import { materialTextureUrl } from '../render/materials';
 import { registerRailPanel } from './hudLayout';
 
 // The build-mode palette: the pieces the player can put down, shown only while
@@ -47,7 +43,7 @@ export function initializeBuildPalette() {
     }
     const materialButton = target.closest<HTMLButtonElement>('[data-build-material]');
     if (materialButton?.dataset.buildMaterial) {
-      setSelectedBuildMaterial(materialButton.dataset.buildMaterial as BuildMaterialKey);
+      setSelectedBuildMaterial(materialButton.dataset.buildMaterial as BuildMaterialId);
     }
   });
   palette.addEventListener('pointerdown', (event) => event.stopPropagation());
@@ -89,14 +85,47 @@ function renderPalette() {
           </button>`;
   }).join('')}
     </div>
-    <p class="build-palette-heading build-material-heading">Material</p>
+    <p class="build-palette-heading build-material-heading">${materialHeading(selected)}</p>
     <div class="build-material-list" role="listbox" aria-label="Choose a material">
-      ${BUILD_MATERIAL_OPTIONS.map((material) => `
-          <button type="button" role="option" aria-selected="${selectedMaterial === material}"
-            class="build-material-item${selectedMaterial === material ? ' is-selected' : ''}"
-            data-build-material="${material}" title="${BUILD_MATERIAL_LABELS[material]}"
-            style="background-image: url('${materialTextureUrl(material)}')">
-            <span class="sr-only">${BUILD_MATERIAL_LABELS[material]}</span>
-          </button>`).join('')}
+      ${materialSwatches(selected, selectedMaterial)}
     </div>`;
+}
+
+/**
+ * The Material heading carries the price, because the picker is the only
+ * place a player finds out that a piece costs anything at all.
+ */
+function materialHeading(piece: BuildPieceKey | null): string {
+  if (!piece) return 'Material';
+  const units = buildMaterialUnits(piece);
+  return units > 0 ? `Material — ${units} needed` : 'Material';
+}
+
+/**
+ * Only what is in the bag, and only in quantities that would finish the piece.
+ *
+ * The six curated paper textures this replaced were free and tied to nothing,
+ * so the picker could always show a full row. Now an empty row is a true and
+ * useful thing to say: go and gather something.
+ */
+function materialSwatches(piece: BuildPieceKey | null, selectedMaterial: string | null): string {
+  const offers = buildMaterialOffers();
+  if (offers.length === 0) {
+    return '<p class="build-material-empty">Nothing to build with yet — gather some paper, sticks or stone.</p>';
+  }
+
+  const units = piece ? buildMaterialUnits(piece) : 0;
+  return offers.map((offer) => {
+    const affordable = offer.owned >= units;
+    const label = `${offer.label} — ${offer.owned} in your bag${affordable ? '' : `, ${units} needed`}`;
+    return `
+          <button type="button" role="option" aria-selected="${selectedMaterial === offer.id}"
+            class="build-material-item${selectedMaterial === offer.id ? ' is-selected' : ''}${affordable ? '' : ' is-short'}"
+            data-build-material="${offer.id}" title="${label}"
+            ${affordable ? '' : 'disabled'}
+            style="background-image: url('${offer.textureUrl}')">
+            <span class="sr-only">${label}</span>
+            <span class="build-material-count" aria-hidden="true">${offer.owned}</span>
+          </button>`;
+  }).join('');
 }

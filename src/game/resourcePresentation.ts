@@ -1,3 +1,4 @@
+import { parseBuildMaterial } from '../sim/catalogs/building';
 import type { ResourceId } from '../sim/catalogs/resources';
 import { GENERATED_RESOURCE_ART } from './resourceArt.generated';
 
@@ -60,6 +61,7 @@ type GeneratedArtRecord = {
   /** The tiling surface the loose pieces were cut from. Null for seeds,
    *  which are drawn as direct cutouts and have no tiling form. */
   surfaceUrl: string | null;
+  colorways: readonly { id: string; label: string; sourceUrl: string }[];
   variants: readonly ResourceArtVariant[];
 };
 
@@ -102,4 +104,41 @@ export function resourceArtVariant(art: ResourceArt, seed: number): ResourceArtV
   const variants = art.variants.length > 0 ? art.variants : [art];
   const index = Math.abs(Math.trunc(seed)) % variants.length;
   return variants[index];
+}
+
+/**
+ * The tile a build material names, colorway included.
+ *
+ * `sim/` validates that a build material names a real resource and stops
+ * there, on purpose — whether that resource has been drawn yet, and what
+ * `kraft-twigs.terracotta` looks like, are presentation facts. This is where
+ * they are answered. Null means the material is a retired paper key, or names
+ * a resource nobody has drawn yet; either way the caller falls back to the
+ * piece's original look rather than rendering nothing.
+ */
+export function getBuildSurfaceUrl(material: string): string | null {
+  const parsed = parseBuildMaterial(material);
+  if (!parsed) return null;
+  const record = generatedResourceArt[parsed.resource];
+  if (!record) return null;
+  if (!parsed.colorway) return record.surfaceUrl;
+  const colorway = record.colorways.find((entry) => entry.id === parsed.colorway);
+  return colorway?.sourceUrl ?? record.surfaceUrl;
+}
+
+/**
+ * Every drawn resource and the surfaces it offers — its default tile first,
+ * then each colorway. A colorway costs no more than the plain tile: it is the
+ * same paper, dyed differently.
+ */
+export function resourceBuildSurfaces(): Array<[ResourceId, Array<{ colorway: string | null; label: string }>]> {
+  return (Object.keys(generatedResourceArt) as ResourceId[]).flatMap((resource) => {
+    const record = generatedResourceArt[resource];
+    if (!record?.surfaceUrl) return [];
+    const surfaces = [
+      { colorway: null, label: 'As drawn' },
+      ...record.colorways.map((entry) => ({ colorway: entry.id, label: entry.label })),
+    ];
+    return [[resource, surfaces] as [ResourceId, Array<{ colorway: string | null; label: string }>]];
+  });
 }

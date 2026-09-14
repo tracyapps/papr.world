@@ -5,10 +5,11 @@ import type { BuildSiteState } from '../sim/state';
 import { dispatchGameCommand, resolveIngredientAllocation } from '../sim/commands';
 import {
   buildAssemblyDef,
-  DEFAULT_BUILD_MATERIAL,
+  buildMaterialUnits,
   nextBuildStep,
-  type BuildMaterialKey,
+  type BuildMaterialId,
 } from '../sim/catalogs/building';
+import { canAffordBuildMaterial, defaultBuildMaterial } from './buildMaterials';
 import { TOOL_DEFS } from '../sim/catalogs/tools';
 import {
   BUILD_PIECE_DEFS,
@@ -74,7 +75,7 @@ type ActiveBuildPreview = {
   key: BuildPieceKey;
   point: THREE.Vector3;
   rotY: number;
-  material: BuildMaterialKey;
+  material: BuildMaterialId | null;
 };
 
 // ---- Piece selection -----------------------------------------------------
@@ -82,7 +83,14 @@ type ActiveBuildPreview = {
 const selectionListeners = new Set<() => void>();
 let selectedKey: BuildPieceKey | null = null;
 let selectedRotY = 0;
-let selectedMaterial: BuildMaterialKey = DEFAULT_BUILD_MATERIAL['paper-bench'];
+/**
+ * Null until the player has something to build with.
+ *
+ * Materials are things you gathered now, so there is no longer a free default
+ * to fall back on — an empty bag means you go and find some paper first, which
+ * is the whole point of the change.
+ */
+let selectedMaterial: BuildMaterialId | null = defaultBuildMaterial('paper-bench');
 let activeBuildPreview: ActiveBuildPreview | null = null;
 
 export function getSelectedBuildPiece() {
@@ -93,7 +101,12 @@ export function setSelectedBuildPiece(key: BuildPieceKey | null) {
   if (key === selectedKey) return;
   selectedKey = key;
   selectedRotY = 0;
-  selectedMaterial = key ? DEFAULT_BUILD_MATERIAL[key] : selectedMaterial;
+  // Keep the current choice when it still covers the new piece — swapping a
+  // bench for a plank should not quietly change what it is made of — and
+  // otherwise fall to the first material that does.
+  if (key && !(selectedMaterial && canAffordBuildMaterial(key, selectedMaterial))) {
+    selectedMaterial = defaultBuildMaterial(key);
+  }
   for (const listener of selectionListeners) listener();
 }
 
@@ -108,7 +121,7 @@ export function getSelectedBuildMaterial() {
 /** Build-palette swatch click. Ignored once a build is already pinned and
  * running, same as rotation below — the in-flight action already captured
  * its pose and look. */
-export function setSelectedBuildMaterial(material: BuildMaterialKey) {
+export function setSelectedBuildMaterial(material: BuildMaterialId) {
   if (getActionMode() !== 'place') return;
   if (carrying) {
     if (activeBuildPreview) return; // a restyle timer is already running
@@ -237,7 +250,7 @@ function assessCarryDropAtPoint(point: THREE.Vector3): PlaceAssessment {
 /** Shared by an instant move (`material` unchanged) and a restyle (`material`
  * different, so a rebuild timer runs first) — both end with the same
  * `updatePlacedPiece` command once the drop point checks out. */
-function dropCarriedPiece(point: THREE.Vector3, material: BuildMaterialKey) {
+function dropCarriedPiece(point: THREE.Vector3, material: BuildMaterialId) {
   if (!carrying) return;
   const assessment = assessCarryDropAtPoint(point);
   if (assessment.status !== 'valid' || !assessment.point) {
@@ -399,7 +412,7 @@ export function tryPlaceAt(clientX: number, clientY: number) {
   if (getActionMode() !== 'place') return false;
   if (carrying) {
     const point = pickTerrainAtScreen(clientX, clientY);
-    if (point) dropCarriedPiece(point, carrying.piece.material as BuildMaterialKey);
+    if (point) dropCarriedPiece(point, carrying.piece.material as BuildMaterialId);
     return true;
   }
   const groundPoint = pickTerrainAtScreen(clientX, clientY);
@@ -426,6 +439,16 @@ export function tryPlaceAt(clientX: number, clientY: number) {
     return true;
   }
   const material = selectedMaterial;
+  // A piece is made of something you gathered, so an empty bag stops the
+  // build here rather than at the command — with the number, because "not
+  // enough" without "how much" is just a shrug.
+  if (!material || !canAffordBuildMaterial(assessment.def.key, material)) {
+    const units = buildMaterialUnits(assessment.def.key);
+    showPetToast(material
+      ? `Not enough of that material — ${assessment.def.label} takes ${units}.`
+      : `Gather some material first — ${assessment.def.label} takes ${units}.`);
+    return true;
+  }
   activeBuildPreview = {
     key: assessment.def.key,
     point: assessment.point.clone(),
@@ -488,7 +511,7 @@ let ghost: THREE.Group | null = null;
 let targetRing: THREE.Mesh | null = null;
 let claimedRings: THREE.Group | null = null;
 let ghostKey: BuildPieceKey | null = null;
-let ghostMaterial: BuildMaterialKey | null = null;
+let ghostMaterial: BuildMaterialId | null = null;
 
 export function initializePlacement() {
   if (overlayRoot) return;
@@ -534,7 +557,7 @@ export function hideBuildOverlay() {
 }
 
 /** Rebuild the ghost only when the piece it represents actually changes. */
-function syncGhost(key: BuildPieceKey | null, material: BuildMaterialKey) {
+function syncGhost(key: BuildPieceKey | null, material: BuildMaterialId | null) {
   if (!ghostHost) return;
   if (key === ghostKey && material === ghostMaterial) return;
   ghostKey = key;
@@ -548,7 +571,10 @@ function syncGhost(key: BuildPieceKey | null, material: BuildMaterialKey) {
     x: 0,
     z: 0,
     rotY: 0,
-    material,
+    // Nothing chosen yet — with an empty bag there may be nothing to choose —
+    // so the ghost falls back to the piece's own original look, the same way
+    // `resolveBuildMaterial` treats any value it does not recognise.
+    material: material ?? '',
     makerId: LOCAL_MAKER_ID,
     page: '0,0',
   });
@@ -599,7 +625,7 @@ export function updateBuildOverlay(
   if (carrying && !pinned && hover) carryHoverPoint = hover.clone();
   const key = pinned?.key ?? (carrying ? carrying.piece.templateKey as BuildPieceKey : selectedKey);
   const material = pinned?.material
-    ?? (carrying ? carrying.piece.material as BuildMaterialKey : selectedMaterial);
+    ?? (carrying ? carrying.piece.material as BuildMaterialId : selectedMaterial);
   const displayPoint = pinned?.point ?? hover;
   const assessment = pinned
     ? { status: 'valid' as const, def: BUILD_PIECE_DEFS[pinned.key], point: pinned.point, rotY: pinned.rotY }

@@ -31,6 +31,7 @@ const PET_VERBS: Record<string, string> = {
   cat: 'slow-blinks at you',
   woodchuck: 'chatters its teeth and beams',
   meerkat: 'stands up tall on its toes to get a better look at you',
+  fox: 'flicks its tail and gives a sly little yip',
 };
 
 // --- Paper hearts -----------------------------------------------------

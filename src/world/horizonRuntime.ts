@@ -5,7 +5,7 @@ import { createTerrainPageMesh, sampleTerrainHeight } from './terrain';
 import { TREE_DEFS } from './pageRuntime';
 import type { PageData, TreeKind } from './types';
 
-type HorizonTreeStyle = 'leafy' | 'pine' | 'redwood';
+type HorizonTreeStyle = 'leafy' | 'palm' | 'pine' | 'redwood';
 
 const HORIZON_TREE_KIND: Record<TreeKind, HorizonTreeStyle> = {
   'pine-medium-1': 'pine',
@@ -13,6 +13,12 @@ const HORIZON_TREE_KIND: Record<TreeKind, HorizonTreeStyle> = {
   'pine-tall': 'pine',
   'leafy-1': 'leafy',
   'leafy-2': 'leafy',
+  'leafy-3': 'leafy',
+  'palm-1': 'palm',
+  'palm-2': 'palm',
+  'palm-3': 'palm',
+  'palm-4': 'palm',
+  'palm-5': 'palm',
   'redwood-1': 'redwood',
   'redwood-2': 'redwood',
   'redwood-3': 'redwood',
@@ -24,6 +30,7 @@ const HORIZON_TREE_KIND: Record<TreeKind, HorizonTreeStyle> = {
 
 const HORIZON_TREE_ART: Record<HorizonTreeStyle, TreeKind> = {
   leafy: 'leafy-1',
+  palm: 'palm-1',
   pine: 'pine-tall',
   redwood: 'redwood-1',
 };

@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   BUILD_ASSEMBLY_DEFS,
-  BUILD_MATERIAL_OPTIONS,
+  LEGACY_BUILD_MATERIALS,
   DEFAULT_BUILD_MATERIAL,
+  buildMaterialResource,
+  buildMaterialUnits,
+  formatBuildMaterial,
   isBuildMaterial,
+  isLegacyBuildMaterial,
   nextBuildStep,
+  parseBuildMaterial,
   resolveBuildMaterial,
   validateBuildAssembly,
   type BuildAssemblyDefinition,
@@ -29,16 +34,16 @@ describe('build assembly catalog', () => {
       steps: [
         {
           id: 'frame', label: 'Making frame', verb: 'build', durationSeconds: 2,
-          materials: [], producesPart: 'frame',
+          materials: [], materialUnits: 2, producesPart: 'frame',
         },
         {
           id: 'walls', label: 'Making wall panels', verb: 'build', durationSeconds: 2,
-          materials: [], producesPart: 'wall-panels',
+          materials: [], materialUnits: 3, producesPart: 'wall-panels',
         },
         {
           id: 'shell', label: 'Assembling', verb: 'assemble', durationSeconds: 3,
           materials: [{ kind: 'exact', resource: 'mossy-paper-fiber', quantity: 1 }],
-          requiresParts: ['frame', 'wall-panels'], join: 'tape',
+          materialUnits: 1, requiresParts: ['frame', 'wall-panels'], join: 'tape',
         },
       ],
     };
@@ -60,7 +65,7 @@ describe('build assembly catalog', () => {
       minimumToolTier: 2,
       steps: [{
         id: 'join', label: 'Assembling', verb: 'assemble', durationSeconds: 2,
-        materials: [], requiresParts: ['missing-roof'], join: 'tape',
+        materials: [], materialUnits: 0, requiresParts: ['missing-roof'], join: 'tape',
       }],
     };
 
@@ -76,7 +81,12 @@ describe('build material choice', () => {
     }
   });
 
-  it('accepts a requested material when it is a real option', () => {
+  it('accepts a resource the player could actually be holding', () => {
+    expect(resolveBuildMaterial('paper-bench', 'kraft-twigs')).toBe('kraft-twigs');
+    expect(resolveBuildMaterial('paper-bench', 'kraft-twigs.terracotta')).toBe('kraft-twigs.terracotta');
+  });
+
+  it('still accepts a retired paper key, so an existing piece keeps its look', () => {
     expect(resolveBuildMaterial('paper-bench', 'paper.grey')).toBe('paper.grey');
   });
 
@@ -90,7 +100,52 @@ describe('build material choice', () => {
     }
   });
 
-  it('never offers the same option twice', () => {
-    expect(new Set(BUILD_MATERIAL_OPTIONS).size).toBe(BUILD_MATERIAL_OPTIONS.length);
+  it('never lists the same retired option twice', () => {
+    expect(new Set(LEGACY_BUILD_MATERIALS).size).toBe(LEGACY_BUILD_MATERIALS.length);
+  });
+
+  it('reads a resource and its colorway out of a material id', () => {
+    expect(parseBuildMaterial('kraft-twigs')).toEqual({ resource: 'kraft-twigs', colorway: null });
+    expect(parseBuildMaterial('kraft-twigs.terracotta')).toEqual({
+      resource: 'kraft-twigs',
+      colorway: 'terracotta',
+    });
+    expect(formatBuildMaterial('kraft-twigs', 'terracotta')).toBe('kraft-twigs.terracotta');
+    expect(formatBuildMaterial('kraft-twigs')).toBe('kraft-twigs');
+  });
+
+  it('does not mistake a retired paper key for a resource', () => {
+    // Every retired key contains a dot, same as a colorway does — what
+    // separates them is that no resource is called `paper`.
+    for (const legacy of LEGACY_BUILD_MATERIALS) {
+      expect(parseBuildMaterial(legacy)).toBeNull();
+      expect(buildMaterialResource(legacy)).toBeNull();
+      expect(isLegacyBuildMaterial(legacy)).toBe(true);
+      expect(isBuildMaterial(legacy)).toBe(true);
+    }
+  });
+
+  it('names no resource for a material that does not exist', () => {
+    expect(buildMaterialResource('not-a-resource')).toBeNull();
+    expect(buildMaterialResource('not-a-resource.terracotta')).toBeNull();
+    expect(isBuildMaterial('not-a-resource')).toBe(false);
+  });
+});
+
+describe('what a piece costs', () => {
+  it('charges every placeable piece something in its chosen material', () => {
+    for (const templateKey of Object.keys(BUILD_PIECE_DEFS) as BuildPieceKey[]) {
+      expect(buildMaterialUnits(templateKey)).toBeGreaterThan(0);
+    }
+  });
+
+  it('adds the cost up across every step, so a multi-step structure can charge more', () => {
+    const total = BUILD_ASSEMBLY_DEFS['paper-bench'].steps
+      .reduce((sum, step) => sum + step.materialUnits, 0);
+    expect(buildMaterialUnits('paper-bench')).toBe(total);
+  });
+
+  it('costs nothing for a piece that has no assembly plan', () => {
+    expect(buildMaterialUnits('future-paper-house')).toBe(0);
   });
 });
