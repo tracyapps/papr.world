@@ -153,14 +153,15 @@ members`, or `nobody`). Gifts may be allowed separately.
 2. **Auth foundation.** Clerk application/config, auth UI, Railway JWT
    verification, owner allowlist, invitation control, and one-time
    paper-passport claim. Production sign-in, the first control-center seam,
-   durable identity tables, and the idempotent claim API are implemented; the
-   player-facing claim screen remains.
+   durable identity tables, the idempotent claim API, and the explicit
+   player-facing claim screen are implemented.
 3. **Account/world schema.** Profiles, world registry, memberships, persistent
    signup/world invitations, and admin invitation screen. The foundational
    profile, world, and membership tables are implemented; durable invitation
    records and their controls remain.
-4. **Landing page.** World chooser, inbox, avatar editor, account inventory/
-   tech summary, and settings.
+4. **Landing page.** The signed-in account desk and identity summary are
+   implemented. World chooser, inbox, avatar editor, account inventory/tech
+   summary, and settings remain.
 5. **Authority migration.** Account inventory + tech, then world-local
    containers/crops/homes.
 6. **Social graph.** Search, requests, DMs, presence/privacy, and wayfinding.

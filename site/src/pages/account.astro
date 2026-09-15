@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+
+const clerkPublishableKey = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
+const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
+  ?? 'https://paprworld-production.up.railway.app';
+---
+
+<Base
+  title="Your desk"
+  description="Your papr.world account, worlds, and traveling scrapbook."
+  sky={false}
+  noindex
+>
+  <section
+    class="desk"
+    data-account-shell
+    data-clerk-publishable-key={clerkPublishableKey}
+    data-api-url={apiUrl}
+  >
+    <header class="desk__head">
+      <div>
+        <p class="label">Your place between worlds</p>
+        <h1 class="hand desk__title">Your desk</h1>
+        <p class="desk__lede">The things that belong to you, even when you leave a neighborhood.</p>
+      </div>
+      <div data-account-user-button></div>
+    </header>
+
+    <p class="desk__notice" data-account-message role="status" aria-live="polite">
+      Opening your desk…
+    </p>
+
+    <div class="desk__signin" data-account-signin hidden>
+      <div data-account-signin-target></div>
+    </div>
+
+    <section class="paper-card claim" data-account-claim hidden>
+      <p class="label">One-time bridge</p>
+      <h2>Bring your paper passport home</h2>
+      <p data-claim-description>Checking this browser for a paper passport…</p>
+      <p class="soft">
+        This does not upload your private solo save or move anything out of a world.
+        The device credential stays in place while the alpha still needs it.
+      </p>
+      <button class="btn" type="button" data-claim-button disabled>Claim this passport</button>
+      <a class="btn btn--quiet" href="/enter/">Enter a neighborhood</a>
+    </section>
+
+    <div data-account-claimed hidden>
+      <section class="paper-card identity-card">
+        <p class="label">Paper passport connected</p>
+        <h2>Welcome back, <span data-account-name>paper friend</span>.</h2>
+        <p class="identity-card__id">Account <code data-account-id></code></p>
+      </section>
+
+      <div class="desk-grid" aria-label="Account areas">
+        <section class="paper-card">
+          <p class="label">Worlds</p>
+          <h2>Your doors</h2>
+          <p>Solo, shared, and invited worlds will appear here as memberships come online.</p>
+          <span class="coming">World provisioning is next</span>
+        </section>
+        <section class="paper-card">
+          <p class="label">Traveling with you</p>
+          <h2>Scrapbook</h2>
+          <p>Your account pouch and learned techniques will move here without moving world storage.</p>
+          <span class="coming">Inventory migration follows worlds</span>
+        </section>
+        <section class="paper-card">
+          <p class="label">Mailbox</p>
+          <h2>Letters and parcels</h2>
+          <p>Your existing passport mailbox stays intact; this desk will become another way to open it.</p>
+          <span class="coming">Inbox view is being folded</span>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/account';
+  </script>
+</Base>
+
+<style lang="scss">
+  .desk { max-width: 1080px; margin: 0 auto; padding: 130px var(--gutter) 110px; }
+  .desk__head { display: flex; gap: 24px; align-items: start; justify-content: space-between; }
+  .desk__title { @include hand(56px, 92px, 9vw); margin: 4px 0 14px; }
+  .desk__lede { max-width: 620px; color: var(--ink-soft); font-size: 19px; }
+  .desk__notice { margin: 28px 0; padding: 14px 18px; border-left: 4px solid var(--crayon); background: var(--paper-2); }
+  .desk__notice[data-kind="error"] { border-color: #a33; }
+  .desk__signin { max-width: 430px; margin: 38px auto; }
+  .paper-card { @include card(var(--paper), var(--paper-2)); padding: clamp(22px, 3vw, 30px); }
+  .paper-card h2 { margin: 7px 0 10px; font-size: 25px; }
+  .claim { max-width: 700px; margin: 34px auto; }
+  .claim .btn { display: inline-block; margin: 12px 8px 0 0; }
+  .identity-card { margin: 32px 0 22px; }
+  .identity-card__id { color: var(--ink-soft); }
+  .identity-card code { overflow-wrap: anywhere; }
+  .desk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 18px; }
+  .soft, .coming { color: var(--ink-soft); }
+  .coming { display: inline-block; margin-top: 12px; font: 700 11px/1.35 $font-mono; text-transform: uppercase; letter-spacing: .06em; }
+</style>
