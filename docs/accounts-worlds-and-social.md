@@ -157,11 +157,13 @@ members`, or `nobody`). Gifts may be allowed separately.
    player-facing claim screen are implemented.
 3. **Account/world schema.** Profiles, world registry, memberships, persistent
    signup/world invitations, and admin invitation screen. The foundational
-   profile, world, and membership tables are implemented; durable invitation
-   records and their controls remain.
+   profile, world, and membership tables are implemented. Every claimed
+   account idempotently receives an owned solo world and membership in the
+   general shared world; durable invitation records and their controls remain.
 4. **Landing page.** The signed-in account desk and identity summary are
-   implemented. World chooser, inbox, avatar editor, account inventory/tech
-   summary, and settings remain.
+   implemented, including live world-membership cards. Gameplay entry from a
+   membership, inbox, avatar editor, account inventory/tech summary, and
+   settings remain.
 5. **Authority migration.** Account inventory + tech, then world-local
    containers/crops/homes.
 6. **Social graph.** Search, requests, DMs, presence/privacy, and wayfinding.

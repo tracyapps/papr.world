@@ -55,11 +55,11 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
       </section>
 
       <div class="desk-grid" aria-label="Account areas">
-        <section class="paper-card">
+        <section class="paper-card worlds-card">
           <p class="label">Worlds</p>
           <h2>Your doors</h2>
-          <p>Solo, shared, and invited worlds will appear here as memberships come online.</p>
-          <span class="coming">World provisioning is next</span>
+          <p>These permissions belong to your account rather than an expiring neighborhood link.</p>
+          <div class="world-list" data-world-list></div>
         </section>
         <section class="paper-card">
           <p class="label">Traveling with you</p>
@@ -98,6 +98,11 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
   .identity-card__id { color: var(--ink-soft); }
   .identity-card code { overflow-wrap: anywhere; }
   .desk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 18px; }
-  .soft, .coming { color: var(--ink-soft); }
-  .coming { display: inline-block; margin-top: 12px; font: 700 11px/1.35 $font-mono; text-transform: uppercase; letter-spacing: .06em; }
+  .worlds-card { grid-column: 1 / -1; }
+  .world-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 20px; }
+  :global(.world-card) { padding: 18px; border: 1px solid var(--edge); border-radius: 9px; background: var(--paper-2); }
+  :global(.world-card h3) { margin: 7px 0 9px; font-size: 21px; }
+  :global(.world-card p) { margin: 7px 0; }
+  .soft, :global(.coming) { color: var(--ink-soft); }
+  :global(.coming) { display: inline-block; margin-top: 12px; font: 700 11px/1.35 $font-mono; text-transform: uppercase; letter-spacing: .06em; }
 </style>

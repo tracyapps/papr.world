@@ -7,6 +7,34 @@ export type DurableAccount = {
   lastSeenAt: number;
 };
 
+export type WorldMembership = {
+  id: string;
+  slug: string;
+  name: string;
+  kind: 'solo' | 'shared' | 'custom';
+  role: 'owner' | 'admin' | 'member' | 'visitor' | 'viewer';
+  capabilities: string[];
+};
+
+export type AccountHome = { account: DurableAccount; worlds: WorldMembership[] };
+
+export function defaultWorldSpecifications(account: Pick<DurableAccount, 'id' | 'displayName'>) {
+  return {
+    solo: {
+      slug: `solo-${account.id}`,
+      name: `${account.displayName}'s solo world`,
+      role: 'owner' as const,
+      capabilities: ['enter', 'build', 'invite', 'claim_home'],
+    },
+    shared: {
+      slug: 'shared',
+      name: 'Shared world',
+      role: 'member' as const,
+      capabilities: ['enter', 'build', 'claim_home'],
+    },
+  };
+}
+
 export class IdentityConflictError extends Error {
   constructor() {
     super('that sign-in or paper passport is already linked to another account');
@@ -61,6 +89,21 @@ const SCHEMA = [
     updated_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (world_id, account_id)
   )`,
+  `INSERT INTO worlds (slug, name, kind)
+    VALUES ('shared', 'Shared world', 'shared')
+    ON CONFLICT (lower(slug)) DO NOTHING`,
+  `INSERT INTO worlds (slug, name, kind, owner_account_id)
+    SELECT 'solo-' || a.id::text, p.display_name || '''s solo world', 'solo', a.id
+    FROM player_accounts a JOIN player_profiles p ON p.account_id = a.id
+    ON CONFLICT (lower(slug)) DO NOTHING`,
+  `INSERT INTO world_memberships (world_id, account_id, role, capabilities)
+    SELECT w.id, a.id, 'owner', ARRAY['enter', 'build', 'invite', 'claim_home']
+    FROM player_accounts a JOIN worlds w ON w.slug = 'solo-' || a.id::text
+    ON CONFLICT (world_id, account_id) DO NOTHING`,
+  `INSERT INTO world_memberships (world_id, account_id, role, capabilities)
+    SELECT w.id, a.id, 'member', ARRAY['enter', 'build', 'claim_home']
+    FROM player_accounts a CROSS JOIN worlds w WHERE lower(w.slug) = 'shared'
+    ON CONFLICT (world_id, account_id) DO NOTHING`,
 ];
 
 export class PaprDatabase {
@@ -116,11 +159,18 @@ export class PaprDatabase {
     } : null;
   }
 
+  async homeForClerkUser(clerkUserId: string): Promise<AccountHome | null> {
+    const account = await this.accountForClerkUser(clerkUserId);
+    if (!account) return null;
+    return { account, worlds: await this.worldsForAccount(account.id) };
+  }
+
   async claimClerkIdentity(clerkUserId: string, account: DurableAccount): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
       await this.upsertClaim(client, clerkUserId, account);
+      await this.provisionDefaultWorlds(client, account);
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -128,6 +178,53 @@ export class PaprDatabase {
     } finally {
       client.release();
     }
+  }
+
+  private async provisionDefaultWorlds(client: PoolClient, account: DurableAccount): Promise<void> {
+    const defaults = defaultWorldSpecifications(account);
+    await client.query(
+      `INSERT INTO worlds (slug, name, kind, owner_account_id)
+       VALUES ($1, $2, 'solo', $3)
+       ON CONFLICT (lower(slug)) DO NOTHING`,
+      [defaults.solo.slug, defaults.solo.name, account.id],
+    );
+    await client.query(
+      `INSERT INTO worlds (slug, name, kind)
+       VALUES ($1, $2, 'shared')
+       ON CONFLICT (lower(slug)) DO NOTHING`,
+      [defaults.shared.slug, defaults.shared.name],
+    );
+    await client.query(
+      `INSERT INTO world_memberships (world_id, account_id, role, capabilities)
+       SELECT id, $2, $3, $4 FROM worlds WHERE lower(slug) = lower($1)
+       ON CONFLICT (world_id, account_id) DO NOTHING`,
+      [defaults.solo.slug, account.id, defaults.solo.role, defaults.solo.capabilities],
+    );
+    await client.query(
+      `INSERT INTO world_memberships (world_id, account_id, role, capabilities)
+       SELECT id, $2, $3, $4 FROM worlds WHERE lower(slug) = lower($1)
+       ON CONFLICT (world_id, account_id) DO NOTHING`,
+      [defaults.shared.slug, account.id, defaults.shared.role, defaults.shared.capabilities],
+    );
+  }
+
+  private async worldsForAccount(accountId: string): Promise<WorldMembership[]> {
+    const result = await this.pool.query<{
+      id: string;
+      slug: string;
+      name: string;
+      kind: WorldMembership['kind'];
+      role: WorldMembership['role'];
+      capabilities: string[];
+    }>(
+      `SELECT w.id, w.slug, w.name, w.kind, m.role, m.capabilities
+       FROM world_memberships m
+       JOIN worlds w ON w.id = m.world_id
+       WHERE m.account_id = $1
+       ORDER BY CASE w.kind WHEN 'solo' THEN 0 WHEN 'shared' THEN 1 ELSE 2 END, lower(w.name)`,
+      [accountId],
+    );
+    return result.rows.map((row) => ({ ...row, capabilities: [...row.capabilities] }));
   }
 
   private async upsertClaim(

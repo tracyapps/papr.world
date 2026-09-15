@@ -8,7 +8,21 @@ type Account = {
   lastSeenAt: number;
 };
 
-type AccountResponse = { claimed: boolean; account: Account | null; error?: string };
+type World = {
+  id: string;
+  slug: string;
+  name: string;
+  kind: 'solo' | 'shared' | 'custom';
+  role: 'owner' | 'admin' | 'member' | 'visitor' | 'viewer';
+  capabilities: string[];
+};
+
+type AccountResponse = {
+  claimed: boolean;
+  account: Account | null;
+  worlds?: World[];
+  error?: string;
+};
 
 const shell = document.querySelector<HTMLElement>('[data-account-shell]');
 
@@ -25,6 +39,7 @@ if (shell) {
   const claimed = shell.querySelector<HTMLElement>('[data-account-claimed]');
   const displayName = shell.querySelector<HTMLElement>('[data-account-name]');
   const accountId = shell.querySelector<HTMLElement>('[data-account-id]');
+  const worldList = shell.querySelector<HTMLElement>('[data-world-list]');
 
   const tell = (text: string, kind: 'info' | 'error' = 'info') => {
     if (!message) return;
@@ -32,12 +47,38 @@ if (shell) {
     message.dataset.kind = kind;
   };
 
-  const showAccount = (account: Account) => {
+  const renderWorlds = (worlds: World[]) => {
+    if (!worldList) return;
+    worldList.replaceChildren();
+    for (const world of worlds) {
+      const card = document.createElement('article');
+      card.className = 'world-card';
+      const kind = document.createElement('p');
+      kind.className = 'label';
+      kind.textContent = `${world.kind} world · ${world.role}`;
+      const name = document.createElement('h3');
+      name.textContent = world.name;
+      const access = document.createElement('p');
+      access.textContent = world.capabilities.length > 0
+        ? `Access: ${world.capabilities.join(', ').replaceAll('_', ' ')}`
+        : 'No active capabilities';
+      const next = document.createElement('span');
+      next.className = 'coming';
+      next.textContent = world.kind === 'solo'
+        ? 'Private world provisioned · game entry bridge next'
+        : 'Membership active · game authorization bridge next';
+      card.append(kind, name, access, next);
+      worldList.append(card);
+    }
+  };
+
+  const showAccount = (account: Account, worlds: World[] = []) => {
     if (claim) claim.hidden = true;
     if (displayName) displayName.textContent = account.displayName;
     if (accountId) accountId.textContent = account.id;
+    renderWorlds(worlds);
     if (claimed) claimed.hidden = false;
-    tell('Your account is connected to this paper passport.');
+    tell(`Your account is connected. ${worlds.length} world${worlds.length === 1 ? '' : 's'} available.`);
   };
 
   if (!publishableKey || !apiUrl) {
@@ -63,7 +104,7 @@ if (shell) {
         if (!response.ok) throw new Error(body.error || 'The account desk could not be opened.');
 
         if (body.claimed && body.account) {
-          showAccount(body.account);
+          showAccount(body.account, body.worlds ?? []);
         } else {
           const passport = loadDevicePassport(localStorage);
           if (claim) claim.hidden = false;
@@ -88,7 +129,7 @@ if (shell) {
                 if (!claimResponse.ok || !result.account) {
                   throw new Error(result.error || 'The passport could not be claimed.');
                 }
-                showAccount(result.account);
+                showAccount(result.account, result.worlds ?? []);
               } catch (error) {
                 tell(error instanceof Error ? error.message : 'The passport could not be claimed.', 'error');
                 claimButton.disabled = false;

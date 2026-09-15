@@ -5,13 +5,14 @@ import type { AccountStore } from './accounts';
 import { authenticateClerkUser, type AdminConfig } from './admin';
 import {
   IdentityConflictError,
+  type AccountHome,
   type DurableAccount,
   type PaprDatabase,
 } from './database';
 
 type IdentityDependencies = {
   accounts: Pick<AccountStore, 'verify' | 'getForClaim'>;
-  database: Pick<PaprDatabase, 'accountForClerkUser' | 'claimClerkIdentity'> | null;
+  database: Pick<PaprDatabase, 'homeForClerkUser' | 'claimClerkIdentity'> | null;
   clerk: Pick<AdminConfig, 'secretKey' | 'jwtKey' | 'authorizedParties'>;
 };
 
@@ -81,9 +82,13 @@ export function createAccountIdentityHandlers(deps: IdentityDependencies) {
         return;
       }
       try {
-        const account = await deps.database.accountForClerkUser(clerkUserId);
+        const home = await deps.database.homeForClerkUser(clerkUserId);
         res.setHeader('cache-control', 'private, no-store');
-        res.json({ claimed: Boolean(account), account });
+        res.json({
+          claimed: Boolean(home),
+          account: home?.account ?? null,
+          worlds: home?.worlds ?? [],
+        });
       } catch (error) {
         console.error('[account] managed-identity lookup failed:', error instanceof Error ? error.name : 'unknown');
         res.status(502).json({ error: 'the durable account service could not be reached' });
@@ -105,8 +110,10 @@ export function createAccountIdentityHandlers(deps: IdentityDependencies) {
           clerkUserId,
           JSON.parse(await readBody(req)),
         );
+        const home: AccountHome = await deps.database.homeForClerkUser(clerkUserId)
+          ?? { account, worlds: [] };
         res.setHeader('cache-control', 'private, no-store');
-        res.status(201).json({ claimed: true, account });
+        res.status(201).json({ claimed: true, account: home.account, worlds: home.worlds });
       } catch (error) {
         if (error instanceof InvalidPassportError) {
           res.status(401).json({ error: error.message });
