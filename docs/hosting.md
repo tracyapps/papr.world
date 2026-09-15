@@ -51,7 +51,13 @@ Dockerfile sets `PP_DATA_DIR=/data`. Do not set either by hand.
 | `PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key | `/admin` shows a configuration warning instead of sign-in. This key is intentionally public. |
 | `PUBLIC_PAPR_API_URL` | `https://paprworld-production.up.railway.app` | `/admin` cannot reach its privileged Railway API. |
 
-Set the Vercel ones for **Production and Preview** both.
+Set the ordinary site/game variables for **Production and Preview**. Scope
+`PUBLIC_CLERK_PUBLISHABLE_KEY` more carefully: use the Clerk **production** key
+for Vercel **Production only**. A normal `*.vercel.app` preview cannot use a
+Clerk production instance. Leave Clerk disabled in previews for now; when a
+preview auth environment is added, give it the Clerk development publishable
+key and a backend configured for that same development instance. Never mix a
+development Clerk token with the production Railway secret.
 
 > **The two `VITE_` variables are build-time.** Vite bakes them into the
 > bundle, so saving them in the dashboard changes nothing until you
