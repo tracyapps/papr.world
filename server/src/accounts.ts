@@ -127,6 +127,14 @@ export class AccountStore {
     return this.accounts.has(id);
   }
 
+  /** Metadata snapshot for identity attachment; the secret hash never leaves this store. */
+  getForClaim(id: string): Omit<AccountRecord, 'secretHash'> | null {
+    const record = this.accounts.get(id);
+    if (!record) return null;
+    const { secretHash: _secretHash, ...safe } = record;
+    return safe;
+  }
+
   get size(): number {
     return this.accounts.size;
   }

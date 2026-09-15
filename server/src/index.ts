@@ -28,18 +28,25 @@ import {
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
 import { accounts, feedbackStore, mail, moderation, OWNER_ACCOUNT } from './stores';
-import { createAdminHandlers } from './admin';
+import { createAdminHandlers, readAdminConfig } from './admin';
+import { createAccountIdentityHandlers } from './accountIdentity';
+import { createDatabase } from './database';
 
 const port = Number(process.env.PORT ?? 2567);
 const corsOrigin = process.env.PP_CORS_ORIGIN ?? '*';
 const feedbackWindows = new Map<string, number[]>();
 const FEEDBACK_WINDOW_MS = 10 * 60 * 1000;
 const FEEDBACK_LIMIT = 6;
+const database = createDatabase();
+if (database) await database.migrate();
+const clerkConfig = readAdminConfig();
 const admin = createAdminHandlers({
   accountCount: () => accounts.size,
   corsOrigin,
   dataDir: process.env.PP_DATA_DIR ?? 'data',
-});
+  databaseConfigured: Boolean(database),
+}, clerkConfig);
+const accountIdentity = createAccountIdentityHandlers({ accounts, database, clerk: clerkConfig });
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
   // The 0.17 SDK's matchmaking request is credentialed. Browsers reject a
@@ -382,6 +389,12 @@ const gameServer = new Server({
     app.post('/account', (req: Request, res: Response) => {
       void handleCreateAccount(req, res);
     });
+    app.get('/account/me', (req: Request, res: Response) => {
+      void accountIdentity.me(req, res);
+    });
+    app.post('/account/claim', (req: Request, res: Response) => {
+      void accountIdentity.claim(req, res);
+    });
     app.post('/feedback', (req: Request, res: Response) => {
       void handleFeedback(req, res);
     });
@@ -404,9 +417,10 @@ const gameServer = new Server({
 });
 
 gameServer.define(DEFAULT_ROOM, PaperRoom).filterBy(['inviteCode']);
-gameServer.onShutdown(() => {
+gameServer.onShutdown(async () => {
   accounts.flush();
   mail.flush();
+  if (database) await database.close();
 });
 
 await gameServer.listen(port);

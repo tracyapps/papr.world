@@ -152,10 +152,13 @@ members`, or `nobody`). Gifts may be allowed separately.
    join links do not create guessed worlds. Implemented with protocol v8.
 2. **Auth foundation.** Clerk application/config, auth UI, Railway JWT
    verification, owner allowlist, invitation control, and one-time
-   paper-passport claim. The development app and first control-center seam are
-   implemented; production keys and the claim transaction remain.
+   paper-passport claim. Production sign-in, the first control-center seam,
+   durable identity tables, and the idempotent claim API are implemented; the
+   player-facing claim screen remains.
 3. **Account/world schema.** Profiles, world registry, memberships, persistent
-   signup/world invitations, and admin invitation screen.
+   signup/world invitations, and admin invitation screen. The foundational
+   profile, world, and membership tables are implemented; durable invitation
+   records and their controls remain.
 4. **Landing page.** World chooser, inbox, avatar editor, account inventory/
    tech summary, and settings.
 5. **Authority migration.** Account inventory + tech, then world-local

@@ -31,9 +31,14 @@ getting right in one pass.
 | `CLERK_AUTHORIZED_PARTIES` | `https://papr.world` | Clerk tokens are not restricted to the expected browser origin. Add `http://localhost:4321` only for local testing. |
 | `PP_ADMIN_CLERK_USER_IDS` | your Clerk `user_...` id | Nobody can open the control center, even when signed in. Comma-separate backup admins. |
 | `PP_CLERK_INVITATION_REDIRECT_URL` | `https://papr.world/` | Optional; invitation acceptance returns to the site root. |
+| `DATABASE_URL` | Neon **pooled** connection string | Managed accounts, profiles, worlds, and memberships remain disabled. Keep this only on Railway and include `sslmode=require`. |
 
 `PORT` and `PP_DATA_DIR` are handled for you — Railway injects `PORT`, and the
 Dockerfile sets `PP_DATA_DIR=/data`. Do not set either by hand.
+
+When `DATABASE_URL` is present, the server applies its additive, idempotent
+schema transaction before accepting traffic. A bad connection fails the deploy
+instead of silently falling back to filesystem-only managed accounts.
 
 **Also on Railway, and not a variable:** a volume mounted at `/data`.
 

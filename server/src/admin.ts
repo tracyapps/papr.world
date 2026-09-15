@@ -14,6 +14,7 @@ type AdminStatusInput = {
   accountCount: () => number;
   corsOrigin: string;
   dataDir: string;
+  databaseConfigured?: boolean;
 };
 
 function csv(value: string | undefined): string[] {
@@ -56,8 +57,10 @@ export function buildAdminStatus(config: AdminConfig, input: AdminStatusInput) {
             : 'Add Clerk server credentials on Railway',
       },
       durableDatabase: {
-        state: 'planned' as const,
-        detail: 'Neon/Postgres is the next persistence migration',
+        state: input.databaseConfigured ? 'configured' as const : 'setup-needed' as const,
+        detail: input.databaseConfigured
+          ? 'Postgres schema is ready for managed accounts and worlds'
+          : 'Add DATABASE_URL on Railway to enable managed accounts',
       },
     },
     counts: { paperPassports: input.accountCount() },
@@ -87,13 +90,13 @@ async function readBody(req: IncomingMessage, maxBytes = 4096): Promise<string> 
   });
 }
 
-async function authorizeAdmin(
+export async function authenticateClerkUser(
   req: Request,
   res: Response,
-  config: AdminConfig,
+  config: Pick<AdminConfig, 'secretKey' | 'jwtKey' | 'authorizedParties'>,
 ): Promise<string | null> {
-  if ((!config.secretKey && !config.jwtKey) || config.adminUserIds.size === 0) {
-    res.status(503).json({ error: 'admin authentication is not configured' });
+  if (!config.secretKey && !config.jwtKey) {
+    res.status(503).json({ error: 'account authentication is not configured' });
     return null;
   }
 
@@ -113,10 +116,6 @@ async function authorizeAdmin(
         ? { authorizedParties: config.authorizedParties }
         : {}),
     });
-    if (!config.adminUserIds.has(payload.sub)) {
-      res.status(403).json({ error: 'this account is not a papr.world administrator' });
-      return null;
-    }
     return payload.sub;
   } catch {
     res.setHeader('www-authenticate', 'Bearer');
@@ -125,8 +124,25 @@ async function authorizeAdmin(
   }
 }
 
-export function createAdminHandlers(input: AdminStatusInput) {
-  const config = readAdminConfig();
+async function authorizeAdmin(
+  req: Request,
+  res: Response,
+  config: AdminConfig,
+): Promise<string | null> {
+  if (config.adminUserIds.size === 0) {
+    res.status(503).json({ error: 'admin authentication is not configured' });
+    return null;
+  }
+  const userId = await authenticateClerkUser(req, res, config);
+  if (!userId) return null;
+  if (!config.adminUserIds.has(userId)) {
+    res.status(403).json({ error: 'this account is not a papr.world administrator' });
+    return null;
+  }
+  return userId;
+}
+
+export function createAdminHandlers(input: AdminStatusInput, config = readAdminConfig()) {
   const clerk = config.secretKey ? createClerkClient({ secretKey: config.secretKey }) : null;
 
   return {
