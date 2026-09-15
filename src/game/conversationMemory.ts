@@ -59,6 +59,7 @@ export function markConversationSeen(critterId: string, key: string): number {
 export function recordDiaryEntry(entry: {
   id: string;
   critterId: string;
+  speakerName?: string;
   pageId: string;
   kind: string;
   text: string;
@@ -68,6 +69,7 @@ export function recordDiaryEntry(entry: {
     state.player.diaryEntries.unshift({
       id: entry.id,
       critterId: entry.critterId,
+      ...(entry.speakerName ? { speakerName: entry.speakerName } : {}),
       pageId: entry.pageId,
       kind: entry.kind,
       text: entry.text,

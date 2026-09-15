@@ -9,7 +9,12 @@
 // Escape, returning focus to the button that opened it, and making the rest
 // of the page inert — four things a hand-rolled menu reliably gets wrong.
 
-import type { ChatBroadcast, RemovedNotice } from '../../shared/src/index';
+import type {
+  AccountInventory,
+  ChatBroadcast,
+  MailAttachmentIntent,
+  RemovedNotice,
+} from '../../shared/src/index';
 import { registerDraggableHudWidget } from './hud';
 import { getMultiplayerStatusButton } from './multiplayerPanel';
 
@@ -19,6 +24,11 @@ export type SharedChatHandlers = {
   onUnblock?: (accountId: string) => void;
   onReport?: (report: { accountId: string; messageId?: string; details?: string }) => void;
   onRemove?: (accountId: string, ban: boolean) => void;
+  onSendMail?: (
+    accountId: string,
+    text: string,
+    attachment?: MailAttachmentIntent,
+  ) => void;
 };
 
 export type SharedChatUi = {
@@ -31,6 +41,10 @@ export type SharedChatUi = {
   setBlocks: (accountIds: string[]) => void;
   /** Whether to offer the removal control at all. */
   setOwner: (isOwner: boolean) => void;
+  /** Durable account behind this client; self-authored lines have no actions. */
+  setSelfAccountId: (accountId: string) => void;
+  /** Refresh the server-owned neighborhood pouch used for parcels. */
+  setInventory: (inventory: AccountInventory) => void;
   /** Explain a removal in the log before the connection closes. */
   showRemoved: (notice: RemovedNotice) => void;
   focus: () => void;
@@ -47,6 +61,8 @@ export function initializeSharedChat(
 
   let blocked = new Set<string>();
   let isOwner = false;
+  let selfAccountId = '';
+  let inventory: AccountInventory | null = null;
   /** Who the open dialog is about. */
   let subject: ChatBroadcast | null = null;
 
@@ -104,6 +120,22 @@ export function initializeSharedChat(
         <button type="button" data-action="unblock" hidden>Show their messages again</button>
       </div>
 
+      <details class="chat-actions-mail">
+        <summary>Write them a letter</summary>
+        <p class="chat-actions-hint">It will wait in their mailbox even if they have wandered home.</p>
+        <label class="sr-only" for="chat-mail-text">Letter</label>
+        <textarea id="chat-mail-text" data-role="mail-text" rows="4" maxlength="500"
+          placeholder="Write a little note…"></textarea>
+        <label for="chat-mail-attachment">Attach from your neighborhood pouch</label>
+        <select id="chat-mail-attachment" data-role="mail-attachment">
+          <option value="">No attachment</option>
+        </select>
+        <label for="chat-mail-quantity">Quantity</label>
+        <input id="chat-mail-quantity" data-role="mail-quantity" type="number" min="1" max="999" value="1">
+        <p class="chat-actions-hint" data-role="pouch-hint">The server-kept pouch is loading…</p>
+        <button type="button" data-action="mail">Send letter</button>
+      </details>
+
       <details class="chat-actions-report">
         <summary>Report this to the people running the alpha</summary>
         <p class="chat-actions-hint">
@@ -133,9 +165,60 @@ export function initializeSharedChat(
   const title = dialog.querySelector<HTMLElement>('[data-role="title"]')!;
   const quote = dialog.querySelector<HTMLElement>('[data-role="quote"]')!;
   const details = dialog.querySelector<HTMLTextAreaElement>('[data-role="details"]')!;
+  const mailText = dialog.querySelector<HTMLTextAreaElement>('[data-role="mail-text"]')!;
+  const mailAttachment = dialog.querySelector<HTMLSelectElement>('[data-role="mail-attachment"]')!;
+  const mailQuantity = dialog.querySelector<HTMLInputElement>('[data-role="mail-quantity"]')!;
+  const pouchHint = dialog.querySelector<HTMLElement>('[data-role="pouch-hint"]')!;
+  const mailBox = dialog.querySelector<HTMLElement>('.chat-actions-mail')!;
   const ownerBox = dialog.querySelector<HTMLElement>('[data-role="owner"]')!;
   const blockButton = dialog.querySelector<HTMLButtonElement>('[data-action="block"]')!;
   const unblockButton = dialog.querySelector<HTMLButtonElement>('[data-action="unblock"]')!;
+  mailBox.hidden = !on.onSendMail;
+
+  function friendlyId(id: string): string {
+    return id.replace(/[-_.]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function refreshAttachmentOptions(): void {
+    const selected = mailAttachment.value;
+    mailAttachment.replaceChildren(new Option('No attachment', ''));
+    if (!inventory) {
+      pouchHint.textContent = 'The server-kept pouch is loading…';
+      return;
+    }
+    const entries: Array<{ value: string; label: string; count: number }> = [];
+    if (inventory.chips > 0) entries.push({ value: 'chips:', label: 'Shiny chips', count: inventory.chips });
+    for (const [id, count] of Object.entries(inventory.resources)) {
+      if (count > 0) entries.push({ value: `resource:${id}`, label: friendlyId(id), count });
+    }
+    for (const [id, count] of Object.entries(inventory.tools)) {
+      if (count > 0) entries.push({ value: `tool:${id}`, label: friendlyId(id), count });
+    }
+    for (const [id, count] of Object.entries(inventory.items)) {
+      if (count > 0) entries.push({ value: `item:${id}`, label: friendlyId(id), count });
+    }
+    for (const entry of entries.sort((a, b) => a.label.localeCompare(b.label))) {
+      mailAttachment.append(new Option(`${entry.label} (${entry.count})`, entry.value));
+    }
+    if ([...mailAttachment.options].some((option) => option.value === selected)) {
+      mailAttachment.value = selected;
+    }
+    pouchHint.textContent = entries.length > 0
+      ? 'Only this server-kept balance can leave your account.'
+      : 'Your neighborhood pouch is empty.';
+  }
+
+  mailAttachment.addEventListener('change', () => {
+    const [kind, itemId] = mailAttachment.value.split(':');
+    const available = !inventory ? 1 : kind === 'chips' ? inventory.chips
+      : kind === 'resource' ? inventory.resources[itemId] ?? 0
+        : kind === 'tool' ? inventory.tools[itemId] ?? 0
+          : inventory.items[itemId] ?? 0;
+    mailQuantity.max = String(Math.max(1, Math.min(999, available)));
+    if (Number(mailQuantity.value) > available) mailQuantity.value = String(Math.max(1, available));
+    mailQuantity.disabled = !mailAttachment.value;
+  });
+  mailQuantity.disabled = true;
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -156,6 +239,10 @@ export function initializeSharedChat(
     title.textContent = `Message from ${line.name}`;
     quote.textContent = line.text;
     details.value = '';
+    mailText.value = '';
+    mailAttachment.value = '';
+    mailQuantity.value = '1';
+    mailQuantity.disabled = true;
 
     const already = blocked.has(line.accountId);
     blockButton.hidden = already;
@@ -176,6 +263,22 @@ export function initializeSharedChat(
       on.onReport?.({ accountId, messageId: id, details: details.value.trim() || undefined });
       notice('Report sent. Thank you for telling us.');
     }
+    if (action === 'mail') {
+      const text = mailText.value.trim();
+      if (!text) {
+        mailText.focus();
+        return;
+      }
+      let attachment: MailAttachmentIntent | undefined;
+      if (mailAttachment.value) {
+        const [kind, itemId] = mailAttachment.value.split(':');
+        const quantity = Number(mailQuantity.value);
+        attachment = kind === 'chips'
+          ? { kind: 'chips', quantity }
+          : { kind: kind as 'resource' | 'tool' | 'item', itemId, quantity };
+      }
+      on.onSendMail?.(accountId, text, attachment);
+    }
     if (action === 'remove') on.onRemove?.(accountId, false);
     if (action === 'ban') on.onRemove?.(accountId, true);
 
@@ -191,7 +294,7 @@ export function initializeSharedChat(
 
     // No actions on your own messages, and none when there is nothing wired
     // up to act on them.
-    if (on.onBlock || on.onReport) {
+    if (line.accountId !== selfAccountId && (on.onBlock || on.onReport || on.onSendMail)) {
       const actions = document.createElement('button');
       actions.type = 'button';
       actions.className = 'shared-chat-actions';
@@ -243,6 +346,13 @@ export function initializeSharedChat(
     },
 
     setOwner: (value) => { isOwner = value; },
+
+    setSelfAccountId: (accountId) => { selfAccountId = accountId; },
+
+    setInventory: (value) => {
+      inventory = value;
+      refreshAttachmentOptions();
+    },
 
     showRemoved: (removed) => {
       notice(removed.reason === 'banned'

@@ -13,8 +13,10 @@ its old persisted room.
   receives authoritative state, forwards changes to renderer callbacks.
 - `remotePlayers.ts` — renderer-free interpolation buffer so other players move
   smoothly between the server's ~20 Hz snapshots instead of teleporting.
-- `sharedSession.ts` — opt-in coordinator for passports, presence, chat, and
-  finished build publication, plus observable connection/recovery states.
+- `sharedSession.ts` — opt-in coordinator for passports, presence, chat,
+  account-scoped offline letters, the server-kept Neighborhood Pouch, and
+  finished build publication, plus
+  observable connection/recovery states.
 - `remoteAvatarVisuals.ts` / `sharedPieceVisuals.ts` — Three.js call sites for
   server-owned entities.
 - `sharedConfig.ts` — tested URL gate and `AvatarDesign` → `AvatarRef` adapter.
@@ -43,7 +45,11 @@ join there. Chat is accessible DOM; peers use named, edge-colored fallback
 cutouts until full drawing sync lands. Completed local assemblies publish to
 that code's authoritative persisted room and return after server restart. A
 join-intent URL never creates a missing neighborhood; it shows Retry and Return
-to solo instead.
+to solo instead. A message's actions can send an authenticated text letter;
+the recipient's private server inbox is delivered on join/reconnect and survives
+server restart. Protocol v7 parcels may attach only balances in the separate
+server-owned Neighborhood Pouch; send and claim are atomic and exactly-once.
+Private solo inventory is never uploaded.
 
 ## Design rules this layer keeps
 
@@ -53,3 +59,6 @@ to solo instead.
 - The local build command still owns material spending; the server owns the
   shared piece id, maker credit, caps, and persistence. Moving the entire build
   transaction server-side belongs to the later shared-simulation hardening.
+- Transferable inventory is different from private progression. Only the
+  revisioned Neighborhood Pouch may cross accounts; shared gathering/crafting
+  must earn into it through specific validated intents.

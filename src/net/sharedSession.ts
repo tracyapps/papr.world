@@ -8,6 +8,13 @@ import { getCurrentPageId } from '../world/streaming';
 import { connect, type NetConnection } from './client';
 import { describeClose } from './closeReason';
 import { getOrCreatePassport } from './passport';
+import { mergeMailSnapshot } from '../sim/mail';
+import { updateGameState } from '../sim/state';
+import {
+  clearSharedInventory,
+  receiveSharedInventory,
+  setSharedMailClaimHandler,
+} from './sharedInventory';
 import {
   addRemoteAvatar,
   clearRemoteAvatars,
@@ -24,6 +31,13 @@ import {
   sharedPieceCount,
   syncSharedPieceVisibility,
 } from './sharedPieceVisuals';
+import {
+  clearSharedResourceVisuals,
+  initializeSharedResourceVisuals,
+  removeSharedResourceNode,
+  syncSharedResourceVisibility,
+  upsertSharedResourceNode,
+} from './sharedResourceVisuals';
 
 type SharedSessionDebug = {
   enabled: boolean;
@@ -119,6 +133,8 @@ export async function initializeSharedSession(): Promise<void> {
     onUnblock: (accountId) => liveConnection?.sendUnblock(accountId),
     onReport: (report) => liveConnection?.sendReport(report),
     onRemove: (accountId, ban) => liveConnection?.sendRemove({ accountId, ban }),
+    onSendMail: (toAccountId, text, attachment) =>
+      liveConnection?.sendMail({ toAccountId, text, ...(attachment ? { attachment } : {}) }),
   });
   ui.setStatus('connecting…');
   publishStatus({
@@ -130,6 +146,7 @@ export async function initializeSharedSession(): Promise<void> {
   });
   initializeRemoteAvatarVisuals();
   initializeSharedPieceVisuals();
+  initializeSharedResourceVisuals((nodeId) => liveConnection?.sendGather(nodeId));
 
   // Minting the passport and joining the room are two different things that
   // fail for two different reasons. Wrapping them in one try meant a passport
@@ -148,6 +165,7 @@ export async function initializeSharedSession(): Promise<void> {
       `papr.world paper passport: ${account.id}\n`
       + '(this is your account id — the value PAPR_OWNER_ACCOUNT wants. Never share the secret.)',
     );
+    ui.setSelfAccountId(account.id);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     ui.setStatus('offline');
@@ -194,6 +212,9 @@ export async function initializeSharedSession(): Promise<void> {
         },
         onPieceAdd: addSharedPiece,
         onPieceRemove: removeSharedPiece,
+        onNodeAdd: upsertSharedResourceNode,
+        onNodeUpdate: upsertSharedResourceNode,
+        onNodeRemove: removeSharedResourceNode,
         onChat: ui.addChat,
         onChatHistory: (lines) => {
           ui.setHistory(lines);
@@ -204,6 +225,27 @@ export async function initializeSharedSession(): Promise<void> {
         onBlocks: ui.setBlocks,
         onReportFiled: (receiptId) =>
           ui.addNotice(`Report filed. Its reference is ${receiptId.slice(0, 8)}.`),
+        onMailbox: (items) => {
+          // Server list is newest first. Deliver oldest first because the
+          // local merge prepends, preserving the authoritative order while
+          // retaining solo/system mail already in the scrapbook.
+          updateGameState((state) => {
+            mergeMailSnapshot(state, items);
+          });
+        },
+        onClaimedMail: (ids) => {
+          updateGameState((state) => {
+            const retained = new Set(state.player.mailbox.map((item) => item.id));
+            state.player.claimedMailIds = [...new Set([
+              ...state.player.claimedMailIds,
+              ...ids.filter((id) => retained.has(id)),
+            ])].slice(0, 200);
+          });
+        },
+        onInventory: (inventory) => {
+          if (receiveSharedInventory(inventory)) ui.setInventory(inventory);
+        },
+        onMailSent: () => ui.addNotice('Your letter is safely in their mailbox.'),
         onRemoved: ui.showRemoved,
         onRejected: (info) => {
           // A first movement can be clamped while the server catches up to the
@@ -244,6 +286,8 @@ export async function initializeSharedSession(): Promise<void> {
           // different events and should not read the same.
           const reason = describeClose(code);
           clearRemoteAvatars();
+          clearSharedResourceVisuals();
+          clearSharedInventory();
           connected = false;
           connection = null;
           ui.setStatus('offline');
@@ -260,6 +304,7 @@ export async function initializeSharedSession(): Promise<void> {
       },
     );
     connection = liveConnection;
+    setSharedMailClaimHandler((mailId) => liveConnection?.sendClaimMail({ mailId }));
     connected = true;
     ui.setStatus(`online as ${config.name}`, true);
     ui.addNotice(`You are visiting neighborhood ${config.inviteCode}.`);
@@ -272,6 +317,7 @@ export async function initializeSharedSession(): Promise<void> {
     });
   } catch (error) {
     clearRemoteAvatars();
+    clearSharedResourceVisuals();
     connected = false;
     connection = null;
     ui.setStatus('offline');
@@ -296,6 +342,8 @@ export function disconnectSharedSession(): void {
   connection = null;
   connected = false;
   clearRemoteAvatars();
+  clearSharedResourceVisuals();
+  clearSharedInventory();
   publishStatus({
     phase: 'solo', message: 'Returning to your solo world…', name: playerName,
     inviteCode, intent: null,
@@ -314,6 +362,7 @@ export function updateSharedSession(): void {
     const sample = connection.sampleRemote(id);
     if (sample) updateRemoteAvatar(id, sample, avatar.position);
   }
+  syncSharedResourceVisibility();
 }
 
 /** Publish a finished local assembly; the server assigns its durable id/maker. */

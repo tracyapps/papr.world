@@ -324,8 +324,12 @@ previous one's acceptance criteria pass.
 - **E. Interest + hardening** — page-scoped sync, per-intent rate limits,
   page adjacency validation, per-player caps. ✅ when: a client only
   receives entities for nearby pages; flood tests get rejected.
-- **F. Async togetherness** — mailbox delivery on join, guestbooks,
-  while-you-were-away journal, mailed harvests (needs maker id ✓).
+- **F. Async togetherness** *(started 2026-09-14)* — account-scoped offline
+  letters, atomic persistence, delivery on join/reconnect, and live cross-room
+  delivery are built. Protocol v7 adds private revisioned Neighborhood Pouch
+  snapshots plus atomic player parcel debit/claim; the solo bag is never
+  uploaded. Guestbooks, the while-you-were-away journal, shared-world pouch
+  earning/spending routes, and mailed harvests (needs maker id ✓) remain.
   ✅ when: an offline gift arrives on next login.
 - **G. Commons + public readiness** — portal travel between rooms, commons
   neighborhood, reports queue, slow-mode, ToS/privacy text, Colyseus

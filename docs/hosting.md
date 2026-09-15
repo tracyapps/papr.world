@@ -363,7 +363,7 @@ tear for exactly this reason.
 instances will corrupt saves. If you outgrow one process, that is a real
 piece of work, not a slider.
 
-**Back up before a protocol change.** `PROTOCOL_VERSION` is 4. Bumping it
+**Back up before a protocol change.** `PROTOCOL_VERSION` is 7. Bumping it
 refuses older clients on purpose — but download `/data` first if a save-shape
 change is involved.
 

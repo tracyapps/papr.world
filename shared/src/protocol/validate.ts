@@ -5,8 +5,14 @@
 // trip. Because the logic lives here once, both sides always agree.
 
 import { LIMITS } from './constants';
-import type { AvatarRef } from './state';
-import type { AccountCredentials, PlacePieceIntent } from './messages';
+import type { AccountInventory, AvatarRef, MailItem } from './state';
+import type {
+  AccountCredentials,
+  ClaimMailIntent,
+  MailAttachmentIntent,
+  PlacePieceIntent,
+  SendMailIntent,
+} from './messages';
 
 const AVATAR_PRESETS: AvatarRef['preset'][] = [
   'small',
@@ -54,6 +60,94 @@ export function sanitizeChat(raw: unknown): string | null {
   const text = typeof raw === 'string' ? raw : '';
   const cleaned = stripControlChars(text).trim().slice(0, LIMITS.chatMaxLength);
   return cleaned.length > 0 ? cleaned : null;
+}
+
+/** Trim and bound a private letter using the same control-character rules as chat. */
+export function sanitizeMailText(raw: unknown): string | null {
+  const text = typeof raw === 'string' ? raw : '';
+  const cleaned = stripControlChars(text).trim().slice(0, LIMITS.mailTextMaxLength);
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+export function sanitizeSendMail(raw: unknown): SendMailIntent | null {
+  const value = (raw ?? {}) as Partial<SendMailIntent>;
+  const toAccountId = typeof value.toAccountId === 'string' ? value.toAccountId.trim() : '';
+  const text = sanitizeMailText(value.text);
+  if (!toAccountId || toAccountId.length > 160 || !text) return null;
+  const attachment = value.attachment === undefined
+    ? undefined : sanitizeMailAttachment(value.attachment);
+  if (value.attachment !== undefined && !attachment) return null;
+  return { toAccountId, text, ...(attachment ? { attachment } : {}) };
+}
+
+export function sanitizeMailAttachment(raw: unknown): MailAttachmentIntent | null {
+  const value = (raw ?? {}) as Partial<MailAttachmentIntent> & { itemId?: unknown };
+  if (!Number.isSafeInteger(value.quantity) || (value.quantity ?? 0) < 1
+    || (value.quantity ?? 0) > LIMITS.mailAttachmentMax) return null;
+  const quantity = value.quantity as number;
+  if (value.kind === 'chips') return { kind: 'chips', quantity };
+  if (value.kind !== 'resource' && value.kind !== 'tool' && value.kind !== 'item') return null;
+  const itemId = typeof value.itemId === 'string' ? value.itemId.trim() : '';
+  if (!itemId || itemId.length > 128) return null;
+  return { kind: value.kind, itemId, quantity };
+}
+
+export function sanitizeClaimMail(raw: unknown): ClaimMailIntent | null {
+  const value = (raw ?? {}) as Partial<ClaimMailIntent>;
+  const mailId = typeof value.mailId === 'string' ? value.mailId.trim() : '';
+  return mailId && mailId.length <= 160 ? { mailId } : null;
+}
+
+/** Validate a server inventory snapshot before exposing it to UI state. */
+export function sanitizeAccountInventory(raw: unknown): AccountInventory | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const value = raw as Partial<AccountInventory>;
+  if (!Number.isSafeInteger(value.revision) || (value.revision ?? -1) < 0) return null;
+  if (!Number.isSafeInteger(value.chips) || (value.chips ?? -1) < 0) return null;
+  const safeBag = (bag: unknown): Record<string, number> | null => {
+    if (!bag || typeof bag !== 'object' || Array.isArray(bag)) return null;
+    const result: Record<string, number> = {};
+    for (const [key, count] of Object.entries(bag)) {
+      if (!key || key.length > 128 || !Number.isSafeInteger(count) || (count as number) < 0) return null;
+      result[key] = Math.min(count as number, LIMITS.inventoryStackMax);
+    }
+    return result;
+  };
+  const resources = safeBag(value.resources);
+  const tools = safeBag(value.tools);
+  const items = safeBag(value.items);
+  if (!resources || !tools || !items) return null;
+  return {
+    revision: value.revision as number,
+    chips: Math.min(value.chips as number, LIMITS.inventoryStackMax),
+    resources, tools, items,
+  };
+}
+
+/** Validate persisted or network-delivered mail before it reaches a player save. */
+export function sanitizeMailItem(raw: unknown): MailItem | null {
+  const value = (raw ?? {}) as Partial<MailItem>;
+  if (typeof value.id !== 'string' || !value.id.trim() || value.id.length > 160) return null;
+  if (typeof value.fromAccountId !== 'string' || value.fromAccountId.length > 160) return null;
+  if (typeof value.fromName !== 'string' || value.fromName.length > 80) return null;
+  if (typeof value.kind !== 'string' || value.kind.length > 40) return null;
+  if (typeof value.at !== 'number' || !Number.isFinite(value.at)) return null;
+  if (!value.payload || typeof value.payload !== 'object' || Array.isArray(value.payload)) return null;
+
+  const payload: Record<string, string | number> = {};
+  for (const [key, item] of Object.entries(value.payload)) {
+    if (!key || key.length > 64) continue;
+    if (typeof item === 'string') payload[key] = item.slice(0, 500);
+    else if (typeof item === 'number' && Number.isFinite(item)) payload[key] = item;
+  }
+  return {
+    id: value.id,
+    fromAccountId: value.fromAccountId,
+    fromName: value.fromName,
+    kind: value.kind,
+    payload,
+    at: Math.max(0, value.at),
+  };
 }
 
 /** Normalize an untrusted avatar reference into a safe, complete one. */

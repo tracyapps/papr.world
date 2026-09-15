@@ -11,6 +11,7 @@ import { RoomStore } from './persistence';
 import { FeedbackStore } from './feedback';
 import { BlockStore } from './blocks';
 import { ModerationStore } from './moderation';
+import { MailStore } from './mail';
 
 export const DATA_DIR = process.env.PP_DATA_DIR ?? 'data';
 
@@ -58,6 +59,7 @@ export const roomStore = new RoomStore(DATA_DIR);
 export const feedbackStore = new FeedbackStore(DATA_DIR);
 export const blocks = new BlockStore(DATA_DIR);
 export const moderation = new ModerationStore(DATA_DIR);
+export const mail = new MailStore(DATA_DIR);
 
 /**
  * The account that may remove people from any neighborhood.

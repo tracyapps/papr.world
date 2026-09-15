@@ -153,6 +153,20 @@ placed-entity persistence, so mail is no longer coupled to the building system.
 It can ship early and on its own. Building a nicer mailbox later is a
 building-system feature that happens to be mailbox-shaped.
 
+**Playable inbox, offline letters, and authoritative parcels built 2026-09-14.** The scrapbook inbox
+persists letters and collects validated resource, chip, tool, and general-item
+attachments once without deleting the letter. Pip's welcome parcel proves the
+local attachment path. Authenticated players can also write notes from a
+neighbor's chat line: the server owns the per-passport inbox, persists before
+acknowledging, enforces blocks and rate limits, and returns mail on join or
+reconnect even after a process restart. Protocol v7 adds a separate server-owned
+Neighborhood Pouch: parcel sending atomically debits the sender, claiming
+credits the recipient exactly once, and both balances survive restart. The
+client never uploads its private solo balance. Shared gathering/crafting will
+fill this pouch through individually validated server actions; any future
+one-way solo import requires an explicit policy rather than implicit trust of
+client data.
+
 ### Generosity pays off
 
 Sharing resources produces unearned good things:

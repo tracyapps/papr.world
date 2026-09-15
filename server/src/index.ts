@@ -27,7 +27,7 @@ import {
   type ModerationStatus,
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
-import { accounts, feedbackStore, moderation, OWNER_ACCOUNT } from './stores';
+import { accounts, feedbackStore, mail, moderation, OWNER_ACCOUNT } from './stores';
 
 const port = Number(process.env.PORT ?? 2567);
 const corsOrigin = process.env.PP_CORS_ORIGIN ?? '*';
@@ -392,7 +392,10 @@ const gameServer = new Server({
 });
 
 gameServer.define(DEFAULT_ROOM, PaperRoom).filterBy(['inviteCode']);
-gameServer.onShutdown(() => accounts.flush());
+gameServer.onShutdown(() => {
+  accounts.flush();
+  mail.flush();
+});
 
 await gameServer.listen(port);
 // Not "localhost" — this line is read far more often in a deploy log than on

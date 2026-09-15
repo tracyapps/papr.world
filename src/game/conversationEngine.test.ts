@@ -134,7 +134,7 @@ describe('place knowledge', () => {
 
   it('writes a diary entry per remembered fact and dedups on repeat (Phase 2.4 data shape)', () => {
     setGameStateForTests(createDefaultGameState());
-    const critter = { id: 'diary-test-critter' } as Critter;
+    const critter = { id: 'diary-test-critter', params: { name: 'Hazel' } } as Critter;
     const followUps = placeKnowledgeFollowUps(placeContext('forest'), 'gentle');
     const materials = followUps.find((choice) => choice.id === 'materials')!;
     const scene = { id: 'place', opening: 'A first local fact.', choices: followUps };
@@ -151,6 +151,7 @@ describe('place knowledge', () => {
     expect(entries).toHaveLength(poolSize);
     expect(results[poolSize].reply).toBe(results[0].reply);
     expect(entries.every((entry) => entry.critterId === critter.id)).toBe(true);
+    expect(entries.every((entry) => entry.speakerName === 'Hazel')).toBe(true);
     expect(entries.every((entry) => entry.pageId === '0,0')).toBe(true);
     expect(entries.every((entry) => entry.kind === 'materials')).toBe(true);
     expect(entries.every((entry) => typeof entry.id === 'string' && entry.id.startsWith('place:0,0:materials:'))).toBe(true);

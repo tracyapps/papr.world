@@ -41,7 +41,12 @@ describe('diary entry save shape (Phase 2.4 data shape)', () => {
   });
 
   it('round-trips a well-formed entry, with and without the player-authored note seam', () => {
-    const withNote: DiaryEntry = { ...validEntry, id: 'place:0,0:materials:1', note: 'my own note' };
+    const withNote: DiaryEntry = {
+      ...validEntry,
+      id: 'place:0,0:materials:1',
+      speakerName: 'Hazel',
+      note: 'my own note',
+    };
     const saved = createDefaultGameState();
     saved.player.diaryEntries = [validEntry, withNote];
     const storage = fakeStorage(JSON.stringify(saved));

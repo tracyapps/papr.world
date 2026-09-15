@@ -15,6 +15,13 @@ import { setActionMode } from '../game/actionMode';
 import { getToolArt } from '../game/toolPresentation';
 import { getResourceArt } from '../game/resourcePresentation';
 import { requestHudLayout } from './hudLayout';
+import { buildDiaryGroups, type DiaryGroup } from './diaryView';
+import { mailAttachment, mailSubject, mailText } from '../sim/mail';
+import {
+  claimSharedMail,
+  getSharedInventory,
+  onSharedInventoryChanged,
+} from '../net/sharedInventory';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
 // a pop-up book. Rationale:
@@ -34,7 +41,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'plans';
+type TabId = ResourceCategoryId | 'tools' | 'plans' | 'diary' | 'mail' | 'pouch';
 
 type TabDefinition = {
   id: TabId;
@@ -45,6 +52,14 @@ type TabDefinition = {
 
 let scrapbookOpen = false;
 let activeTab: TabId = 'sticks';
+let diarySearch = '';
+let mailMessage = '';
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]!);
+}
 
 function resourcesInCategory(category: ResourceCategoryId) {
   return (Object.values(RESOURCE_DEFS) as typeof RESOURCE_DEFS[ResourceId][])
@@ -69,6 +84,19 @@ const TABS: TabDefinition[] = [
   })),
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
   { id: 'plans', label: 'Plans', summary: () => null },
+  { id: 'diary', label: 'Diary', summary: () => String(getGameState().player.diaryEntries.length) },
+  { id: 'mail', label: 'Mail', summary: () => String(getGameState().player.mailbox.length) },
+  {
+    id: 'pouch',
+    label: 'Neighborhood Pouch',
+    summary: () => {
+      const inventory = getSharedInventory();
+      if (!inventory) return null;
+      return String(Number(inventory.chips > 0)
+        + [inventory.resources, inventory.tools, inventory.items]
+          .reduce((total, bag) => total + Object.values(bag).filter((count) => count > 0).length, 0));
+    },
+  },
 ];
 
 function renderTabs() {
@@ -174,11 +202,138 @@ function renderPlansTab() {
   }).join('')}</ul>`;
 }
 
+const diaryDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+function diaryDate(timestamp: number): { datetime: string; label: string } {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return { datetime: '', label: 'Date unknown' };
+  try {
+    return { datetime: date.toISOString(), label: diaryDateFormatter.format(date) };
+  } catch {
+    return { datetime: '', label: 'Date unknown' };
+  }
+}
+
+function renderDiaryGroup(group: DiaryGroup) {
+  const headingId = `diary-place-${encodeURIComponent(group.id)}`;
+  return `
+    <section class="scrapbook-diary-group" aria-labelledby="${headingId}">
+      <h3 id="${headingId}">${escapeHtml(group.label)}</h3>
+      <ol class="scrapbook-diary-entries">${group.entries.map((entry) => {
+    const date = diaryDate(entry.recordedAt);
+    return `
+        <li class="scrapbook-diary-entry">
+          <p>${escapeHtml(entry.text)}</p>
+          <footer>
+            <span><strong>${escapeHtml(entry.speakerLabel)}</strong> · ${escapeHtml(entry.topicLabel)}</span>
+            <time${date.datetime ? ` datetime="${date.datetime}"` : ''}>${date.label}</time>
+          </footer>
+        </li>`;
+  }).join('')}</ol>
+    </section>`;
+}
+
+function renderDiaryResults() {
+  const entries = getGameState().player.diaryEntries;
+  const groups = buildDiaryGroups(entries, diarySearch);
+  if (entries.length === 0) {
+    return '<p class="scrapbook-empty">Ask a neighbor about a place and their useful stories will be kept here.</p>';
+  }
+  if (groups.length === 0) {
+    return `<p class="scrapbook-empty">Nothing in the diary matches “${escapeHtml(diarySearch.trim())}”.</p>`;
+  }
+  return groups.map(renderDiaryGroup).join('');
+}
+
+function diaryResultCount() {
+  return buildDiaryGroups(getGameState().player.diaryEntries, diarySearch)
+    .reduce((total, group) => total + group.entries.length, 0);
+}
+
+function renderDiaryTab() {
+  const count = getGameState().player.diaryEntries.length;
+  const shown = diaryResultCount();
+  return `
+    <div class="scrapbook-diary-toolbar">
+      <label for="scrapbook-diary-search">Search the diary</label>
+      <input id="scrapbook-diary-search" type="search" value="${escapeHtml(diarySearch)}"
+        placeholder="A critter, place, or story…" autocomplete="off">
+      <span class="scrapbook-diary-count" aria-live="polite">${shown === count ? count : `${shown} of ${count}`} ${count === 1 ? 'story' : 'stories'} kept</span>
+    </div>
+    <div class="scrapbook-diary-results">${renderDiaryResults()}</div>`;
+}
+
+function renderMailTab() {
+  const state = getGameState();
+  if (state.player.mailbox.length === 0) {
+    return '<p class="scrapbook-empty">Your mailbox is empty. Letters and parcels will wait here whenever they arrive.</p>';
+  }
+  return `
+    ${mailMessage ? `<p class="scrapbook-mail-message" aria-live="polite">${escapeHtml(mailMessage)}</p>` : ''}
+    <ol class="scrapbook-mail-list">${state.player.mailbox.map((mail) => {
+    const attachment = mailAttachment(mail);
+    const claimed = state.player.claimedMailIds.includes(mail.id);
+    const serverParcel = attachment && mail.payload.inventoryAuthority === 'server';
+    const sharedClaim = Boolean(serverParcel && getSharedInventory());
+    const date = diaryDate(mail.at);
+    return `
+      <li class="scrapbook-mail-card${claimed ? ' is-collected' : ''}">
+        <header>
+          <span><strong>${escapeHtml(mailSubject(mail))}</strong><small>From ${escapeHtml(mail.fromName)}</small></span>
+          <time${date.datetime ? ` datetime="${date.datetime}"` : ''}>${date.label}</time>
+        </header>
+        ${mailText(mail) ? `<p>${escapeHtml(mailText(mail))}</p>` : ''}
+        ${attachment ? `
+          <footer>
+            <span class="scrapbook-mail-attachment">${escapeHtml(attachment.label)}</span>
+            <button type="button" data-collect-mail="${escapeHtml(mail.id)}" ${claimed ? 'disabled' : ''}>
+              ${claimed ? 'Collected' : sharedClaim ? 'Collect to neighborhood pouch' : 'Collect'}
+            </button>
+          </footer>` : ''}
+      </li>`;
+  }).join('')}</ol>`;
+}
+
+function renderPouchTab() {
+  const inventory = getSharedInventory();
+  if (!inventory) {
+    return '<p class="scrapbook-empty">Visit a shared neighborhood to open your server-kept pouch.</p>';
+  }
+  const entries: Array<{ label: string; count: number }> = [];
+  if (inventory.chips > 0) entries.push({ label: 'Shiny chips', count: inventory.chips });
+  for (const [id, count] of Object.entries(inventory.resources)) {
+    if (count <= 0) continue;
+    const resource = RESOURCE_DEFS[id as ResourceId];
+    entries.push({ label: resource?.label ?? id.replace(/[-_.]+/g, ' '), count });
+  }
+  for (const [id, count] of Object.entries(inventory.tools)) {
+    if (count > 0) entries.push({ label: TOOL_DEFS[id as ToolId]?.name ?? id.replace(/[-_.]+/g, ' '), count });
+  }
+  for (const [id, count] of Object.entries(inventory.items)) {
+    if (count > 0) entries.push({ label: id.replace(/[-_.]+/g, ' '), count });
+  }
+  return `
+    <p class="scrapbook-panel-note">This pouch is kept by the neighborhood server, so its contents can be mailed safely. Your private solo scrapbook stays separate.</p>
+    ${entries.length === 0
+      ? '<p class="scrapbook-empty">Your neighborhood pouch is empty.</p>'
+      : `<ul class="scrapbook-items">${entries
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map((entry) => `<li class="scrapbook-item"><span class="scrapbook-item-copy"><strong>${escapeHtml(entry.label)}</strong><small>${entry.count}</small></span></li>`)
+        .join('')}</ul>`}`;
+}
+
 function renderPanel() {
   if (!panelElement) return;
 
   if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
+  else if (activeTab === 'diary') panelElement.innerHTML = renderDiaryTab();
+  else if (activeTab === 'mail') panelElement.innerHTML = renderMailTab();
+  else if (activeTab === 'pouch') panelElement.innerHTML = renderPouchTab();
   else panelElement.innerHTML = renderMaterialsTab(activeTab);
 }
 
@@ -243,6 +398,23 @@ export function initializeScrapbook() {
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
 
+    const mailId = target.closest<HTMLButtonElement>('[data-collect-mail]')?.dataset.collectMail;
+    if (mailId) {
+      const mail = getGameState().player.mailbox.find((entry) => entry.id === mailId);
+      if (mail?.payload.inventoryAuthority === 'server') {
+        const sent = claimSharedMail(mailId);
+        mailMessage = sent
+          ? 'The server is placing that parcel in your neighborhood pouch…'
+          : 'Reconnect to the neighborhood before collecting this parcel.';
+        render();
+        return;
+      }
+      const result = dispatchGameCommand({ type: 'collectMail', mailId });
+      mailMessage = result.ok ? result.message : result.reason;
+      render();
+      return;
+    }
+
     const seedId = target.closest<HTMLButtonElement>('[data-select-seed]')?.dataset.selectSeed as SeedId | undefined;
     if (seedId && seedId in SEED_DEFS) {
       const selected = getGameState().player.selectedSeed === seedId;
@@ -271,7 +443,22 @@ export function initializeScrapbook() {
     }
   });
 
+  panelElement?.addEventListener('input', (event) => {
+    const input = (event.target as HTMLElement).closest<HTMLInputElement>('#scrapbook-diary-search');
+    if (!input) return;
+    diarySearch = input.value;
+    const results = panelElement.querySelector<HTMLElement>('.scrapbook-diary-results');
+    if (results) results.innerHTML = renderDiaryResults();
+    const count = getGameState().player.diaryEntries.length;
+    const countElement = panelElement.querySelector<HTMLElement>('.scrapbook-diary-count');
+    if (countElement) {
+      const shown = diaryResultCount();
+      countElement.textContent = `${shown === count ? count : `${shown} of ${count}`} ${count === 1 ? 'story' : 'stories'} kept`;
+    }
+  });
+
   onResourceInventoryChanged(render);
   onGameStateChanged(render);
+  onSharedInventoryChanged(render);
   setScrapbookOpen(false);
 }

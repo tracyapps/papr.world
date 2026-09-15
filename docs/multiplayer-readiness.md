@@ -16,8 +16,8 @@ features on top of a network that already exists.
 > (durable `accountId`, minted at `POST /account`, scrypt-hashed secrets),
 > JSON room persistence (pieces + nodes survive restarts), `makerId` on
 > placed pieces, per-player piece caps, and `src/net/passport.ts` on the
-> client. `PROTOCOL_VERSION` is now **3**; v3 adds validated invite-code
-> matchmaking to the join contract.
+> client. `PROTOCOL_VERSION` is now **7**; v7 adds private, revisioned
+> server-owned Neighborhood Pouch snapshots and atomic mail parcels.
 
 ## Can it live on any web server?
 

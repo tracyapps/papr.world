@@ -22,15 +22,19 @@ import {
   PROTOCOL_VERSION,
   ServerMessage,
   type AccountCredentials,
+  type AccountInventory,
   type AvatarRef,
   type BlockIntent,
   type BlockList,
   type ChatBroadcast,
   type ChatHistory,
   type ChatIntent,
+  type ClaimMailIntent,
   type GatherIntent,
   type JoinOptions,
   type MoveIntent,
+  type MailboxSnapshot,
+  type MailSent,
   type PlacePieceIntent,
   type PlacedPiece,
   type PlayerState,
@@ -39,6 +43,8 @@ import {
   type RemovedNotice,
   type ReportFiled,
   type ReportIntent,
+  type ResourceNode,
+  type SendMailIntent,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 
@@ -51,6 +57,10 @@ export type NetCallbacks = {
   onPieceAdd?: (piece: PlacedPiece) => void;
   /** A build piece was removed. */
   onPieceRemove?: (id: string) => void;
+  /** A server-owned gather node appeared or changed. */
+  onNodeAdd?: (node: ResourceNode) => void;
+  onNodeUpdate?: (node: ResourceNode) => void;
+  onNodeRemove?: (id: string) => void;
   /** A chat line was accepted by the server. */
   onChat?: (line: ChatBroadcast) => void;
   /** The backlog, once, on join. Already filtered by your blocks. */
@@ -59,6 +69,14 @@ export type NetCallbacks = {
   onBlocks?: (accountIds: string[]) => void;
   /** A safety report was filed; carries the receipt. */
   onReportFiled?: (receiptId: string) => void;
+  /** Complete bounded account inbox, on join/reconnect and live delivery. */
+  onMailbox?: (items: MailboxSnapshot['items']) => void;
+  /** Server-owned claimed ids accompany the mailbox snapshot. */
+  onClaimedMail?: (ids: string[]) => void;
+  /** Passport-scoped transferable balance. */
+  onInventory?: (inventory: AccountInventory) => void;
+  /** Private receipt for a letter durably accepted by the server. */
+  onMailSent?: (receipt: MailSent) => void;
   /** You were removed from the neighborhood. */
   onRemoved?: (notice: RemovedNotice) => void;
   /** An intent was refused — surface a quiet hint. */
@@ -96,6 +114,8 @@ export type NetConnection = {
   sendReport: (report: ReportIntent) => void;
   /** Owner only; the server checks and refuses everyone else. */
   sendRemove: (intent: RemoveIntent) => void;
+  sendMail: (intent: SendMailIntent) => void;
+  sendClaimMail: (intent: ClaimMailIntent) => void;
   disconnect: () => void;
 };
 
@@ -142,6 +162,7 @@ export async function connect(
 
   wirePlayers(room, stateCallbacks, selfId, buffer, callbacks);
   wirePieces(room, stateCallbacks, callbacks);
+  wireNodes(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
   // Three distinct endings, and they used to be one.
   //
@@ -195,6 +216,8 @@ export async function connect(
     },
     sendReport: (report) => room.send(ClientMessage.Report, report),
     sendRemove: (intent) => room.send(ClientMessage.Remove, intent),
+    sendMail: (intent) => room.send(ClientMessage.SendMail, intent),
+    sendClaimMail: (intent) => room.send(ClientMessage.ClaimMail, intent),
     disconnect: () => {
       void room.leave();
     },
@@ -235,6 +258,18 @@ function readPiece(id: string, raw: any): PlacedPiece {
   };
 }
 
+function readNode(id: string, raw: any): ResourceNode {
+  return {
+    id,
+    kind: raw.kind ?? '',
+    x: raw.x,
+    z: raw.z,
+    page: raw.page ?? '',
+    remaining: raw.remaining,
+    respawnAt: raw.respawnAt || null,
+  };
+}
+
 function wirePlayers(
   room: Room,
   $: NonNullable<ReturnType<typeof getStateCallbacks>>,
@@ -269,6 +304,18 @@ function wirePieces(
     callbacks.onPieceRemove?.(id));
 }
 
+function wireNodes(
+  room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
+  callbacks: NetCallbacks,
+): void {
+  $(room.state as any).nodes.onAdd((raw: any, id: string) => {
+    callbacks.onNodeAdd?.(readNode(id, raw));
+    $(raw).onChange(() => callbacks.onNodeUpdate?.(readNode(id, raw)));
+  });
+  $(room.state as any).nodes.onRemove((_raw: any, id: string) => callbacks.onNodeRemove?.(id));
+}
+
 /**
  * Every server-sent event.
  *
@@ -286,6 +333,13 @@ function wireMessages(room: Room, callbacks: NetCallbacks): void {
     callbacks.onBlocks?.(list.accountIds ?? []));
   room.onMessage(ServerMessage.ReportFiled, (filed: ReportFiled) =>
     callbacks.onReportFiled?.(filed.receiptId));
+  room.onMessage(ServerMessage.Mailbox, (snapshot: MailboxSnapshot) => {
+    callbacks.onMailbox?.(snapshot.items ?? []);
+    callbacks.onClaimedMail?.(snapshot.claimedIds ?? []);
+  });
+  room.onMessage(ServerMessage.MailSent, (receipt: MailSent) => callbacks.onMailSent?.(receipt));
+  room.onMessage(ServerMessage.Inventory, (inventory: AccountInventory) =>
+    callbacks.onInventory?.(inventory));
   room.onMessage(ServerMessage.Removed, (notice: RemovedNotice) =>
     callbacks.onRemoved?.(notice));
   room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));

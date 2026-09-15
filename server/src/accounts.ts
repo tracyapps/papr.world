@@ -122,6 +122,11 @@ export class AccountStore {
     return true;
   }
 
+  /** Recipient validation for account-scoped systems such as mail. */
+  has(id: string): boolean {
+    return this.accounts.has(id);
+  }
+
   get size(): number {
     return this.accounts.size;
   }

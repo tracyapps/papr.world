@@ -4,8 +4,9 @@ import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import type { DigDiscovery } from './catalogs/geology';
 import { PLANT_STAGE_ORDER, SEED_DEFS, type PlantStage, type SeedId } from './catalogs/seeds';
 import { MAX_TREE_GROWTH, type TreeGrowthState } from './catalogs/trees';
-import type { PlacedPiece } from '../../shared/src/index';
+import { LIMITS, type MailItem, type PlacedPiece } from '../../shared/src/index';
 import { buildAssemblyDef } from './catalogs/building';
+import { createWelcomeMail } from './mail';
 
 export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
@@ -154,6 +155,8 @@ export type ActivityEntry = {
 export type DiaryEntry = {
   id: string;
   critterId: string;
+  /** Display name at the time of the conversation; absent on older saves. */
+  speakerName?: string;
   pageId: string;
   kind: string;
   text: string;
@@ -181,6 +184,10 @@ export type GameState = {
     activityLog: ActivityEntry[];
     /** Newest first; everything a critter has told the player so far. */
     diaryEntries: DiaryEntry[];
+    /** Newest first; letters remain after an attachment is collected. */
+    mailbox: MailItem[];
+    /** Stable mail ids whose attachment has already been taken. */
+    claimedMailIds: string[];
   };
   world: {
     harvestRespawns: Record<string, number>;
@@ -224,6 +231,8 @@ export function createDefaultGameState(): GameState {
       activeLearning: null,
       activityLog: [],
       diaryEntries: [],
+      mailbox: [createWelcomeMail()],
+      claimedMailIds: [],
     },
     world: {
       harvestRespawns: {},
@@ -514,9 +523,12 @@ function normalizeState(value: unknown): GameState | null {
       if (typeof entry.text !== 'string') return [];
       if (typeof entry.recordedAt !== 'number' || !Number.isFinite(entry.recordedAt)) return [];
       const note = typeof entry.note === 'string' ? entry.note.slice(0, 500) : undefined;
+      const speakerName = typeof entry.speakerName === 'string'
+        ? entry.speakerName.slice(0, 80) : undefined;
       return [{
         id: entry.id,
         critterId: entry.critterId,
+        ...(speakerName !== undefined ? { speakerName } : {}),
         pageId: entry.pageId,
         kind: entry.kind,
         text: entry.text.slice(0, 500),
@@ -524,6 +536,34 @@ function normalizeState(value: unknown): GameState | null {
         ...(note !== undefined ? { note } : {}),
       }];
     }).slice(0, DIARY_ENTRY_LIMIT)
+    : [];
+  state.player.mailbox = Array.isArray(player.mailbox)
+    ? player.mailbox.flatMap((rawMail) => {
+      const mail = safeObject(rawMail);
+      const payload = safeObject(mail.payload);
+      if (typeof mail.id !== 'string' || typeof mail.fromAccountId !== 'string') return [];
+      if (typeof mail.fromName !== 'string' || typeof mail.kind !== 'string') return [];
+      if (typeof mail.at !== 'number' || !Number.isFinite(mail.at)) return [];
+      const safePayload = Object.fromEntries(Object.entries(payload).flatMap(([key, value]) => (
+        (typeof value === 'string' || (typeof value === 'number' && Number.isFinite(value)))
+          ? [[key.slice(0, 64), typeof value === 'string' ? value.slice(0, 500) : value]]
+          : []
+      )));
+      return [{
+        id: mail.id.slice(0, 160),
+        fromAccountId: mail.fromAccountId.slice(0, 160),
+        fromName: mail.fromName.slice(0, 80),
+        kind: mail.kind.slice(0, 40),
+        payload: safePayload,
+        at: Math.max(0, mail.at),
+      }];
+    }).slice(0, LIMITS.mailboxMax)
+    : [createWelcomeMail()];
+  const mailboxIds = new Set(state.player.mailbox.map((mail) => mail.id));
+  state.player.claimedMailIds = Array.isArray(player.claimedMailIds)
+    ? player.claimedMailIds
+      .filter((id): id is string => typeof id === 'string' && mailboxIds.has(id))
+      .slice(0, LIMITS.mailboxMax)
     : [];
   const learning = safeObject(player.activeLearning);
   if (

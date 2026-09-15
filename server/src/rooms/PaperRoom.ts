@@ -31,10 +31,13 @@ import {
   sanitizeName,
   sanitizePlacePiece,
   sanitizeAccountCredentials,
+  sanitizeClaimMail,
+  sanitizeSendMail,
   isFiniteNumber,
   type BlockIntent,
   type ChatBroadcast,
   type ChatIntent,
+  type ClaimMailIntent,
   type GatherIntent,
   type JoinOptions,
   type MoveIntent,
@@ -45,8 +48,9 @@ import {
   type ReportIntent,
   type ResourceNode,
   type RoomSave,
+  type SendMailIntent,
 } from '../../../shared/src/index';
-import { accounts, blocks, isOwner, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { accounts, blocks, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
 import {
   NodeSchema,
   PaperRoomState,
@@ -58,6 +62,7 @@ import {
 type Session = {
   lastMoveAt: number;
   lastChatAt: number;
+  lastMailAt: number;
 };
 
 const DEFAULT_PERSISTENCE_ID = 'neighborhood';
@@ -98,6 +103,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
 
   /** Accounts refused entry to this neighborhood. Restored from the save. */
   private banned = new Set<string>();
+  private unsubscribeMail: (() => void) | null = null;
+  private unsubscribeInventory: (() => void) | null = null;
 
   override onCreate(options: JoinOptions): void {
     const inviteCode = sanitizeInviteCode(options?.inviteCode);
@@ -140,6 +147,19 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.onMessage(ClientMessage.Remove, (client, msg: RemoveIntent) =>
       this.handleRemove(client, msg),
     );
+    this.onMessage(ClientMessage.SendMail, (client, msg: SendMailIntent) =>
+      this.handleSendMail(client, msg),
+    );
+    this.onMessage(ClientMessage.ClaimMail, (client, msg: ClaimMailIntent) =>
+      this.handleClaimMail(client, msg),
+    );
+
+    // Mail belongs to accounts, not rooms. Every live room listens so a
+    // recipient sees a delivery immediately even when sender and recipient
+    // are visiting different neighborhood codes.
+    this.unsubscribeMail = mail.subscribe((accountId) => this.sendMailboxToAccount(accountId));
+    this.unsubscribeInventory = mail.subscribeInventory((accountId) =>
+      this.sendInventoryToAccount(accountId));
 
     // Light housekeeping tick: refill spent resource nodes.
     this.setSimulationInterval(() => this.refillNodes(), 1000);
@@ -200,7 +220,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     player.isOwner = isOwner(player.accountId);
 
     this.state.players.set(client.sessionId, player);
-    this.sessions.set(client.sessionId, { lastMoveAt: Date.now(), lastChatAt: 0 });
+    this.sessions.set(client.sessionId, { lastMoveAt: Date.now(), lastChatAt: 0, lastMailAt: 0 });
 
     // The backlog, filtered the same way live chat is — otherwise a block
     // would hold for new lines and then hand you everything you blocked the
@@ -212,6 +232,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     // Echo their own block list so the client can label people correctly
     // without keeping its own copy that could drift.
     client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
+    this.sendMailbox(client, player.accountId);
+    this.sendInventory(client, player.accountId);
   }
 
   /**
@@ -292,6 +314,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       lines: this.chatLog.filter((line) => !blocks.isBlocked(player.accountId, line.accountId)),
     });
     client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
+    this.sendMailbox(client, player.accountId);
+    this.sendInventory(client, player.accountId);
   }
 
   // ---- Handlers -------------------------------------------------------------
@@ -402,14 +426,22 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       this.reject(client, ClientMessage.Gather, 'node-empty');
       return;
     }
+    if (player.accountId.startsWith('guest:')) {
+      this.reject(client, ClientMessage.Gather, 'guest-not-allowed');
+      return;
+    }
+    if (node.page !== player.page || Math.hypot(node.x - player.x, node.z - player.z) > 4) {
+      this.reject(client, ClientMessage.Gather, 'too-far');
+      return;
+    }
 
     node.remaining -= 1;
     if (node.remaining <= 0) {
       // Spent: hide until it refills 30s later.
       node.respawnAt = Date.now() + 30_000;
     }
+    mail.grant(player.accountId, { kind: 'resource', itemId: node.kind, quantity: 1 });
     this.persist();
-    // Inventory grant lands here once the scrapbook data model exists.
   }
 
   /**
@@ -538,16 +570,106 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     }
   }
 
+  /**
+   * Durable private letters. Notes only until shared inventory becomes
+   * authoritative; accepting client-claimed parcels today would let a sender
+   * duplicate anything by lying about what their local bag contains.
+   */
+  private handleSendMail(client: Client, msg: SendMailIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    const session = this.sessions.get(client.sessionId);
+    if (!player || !session || !msg) return;
+    if (player.accountId.startsWith('guest:')) {
+      this.reject(client, ClientMessage.SendMail, 'guest-not-allowed');
+      return;
+    }
+
+    const now = Date.now();
+    if (now - session.lastMailAt < LIMITS.mailSendIntervalMs) {
+      this.reject(client, ClientMessage.SendMail, 'rate-limited');
+      return;
+    }
+    const intent = sanitizeSendMail(msg);
+    if (!intent || intent.toAccountId === player.accountId || !accounts.has(intent.toAccountId)) {
+      this.reject(client, ClientMessage.SendMail, 'invalid');
+      return;
+    }
+    // Personal blocks cover private delivery too. A generic refusal does not
+    // reveal whether the account exists or whether the recipient blocked them.
+    if (blocks.isBlocked(intent.toAccountId, player.accountId)) {
+      this.reject(client, ClientMessage.SendMail, 'not-allowed');
+      return;
+    }
+
+    session.lastMailAt = now;
+    const delivered = intent.attachment
+      ? mail.deliverParcel({
+        fromAccountId: player.accountId, fromName: player.name,
+        toAccountId: intent.toAccountId, text: intent.text,
+        attachment: intent.attachment, at: now,
+      })?.item
+      : mail.deliver({
+        fromAccountId: player.accountId, fromName: player.name,
+        toAccountId: intent.toAccountId, text: intent.text, at: now,
+      });
+    if (!delivered) {
+      this.reject(client, ClientMessage.SendMail, 'not-allowed');
+      return;
+    }
+    client.send(ServerMessage.MailSent, { mailId: delivered.id, toAccountId: intent.toAccountId });
+  }
+
+  private handleClaimMail(client: Client, msg: ClaimMailIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || player.accountId.startsWith('guest:')) {
+      this.reject(client, ClientMessage.ClaimMail, 'guest-not-allowed');
+      return;
+    }
+    const intent = sanitizeClaimMail(msg);
+    if (!intent || !mail.claim(player.accountId, intent.mailId)) {
+      this.reject(client, ClientMessage.ClaimMail, 'invalid');
+      return;
+    }
+    this.sendMailbox(client, player.accountId);
+  }
+
   // ---- Helpers --------------------------------------------------------------
 
   private reject(client: Client, action: string, reason: RejectionReason): void {
     client.send(ServerMessage.Rejected, { action, reason });
   }
 
+  private sendMailbox(client: Client, accountId: string): void {
+    client.send(ServerMessage.Mailbox, {
+      items: accountId.startsWith('guest:') ? [] : mail.list(accountId),
+      claimedIds: accountId.startsWith('guest:') ? [] : mail.listClaimed(accountId),
+    });
+  }
+
+  private sendInventory(client: Client, accountId: string): void {
+    client.send(ServerMessage.Inventory, accountId.startsWith('guest:')
+      ? { revision: 0, chips: 0, resources: {}, tools: {}, items: {} }
+      : mail.inventory(accountId));
+  }
+
+  private sendMailboxToAccount(accountId: string): void {
+    for (const client of this.clients) {
+      const player = this.state.players.get(client.sessionId);
+      if (player?.accountId === accountId) this.sendMailbox(client, accountId);
+    }
+  }
+
+  private sendInventoryToAccount(accountId: string): void {
+    for (const client of this.clients) {
+      const player = this.state.players.get(client.sessionId);
+      if (player?.accountId === accountId) this.sendInventory(client, accountId);
+    }
+  }
+
   private seedResourceNodes(): void {
     const seeds = [
-      { id: 'clearing-scrap-1', kind: 'scrap.lined', x: 4, z: -3, page: '0,0' },
-      { id: 'clearing-scrap-2', kind: 'scrap.construction', x: -5, z: 2, page: '0,0' },
+      { id: 'clearing-kraft-1', kind: 'kraft-twigs', x: 2, z: -1, page: '0,0' },
+      { id: 'clearing-confetti-1', kind: 'confetti-stones', x: -2, z: 1, page: '0,0' },
     ];
     for (const s of seeds) {
       const node = new NodeSchema();
@@ -578,6 +700,10 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   // ---- Persistence ----------------------------------------------------------
 
   override onDispose(): void {
+    this.unsubscribeMail?.();
+    this.unsubscribeMail = null;
+    this.unsubscribeInventory?.();
+    this.unsubscribeInventory = null;
     roomStore.saveNow(this.persistenceId, () => this.snapshot());
     accounts.flush();
   }

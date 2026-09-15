@@ -270,7 +270,7 @@ walk with the distinct biomes one page north/east/south/west. Asking generates
 only those four deterministic neighboring pages; it never turns a critter into
 a global directory.
 
-### 2.4 The diary — **L** — ◐ data shape built (2026-09-01)
+### 2.4 The diary — ✅ built (2026-09-14)
 
 Depends on 2.1 having something to record. A searchable record of what you have
 been told, formatted like something the player kept.
@@ -281,17 +281,21 @@ rather than retrofitted. The annotation UI itself is parked.
 
 `player.diaryEntries: DiaryEntry[]` is live and recording. Every place-knowledge
 follow-up reply (`placeKnowledgeFollowUps` in `conversationEngine.ts`) now
-writes a `DiaryEntry` — critter id, page id, kind, the exact resolved sentence,
-and a timestamp — alongside the existing conversation flag, using the same id
-as that flag so repeats dedupe for free. `note?: string` rides along unused as
-the seam for later player-authored annotation. No save migration was needed:
-old saves default the field to `[]` on load, same pattern as `activityLog`.
-Capped at `DIARY_ENTRY_LIMIT` (400) on both write and load.
+writes a `DiaryEntry` — critter id and display name, page id, kind, the exact
+resolved sentence, and a timestamp — alongside the existing conversation flag,
+using the same id as that flag so repeats dedupe for free. `note?: string` rides
+along unused as the seam for later player-authored annotation. No save migration
+was needed: old saves default the field to `[]` on load and older entries without
+a display name use a friendly fallback. Capped at `DIARY_ENTRY_LIMIT` (400) on
+both write and load.
 
-**Still parked, on purpose:** the scrapbook Diary tab, its visual format (an
-open design question per `biome-knowledge.md`), and the annotation UI. There
-is no UI yet for a player to actually read their diary — only the save-level
-record of what would go in it.
+The scrapbook now has a read-only Diary tab. It lays entries out as compact
+field notes grouped by named region, identifies the critter and topic, keeps the
+newest notes first, and searches across the sentence, speaker, place, topic, and
+future annotation seam. Empty-diary and no-match states point back toward play
+instead of exposing storage details.
+
+**Still parked, on purpose:** player-authored annotation and highlighting UI.
 
 ---
 
@@ -523,15 +527,45 @@ you are stuck.
 Needs an easel structure and a studio set piece, in the manner of
 `world/woodMill.ts`.
 
-### 3.5 Mailbox and PWMS — **L**
+### 3.5 Mailbox and PWMS — **L** — ◐ authoritative parcels built (2026-09-14)
 
 Depends on 3.1. Every player gets a mailbox; materials, chips, tools, and made
 creations can be sent to it. Plan knowledge is never transferable.
 
-Open first: **is the mailbox a placed world object or a scrapbook tab?** The
-world object is warmer and pulls in placed-entity persistence — which is also a
-prerequisite for boats (4.11) and buildings, so doing it here means doing it once.
-The scrapbook tab ships in a day and gives that up.
+The earlier open question is settled in `economy.md`: mail is an inbox, not an
+address, and never depends on where a decorative mailbox stands. The first
+playable slice now lives in the scrapbook. New and migrated players receive a
+durable welcome parcel from Pip; letters retain their sender, subject, message,
+timestamp, and renderer-free attachment payload. Resource, chip, tool, and
+general-item parcels collect into their proper bags exactly once while the
+letter remains readable. Save normalization drops malformed mail, old saves
+gain the welcome parcel, and both inbox and claimed-id state honor the shared
+200-letter protocol bound.
+
+The networked letter path is also built. Authenticated players can write from a
+neighbor's chat line; the server validates and rate-limits the note, respects
+the recipient's block list, writes it atomically to that passport's bounded
+inbox, and only then acknowledges the sender. The complete private inbox is
+delivered on join/reconnect and live deliveries cross neighborhood-room
+boundaries. A two-passport browser smoke proved delivery while the recipient
+was offline and retrieval after a server restart.
+
+Protocol v7 adds the account-scoped **Neighborhood Pouch**, the authoritative
+transferable-inventory boundary. It is never initialized from a client-declared
+solo balance. Parcel send atomically debits that pouch and enqueues the gift;
+claiming atomically credits the recipient and records the claim exactly once.
+Resource, chip, tool, and general-item stacks share bounded validation,
+revisioned private snapshots, restart persistence, and cross-room live updates.
+The scrapbook exposes the pouch separately so the trust boundary is visible
+rather than pretending the private solo bag is synced. A two-passport restart
+smoke proved debit, delivery, claim, and the resulting 0→4 seed balance.
+
+Still owed for the full PWMS/economy bridge: server-validated ways to earn and
+spend more pouch contents through shared gathering, crafting, and building,
+plus the later garden-harvest mirror. Automatic solo import is deliberately
+forbidden; an explicit one-way import would need its own policy before it could
+exist. A physical mailbox remains a future home/decor ritual, never delivery
+plumbing.
 
 ### 3.6 Giving made creations — **S**
 

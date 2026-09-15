@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 5; // v5: PlacedPiece gains material + designId
+export const PROTOCOL_VERSION = 7; // v7: server-owned transferable inventory + parcels
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -43,6 +43,14 @@ export const LIMITS = {
   accountSecretLength: 43,
   /** Mail items retained per account before oldest drop off. */
   mailboxMax: 200,
+  /** Long enough for a letter, short enough to remain a note rather than a document. */
+  mailTextMaxLength: 500,
+  /** Server-side pause between letters from one live session. */
+  mailSendIntervalMs: 3_000,
+  /** Largest single parcel; keeps mistakes and payloads bounded. */
+  mailAttachmentMax: 999,
+  /** Defensive ceiling for any one server-owned inventory stack. */
+  inventoryStackMax: 999_999,
 
   /**
    * Accounts one person may block. Generous - nobody should ever hit it -

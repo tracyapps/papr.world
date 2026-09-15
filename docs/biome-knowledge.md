@@ -170,9 +170,13 @@ anything auto-recorded. That ambition matters now only in one way — entries
 need stable ids and room for player-authored fields from the start, so
 annotation is added rather than retrofitted.
 
+**Settled 2026-09-14:** diary entries are compact field-note cards in the
+scrapbook strip, grouped by named region and searchable by story, speaker,
+place, and topic. The saved page id remains the durable source of the region
+label; an optional saved speaker name keeps unloaded critters readable without
+exposing an internal id.
+
 ## Still open
 
-- What the diary entry *looks like* — this is design work, not a decision
-  waiting on code.
 - Whether the hidden gift is per-suggestion (one bird song, one gift) or a
   low-probability roll each time. The first is warmer; the second is cheaper.

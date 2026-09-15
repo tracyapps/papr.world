@@ -84,8 +84,9 @@ export type PlacedPiece = {
 
 /**
  * One item waiting in an account's mailbox — the offline half of gifting and
- * mailed garden harvests. Shape only for now; delivery lands in Phase F
- * (docs/communal-multiplayer.md §6).
+ * mailed garden harvests. The local inbox and collection rules use this shape;
+ * authoritative account delivery lands in Phase F
+ * (`docs/communal-multiplayer.md` §6).
  */
 export type MailItem = {
   id: string;
@@ -99,6 +100,16 @@ export type MailItem = {
   payload: Record<string, string | number>;
   /** Server epoch ms when queued. */
   at: number;
+};
+
+/** Server-owned balance used for anything transferable between players. */
+export type AccountInventory = {
+  /** Monotonic account-local revision; clients ignore stale snapshots. */
+  revision: number;
+  chips: number;
+  resources: Record<string, number>;
+  tools: Record<string, number>;
+  items: Record<string, number>;
 };
 
 export type ResourceNode = {

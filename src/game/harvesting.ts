@@ -25,6 +25,10 @@ type Harvestable = {
   respawnAt: number;
   pageId?: string;
   dropId?: string;
+  /** Server-backed nodes request a grant instead of mutating the solo bag. */
+  onCollect?: () => void;
+  /** Explicit availability for a server-backed node. */
+  available?: boolean;
 };
 
 const harvestables: Harvestable[] = [];
@@ -50,12 +54,22 @@ export function registerHarvestable(options: Omit<Harvestable, 'respawnAt'>) {
     existing.respawnSeconds = options.respawnSeconds;
     existing.pageId = options.pageId;
     existing.dropId = options.dropId;
-    existing.object.visible = existing.respawnAt <= Date.now();
+    existing.onCollect = options.onCollect;
+    existing.available = options.available;
+    existing.object.visible = options.available ?? existing.respawnAt <= Date.now();
+    pendingHarvests.delete(existing.id);
     return;
   }
   const respawnAt = loadState()[options.id] ?? 0;
-  options.object.visible = respawnAt <= Date.now();
+  options.object.visible = options.available ?? respawnAt <= Date.now();
   harvestables.push({ ...options, respawnAt });
+}
+
+export function unregisterHarvestable(id: string): void {
+  const index = harvestables.findIndex((entry) => entry.id === id);
+  if (index >= 0) harvestables.splice(index, 1);
+  pendingHarvests.delete(id);
+  walkOverlaps.delete(id);
 }
 
 export function registerWorldDrop(options: {
@@ -153,6 +167,12 @@ export function tryHarvestAt(clientX: number, clientY: number): boolean {
 
 function collectHarvestable(harvestable: Harvestable) {
   if (!harvestable.object.visible) return;
+  if (harvestable.onCollect) {
+    pendingHarvests.add(harvestable.id);
+    harvestable.object.visible = false;
+    harvestable.onCollect();
+    return;
+  }
   if (harvestable.dropId && harvestable.pageId) {
     const result = dispatchGameCommand({
       type: 'collectWorldDrop', pageId: harvestable.pageId, dropId: harvestable.dropId,

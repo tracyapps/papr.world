@@ -584,6 +584,7 @@ export function resolveConversationChoice(
       recordDiaryEntry({
         id: flagKey,
         critterId: critter.id,
+        speakerName: critter.params?.name,
         pageId: choice.rememberReplyContext.pageId,
         kind: choice.rememberReplyContext.kind,
         text: reply,

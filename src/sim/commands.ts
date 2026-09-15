@@ -49,6 +49,7 @@ import {
 } from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
+import { mailAttachment } from './mail';
 
 export type ResourceAllocation = Partial<Record<ResourceId, number>>;
 
@@ -58,6 +59,7 @@ export type GameCommand =
   | { type: 'collectWorldDrop'; pageId: string; dropId: string }
   | { type: 'collectPlantSeed'; target: TerrainCellAddress; now: number }
   | { type: 'collectOutput'; index: number }
+  | { type: 'collectMail'; mailId: string }
   | { type: 'completeCraft'; now: number }
   | { type: 'completeMending'; target: TerrainCellAddress; now: number }
   | { type: 'completeTerrainRecovery'; target: TerrainCellAddress; now: number }
@@ -457,6 +459,30 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
 
       state.player.items[recipe.output.itemId] = (state.player.items[recipe.output.itemId] ?? 0) + 1;
       return { ok: true, message: `Picked up the ${recipe.output.label}.` };
+    }
+
+    case 'collectMail': {
+      const mail = state.player.mailbox.find((entry) => entry.id === command.mailId);
+      if (!mail) return { ok: false, reason: 'That letter is not in your mailbox.' };
+      if (state.player.claimedMailIds.includes(mail.id)) {
+        return { ok: false, reason: 'You already collected that parcel.' };
+      }
+      const attachment = mailAttachment(mail);
+      if (!attachment) return { ok: false, reason: 'That letter has nothing to collect.' };
+
+      if (attachment.kind === 'chips') state.player.chips += attachment.quantity;
+      else if (attachment.kind === 'resource') {
+        state.player.inventory[attachment.resource] =
+          (state.player.inventory[attachment.resource] ?? 0) + attachment.quantity;
+      } else if (attachment.kind === 'tool') {
+        state.player.tools[attachment.toolId] =
+          (state.player.tools[attachment.toolId] ?? 0) + attachment.quantity;
+      } else {
+        state.player.items[attachment.itemId] =
+          (state.player.items[attachment.itemId] ?? 0) + attachment.quantity;
+      }
+      state.player.claimedMailIds.push(mail.id);
+      return { ok: true, message: `Collected ${attachment.label} from ${mail.fromName}.` };
     }
 
     case 'digTerrain': {

@@ -13,6 +13,14 @@ The multiplayer architecture question that was drifting: how much of the game mo
 - **The world stays deterministic.** Pages generate identically for everyone from their coordinates, so terrain, water, and scenery never need syncing.
 - **Explicit non-goals:** moving the simulation server-side (the cost shape that hurt Palia — MMO infrastructure that only survives on very large populations); player-to-player chip markets (parked until gifting culture is visibly strong).
 
+**2026-09-14 addendum — transferable inventory.** Private solo progression
+still belongs to the client. Anything that can cross between players now lives
+in a separate server-owned **Neighborhood Pouch**, keyed by paper passport. The
+client cannot upload its solo bag into it. Server-validated shared actions may
+credit or debit it, and mail moves pouch balances atomically. This closes the
+split-brain duplication route without turning the whole solo simulation into an
+MMO backend.
+
 ## Why this shape
 
 - Solo must stand alone (the Stardew principle): one world loop, complete alone, enriched by others — not a separate multiplayer mode.
@@ -28,7 +36,9 @@ Testers: **these are expected, not bugs.** Do report anything that *isn't* on th
 3. **Gardens and plantings are private.** Your friend cannot see your garden yet.
 4. **Pieces placed while solo stay solo.** Only pieces finished while connected publish to the neighborhood; re-place a build while connected to share it.
 5. **Remote avatars are placeholders.** Others see a tinted cutout + your name until drawn designs arrive over the wire (warmth-quad item, in flight).
-6. **Inventory, learning, and chips are personal.** Nothing in your scrapbook syncs, by design for now.
+6. **Solo inventory, learning, and chips are personal.** Nothing in the private
+   bag syncs. The separate Neighborhood Pouch is server-kept because its
+   contents may be mailed to another person.
 
 ## What already works (so nobody undersells it)
 

@@ -9,7 +9,7 @@
 // Message names are plain string consts (not TS enums) so this file stays
 // friendly to isolated-module / erasable-syntax transpilers like the client's.
 
-import type { AvatarRef } from './state';
+import type { AccountInventory, AvatarRef, MailItem } from './state';
 
 /** Credentials for a durable "paper passport" account (see server /account). */
 export type AccountCredentials = {
@@ -46,6 +46,10 @@ export const ClientMessage = {
   Report: 'report',
   /** Owner only: remove someone from this neighborhood. */
   Remove: 'remove',
+  /** Send a durable letter to another paper-passport account. */
+  SendMail: 'send-mail',
+  /** Move one unclaimed parcel into the server-owned account inventory. */
+  ClaimMail: 'claim-mail',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -105,6 +109,19 @@ export type RemoveIntent = {
   ban?: boolean;
 };
 
+export type SendMailIntent = {
+  /** Durable passport id, never a transient room session id. */
+  toAccountId: string;
+  text: string;
+  attachment?: MailAttachmentIntent;
+};
+
+export type MailAttachmentIntent =
+  | { kind: 'chips'; quantity: number }
+  | { kind: 'resource' | 'tool' | 'item'; itemId: string; quantity: number };
+
+export type ClaimMailIntent = { mailId: string };
+
 export type ClientPayloads = {
   [ClientMessage.Move]: MoveIntent;
   [ClientMessage.Chat]: ChatIntent;
@@ -114,6 +131,8 @@ export type ClientPayloads = {
   [ClientMessage.Unblock]: BlockIntent;
   [ClientMessage.Report]: ReportIntent;
   [ClientMessage.Remove]: RemoveIntent;
+  [ClientMessage.SendMail]: SendMailIntent;
+  [ClientMessage.ClaimMail]: ClaimMailIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------
@@ -139,6 +158,12 @@ export const ServerMessage = {
   Removed: 'removed',
   /** An intent was refused; surface a quiet UI hint. */
   Rejected: 'rejected',
+  /** The recipient's complete bounded inbox, sent on join/reconnect/delivery. */
+  Mailbox: 'mailbox',
+  /** Private confirmation that a durable letter reached the server store. */
+  MailSent: 'mail-sent',
+  /** Complete server-owned transferable balance for this passport. */
+  Inventory: 'inventory',
 } as const;
 export type ServerMessageType = (typeof ServerMessage)[keyof typeof ServerMessage];
 
@@ -196,6 +221,13 @@ export type Rejected = {
   reason: RejectionReason;
 };
 
+export type MailboxSnapshot = { items: MailItem[]; claimedIds: string[] };
+
+export type MailSent = {
+  mailId: string;
+  toAccountId: string;
+};
+
 export type ServerPayloads = {
   [ServerMessage.Chat]: ChatBroadcast;
   [ServerMessage.ChatHistory]: ChatHistory;
@@ -203,4 +235,7 @@ export type ServerPayloads = {
   [ServerMessage.ReportFiled]: ReportFiled;
   [ServerMessage.Removed]: RemovedNotice;
   [ServerMessage.Rejected]: Rejected;
+  [ServerMessage.Mailbox]: MailboxSnapshot;
+  [ServerMessage.MailSent]: MailSent;
+  [ServerMessage.Inventory]: AccountInventory;
 };
