@@ -161,9 +161,11 @@ members`, or `nobody`). Gifts may be allowed separately.
    account idempotently receives an owned solo world and membership in the
    general shared world; durable invitation records and their controls remain.
 4. **Landing page.** The signed-in account desk and identity summary are
-   implemented, including live world-membership cards. Gameplay entry from a
-   membership, inbox, avatar editor, account inventory/tech summary, and
-   settings remain.
+   implemented, including live world-membership cards. Those cards now hand a
+   short-lived Clerk session to the game without exposing it in the URL;
+   Railway verifies the identity and `enter` capability before matchmaking,
+   and the durable world UUID selects the room save. Inbox, avatar editor,
+   account inventory/tech summary, and settings remain.
 5. **Authority migration.** Account inventory + tech, then world-local
    containers/crops/homes.
 6. **Social graph.** Search, requests, DMs, presence/privacy, and wayfinding.

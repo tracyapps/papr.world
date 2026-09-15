@@ -26,6 +26,7 @@ describe('shared-mode configuration', () => {
       name: 'Fern',
       room: 'neighborhood',
       inviteCode: 'PAPR-22',
+      worldId: null,
       intent: 'create',
     });
   });
@@ -48,6 +49,7 @@ describe('shared-mode configuration', () => {
       name: 'Moss Friend',
       room: 'neighborhood',
       inviteCode: 'PAPR-22',
+      worldId: null,
       intent: 'create',
     });
   });
@@ -62,6 +64,13 @@ describe('shared-mode configuration', () => {
       .toMatchObject({ inviteCode: 'MASH-47', intent: 'join' });
     expect(() => readSharedModeConfig(at('invite=not-a-code&intent=join')))
       .toThrow(/invite code/i);
+  });
+
+  it('recognizes a durable account world without treating it as an invite code', () => {
+    const worldId = '25e7894b-3808-489c-9b80-e9ef90cb03c2';
+    expect(readSharedModeConfig(new URL(
+      `http://localhost:5173/play/?world=${worldId}`,
+    ), 'Fern')).toMatchObject({ worldId, inviteCode: null, intent: 'join' });
   });
 
   it('builds share and solo URLs without leaking internal room ids', () => {

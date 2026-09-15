@@ -47,7 +47,11 @@ if (shell) {
     message.dataset.kind = kind;
   };
 
-  const renderWorlds = (worlds: World[]) => {
+  const renderWorlds = (
+    worlds: World[],
+    account: Account,
+    getToken: () => Promise<string | null>,
+  ) => {
     if (!worldList) return;
     worldList.replaceChildren();
     for (const world of worlds) {
@@ -62,21 +66,46 @@ if (shell) {
       access.textContent = world.capabilities.length > 0
         ? `Access: ${world.capabilities.join(', ').replaceAll('_', ' ')}`
         : 'No active capabilities';
-      const next = document.createElement('span');
-      next.className = 'coming';
-      next.textContent = world.kind === 'solo'
-        ? 'Private world provisioned · game entry bridge next'
-        : 'Membership active · game authorization bridge next';
-      card.append(kind, name, access, next);
+      const enter = document.createElement('button');
+      enter.className = 'btn world-card__enter';
+      enter.type = 'button';
+      enter.textContent = world.kind === 'solo' ? 'Enter my world' : 'Enter world';
+      enter.disabled = !world.capabilities.includes('enter');
+      enter.addEventListener('click', async () => {
+        enter.disabled = true;
+        enter.textContent = 'Opening…';
+        try {
+          const token = await getToken();
+          if (!token) throw new Error('Your sign-in session could not be refreshed.');
+          sessionStorage.setItem('pp.managed-world-entry.v1', JSON.stringify({
+            accountId: account.id,
+            worldId: world.id,
+            worldName: world.name,
+            playerName: account.displayName,
+            sessionToken: token,
+            expiresAt: Date.now() + 45_000,
+          }));
+          window.location.assign(`/play/?world=${encodeURIComponent(world.id)}`);
+        } catch (error) {
+          tell(error instanceof Error ? error.message : 'That world could not be opened.', 'error');
+          enter.disabled = false;
+          enter.textContent = world.kind === 'solo' ? 'Enter my world' : 'Enter world';
+        }
+      });
+      card.append(kind, name, access, enter);
       worldList.append(card);
     }
   };
 
-  const showAccount = (account: Account, worlds: World[] = []) => {
+  const showAccount = (
+    account: Account,
+    worlds: World[] = [],
+    getToken: () => Promise<string | null>,
+  ) => {
     if (claim) claim.hidden = true;
     if (displayName) displayName.textContent = account.displayName;
     if (accountId) accountId.textContent = account.id;
-    renderWorlds(worlds);
+    renderWorlds(worlds, account, getToken);
     if (claimed) claimed.hidden = false;
     tell(`Your account is connected. ${worlds.length} world${worlds.length === 1 ? '' : 's'} available.`);
   };
@@ -104,7 +133,11 @@ if (shell) {
         if (!response.ok) throw new Error(body.error || 'The account desk could not be opened.');
 
         if (body.claimed && body.account) {
-          showAccount(body.account, body.worlds ?? []);
+          showAccount(
+            body.account,
+            body.worlds ?? [],
+            () => clerk.session?.getToken() ?? Promise.resolve(null),
+          );
         } else {
           const passport = loadDevicePassport(localStorage);
           if (claim) claim.hidden = false;
@@ -129,7 +162,11 @@ if (shell) {
                 if (!claimResponse.ok || !result.account) {
                   throw new Error(result.error || 'The passport could not be claimed.');
                 }
-                showAccount(result.account, result.worlds ?? []);
+                showAccount(
+                  result.account,
+                  result.worlds ?? [],
+                  () => clerk.session?.getToken() ?? Promise.resolve(null),
+                );
               } catch (error) {
                 tell(error instanceof Error ? error.message : 'The passport could not be claimed.', 'error');
                 claimButton.disabled = false;

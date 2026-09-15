@@ -29,6 +29,7 @@ import {
   sanitizeChat,
   sanitizeInviteCode,
   sanitizeName,
+  sanitizeWorldId,
   sanitizePlacePiece,
   sanitizeAccountCredentials,
   sanitizeClaimMail,
@@ -51,6 +52,9 @@ import {
   type SendMailIntent,
 } from '../../../shared/src/index';
 import { accounts, blocks, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { readAdminConfig, verifyClerkSessionToken } from '../admin';
+import { database } from '../runtime';
+import { authorizeManagedWorldEntry } from '../worldAuthorization';
 import {
   NodeSchema,
   PaperRoomState,
@@ -86,7 +90,7 @@ const CONSENTED_CLOSE = 4000;
 
 type PaperRoomOptions = {
   state: PaperRoomState;
-  metadata: { inviteCode: string };
+  metadata: { inviteCode?: string; worldId?: string };
 };
 
 export class PaperRoom extends Room<PaperRoomOptions> {
@@ -106,19 +110,59 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   private unsubscribeMail: (() => void) | null = null;
   private unsubscribeInventory: (() => void) | null = null;
 
-  override onCreate(options: JoinOptions): void {
-    const inviteCode = sanitizeInviteCode(options?.inviteCode);
-    if (!inviteCode || inviteCode !== options.inviteCode) throw new Error('bad-invite-code');
+  /** Authenticate before matchmaking is allowed to create or reveal a room. */
+  static override async onAuth(
+    _token: string,
+    options: JoinOptions,
+  ): Promise<string> {
+    if (!options || options.protocol !== PROTOCOL_VERSION) throw new Error('bad-protocol');
     if (options.intent !== 'create' && options.intent !== 'join') throw new Error('bad-intent');
-    this.inviteCode = inviteCode;
-    this.persistenceId = inviteCode === LEGACY_INVITE_CODE
-      ? DEFAULT_PERSISTENCE_ID
-      : `invite-${inviteCode}`;
-    // Colyseus disposes an empty room process, not its saved world. A join
-    // link may recreate that process only when durable state proves the code
-    // already existed. Otherwise guessing a code could silently mint a world.
-    if (options.intent === 'join' && !roomStore.has(this.persistenceId)) {
-      throw new Error('neighborhood-not-found');
+
+    const worldId = sanitizeWorldId(options.worldId);
+    if (worldId) {
+      if (worldId !== options.worldId) throw new Error('bad-auth');
+      const accountId = await authorizeManagedWorldEntry(
+        { database, clerk: readAdminConfig(), verifyToken: verifyClerkSessionToken },
+        worldId,
+        typeof options.sessionToken === 'string' ? options.sessionToken : '',
+      );
+      if (!accountId) throw new Error(database ? 'not-allowed' : 'bad-auth');
+      return accountId;
+    }
+
+    if (sanitizeInviteCode(options.inviteCode) !== options.inviteCode) {
+      throw new Error('bad-invite-code');
+    }
+    if (options.account !== undefined) {
+      const creds = sanitizeAccountCredentials(options.account);
+      if (!creds || !accounts.verify(creds.id, creds.secret, sanitizeName(options.name))) {
+        throw new Error('bad-auth');
+      }
+      return creds.id;
+    }
+    if (OWNER_ACCOUNT) throw new Error('guest-not-allowed');
+    return 'guest';
+  }
+
+  override onCreate(options: JoinOptions): void {
+    if (options.intent !== 'create' && options.intent !== 'join') throw new Error('bad-intent');
+    const worldId = sanitizeWorldId(options?.worldId);
+    if (worldId) {
+      if (worldId !== options.worldId) throw new Error('bad-world-id');
+      this.persistenceId = `world-${worldId}`;
+    } else {
+      const inviteCode = sanitizeInviteCode(options?.inviteCode);
+      if (!inviteCode || inviteCode !== options.inviteCode) throw new Error('bad-invite-code');
+      this.inviteCode = inviteCode;
+      this.persistenceId = inviteCode === LEGACY_INVITE_CODE
+        ? DEFAULT_PERSISTENCE_ID
+        : `invite-${inviteCode}`;
+      // Colyseus disposes an empty room process, not its saved world. A join
+      // link may recreate that process only when durable state proves the code
+      // already existed. Otherwise guessing a code could silently mint a world.
+      if (options.intent === 'join' && !roomStore.has(this.persistenceId)) {
+        throw new Error('neighborhood-not-found');
+      }
     }
     this.maxClients = LIMITS.playersPerRoom;
     this.setPatchRate(1000 / SERVER_TICK_HZ);
@@ -172,50 +216,16 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.setSimulationInterval(() => this.refillNodes(), 1000);
   }
 
-  /**
-   * Gate the join: protocol check, then passport verification.
-   *
-   * Returns the durable accountId, which Colyseus hands to onJoin as `auth`.
-   * No credentials = guest (`guest:<sessionId>` — real for the visit, not
-   * durable). Bad credentials = refused outright, NOT downgraded to guest:
-   * silently becoming a guest would let someone build a week of work onto an
-   * identity they think is durable.
-   */
-  override onAuth(client: Client, options: JoinOptions): string {
-    if (!options || options.protocol !== PROTOCOL_VERSION) {
-      throw new Error('bad-protocol');
-    }
-    if (sanitizeInviteCode(options.inviteCode) !== options.inviteCode) {
-      throw new Error('bad-invite-code');
-    }
-    if (options.intent !== 'create' && options.intent !== 'join') {
-      throw new Error('bad-intent');
-    }
-    if (options.account !== undefined) {
-      const creds = sanitizeAccountCredentials(options.account);
-      if (!creds || !accounts.verify(creds.id, creds.secret, sanitizeName(options.name))) {
-        throw new Error('bad-auth');
-      }
-      // Removal has to mean something. Checked here, before the room is
-      // touched at all, so a removed account cannot even see the state.
-      if (this.banned.has(creds.id)) throw new Error('banned');
-      return creds.id;
-    }
-
-    // Guests are refused once an owner is configured — i.e. on any real
-    // deployment. A guest's identity is `guest:<sessionId>`, which is new on
-    // every connection, so a guest cannot be meaningfully removed, banned or
-    // blocked. Allowing them would make all three of those controls a lie.
-    // Locally, with no owner set, guests stay welcome for quick dogfooding.
-    if (OWNER_ACCOUNT) throw new Error('guest-not-allowed');
-
-    return `guest:${client.sessionId}`;
-  }
-
   override onJoin(client: Client, options: JoinOptions, auth?: string): void {
+    const authenticatedAccountId = auth === 'guest'
+      ? `guest:${client.sessionId}`
+      : auth ?? `guest:${client.sessionId}`;
+    // Saved room bans are available only after onCreate hydrates the room,
+    // but onJoin still runs before state is sent to this client.
+    if (this.banned.has(authenticatedAccountId)) throw new Error('banned');
     const player = new PlayerSchema();
     player.id = client.sessionId;
-    player.accountId = auth ?? `guest:${client.sessionId}`;
+    player.accountId = authenticatedAccountId;
     player.name = sanitizeName(options.name);
     const avatar = sanitizeAvatar(options.avatar);
     player.avatar.preset = avatar.preset;

@@ -23,7 +23,12 @@ export type JoinOptions = {
   name: string;
   avatar: AvatarRef;
   /** Human-facing matchmaking key. Internal Colyseus room ids stay private. */
-  inviteCode: string;
+  /** Legacy neighborhood-code route. Omitted for account-managed worlds. */
+  inviteCode?: string;
+  /** Durable database world selected from the signed-in account desk. */
+  worldId?: string;
+  /** Short-lived Clerk session token. Never place this in a URL. */
+  sessionToken?: string;
   /**
    * Creating may mint a new neighborhood. Joining may only open a live or
    * previously persisted one. The server enforces this distinction.

@@ -17,6 +17,7 @@ export type WorldMembership = {
 };
 
 export type AccountHome = { account: DurableAccount; worlds: WorldMembership[] };
+export type WorldEntry = WorldMembership & { accountId: string };
 
 export function defaultWorldSpecifications(account: Pick<DurableAccount, 'id' | 'displayName'>) {
   return {
@@ -163,6 +164,37 @@ export class PaprDatabase {
     const account = await this.accountForClerkUser(clerkUserId);
     if (!account) return null;
     return { account, worlds: await this.worldsForAccount(account.id) };
+  }
+
+  async authorizeWorldEntry(clerkUserId: string, worldId: string): Promise<WorldEntry | null> {
+    const result = await this.pool.query<{
+      account_id: string;
+      id: string;
+      slug: string;
+      name: string;
+      kind: WorldMembership['kind'];
+      role: WorldMembership['role'];
+      capabilities: string[];
+    }>(
+      `SELECT a.id AS account_id, w.id, w.slug, w.name, w.kind, m.role, m.capabilities
+       FROM account_identities i
+       JOIN player_accounts a ON a.id = i.account_id
+       JOIN world_memberships m ON m.account_id = a.id
+       JOIN worlds w ON w.id = m.world_id
+       WHERE i.provider = 'clerk' AND i.provider_subject = $1
+         AND w.id = $2 AND 'enter' = ANY(m.capabilities)`,
+      [clerkUserId, worldId],
+    );
+    const row = result.rows[0];
+    return row ? {
+      accountId: row.account_id,
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      kind: row.kind,
+      role: row.role,
+      capabilities: [...row.capabilities],
+    } : null;
   }
 
   async claimClerkIdentity(clerkUserId: string, account: DurableAccount): Promise<void> {

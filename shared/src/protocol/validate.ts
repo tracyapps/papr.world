@@ -55,6 +55,15 @@ export function sanitizeInviteCode(raw: unknown): string | null {
   return `${compact.slice(0, 4)}-${compact.slice(4)}`;
 }
 
+/** Accept canonical UUIDs used by durable account and world records. */
+export function sanitizeWorldId(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const value = raw.trim().toLowerCase();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(value)
+    ? value
+    : null;
+}
+
 /** Trim + clamp a chat line. Returns null if there's nothing worth sending. */
 export function sanitizeChat(raw: unknown): string | null {
   const text = typeof raw === 'string' ? raw : '';

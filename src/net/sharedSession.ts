@@ -24,6 +24,7 @@ import {
   updateRemoteAvatar,
 } from './remoteAvatarVisuals';
 import { avatarRefForDesign, readSharedModeConfig } from './sharedConfig';
+import { consumeWorldEntryHandoff } from './worldEntry';
 import {
   addSharedPiece,
   initializeSharedPieceVisuals,
@@ -99,7 +100,7 @@ export function subscribeSharedSessionStatus(
 
 export async function initializeSharedSession(): Promise<void> {
   const pageUrl = new URL(window.location.href);
-  if (pageUrl.searchParams.get('shared') === '1') enabled = true;
+  if (pageUrl.searchParams.get('shared') === '1' || pageUrl.searchParams.has('world')) enabled = true;
   if (!enabled) {
     publishStatus({
       phase: 'solo', message: 'Playing in your solo world.', name: null,
@@ -122,6 +123,21 @@ export async function initializeSharedSession(): Promise<void> {
     return;
   }
   if (!config) return;
+  const managedEntry = config.worldId
+    ? consumeWorldEntryHandoff(sessionStorage, config.worldId)
+    : null;
+  if (config.worldId && !managedEntry) {
+    const ui = initializeSharedChat(() => {});
+    const message = 'This world entry pass is missing or expired. Return to My desk and open the world again.';
+    ui.setStatus('sign-in needed');
+    ui.addNotice(message);
+    publishStatus({
+      phase: 'setup-error', message, name: null, inviteCode: null, intent: null,
+    });
+    return;
+  }
+  if (managedEntry) config.name = managedEntry.playerName;
+  const destination = managedEntry?.worldName ?? `neighborhood ${config.inviteCode}`;
   playerName = config.name;
   inviteCode = config.inviteCode;
   sessionStorage.setItem('pp.shared-name.v1', config.name);
@@ -139,7 +155,7 @@ export async function initializeSharedSession(): Promise<void> {
   ui.setStatus('connecting…');
   publishStatus({
     phase: 'preparing',
-    message: 'Preparing your paper passport…',
+    message: managedEntry ? 'Checking your world access…' : 'Preparing your paper passport…',
     name: config.name,
     inviteCode: config.inviteCode,
     intent: config.intent,
@@ -154,39 +170,41 @@ export async function initializeSharedSession(): Promise<void> {
   // named the wrong component and — because the mint is what WRITES the
   // passport — also left localStorage empty for anyone told to read it.
   let account;
-  try {
-    account = await getOrCreatePassport(config.httpEndpoint, config.name);
+  if (managedEntry) {
+    ui.setSelfAccountId(managedEntry.accountId);
+  } else {
+    try {
+      account = await getOrCreatePassport(config.httpEndpoint, config.name);
 
-    // Printed once, deliberately. It is the id an owner needs for
-    // PAPR_OWNER_ACCOUNT and the id to quote in a bug report, and digging it
-    // out of localStorage by hand is a miserable first experience. The secret
-    // is never printed.
-    console.info(
-      `papr.world paper passport: ${account.id}\n`
-      + '(this is your account id — the value PAPR_OWNER_ACCOUNT wants. Never share the secret.)',
-    );
-    ui.setSelfAccountId(account.id);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    ui.setStatus('offline');
-    ui.addNotice(`${detail} Solo play is still available.`);
-    publishStatus({
-      phase: 'setup-error',
-      message: detail,
-      name: config.name,
-      inviteCode: config.inviteCode,
-      intent: config.intent,
-    });
-    console.warn('Paper passport could not be minted', error);
-    return;
+      // Printed once, deliberately. It is the id an owner needs for
+      // PAPR_OWNER_ACCOUNT and the id to quote in a bug report, and digging it
+      // out of localStorage by hand is a miserable first experience. The secret
+      // is never printed.
+      console.info(
+        `papr.world paper passport: ${account.id}\n`
+        + '(this is your account id — the value PAPR_OWNER_ACCOUNT wants. Never share the secret.)',
+      );
+      ui.setSelfAccountId(account.id);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      ui.setStatus('offline');
+      ui.addNotice(`${detail} Solo play is still available.`);
+      publishStatus({
+        phase: 'setup-error',
+        message: detail,
+        name: config.name,
+        inviteCode: config.inviteCode,
+        intent: config.intent,
+      });
+      console.warn('Paper passport could not be minted', error);
+      return;
+    }
   }
 
   try {
     publishStatus({
       phase: 'connecting',
-      message: config.intent === 'join'
-        ? `Looking for neighborhood ${config.inviteCode}…`
-        : `Opening neighborhood ${config.inviteCode}…`,
+      message: `Opening ${destination}…`,
       name: config.name,
       inviteCode: config.inviteCode,
       intent: config.intent,
@@ -197,7 +215,9 @@ export async function initializeSharedSession(): Promise<void> {
         name: config.name,
         avatar: avatarRefForDesign(getWornDesign()),
         room: config.room,
-        inviteCode: config.inviteCode,
+        inviteCode: config.inviteCode ?? undefined,
+        worldId: config.worldId ?? undefined,
+        sessionToken: managedEntry?.sessionToken,
         intent: config.intent,
         account,
       },
@@ -273,7 +293,7 @@ export async function initializeSharedSession(): Promise<void> {
           ui.addNotice('Back in the neighborhood.');
           publishStatus({
             phase: 'online',
-            message: `Online in neighborhood ${config.inviteCode}.`,
+            message: `Online in ${destination}.`,
             name: config.name,
             inviteCode: config.inviteCode,
             intent: config.intent,
@@ -307,10 +327,10 @@ export async function initializeSharedSession(): Promise<void> {
     setSharedMailClaimHandler((mailId) => liveConnection?.sendClaimMail({ mailId }));
     connected = true;
     ui.setStatus(`online as ${config.name}`, true);
-    ui.addNotice(`You are visiting neighborhood ${config.inviteCode}.`);
+    ui.addNotice(`You are visiting ${destination}.`);
     publishStatus({
       phase: 'online',
-      message: `Online in neighborhood ${config.inviteCode}.`,
+      message: `Online in ${destination}.`,
       name: config.name,
       inviteCode: config.inviteCode,
       intent: config.intent,
@@ -325,9 +345,11 @@ export async function initializeSharedSession(): Promise<void> {
     // to check their invite code when the address is usually the problem.
     const where = `at ${config.endpoint}`;
     const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
-    const message = config.intent === 'join'
-      ? `Neighborhood ${config.inviteCode} was not found ${where}.${detail}`
-      : `Neighborhood ${config.inviteCode} could not be opened ${where}.${detail}`;
+    const message = managedEntry
+      ? `${managedEntry.worldName} could not be opened ${where}.${detail}`
+      : config.intent === 'join'
+        ? `Neighborhood ${config.inviteCode} was not found ${where}.${detail}`
+        : `Neighborhood ${config.inviteCode} could not be opened ${where}.${detail}`;
     ui.addNotice(`${message} Solo play is still available.`);
     publishStatus({
       phase: 'offline', message, name: config.name,

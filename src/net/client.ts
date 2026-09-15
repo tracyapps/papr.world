@@ -125,7 +125,9 @@ export type ConnectOptions = {
   name: string;
   avatar: AvatarRef;
   room?: string;
-  inviteCode: string;
+  inviteCode?: string;
+  worldId?: string;
+  sessionToken?: string;
   intent: 'create' | 'join';
   /**
    * Paper passport from src/net/passport.ts. Omit to join as a guest —
@@ -173,9 +175,11 @@ export async function connect(
     protocol: PROTOCOL_VERSION,
     name: options.name,
     avatar: options.avatar,
-    inviteCode: options.inviteCode,
     intent: options.intent,
-    account: options.account,
+    ...(options.inviteCode ? { inviteCode: options.inviteCode } : {}),
+    ...(options.worldId ? { worldId: options.worldId } : {}),
+    ...(options.sessionToken ? { sessionToken: options.sessionToken } : {}),
+    ...(options.account ? { account: options.account } : {}),
   };
 
   const room = await enterNeighborhoodRoom(client, options.room ?? DEFAULT_ROOM, joinOptions);

@@ -30,14 +30,13 @@ import { PaperRoom } from './rooms/PaperRoom';
 import { accounts, feedbackStore, mail, moderation, OWNER_ACCOUNT } from './stores';
 import { createAdminHandlers, readAdminConfig } from './admin';
 import { createAccountIdentityHandlers } from './accountIdentity';
-import { createDatabase } from './database';
+import { database } from './runtime';
 
 const port = Number(process.env.PORT ?? 2567);
 const corsOrigin = process.env.PP_CORS_ORIGIN ?? '*';
 const feedbackWindows = new Map<string, number[]>();
 const FEEDBACK_WINDOW_MS = 10 * 60 * 1000;
 const FEEDBACK_LIMIT = 6;
-const database = createDatabase();
 if (database) await database.migrate();
 const clerkConfig = readAdminConfig();
 const admin = createAdminHandlers({
@@ -416,7 +415,7 @@ const gameServer = new Server({
   },
 });
 
-gameServer.define(DEFAULT_ROOM, PaperRoom).filterBy(['inviteCode']);
+gameServer.define(DEFAULT_ROOM, PaperRoom).filterBy(['worldId', 'inviteCode']);
 gameServer.onShutdown(async () => {
   accounts.flush();
   mail.flush();

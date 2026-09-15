@@ -3,6 +3,7 @@ import {
   LEGACY_INVITE_CODE,
   sanitizeName,
   sanitizeInviteCode,
+  sanitizeWorldId,
   type AvatarDesign,
   type AvatarRef,
 } from '../../shared/src/index';
@@ -15,7 +16,8 @@ export type SharedModeConfig = {
   httpEndpoint: string;
   name: string;
   room: string;
-  inviteCode: string;
+  inviteCode: string | null;
+  worldId: string | null;
   intent: 'create' | 'join';
 };
 
@@ -27,7 +29,8 @@ export function readSharedModeConfig(
   url: URL,
   fallbackName = 'Paper Friend',
 ): SharedModeConfig | null {
-  if (url.searchParams.get('shared') !== '1') return null;
+  const requestedWorld = url.searchParams.get('world');
+  if (url.searchParams.get('shared') !== '1' && !requestedWorld) return null;
 
   const override = url.searchParams.get('server');
   const configured = import.meta.env.VITE_SHARED_WS_ENDPOINT;
@@ -66,11 +69,13 @@ export function readSharedModeConfig(
   endpointUrl.username = '';
   endpointUrl.password = '';
 
+  const worldId = requestedWorld ? sanitizeWorldId(requestedWorld) : null;
+  if (requestedWorld && !worldId) throw new Error('That account world ID is not valid.');
   const requestedInvite = url.searchParams.get('invite');
   const inviteCode = requestedInvite
     ? sanitizeInviteCode(requestedInvite)
-    : LEGACY_INVITE_CODE;
-  if (!inviteCode) throw new Error('That neighborhood invite code is not valid.');
+    : worldId ? null : LEGACY_INVITE_CODE;
+  if (!worldId && !inviteCode) throw new Error('That neighborhood invite code is not valid.');
 
   return {
     endpoint: endpointUrl.toString().replace(/\/$/, ''),
@@ -78,7 +83,8 @@ export function readSharedModeConfig(
     name: sanitizeName(url.searchParams.get('name') || fallbackName),
     room: DEFAULT_ROOM,
     inviteCode,
-    intent: url.searchParams.get('intent') === 'join' ? 'join' : 'create',
+    worldId,
+    intent: worldId || url.searchParams.get('intent') === 'join' ? 'join' : 'create',
   };
 }
 
@@ -116,7 +122,7 @@ export function buildSoloUrl(current: URL): URL {
   const next = new URL(current.toString());
   // Keep an optional hosted endpoint so opening Friends again still knows
   // where to connect. Without `shared=1`, it cannot open a socket on its own.
-  for (const key of ['shared', 'invite', 'intent', 'name']) {
+  for (const key of ['shared', 'invite', 'intent', 'name', 'world']) {
     next.searchParams.delete(key);
   }
   return next;

@@ -109,19 +109,29 @@ export async function authenticateClerkUser(
   }
 
   try {
-    const payload = await verifyToken(token, {
-      ...(config.secretKey ? { secretKey: config.secretKey } : {}),
-      ...(config.jwtKey ? { jwtKey: config.jwtKey } : {}),
-      ...(config.authorizedParties.length > 0
-        ? { authorizedParties: config.authorizedParties }
-        : {}),
-    });
-    return payload.sub;
+    return await verifyClerkSessionToken(token, config);
   } catch {
     res.setHeader('www-authenticate', 'Bearer');
     res.status(401).json({ error: 'the Clerk session could not be verified' });
     return null;
   }
+}
+
+/** Verify a Clerk token at non-HTTP trust boundaries such as room matchmaking. */
+export async function verifyClerkSessionToken(
+  token: string,
+  config: Pick<AdminConfig, 'secretKey' | 'jwtKey' | 'authorizedParties'>,
+): Promise<string> {
+  if (!config.secretKey && !config.jwtKey) throw new Error('clerk-not-configured');
+  if (!token) throw new Error('missing-clerk-token');
+  const payload = await verifyToken(token, {
+      ...(config.secretKey ? { secretKey: config.secretKey } : {}),
+      ...(config.jwtKey ? { jwtKey: config.jwtKey } : {}),
+      ...(config.authorizedParties.length > 0
+        ? { authorizedParties: config.authorizedParties }
+        : {}),
+  });
+  return payload.sub;
 }
 
 async function authorizeAdmin(
