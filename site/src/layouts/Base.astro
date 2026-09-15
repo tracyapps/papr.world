@@ -20,9 +20,11 @@ interface Props {
   sky?: boolean;
   /** Set false to switch off the crayon marks and the paper friend. */
   delight?: boolean;
+  /** Keep private utility pages such as the control center out of search. */
+  noindex?: boolean;
 }
 
-const { title, description, sky = true, delight = true } = Astro.props;
+const { title, description, sky = true, delight = true, noindex = false } = Astro.props;
 
 const fullTitle = title === 'papr.world' ? title : `${title} · papr.world`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://papr.world');
@@ -36,6 +38,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://papr.world'
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical.href} />
 
     <meta property="og:type" content="website" />

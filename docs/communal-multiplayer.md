@@ -328,7 +328,9 @@ previous one's acceptance criteria pass.
   letters, atomic persistence, delivery on join/reconnect, and live cross-room
   delivery are built. Protocol v7 adds private revisioned Neighborhood Pouch
   snapshots plus atomic player parcel debit/claim; the solo bag is never
-  uploaded. Guestbooks, the while-you-were-away journal, shared-world pouch
+  uploaded. Protocol v8 lets empty live rooms rehydrate from a persisted save
+  when the next member follows a join link. Guestbooks, the while-you-were-away
+  journal, shared-world pouch
   earning/spending routes, and mailed harvests (needs maker id ✓) remain.
   ✅ when: an offline gift arrives on next login.
 - **G. Commons + public readiness** — portal travel between rooms, commons

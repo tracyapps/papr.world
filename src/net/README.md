@@ -49,7 +49,9 @@ to solo instead. A message's actions can send an authenticated text letter;
 the recipient's private server inbox is delivered on join/reconnect and survives
 server restart. Protocol v7 parcels may attach only balances in the separate
 server-owned Neighborhood Pouch; send and claim are atomic and exactly-once.
-Private solo inventory is never uploaded.
+Private solo inventory is never uploaded. Protocol v8 allows that same join
+link to reopen a persisted neighborhood after its live room has emptied;
+valid-looking codes without a save are still refused.
 
 ## Design rules this layer keeps
 

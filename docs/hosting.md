@@ -27,6 +27,10 @@ getting right in one pass.
 | `PAPR_OWNER_ACCOUNT` | your passport id (step 5) | Nobody can remove anyone, and guests are allowed in. |
 | `PP_REVIEWER_TOKEN` | `openssl rand -base64 32` | The feedback desk at `?review=1` returns 503. |
 | `PP_MODERATION_TOKEN` | a **different** `openssl rand -base64 32` | Safety reports are still recorded, but you cannot read them. |
+| `CLERK_SECRET_KEY` | Clerk production secret key | Admin sessions cannot be verified and invitations cannot be sent. Never expose this to Vercel or the browser. |
+| `CLERK_AUTHORIZED_PARTIES` | `https://papr.world` | Clerk tokens are not restricted to the expected browser origin. Add `http://localhost:4321` only for local testing. |
+| `PP_ADMIN_CLERK_USER_IDS` | your Clerk `user_...` id | Nobody can open the control center, even when signed in. Comma-separate backup admins. |
+| `PP_CLERK_INVITATION_REDIRECT_URL` | `https://papr.world/` | Optional; invitation acceptance returns to the site root. |
 
 `PORT` and `PP_DATA_DIR` are handled for you — Railway injects `PORT`, and the
 Dockerfile sets `PP_DATA_DIR=/data`. Do not set either by hand.
@@ -44,6 +48,8 @@ Dockerfile sets `PP_DATA_DIR=/data`. Do not set either by hand.
 | `RESEND_API_KEY` | from resend.com | The contact form accepts notes but never delivers them. |
 | `NOTE_TO` | where notes land | As above. |
 | `NOTE_FROM` | a verified sender on your domain | As above. |
+| `PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key | `/admin` shows a configuration warning instead of sign-in. This key is intentionally public. |
+| `PUBLIC_PAPR_API_URL` | `https://paprworld-production.up.railway.app` | `/admin` cannot reach its privileged Railway API. |
 
 Set the Vercel ones for **Production and Preview** both.
 
@@ -363,7 +369,7 @@ tear for exactly this reason.
 instances will corrupt saves. If you outgrow one process, that is a real
 piece of work, not a slider.
 
-**Back up before a protocol change.** `PROTOCOL_VERSION` is 7. Bumping it
+**Back up before a protocol change.** `PROTOCOL_VERSION` is 8. Bumping it
 refuses older clients on purpose — but download `/data` first if a save-shape
 change is involved.
 

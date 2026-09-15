@@ -14,7 +14,7 @@
 // they're read through small `any`-localized readers here rather than importing
 // the server's Schema classes into the client bundle.
 
-import { Client, getStateCallbacks, type Room } from '@colyseus/sdk';
+import { Client, getStateCallbacks, MatchMakeError, type Room } from '@colyseus/sdk';
 import {
   CLIENT_INTENT_HZ,
   ClientMessage,
@@ -134,6 +134,31 @@ export type ConnectOptions = {
   account?: AccountCredentials;
 };
 
+type MatchmakerClient = Pick<Client, 'join' | 'joinOrCreate'>;
+
+/**
+ * Matchmaking policy kept separate so the empty-room recovery behavior can
+ * be proven without opening a socket.
+ */
+export async function enterNeighborhoodRoom(
+  client: MatchmakerClient,
+  roomName: string,
+  options: JoinOptions,
+): Promise<Room> {
+  if (options.intent === 'create') return client.joinOrCreate(roomName, options);
+  try {
+    return await client.join(roomName, options);
+  } catch (error) {
+    // 521 is Colyseus MATCHMAKE_INVALID_CRITERIA: no live room matched this
+    // invite. Do not disguise authentication, capacity, or transport failures
+    // as an empty neighborhood.
+    if (!(error instanceof MatchMakeError) || error.code !== 521) throw error;
+    // Empty rooms disappear from matchmaking. Ask the server to reopen the
+    // process; PaperRoom permits this only when that code has a saved world.
+    return client.joinOrCreate(roomName, options);
+  }
+}
+
 /**
  * Join a neighborhood room. Resolves once the room and our session exist.
  * The renderer supplies callbacks to create/destroy its own meshes; this layer
@@ -149,12 +174,11 @@ export async function connect(
     name: options.name,
     avatar: options.avatar,
     inviteCode: options.inviteCode,
+    intent: options.intent,
     account: options.account,
   };
 
-  const room: Room = options.intent === 'join'
-    ? await client.join(options.room ?? DEFAULT_ROOM, joinOptions)
-    : await client.joinOrCreate(options.room ?? DEFAULT_ROOM, joinOptions);
+  const room = await enterNeighborhoodRoom(client, options.room ?? DEFAULT_ROOM, joinOptions);
   const buffer = new RemotePlayerBuffer();
   const selfId = room.sessionId;
   const stateCallbacks = getStateCallbacks(room);

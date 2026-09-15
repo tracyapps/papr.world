@@ -25,6 +25,11 @@ export type JoinOptions = {
   /** Human-facing matchmaking key. Internal Colyseus room ids stay private. */
   inviteCode: string;
   /**
+   * Creating may mint a new neighborhood. Joining may only open a live or
+   * previously persisted one. The server enforces this distinction.
+   */
+  intent: 'create' | 'join';
+  /**
    * Omitted = join as a guest (`guest:<sessionId>` identity, not durable).
    * Present = the server verifies and stamps the durable accountId.
    */

@@ -109,10 +109,17 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   override onCreate(options: JoinOptions): void {
     const inviteCode = sanitizeInviteCode(options?.inviteCode);
     if (!inviteCode || inviteCode !== options.inviteCode) throw new Error('bad-invite-code');
+    if (options.intent !== 'create' && options.intent !== 'join') throw new Error('bad-intent');
     this.inviteCode = inviteCode;
     this.persistenceId = inviteCode === LEGACY_INVITE_CODE
       ? DEFAULT_PERSISTENCE_ID
       : `invite-${inviteCode}`;
+    // Colyseus disposes an empty room process, not its saved world. A join
+    // link may recreate that process only when durable state proves the code
+    // already existed. Otherwise guessing a code could silently mint a world.
+    if (options.intent === 'join' && !roomStore.has(this.persistenceId)) {
+      throw new Error('neighborhood-not-found');
+    }
     this.maxClients = LIMITS.playersPerRoom;
     this.setPatchRate(1000 / SERVER_TICK_HZ);
 
@@ -180,6 +187,9 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     }
     if (sanitizeInviteCode(options.inviteCode) !== options.inviteCode) {
       throw new Error('bad-invite-code');
+    }
+    if (options.intent !== 'create' && options.intent !== 'join') {
+      throw new Error('bad-intent');
     }
     if (options.account !== undefined) {
       const creds = sanitizeAccountCredentials(options.account);

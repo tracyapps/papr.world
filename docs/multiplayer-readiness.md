@@ -16,8 +16,9 @@ features on top of a network that already exists.
 > (durable `accountId`, minted at `POST /account`, scrypt-hashed secrets),
 > JSON room persistence (pieces + nodes survive restarts), `makerId` on
 > placed pieces, per-player piece caps, and `src/net/passport.ts` on the
-> client. `PROTOCOL_VERSION` is now **7**; v7 adds private, revisioned
-> server-owned Neighborhood Pouch snapshots and atomic mail parcels.
+> client. `PROTOCOL_VERSION` is now **8**; v7 added private, revisioned
+> server-owned Neighborhood Pouch snapshots and atomic mail parcels, and v8
+> lets a join link reopen a persisted neighborhood after its live room empties.
 
 ## Can it live on any web server?
 

@@ -550,22 +550,27 @@ delivered on join/reconnect and live deliveries cross neighborhood-room
 boundaries. A two-passport browser smoke proved delivery while the recipient
 was offline and retrieval after a server restart.
 
-Protocol v7 adds the account-scoped **Neighborhood Pouch**, the authoritative
+Protocol v7 added the account-scoped **Neighborhood Pouch**, the authoritative
 transferable-inventory boundary. It is never initialized from a client-declared
 solo balance. Parcel send atomically debits that pouch and enqueues the gift;
 claiming atomically credits the recipient and records the claim exactly once.
 Resource, chip, tool, and general-item stacks share bounded validation,
 revisioned private snapshots, restart persistence, and cross-room live updates.
 The scrapbook exposes the pouch separately so the trust boundary is visible
-rather than pretending the private solo bag is synced. A two-passport restart
-smoke proved debit, delivery, claim, and the resulting 0→4 seed balance.
+rather than pretending the private solo bag is synced. New accounts start
+empty, preventing account creation from minting transferable starter goods.
+The first shared resource nodes now provide a server-validated earning route.
 
-Still owed for the full PWMS/economy bridge: server-validated ways to earn and
-spend more pouch contents through shared gathering, crafting, and building,
-plus the later garden-harvest mirror. Automatic solo import is deliberately
-forbidden; an explicit one-way import would need its own policy before it could
-exist. A physical mailbox remains a future home/decor ritual, never delivery
-plumbing.
+Protocol v8 fixes persistent-world reopening: once the last visitor leaves,
+the lightweight live room may disappear, but a join link can safely rehydrate
+its saved neighborhood. A valid-looking code with no save is still refused.
+
+Still owed for the full PWMS/economy bridge: more server-validated gathering
+and ways to spend account inventory through shared crafting and building, plus
+the later garden-harvest mirror. `accounts-worlds-and-social.md` defines a
+one-time reviewed migration for old solo saves; continuous client upload stays
+forbidden. A physical mailbox remains a future home/decor ritual, never
+delivery plumbing.
 
 ### 3.6 Giving made creations — **S**
 

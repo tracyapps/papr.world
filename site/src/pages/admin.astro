@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+
+const clerkPublishableKey = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
+const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
+  ?? 'https://paprworld-production.up.railway.app').replace(/\/$/, '');
+---
+
+<Base
+  title="Control center"
+  description="Private papr.world operations and account controls."
+  sky={false}
+  delight={false}
+  noindex
+>
+  <section
+    class="control"
+    data-admin-shell
+    data-clerk-publishable-key={clerkPublishableKey}
+    data-api-url={apiUrl}
+  >
+    <header class="control__head">
+      <div>
+        <p class="label">Private · papr.world</p>
+        <h1 class="hand control__title">Control center</h1>
+        <p class="lede">Accounts, invitations, worlds, safety, and service health will meet here.</p>
+      </div>
+      <div data-user-button></div>
+    </header>
+
+    <p class="notice" data-admin-message role="status" aria-live="polite">
+      Checking the control-center configuration…
+    </p>
+
+    <div class="signin" data-signin hidden>
+      <div data-signin-target></div>
+    </div>
+
+    <div data-admin-content hidden>
+      <div class="control__bar">
+        <div>
+          <p class="label">Live services</p>
+          <p class="soft">Read-only checks from the Railway game server.</p>
+        </div>
+        <button class="btn btn--quiet" type="button" data-refresh>Refresh</button>
+      </div>
+
+      <div class="service-grid" data-services></div>
+
+      <div class="control-grid">
+        <section class="control-card">
+          <p class="label">Closed-alpha invitations</p>
+          <h2>Invite a player</h2>
+          <p>Clerk sends a one-time invitation. New accounts remain closed to everyone else.</p>
+          <form data-invite-form>
+            <label class="control-field">
+              <span>Email address</span>
+              <input type="email" name="emailAddress" autocomplete="email" required />
+            </label>
+            <button class="btn" type="submit">Send invitation</button>
+          </form>
+          <p class="form-result" data-invite-result role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="control-card control-card--future">
+          <p class="label">Next connections</p>
+          <h2>World operations</h2>
+          <ul>
+            <li>Create permanent solo and shared worlds</li>
+            <li>Grant, suspend, boot, and block access</li>
+            <li>Inspect saves, presence, crops, and learning progress</li>
+            <li>Review feedback and safety reports in one place</li>
+          </ul>
+          <p class="soft">These controls stay disabled until durable accounts and worlds move to Postgres.</p>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/admin';
+  </script>
+</Base>
+
+<style lang="scss" is:global>
+  .control { max-width: 1120px; margin: 0 auto; padding: 130px var(--gutter) 100px; }
+  .control__head { display: flex; gap: 24px; align-items: start; justify-content: space-between; }
+  .control__title { @include hand(54px, 88px, 9vw); margin: 4px 0 18px; }
+  .notice { margin: 28px 0; padding: 14px 18px; border-left: 4px solid var(--crayon); background: var(--paper-2); }
+  .notice[data-kind="error"] { border-color: #a33; }
+  .signin { max-width: 430px; margin: 40px auto; }
+  .control__bar { display: flex; gap: 24px; align-items: center; justify-content: space-between; margin: 38px 0 18px; }
+  .control__bar p { margin: 0; }
+  .service-grid, .control-grid { display: grid; gap: 18px; }
+  .service-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .control-grid { margin-top: 28px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .control-card { @include card(var(--paper), var(--paper-2)); padding: 24px; }
+  .control-card h2 { margin: 8px 0; font-size: 24px; }
+  .control-card ul { padding-left: 1.2em; }
+  .control-card--future { opacity: .82; }
+  .control-field { display: grid; gap: 7px; margin: 20px 0 16px; font-weight: 700; }
+  .control-field input { width: 100%; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); font: inherit; }
+  .form-result { min-height: 1.6em; margin-top: 14px; color: var(--ink-soft); }
+  .soft { color: var(--ink-soft); }
+</style>

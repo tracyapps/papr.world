@@ -91,7 +91,7 @@ from day one; annotation/highlighting UI remains parked.
 - The worktree includes the owner's newly added water/rock assets and the
   accumulated water, plans, Pip, and UI changes. Preserve all of it; do not
   reset or treat untracked assets as disposable.
-- `PROTOCOL_VERSION` is 7. Bump it on any wire-shape change.
+- `PROTOCOL_VERSION` is 8. Bump it on any wire-shape change.
 - Shared mode is explicitly gated by `?shared=1`; preserve the plain-URL
   no-socket behavior. Explicit invite URLs use `invite=ABCD-23` and
   `intent=create|join`; bare `?shared=1` deliberately maps to legacy local code

@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/backend": "^3.17.2",
     "@colyseus/core": "^0.17.50",
     "@colyseus/schema": "^4.0.31",
     "@colyseus/ws-transport": "^0.17.13",

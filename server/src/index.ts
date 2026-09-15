@@ -28,12 +28,18 @@ import {
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
 import { accounts, feedbackStore, mail, moderation, OWNER_ACCOUNT } from './stores';
+import { createAdminHandlers } from './admin';
 
 const port = Number(process.env.PORT ?? 2567);
 const corsOrigin = process.env.PP_CORS_ORIGIN ?? '*';
 const feedbackWindows = new Map<string, number[]>();
 const FEEDBACK_WINDOW_MS = 10 * 60 * 1000;
 const FEEDBACK_LIMIT = 6;
+const admin = createAdminHandlers({
+  accountCount: () => accounts.size,
+  corsOrigin,
+  dataDir: process.env.PP_DATA_DIR ?? 'data',
+});
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
   // The 0.17 SDK's matchmaking request is credentialed. Browsers reject a
@@ -367,6 +373,12 @@ const gameServer = new Server({
       next();
     });
     app.get('/health', (_req: Request, res: Response) => res.type('text').send('ok'));
+    app.get('/admin/status', (req: Request, res: Response) => {
+      void admin.status(req, res);
+    });
+    app.post('/admin/invitations', (req: Request, res: Response) => {
+      void admin.invite(req, res);
+    });
     app.post('/account', (req: Request, res: Response) => {
       void handleCreateAccount(req, res);
     });

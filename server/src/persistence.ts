@@ -30,6 +30,11 @@ export class RoomStore {
     return join(this.dataDir, `room-${safe}.json`);
   }
 
+  /** Whether this neighborhood has durable state and may be reopened by a join link. */
+  has(roomId: string): boolean {
+    return existsSync(this.pathFor(roomId));
+  }
+
   /** Load a save if one exists; migrate older versions here as they appear. */
   load(roomId: string): RoomSave | null {
     const path = this.pathFor(roomId);
