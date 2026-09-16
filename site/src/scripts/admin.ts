@@ -21,11 +21,41 @@ if (shell) {
   const refreshButton = shell.querySelector<HTMLButtonElement>('[data-refresh]');
   const inviteForm = shell.querySelector<HTMLFormElement>('[data-invite-form]');
   const inviteResult = shell.querySelector<HTMLElement>('[data-invite-result]');
+  const createOpenInvite = shell.querySelector<HTMLButtonElement>('[data-create-open-invite]');
+  const openInviteResult = shell.querySelector<HTMLElement>('[data-open-invite-result]');
 
   const tell = (text: string, kind: 'info' | 'error' = 'info') => {
     if (!message) return;
     message.textContent = text;
     message.dataset.kind = kind;
+  };
+
+  const renderCopyableLink = (target: HTMLElement, url: string, noteText: string) => {
+    const note = document.createElement('span');
+    note.textContent = noteText;
+    const linkRow = document.createElement('span');
+    linkRow.className = 'invite-link';
+    const link = document.createElement('input');
+    link.type = 'text';
+    link.readOnly = true;
+    link.value = url;
+    link.setAttribute('aria-label', 'Private invitation link');
+    const copy = document.createElement('button');
+    copy.className = 'btn btn--quiet';
+    copy.type = 'button';
+    copy.textContent = 'Copy link';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        copy.textContent = 'Copied';
+      } catch {
+        link.select();
+        const copied = document.execCommand('copy');
+        copy.textContent = copied ? 'Copied' : 'Select and copy';
+      }
+    });
+    linkRow.append(link, copy);
+    target.replaceChildren(note, linkRow);
   };
 
   const renderServices = (status: AdminStatus) => {
@@ -135,35 +165,46 @@ if (shell) {
             return;
           }
 
-          const note = document.createElement('span');
-          note.textContent = 'Private invitation ready. It only works for the email you entered.';
-          const linkRow = document.createElement('span');
-          linkRow.className = 'invite-link';
-          const link = document.createElement('input');
-          link.type = 'text';
-          link.readOnly = true;
-          link.value = url;
-          link.setAttribute('aria-label', 'Private invitation link');
-          const copy = document.createElement('button');
-          copy.className = 'btn btn--quiet';
-          copy.type = 'button';
-          copy.textContent = 'Copy link';
-          copy.addEventListener('click', async () => {
-            try {
-              await navigator.clipboard.writeText(url);
-              copy.textContent = 'Copied';
-            } catch {
-              link.select();
-              const copied = document.execCommand('copy');
-              copy.textContent = copied ? 'Copied' : 'Select and copy';
-            }
-          });
-          linkRow.append(link, copy);
-          inviteResult.replaceChildren(note, linkRow);
+          renderCopyableLink(
+            inviteResult,
+            url,
+            'Private invitation ready. It only works for the email you entered.',
+          );
         } catch (error) {
           inviteResult.textContent = error instanceof Error ? error.message : 'Invitation failed.';
         } finally {
           submits.forEach((submit) => submit.removeAttribute('disabled'));
+        }
+      });
+
+      createOpenInvite?.addEventListener('click', async () => {
+        const sessionToken = await token();
+        if (!sessionToken || !openInviteResult) return;
+        createOpenInvite.disabled = true;
+        openInviteResult.textContent = 'Making a one-use link…';
+        try {
+          const response = await fetch(`${apiUrl}/admin/invite-links`, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${sessionToken}` },
+          });
+          const body = await response.json() as {
+            error?: string;
+            inviteLink?: { url?: string; expiresAt?: string; uses?: number };
+          };
+          if (!response.ok || !body.inviteLink?.url) {
+            throw new Error(body.error || 'The blank invitation link could not be created.');
+          }
+          renderCopyableLink(
+            openInviteResult,
+            body.inviteLink.url,
+            'One-use link ready. It expires in 30 days; your friend supplies the email.',
+          );
+        } catch (error) {
+          openInviteResult.textContent = error instanceof Error
+            ? error.message
+            : 'The blank invitation link could not be created.';
+        } finally {
+          createOpenInvite.disabled = false;
         }
       });
     } catch (error) {

@@ -1,4 +1,5 @@
 import type { IncomingMessage } from 'node:http';
+import { createHash, randomBytes } from 'node:crypto';
 import { createClerkClient, verifyToken } from '@clerk/backend';
 import type { Request, Response } from 'express';
 
@@ -15,6 +16,16 @@ type AdminStatusInput = {
   corsOrigin: string;
   dataDir: string;
   databaseConfigured?: boolean;
+  inviteLinks?: {
+    createSignupInviteLink: (tokenHash: string, createdBy: string, expiresAt: Date) => Promise<void>;
+    reserveSignupInviteLink: (tokenHash: string, emailAddress: string) => Promise<boolean>;
+    completeSignupInviteLink: (
+      tokenHash: string,
+      emailAddress: string,
+      clerkInvitationId: string,
+    ) => Promise<void>;
+    releaseSignupInviteLink: (tokenHash: string, emailAddress: string) => Promise<void>;
+  };
 };
 
 function csv(value: string | undefined): string[] {
@@ -53,6 +64,18 @@ export function normalizeInvitationInput(input: unknown): {
   const delivery = value.delivery === undefined ? 'email' : value.delivery;
   if (delivery !== 'email' && delivery !== 'link') return null;
   return { emailAddress, delivery };
+}
+
+export function validInviteToken(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{32}$/.test(value);
+}
+
+export function hashInviteToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+export function createInviteToken(): string {
+  return randomBytes(24).toString('base64url');
 }
 
 export function buildAdminStatus(config: AdminConfig, input: AdminStatusInput) {
@@ -221,6 +244,100 @@ export function createAdminHandlers(input: AdminStatusInput, config = readAdminC
             : 'Clerk could not create that invitation; it may already exist',
         });
       }
+    },
+
+    async createInviteLink(req: Request, res: Response): Promise<void> {
+      const adminUserId = await authorizeAdmin(req, res, config);
+      if (!adminUserId) return;
+      if (!clerk || !input.inviteLinks) {
+        res.status(503).json({ error: 'durable signup links are not configured' });
+        return;
+      }
+
+      try {
+        const token = createInviteToken();
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        await input.inviteLinks.createSignupInviteLink(
+          hashInviteToken(token),
+          adminUserId,
+          expiresAt,
+        );
+        const siteOrigin = new URL(config.invitationRedirectUrl).origin;
+        res.setHeader('cache-control', 'private, no-store');
+        res.status(201).json({
+          inviteLink: {
+            url: `${siteOrigin}/invite/?token=${encodeURIComponent(token)}`,
+            expiresAt: expiresAt.toISOString(),
+            uses: 1,
+          },
+        });
+      } catch (error) {
+        console.error('[admin] signup link creation failed:', error instanceof Error ? error.name : 'unknown error');
+        res.status(502).json({ error: 'the private signup link could not be created' });
+      }
+    },
+
+    async redeemInviteLink(req: Request, res: Response): Promise<void> {
+      if (!clerk || !input.inviteLinks) {
+        res.status(503).json({ error: 'private signup links are not configured' });
+        return;
+      }
+
+      let token: unknown;
+      let emailAddress: unknown;
+      try {
+        ({ token, emailAddress } = JSON.parse(await readBody(req)) as {
+          token?: unknown;
+          emailAddress?: unknown;
+        });
+      } catch {
+        res.status(400).json({ error: 'invalid request' });
+        return;
+      }
+      const email = typeof emailAddress === 'string' ? emailAddress.trim().toLowerCase() : emailAddress;
+      if (!validInviteToken(token) || !validInviteEmail(email)) {
+        res.status(400).json({ error: 'enter a valid email address and invitation link' });
+        return;
+      }
+
+      const tokenHash = hashInviteToken(token);
+      try {
+        if (!await input.inviteLinks.reserveSignupInviteLink(tokenHash, email)) {
+          res.status(410).json({ error: 'this invitation link has expired or has already been used' });
+          return;
+        }
+      } catch (error) {
+        console.error('[invite] signup link reservation failed:', error instanceof Error ? error.name : 'unknown error');
+        res.status(502).json({ error: 'the invitation service could not be reached' });
+        return;
+      }
+
+      let invitation;
+      try {
+        invitation = await clerk.invitations.createInvitation({
+          emailAddress: email,
+          redirectUrl: config.invitationRedirectUrl,
+          expiresInDays: 30,
+          notify: true,
+        });
+      } catch (error) {
+        await input.inviteLinks.releaseSignupInviteLink(tokenHash, email).catch(() => undefined);
+        console.error('[invite] Clerk invitation failed:', error instanceof Error ? error.name : 'unknown error');
+        res.status(502).json({ error: 'Clerk could not create that invitation; the address may already be invited' });
+        return;
+      }
+
+      try {
+        await input.inviteLinks.completeSignupInviteLink(tokenHash, email, invitation.id);
+      } catch (error) {
+        // The link remains reserved, and Clerk also emails a recovery copy.
+        console.error('[invite] signup link completion recording failed:', error instanceof Error ? error.name : 'unknown error');
+      }
+      res.setHeader('cache-control', 'private, no-store');
+      res.status(201).json({
+        invitation: { url: invitation.url ?? null },
+        fallback: invitation.url ? null : 'email',
+      });
     },
   };
 }

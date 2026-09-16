@@ -74,6 +74,11 @@ signed-in player's requested world before Vercel issues the existing alpha-door
 cookie. No Clerk secret is copied to Vercel, and no additional variable is
 required for account-based entry.
 
+The same Railway/Postgres connection stores one-use signup-link hashes created
+in the control center. No additional environment variable is needed. The raw
+token appears only in the link sent to the friend, expires after 30 days, and is
+spent when Railway creates that friend's restricted Clerk invitation.
+
 ---
 
 ## Do this in order

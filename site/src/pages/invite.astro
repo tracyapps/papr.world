@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+
+const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
+  ?? 'https://paprworld-production.up.railway.app').replace(/\/$/, '');
+---
+
+<Base
+  title="Your invitation"
+  description="Accept a private invitation to papr.world."
+  sky={false}
+  noindex
+>
+  <section class="invitation" data-signup-invite data-api-url={apiUrl}>
+    <div class="paper-card">
+      <p class="label">A folded note for you</p>
+      <h1 class="hand">You’re invited.</h1>
+      <p>
+        Enter the email you want to use for papr.world. This one-use invitation
+        will open account setup, your private solo world, and the Shared World.
+      </p>
+
+      <form data-signup-invite-form>
+        <label>
+          <span>Email address</span>
+          <input type="email" name="emailAddress" autocomplete="email" required />
+        </label>
+        <label>
+          <span>Confirm email address</span>
+          <input type="email" name="confirmEmailAddress" autocomplete="email" required />
+        </label>
+        <button class="btn" type="submit">Continue to sign up</button>
+      </form>
+      <p class="result" data-signup-invite-result role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/signupInvite';
+  </script>
+</Base>
+
+<style lang="scss">
+  .invitation { max-width: 680px; margin: 0 auto; padding: 145px var(--gutter) 120px; }
+  .paper-card { @include card(var(--paper), var(--paper-2)); padding: clamp(26px, 5vw, 48px); }
+  h1 { @include hand(48px, 72px, 10vw); margin: 8px 0 20px; }
+  form { display: grid; gap: 16px; margin-top: 28px; }
+  label { display: grid; gap: 8px; font-weight: 700; }
+  input { width: 100%; padding: 13px 14px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); font: inherit; }
+  .btn { justify-self: start; }
+  .result { min-height: 1.6em; margin-top: 16px; color: var(--ink-soft); }
+  .result[data-kind="error"] { color: #8b2929; }
+</style>

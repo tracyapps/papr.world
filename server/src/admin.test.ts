@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildAdminStatus,
+  createInviteToken,
+  hashInviteToken,
   normalizeInvitationInput,
   readAdminConfig,
   validInviteEmail,
+  validInviteToken,
 } from './admin';
 
 describe('control-center configuration', () => {
@@ -34,6 +37,18 @@ it('normalizes email and copyable-link invitation deliveries', () => {
     .toEqual({ emailAddress: 'friend@example.com', delivery: 'email' });
   expect(normalizeInvitationInput({ emailAddress: 'friend@example.com', delivery: 'sms' }))
     .toBeNull();
+});
+
+it('accepts only full opaque friend-link tokens and hashes them deterministically', () => {
+  const token = '1234567890abcdef_ABCDEFGH-ijklmn';
+  expect(token).toHaveLength(32);
+  expect(validInviteToken(token)).toBe(true);
+  expect(validInviteToken(`${token}x`)).toBe(false);
+  expect(validInviteToken('not-a-token')).toBe(false);
+  expect(hashInviteToken(token)).toMatch(/^[a-f0-9]{64}$/);
+  expect(hashInviteToken(token)).toBe(hashInviteToken(token));
+  expect(hashInviteToken(token)).not.toContain(token);
+  expect(validInviteToken(createInviteToken())).toBe(true);
 });
 
 it('describes configuration without returning credentials', () => {

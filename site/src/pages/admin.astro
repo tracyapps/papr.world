@@ -64,6 +64,12 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
             </div>
           </form>
           <p class="form-result" data-invite-result role="status" aria-live="polite"></p>
+          <div class="open-invite">
+            <p class="label">Don’t know their email?</p>
+            <p class="soft">Make a one-use link. Your friend enters their own email when they open it.</p>
+            <button class="btn btn--quiet" type="button" data-create-open-invite>Create blank invite link</button>
+            <p class="form-result" data-open-invite-result role="status" aria-live="polite"></p>
+          </div>
         </section>
 
         <section class="control-card control-card--future">
@@ -107,6 +113,8 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
   .invite-actions { display: flex; flex-wrap: wrap; gap: 10px; }
   .invite-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 10px; }
   .invite-link input { min-width: 0; padding: 9px 10px; border: 1px solid var(--edge); border-radius: 6px; background: var(--paper); font: 12px/1.35 $font-mono; }
+  .open-invite { margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--edge); }
+  .open-invite p { margin: 6px 0 10px; }
   .form-result { min-height: 1.6em; margin-top: 14px; color: var(--ink-soft); }
   .soft { color: var(--ink-soft); }
 </style>

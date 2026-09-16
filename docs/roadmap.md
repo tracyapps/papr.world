@@ -838,8 +838,9 @@ and mail is an **inbox, not an address**.
 **Finish the account-authority migration.** Clerk signup, hand invitations,
 account claims, permanent solo/Shared World membership, the account desk, and
 authenticated world doors are now built. An administrator can email an invite
-or copy its email-bound private link, and a first-time player is provisioned at
-their desk without needing a legacy neighborhood code.
+or make a one-use link without knowing the friend's email; the friend supplies
+it before Clerk signup. A first-time player is then provisioned at their desk
+without needing a legacy neighborhood code.
 
 Next, make the explicit one-time migration preview for local scrapbook
 inventory and learned techniques, then move those accepted balances into the

@@ -87,10 +87,11 @@ is removed.
 
 During the hand-invited alpha, every accepted signup receives exactly two
 default memberships: an owned private solo world and member access to the first
-general **Shared World**. The control center can ask Clerk to email the signup
-invitation or create the same private invitation as a copyable link for text or
-another message. Both deliveries remain bound to the invited email address;
-there is no reusable bearer link that bypasses the closed-alpha allowlist.
+general **Shared World**. The control center can ask Clerk to email an invitation,
+copy an invitation already bound to a known email, or create a one-use papr.world
+link without knowing the address. In that last flow the recipient supplies and
+confirms their email; Railway atomically spends the 30-day link and creates the
+restricted Clerk invitation for that address. Only a SHA-256 token hash is stored.
 
 ## Landing page
 
@@ -166,10 +167,11 @@ members`, or `nobody`). Gifts may be allowed separately.
    signup/world invitations, and admin invitation screen. The foundational
    profile, world, and membership tables are implemented. Every claimed
    account idempotently receives an owned solo world and membership in the
-   general shared world. The control center now sends email invitations or
-   creates an email-bound copyable link, and a brand-new invitee is provisioned
-   from the account desk without first visiting a legacy neighborhood. Durable
-   game-owned world invitation records and broader access controls remain.
+   general shared world. The control center now sends email invitations, copies
+   email-bound Clerk links, or creates one-use links where the friend supplies
+   their own email. A brand-new invitee is provisioned from the account desk
+   without first visiting a legacy neighborhood. Broader world access controls
+   remain.
 4. **Landing page.** The signed-in account desk and identity summary are
    implemented, including live world-membership cards. Those cards now hand a
    short-lived Clerk session to the game without exposing it in the URL;

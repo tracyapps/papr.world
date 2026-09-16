@@ -90,6 +90,15 @@ const SCHEMA = [
     updated_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (world_id, account_id)
   )`,
+  `CREATE TABLE IF NOT EXISTS signup_invite_links (
+    token_hash text PRIMARY KEY,
+    created_by text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    expires_at timestamptz NOT NULL,
+    claimed_at timestamptz,
+    claimed_email text,
+    clerk_invitation_id text
+  )`,
   `INSERT INTO worlds (slug, name, kind)
     VALUES ('shared', 'Shared world', 'shared')
     ON CONFLICT (lower(slug)) DO NOTHING`,
@@ -195,6 +204,52 @@ export class PaprDatabase {
       role: row.role,
       capabilities: [...row.capabilities],
     } : null;
+  }
+
+  async createSignupInviteLink(
+    tokenHash: string,
+    createdBy: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO signup_invite_links (token_hash, created_by, expires_at)
+       VALUES ($1, $2, $3)`,
+      [tokenHash, createdBy, expiresAt],
+    );
+  }
+
+  async reserveSignupInviteLink(tokenHash: string, emailAddress: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `UPDATE signup_invite_links
+       SET claimed_at = now(), claimed_email = $2
+       WHERE token_hash = $1 AND claimed_at IS NULL AND expires_at > now()
+       RETURNING token_hash`,
+      [tokenHash, emailAddress],
+    );
+    return result.rowCount === 1;
+  }
+
+  async completeSignupInviteLink(
+    tokenHash: string,
+    emailAddress: string,
+    clerkInvitationId: string,
+  ): Promise<void> {
+    const result = await this.pool.query(
+      `UPDATE signup_invite_links
+       SET clerk_invitation_id = $3
+       WHERE token_hash = $1 AND claimed_email = $2 AND clerk_invitation_id IS NULL`,
+      [tokenHash, emailAddress, clerkInvitationId],
+    );
+    if (result.rowCount !== 1) throw new Error('invite-link-completion-conflict');
+  }
+
+  async releaseSignupInviteLink(tokenHash: string, emailAddress: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE signup_invite_links
+       SET claimed_at = NULL, claimed_email = NULL
+       WHERE token_hash = $1 AND claimed_email = $2 AND clerk_invitation_id IS NULL`,
+      [tokenHash, emailAddress],
+    );
   }
 
   async claimClerkIdentity(clerkUserId: string, account: DurableAccount): Promise<void> {

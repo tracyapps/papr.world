@@ -44,6 +44,7 @@ const admin = createAdminHandlers({
   corsOrigin,
   dataDir: process.env.PP_DATA_DIR ?? 'data',
   databaseConfigured: Boolean(database),
+  inviteLinks: database ?? undefined,
 }, clerkConfig);
 const accountIdentity = createAccountIdentityHandlers({ accounts, database, mail, clerk: clerkConfig });
 
@@ -384,6 +385,12 @@ const gameServer = new Server({
     });
     app.post('/admin/invitations', (req: Request, res: Response) => {
       void admin.invite(req, res);
+    });
+    app.post('/admin/invite-links', (req: Request, res: Response) => {
+      void admin.createInviteLink(req, res);
+    });
+    app.post('/signup-invitations/redeem', (req: Request, res: Response) => {
+      void admin.redeemInviteLink(req, res);
     });
     app.post('/account', (req: Request, res: Response) => {
       void handleCreateAccount(req, res);
