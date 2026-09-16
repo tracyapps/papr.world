@@ -7,8 +7,6 @@
  */
 import { gateIsOpen, mintPass, passCookie } from '../lib/gate';
 
-export const config = { runtime: 'edge' };
-
 type AccountHome = {
   claimed?: boolean;
   worlds?: Array<{ id?: unknown; capabilities?: unknown }>;
@@ -55,13 +53,19 @@ export async function handleAccountEntry(
   try {
     response = await fetcher(`${apiUrl}/account/me`, {
       headers: { authorization },
-      redirect: 'error',
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      '[account-entry] Railway lookup failed:',
+      error instanceof Error ? error.name : 'unknown error',
+    );
     return json(502, { error: 'account access could not be checked' });
   }
   if (response.status === 401) return json(401, { error: 'your sign-in session expired' });
-  if (!response.ok) return json(502, { error: 'account access could not be checked' });
+  if (!response.ok) {
+    console.error('[account-entry] Railway lookup returned:', response.status);
+    return json(502, { error: 'account access could not be checked' });
+  }
 
   let home: AccountHome;
   try {
@@ -83,6 +87,12 @@ export async function handleAccountEntry(
   return json(200, { ok: true }, passCookie(pass));
 }
 
-export default async function handler(request: Request): Promise<Response> {
-  return handleAccountEntry(request, process.env as Record<string, string | undefined>);
-}
+/**
+ * Use Vercel's default Node.js runtime for this one outbound service call.
+ * The alpha-door functions that do no I/O remain at the edge.
+ */
+export default {
+  fetch(request: Request): Promise<Response> {
+    return handleAccountEntry(request, process.env as Record<string, string | undefined>);
+  },
+};

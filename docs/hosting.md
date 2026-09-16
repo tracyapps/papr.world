@@ -4,7 +4,7 @@ Two halves, two hosts, and they only meet over `https://` and `wss://`.
 
 | | Where | What it is |
 | --- | --- | --- |
-| **Site + game** | Vercel — `papr.world` | Static. The marketing site, `/play`, `/reference`, and two edge functions (the alpha door and the contact form). |
+| **Site + game** | Vercel — `papr.world` | Static marketing/game files, edge functions for the code door and contact form, and a small Node function that verifies account-world entry with Railway. |
 | **Neighborhood server** | Railway — `paprworld-production.up.railway.app` | A long-lived Node process holding WebSocket connections and the authoritative world. |
 
 The server **cannot** be a Vercel function. It holds open sockets and owns
@@ -72,7 +72,8 @@ development Clerk token with the production Railway secret.
 `PUBLIC_PAPR_API_URL` also lets `/api/account-entry` ask Railway to verify a
 signed-in player's requested world before Vercel issues the existing alpha-door
 cookie. No Clerk secret is copied to Vercel, and no additional variable is
-required for account-based entry.
+required for account-based entry. That outbound proxy uses Vercel's Node runtime;
+the otherwise self-contained alpha-door and contact functions remain at the edge.
 
 The same Railway/Postgres connection stores one-use signup-link hashes created
 in the control center. No additional environment variable is needed. The raw

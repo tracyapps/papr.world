@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { readPass } from '../lib/gate';
-import { handleAccountEntry } from './account-entry';
+import accountEntryFunction, { handleAccountEntry } from './account-entry';
 
 const worldId = '25e7894b-3808-489c-9b80-e9ef90cb03c2';
 const token = 'a-clerk-session-token-long-enough';
@@ -41,7 +41,6 @@ describe('account entry through the alpha door', () => {
     expect(await response.json()).toEqual({ ok: true });
     expect(fetcher).toHaveBeenCalledWith('https://rooms.test/account/me', {
       headers: { authorization: `Bearer ${token}` },
-      redirect: 'error',
     });
     const cookie = response.headers.get('set-cookie') ?? '';
     expect(cookie).toContain('HttpOnly');
@@ -74,5 +73,9 @@ describe('account entry through the alpha door', () => {
     );
     expect(response.status).toBe(200);
     expect(response.headers.has('set-cookie')).toBe(false);
+  });
+
+  it('uses Vercel\'s Node Web Handler shape for reliable Railway I/O', () => {
+    expect(accountEntryFunction).toEqual({ fetch: expect.any(Function) });
   });
 });

@@ -108,7 +108,7 @@ if (shell) {
         try {
           const token = await getToken();
           if (!token) throw new Error('Your sign-in session could not be refreshed.');
-          const entryResponse = await fetch('/api/account-entry', {
+          const entryResponse = await fetch('/api/account-entry/', {
             method: 'POST',
             headers: {
               authorization: `Bearer ${token}`,
