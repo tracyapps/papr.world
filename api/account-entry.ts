@@ -91,8 +91,45 @@ export async function handleAccountEntry(
  * Use Vercel's default Node.js runtime for this one outbound service call.
  * The alpha-door functions that do no I/O remain at the edge.
  */
-export default {
-  fetch(request: Request): Promise<Response> {
-    return handleAccountEntry(request, process.env as Record<string, string | undefined>);
-  },
+type NodeRequest = {
+  method?: string;
+  url?: string;
+  headers: Record<string, string | string[] | undefined>;
+  body?: unknown;
 };
+
+type NodeResponse = {
+  statusCode: number;
+  setHeader: (name: string, value: string) => void;
+  end: (body?: Uint8Array | string) => void;
+};
+
+export async function handleNodeAccountEntry(
+  request: NodeRequest,
+  response: NodeResponse,
+  env: Record<string, string | undefined> = process.env as Record<string, string | undefined>,
+  fetcher: typeof fetch = fetch,
+): Promise<void> {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(request.headers)) {
+    if (typeof value === 'string') headers.set(name, value);
+    else if (Array.isArray(value)) headers.set(name, value.join(', '));
+  }
+  const host = typeof request.headers.host === 'string' ? request.headers.host : 'papr.world';
+  const method = request.method ?? 'GET';
+  const body = method === 'GET' || method === 'HEAD'
+    ? undefined
+    : typeof request.body === 'string'
+      ? request.body
+      : JSON.stringify(request.body ?? {});
+  const webRequest = new Request(
+    new URL(request.url ?? '/api/account-entry/', `https://${host}`),
+    { method, headers, body },
+  );
+  const result = await handleAccountEntry(webRequest, env, fetcher);
+  response.statusCode = result.status;
+  result.headers.forEach((value, name) => response.setHeader(name, value));
+  response.end(new Uint8Array(await result.arrayBuffer()));
+}
+
+export default handleNodeAccountEntry;

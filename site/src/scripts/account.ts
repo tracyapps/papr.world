@@ -116,7 +116,12 @@ if (shell) {
             },
             body: JSON.stringify({ worldId: world.id }),
           });
-          const entryResult = await entryResponse.json() as { ok?: boolean; error?: string };
+          let entryResult: { ok?: boolean; error?: string };
+          try {
+            entryResult = await entryResponse.json() as { ok?: boolean; error?: string };
+          } catch {
+            throw new Error('The world door service failed before it could answer. Please try again shortly.');
+          }
           if (!entryResponse.ok || !entryResult.ok) {
             throw new Error(entryResult.error || 'That world could not be opened.');
           }

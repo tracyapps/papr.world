@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { readPass } from '../lib/gate';
-import accountEntryFunction, { handleAccountEntry } from './account-entry';
+import accountEntryFunction, {
+  handleAccountEntry,
+  handleNodeAccountEntry,
+} from './account-entry';
 
 const worldId = '25e7894b-3808-489c-9b80-e9ef90cb03c2';
 const token = 'a-clerk-session-token-long-enough';
@@ -75,7 +78,29 @@ describe('account entry through the alpha door', () => {
     expect(response.headers.has('set-cookie')).toBe(false);
   });
 
-  it('uses Vercel\'s Node Web Handler shape for reliable Railway I/O', () => {
-    expect(accountEntryFunction).toEqual({ fetch: expect.any(Function) });
+  it('uses Vercel\'s callable Node handler and adapts its parsed JSON body', async () => {
+    expect(accountEntryFunction).toBe(handleNodeAccountEntry);
+    const headers = new Map<string, string>();
+    let responseBody = '';
+    const response = {
+      statusCode: 0,
+      setHeader: (name: string, value: string) => headers.set(name, value),
+      end: (body?: Uint8Array | string) => {
+        responseBody = typeof body === 'string' ? body : new TextDecoder().decode(body);
+      },
+    };
+    await handleNodeAccountEntry({
+      method: 'POST',
+      url: '/api/account-entry/',
+      headers: { host: 'papr.world', authorization: `Bearer ${token}` },
+      body: { worldId },
+    }, response, env, backend({
+      claimed: true,
+      worlds: [{ id: worldId, capabilities: ['enter'] }],
+    }));
+
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(responseBody)).toEqual({ ok: true });
+    expect(headers.get('set-cookie')).toContain('HttpOnly');
   });
 });
