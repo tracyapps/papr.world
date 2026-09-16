@@ -776,6 +776,11 @@ world work.
   and display only — never capacity (decision 2026-08-15, §2.3).
 - `multiplayer-readiness.md` — the wiring checklist for the first two-player
   slice; still accurate, item 4 (persistence) now done.
+- `accounts-worlds-and-social.md` — the account/world boundary and delivery
+  order. **Auth, claims, durable memberships, the account desk, hand-invites,
+  and authenticated world entry shipped 2026-09-15.** Before continuing the
+  authority migration, add one always-reachable in-game **Return to desk**
+  action that leaves the current room and returns to `/account`.
 
 The cross-dependency to keep in mind: avatar Phase D (designs over the
 wire) needs multiplayer Phase B (wire the slice) first; everything else in
@@ -842,12 +847,14 @@ or make a one-use link without knowing the friend's email; the friend supplies
 it before Clerk signup. A first-time player is then provisioned at their desk
 without needing a legacy neighborhood code.
 
-Next, make the explicit one-time migration preview for local scrapbook
-inventory and learned techniques, then move those accepted balances into the
-account-owned ledger. Keep houses, placed storage, crops, and terrain in their
-world. This is the remaining trust boundary to settle before a wider invited
-playtest; once it is firm, world-local containers, crops, and home plots can
-build on it without inventing a second source of truth.
+First, close the small navigation loop with an always-reachable in-game
+**Return to desk** action. Then make the explicit one-time migration preview
+for local scrapbook inventory and learned techniques, and move those accepted
+balances into the account-owned ledger. Keep houses, placed storage, crops,
+and terrain in their world. This is the remaining trust boundary to settle
+before a wider invited playtest; once it is firm, world-local containers,
+crops, and home plots can build on it without inventing a second source of
+truth.
 
 Phase 1 is complete as infrastructure. Future furniture, decoration, clothing,
 building, and structure plans are content within their respective creation

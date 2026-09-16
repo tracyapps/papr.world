@@ -177,8 +177,11 @@ members`, or `nobody`). Gifts may be allowed separately.
    short-lived Clerk session to the game without exposing it in the URL;
    Railway verifies the identity and `enter` capability before matchmaking,
    Vercel grants the existing signed alpha-door pass to that verified member,
-   and the durable world UUID selects the room save. Inbox, avatar editor,
-   account inventory/tech summary, and settings remain.
+   and the durable world UUID selects the room save. Add an always-reachable
+   **Return to desk** action inside the game before broadening the alpha; it
+   should leave the room cleanly and navigate to `/account`, without implying
+   that the player is still present in-world. Inbox, avatar editor, account
+   inventory/tech summary, and settings remain.
 5. **Authority migration.** Account inventory + tech, then world-local
    containers/crops/homes.
 6. **Social graph.** Search, requests, DMs, presence/privacy, and wayfinding.

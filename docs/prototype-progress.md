@@ -1,5 +1,44 @@
 # Prototype Progress
 
+## Accounts, the Desk, and Durable World Entry (2026-09-16)
+
+The invited alpha now begins with a real account rather than a neighborhood
+code standing in for identity. Clerk owns sign-in, Railway verifies identity
+and authorization, Neon stores durable account/world relationships, and the
+game continues to use Colyseus for live rooms. The game's own `account_id`
+remains canonical so an existing paper passport can be claimed without losing
+mail, inventory, blocks, or maker credit.
+
+The first account desk is live with identity and world-membership cards. A new
+alpha account is provisioned with an owned Solo World plus access to the shared
+public world. The control center can email or copy an email-bound invitation,
+or mint a one-use papr.world link so a friend can supply their own email before
+Clerk signup. Membership survives the invitation; the link is not the world.
+
+Desk entry now crosses all three trust boundaries deliberately: the browser
+hands Vercel a short-lived Clerk token, Railway verifies the token and the
+requested world's `enter` capability, and Vercel mints the existing alpha-door
+cookie before the durable world UUID reaches matchmaking. The production-only
+failures found during deployment were fixed by using Vercel's callable Node
+handler, handling non-JSON server errors at the desk, and keeping emitted Node
+ESM imports resolvable with an explicit `.js` extension.
+
+### Verified
+
+- Production sign-in, account provisioning, Solo/Shared World cards, and both
+  world-entry buttons were exercised after deployment.
+- The root suite passes 565 tests across 58 files; `npm run edge:check` and
+  `npm run build:web` pass.
+- A separately emitted deployment artifact imports `api/account-entry.js` and
+  resolves `lib/gate.js` successfully.
+
+### Next closure
+
+Add one always-reachable **Return to desk** action inside the game. It should
+leave the active room cleanly, clear in-world presence, and navigate to
+`/account`. After that, resume the explicit one-time scrapbook/tech migration;
+placed storage, crops, houses, and terrain remain world-local.
+
 ## The Professor Gets a Body — and Blinks (2026-08-08)
 
 The owner uploaded `the-prof.svg` (now kept for reference at
