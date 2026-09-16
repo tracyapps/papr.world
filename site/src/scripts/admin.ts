@@ -96,31 +96,75 @@ if (shell) {
 
       refreshButton?.addEventListener('click', () => void refresh());
       inviteForm?.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const sessionToken = await token();
-      if (!sessionToken || !inviteResult) return;
-      const submit = inviteForm.querySelector<HTMLButtonElement>('button[type="submit"]');
-      const form = new FormData(inviteForm);
-      submit?.setAttribute('disabled', '');
-      inviteResult.textContent = 'Sending…';
-      try {
-        const response = await fetch(`${apiUrl}/admin/invitations`, {
-          method: 'POST',
-          headers: {
-            authorization: `Bearer ${sessionToken}`,
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({ emailAddress: form.get('emailAddress') }),
-        });
-        const body = await response.json() as { error?: string };
-        if (!response.ok) throw new Error(body.error || 'Invitation failed.');
-        inviteResult.textContent = 'Invitation sent.';
-        inviteForm.reset();
-      } catch (error) {
-        inviteResult.textContent = error instanceof Error ? error.message : 'Invitation failed.';
-      } finally {
-        submit?.removeAttribute('disabled');
-      }
+        event.preventDefault();
+        const sessionToken = await token();
+        if (!sessionToken || !inviteResult) return;
+        const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null;
+        const delivery = submitter?.value === 'link' ? 'link' : 'email';
+        const submits = inviteForm.querySelectorAll<HTMLButtonElement>('button[type="submit"]');
+        const form = new FormData(inviteForm);
+        submits.forEach((submit) => submit.setAttribute('disabled', ''));
+        inviteResult.textContent = delivery === 'link' ? 'Making a private link…' : 'Sending…';
+        try {
+          const response = await fetch(`${apiUrl}/admin/invitations`, {
+            method: 'POST',
+            headers: {
+              authorization: `Bearer ${sessionToken}`,
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              emailAddress: form.get('emailAddress'),
+              delivery,
+            }),
+          });
+          const body = await response.json() as {
+            error?: string;
+            invitation?: { url?: string | null };
+          };
+          if (!response.ok) throw new Error(body.error || 'Invitation failed.');
+
+          inviteForm.reset();
+          if (delivery === 'email') {
+            inviteResult.textContent = 'Invitation sent. Their desk will set up a solo world and Shared World access after sign-in.';
+            return;
+          }
+
+          const url = body.invitation?.url;
+          if (!url) {
+            inviteResult.textContent = 'Invitation created, but Clerk did not return a copyable URL. Open Clerk to retrieve this invitation.';
+            return;
+          }
+
+          const note = document.createElement('span');
+          note.textContent = 'Private invitation ready. It only works for the email you entered.';
+          const linkRow = document.createElement('span');
+          linkRow.className = 'invite-link';
+          const link = document.createElement('input');
+          link.type = 'text';
+          link.readOnly = true;
+          link.value = url;
+          link.setAttribute('aria-label', 'Private invitation link');
+          const copy = document.createElement('button');
+          copy.className = 'btn btn--quiet';
+          copy.type = 'button';
+          copy.textContent = 'Copy link';
+          copy.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(url);
+              copy.textContent = 'Copied';
+            } catch {
+              link.select();
+              const copied = document.execCommand('copy');
+              copy.textContent = copied ? 'Copied' : 'Select and copy';
+            }
+          });
+          linkRow.append(link, copy);
+          inviteResult.replaceChildren(note, linkRow);
+        } catch (error) {
+          inviteResult.textContent = error instanceof Error ? error.message : 'Invitation failed.';
+        } finally {
+          submits.forEach((submit) => submit.removeAttribute('disabled'));
+        }
       });
     } catch (error) {
       tell(error instanceof Error ? error.message : 'Clerk sign-in could not load.', 'error');

@@ -28,7 +28,7 @@ export function readAdminConfig(env: NodeJS.ProcessEnv = process.env): AdminConf
     authorizedParties: csv(env.CLERK_AUTHORIZED_PARTIES),
     adminUserIds: new Set(csv(env.PP_ADMIN_CLERK_USER_IDS)),
     invitationRedirectUrl: env.PP_CLERK_INVITATION_REDIRECT_URL?.trim()
-      || 'https://papr.world/',
+      || 'https://papr.world/account/',
   };
 }
 
@@ -36,6 +36,23 @@ export function validInviteEmail(value: unknown): value is string {
   return typeof value === 'string'
     && value.length <= 254
     && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export type InvitationDelivery = 'email' | 'link';
+
+export function normalizeInvitationInput(input: unknown): {
+  emailAddress: string;
+  delivery: InvitationDelivery;
+} | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const value = input as { emailAddress?: unknown; delivery?: unknown };
+  const emailAddress = typeof value.emailAddress === 'string'
+    ? value.emailAddress.trim().toLowerCase()
+    : value.emailAddress;
+  if (!validInviteEmail(emailAddress)) return null;
+  const delivery = value.delivery === undefined ? 'email' : value.delivery;
+  if (delivery !== 'email' && delivery !== 'link') return null;
+  return { emailAddress, delivery };
 }
 
 export function buildAdminStatus(config: AdminConfig, input: AdminStatusInput) {
@@ -170,20 +187,17 @@ export function createAdminHandlers(input: AdminStatusInput, config = readAdminC
       }
 
       try {
-        const parsed = JSON.parse(await readBody(req)) as { emailAddress?: unknown };
-        const emailAddress = typeof parsed.emailAddress === 'string'
-          ? parsed.emailAddress.trim().toLowerCase()
-          : parsed.emailAddress;
-        if (!validInviteEmail(emailAddress)) {
+        const input = normalizeInvitationInput(JSON.parse(await readBody(req)));
+        if (!input) {
           res.status(400).json({ error: 'enter a valid email address' });
           return;
         }
 
         const invitation = await clerk.invitations.createInvitation({
-          emailAddress,
+          emailAddress: input.emailAddress,
           redirectUrl: config.invitationRedirectUrl,
           expiresInDays: 30,
-          notify: true,
+          notify: input.delivery === 'email',
         });
         res.setHeader('cache-control', 'private, no-store');
         res.status(201).json({
@@ -191,6 +205,7 @@ export function createAdminHandlers(input: AdminStatusInput, config = readAdminC
             id: invitation.id,
             status: invitation.status,
             createdAt: invitation.createdAt,
+            ...(input.delivery === 'link' ? { url: invitation.url ?? null } : {}),
           },
         });
       } catch (error) {

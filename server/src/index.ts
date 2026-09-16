@@ -45,7 +45,7 @@ const admin = createAdminHandlers({
   dataDir: process.env.PP_DATA_DIR ?? 'data',
   databaseConfigured: Boolean(database),
 }, clerkConfig);
-const accountIdentity = createAccountIdentityHandlers({ accounts, database, clerk: clerkConfig });
+const accountIdentity = createAccountIdentityHandlers({ accounts, database, mail, clerk: clerkConfig });
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
   // The 0.17 SDK's matchmaking request is credentialed. Browsers reject a

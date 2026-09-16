@@ -40,8 +40,8 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
       <h2>Bring your paper passport home</h2>
       <p data-claim-description>Checking this browser for a paper passport…</p>
       <p class="soft">
-        This does not upload your private solo save or move anything out of a world.
-        The device credential stays in place while the alpha still needs it.
+        Existing players keep their mail, pouch, and maker credits. New players get
+        a fresh passport, a private solo world, and Shared World access automatically.
       </p>
       <button class="btn" type="button" data-claim-button disabled>Claim this passport</button>
       <a class="btn btn--quiet" href="/enter/">Enter a neighborhood</a>
@@ -64,14 +64,13 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
         <section class="paper-card">
           <p class="label">Traveling with you</p>
           <h2>Scrapbook</h2>
-          <p>Your account pouch and learned techniques will move here without moving world storage.</p>
-          <span class="coming">Inventory migration follows worlds</span>
+          <div data-inventory-summary><p class="soft">Opening your neighborhood pouch…</p></div>
+          <span class="coming">Local solo inventory and learned techniques migrate next</span>
         </section>
         <section class="paper-card">
           <p class="label">Mailbox</p>
           <h2>Letters and parcels</h2>
-          <p>Your existing passport mailbox stays intact; this desk will become another way to open it.</p>
-          <span class="coming">Inbox view is being folded</span>
+          <div data-mailbox-summary><p class="soft">Opening your mailbox…</p></div>
         </section>
       </div>
     </div>
@@ -104,6 +103,11 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
   :global(.world-card h3) { margin: 7px 0 9px; font-size: 21px; }
   :global(.world-card p) { margin: 7px 0; }
   :global(.world-card__enter) { margin-top: 12px; }
+  :global(.desk-list) { margin: 14px 0 0; padding: 0; list-style: none; }
+  :global(.desk-list li) { padding: 10px 0; border-top: 1px dashed var(--edge); }
+  :global(.desk-list strong) { display: block; }
+  :global(.desk-list span), :global(.desk-list small) { display: block; margin-top: 3px; }
+  :global(.desk-list small) { color: var(--ink-soft); }
   .soft, :global(.coming) { color: var(--ink-soft); }
   :global(.coming) { display: inline-block; margin-top: 12px; font: 700 11px/1.35 $font-mono; text-transform: uppercase; letter-spacing: .06em; }
 </style>

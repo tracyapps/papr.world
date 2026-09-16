@@ -1,12 +1,28 @@
 export type ClerkSession = { getToken: () => Promise<string | null> };
 
+export type ClerkUser = {
+  fullName?: string | null;
+  firstName?: string | null;
+  username?: string | null;
+  primaryEmailAddress?: { emailAddress?: string | null } | null;
+};
+
 export type ClerkInstance = {
   session?: ClerkSession | null;
-  user?: unknown;
+  user?: ClerkUser | null;
   load: (options: { ui: { ClerkUI: unknown } }) => Promise<void>;
   mountSignIn: (target: HTMLDivElement, options: { fallbackRedirectUrl: string }) => void;
   mountUserButton: (target: HTMLDivElement) => void;
 };
+
+export function displayNameForClerkUser(user: ClerkUser | null | undefined): string {
+  const emailName = user?.primaryEmailAddress?.emailAddress?.split('@')[0];
+  return user?.fullName?.trim()
+    || user?.firstName?.trim()
+    || user?.username?.trim()
+    || emailName?.trim()
+    || 'paper friend';
+}
 
 type ClerkWindow = Window & {
   Clerk?: ClerkInstance;

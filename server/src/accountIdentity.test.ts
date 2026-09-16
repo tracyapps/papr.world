@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { claimPaperPassport, InvalidPassportError } from './accountIdentity';
+import { accountCarrySnapshot, claimPaperPassport, InvalidPassportError } from './accountIdentity';
 
 const passport = {
   id: '25e7894b-3808-489c-9b80-e9ef90cb03c2',
@@ -38,5 +38,22 @@ describe('paper-passport identity claim', () => {
       { id: passport.id, secret: 'wrong-secret' },
     )).rejects.toBeInstanceOf(InvalidPassportError);
     expect(claimClerkIdentity).not.toHaveBeenCalled();
+  });
+});
+
+describe('account desk carry snapshot', () => {
+  it('reads only the authenticated account key from the durable stores', () => {
+    const inventory = vi.fn().mockReturnValue({ revision: 2, chips: 4, resources: {}, tools: {}, items: {} });
+    const list = vi.fn().mockReturnValue([{ id: 'letter-1' }]);
+    const listClaimed = vi.fn().mockReturnValue(['letter-1']);
+
+    expect(accountCarrySnapshot({ inventory, list, listClaimed }, passport.id)).toEqual({
+      inventory: { revision: 2, chips: 4, resources: {}, tools: {}, items: {} },
+      mailbox: [{ id: 'letter-1' }],
+      claimedMailIds: ['letter-1'],
+    });
+    expect(inventory).toHaveBeenCalledWith(passport.id);
+    expect(list).toHaveBeenCalledWith(passport.id);
+    expect(listClaimed).toHaveBeenCalledWith(passport.id);
   });
 });

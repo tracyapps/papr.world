@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildAdminStatus, readAdminConfig, validInviteEmail } from './admin';
+import {
+  buildAdminStatus,
+  normalizeInvitationInput,
+  readAdminConfig,
+  validInviteEmail,
+} from './admin';
 
 describe('control-center configuration', () => {
 it('parses allowlists without accepting empty entries', () => {
@@ -11,7 +16,7 @@ it('parses allowlists without accepting empty entries', () => {
 
   expect(config.authorizedParties).toEqual(['https://papr.world', 'http://localhost:4321']);
   expect([...config.adminUserIds]).toEqual(['user_owner', 'user_backup']);
-  expect(config.invitationRedirectUrl).toBe('https://papr.world/');
+  expect(config.invitationRedirectUrl).toBe('https://papr.world/account/');
 });
 
 it('accepts ordinary invite addresses and rejects malformed input', () => {
@@ -19,6 +24,16 @@ it('accepts ordinary invite addresses and rejects malformed input', () => {
   expect(validInviteEmail('friend @example.com')).toBe(false);
   expect(validInviteEmail('not-an-address')).toBe(false);
   expect(validInviteEmail(null)).toBe(false);
+});
+
+it('normalizes email and copyable-link invitation deliveries', () => {
+  expect(normalizeInvitationInput({
+    emailAddress: ' Friend@Example.com ', delivery: 'link',
+  })).toEqual({ emailAddress: 'friend@example.com', delivery: 'link' });
+  expect(normalizeInvitationInput({ emailAddress: 'friend@example.com' }))
+    .toEqual({ emailAddress: 'friend@example.com', delivery: 'email' });
+  expect(normalizeInvitationInput({ emailAddress: 'friend@example.com', delivery: 'sms' }))
+    .toBeNull();
 });
 
 it('describes configuration without returning credentials', () => {

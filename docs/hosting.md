@@ -30,7 +30,7 @@ getting right in one pass.
 | `CLERK_SECRET_KEY` | Clerk production secret key | Admin sessions cannot be verified and invitations cannot be sent. Never expose this to Vercel or the browser. |
 | `CLERK_AUTHORIZED_PARTIES` | `https://papr.world` | Clerk tokens are not restricted to the expected browser origin. Add `http://localhost:4321` only for local testing. |
 | `PP_ADMIN_CLERK_USER_IDS` | your Clerk `user_...` id | Nobody can open the control center, even when signed in. Comma-separate backup admins. |
-| `PP_CLERK_INVITATION_REDIRECT_URL` | `https://papr.world/` | Optional; invitation acceptance returns to the site root. |
+| `PP_CLERK_INVITATION_REDIRECT_URL` | `https://papr.world/account/` | Optional; invitation acceptance opens the player's desk, where their default worlds are provisioned. |
 | `DATABASE_URL` | Neon **pooled** connection string | Managed accounts, profiles, worlds, and memberships remain disabled. Keep this only on Railway and include `sslmode=require`. |
 
 `PORT` and `PP_DATA_DIR` are handled for you — Railway injects `PORT`, and the
@@ -68,6 +68,11 @@ development Clerk token with the production Railway secret.
 > bundle, so saving them in the dashboard changes nothing until you
 > **redeploy**. This is the single most common way to end up with a
 > production game stubbornly talking to `localhost`.
+
+`PUBLIC_PAPR_API_URL` also lets `/api/account-entry` ask Railway to verify a
+signed-in player's requested world before Vercel issues the existing alpha-door
+cookie. No Clerk secret is copied to Vercel, and no additional variable is
+required for account-based entry.
 
 ---
 

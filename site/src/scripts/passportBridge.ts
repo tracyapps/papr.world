@@ -24,3 +24,18 @@ export function loadDevicePassport(storage: Pick<Storage, 'getItem'>): DevicePas
     return null;
   }
 }
+
+/** Store only a validated credential pair and report browser-storage failures. */
+export function saveDevicePassport(
+  storage: Pick<Storage, 'setItem'>,
+  passport: DevicePassport,
+): boolean {
+  const validated = parseDevicePassport(JSON.stringify(passport));
+  if (!validated) return false;
+  try {
+    storage.setItem(PASSPORT_STORAGE_KEY, JSON.stringify(validated));
+    return true;
+  } catch {
+    return false;
+  }
+}

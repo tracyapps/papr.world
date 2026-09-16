@@ -1,7 +1,9 @@
 import type { IncomingMessage } from 'node:http';
 import type { Request, Response } from 'express';
 import { sanitizeAccountCredentials } from '../../shared/src/index';
+import type { AccountInventory, MailItem } from '../../shared/src/index';
 import type { AccountStore } from './accounts';
+import type { MailStore } from './mail';
 import { authenticateClerkUser, type AdminConfig } from './admin';
 import {
   IdentityConflictError,
@@ -13,8 +15,26 @@ import {
 type IdentityDependencies = {
   accounts: Pick<AccountStore, 'verify' | 'getForClaim'>;
   database: Pick<PaprDatabase, 'homeForClerkUser' | 'claimClerkIdentity'> | null;
+  mail: Pick<MailStore, 'inventory' | 'list' | 'listClaimed'>;
   clerk: Pick<AdminConfig, 'secretKey' | 'jwtKey' | 'authorizedParties'>;
 };
+
+export type AccountCarrySnapshot = {
+  inventory: AccountInventory;
+  mailbox: MailItem[];
+  claimedMailIds: string[];
+};
+
+export function accountCarrySnapshot(
+  mail: Pick<MailStore, 'inventory' | 'list' | 'listClaimed'>,
+  accountId: string,
+): AccountCarrySnapshot {
+  return {
+    inventory: mail.inventory(accountId),
+    mailbox: mail.list(accountId),
+    claimedMailIds: mail.listClaimed(accountId),
+  };
+}
 
 export class InvalidPassportError extends Error {
   constructor() {
@@ -88,6 +108,7 @@ export function createAccountIdentityHandlers(deps: IdentityDependencies) {
           claimed: Boolean(home),
           account: home?.account ?? null,
           worlds: home?.worlds ?? [],
+          ...(home ? accountCarrySnapshot(deps.mail, home.account.id) : {}),
         });
       } catch (error) {
         console.error('[account] managed-identity lookup failed:', error instanceof Error ? error.name : 'unknown');
@@ -113,7 +134,12 @@ export function createAccountIdentityHandlers(deps: IdentityDependencies) {
         const home: AccountHome = await deps.database.homeForClerkUser(clerkUserId)
           ?? { account, worlds: [] };
         res.setHeader('cache-control', 'private, no-store');
-        res.status(201).json({ claimed: true, account: home.account, worlds: home.worlds });
+        res.status(201).json({
+          claimed: true,
+          account: home.account,
+          worlds: home.worlds,
+          ...accountCarrySnapshot(deps.mail, home.account.id),
+        });
       } catch (error) {
         if (error instanceof InvalidPassportError) {
           res.status(401).json({ error: error.message });

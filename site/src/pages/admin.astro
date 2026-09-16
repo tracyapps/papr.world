@@ -51,13 +51,17 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
         <section class="control-card">
           <p class="label">Closed-alpha invitations</p>
           <h2>Invite a player</h2>
-          <p>Clerk sends a one-time invitation. New accounts remain closed to everyone else.</p>
+          <p>Every invite starts with a private solo world and access to the first public Shared World.</p>
+          <p class="soft">Both options are tied to this email. Send it through Clerk, or copy the private link into a text or message yourself.</p>
           <form data-invite-form>
             <label class="control-field">
               <span>Email address</span>
               <input type="email" name="emailAddress" autocomplete="email" required />
             </label>
-            <button class="btn" type="submit">Send invitation</button>
+            <div class="invite-actions">
+              <button class="btn" type="submit" name="delivery" value="email">Send email</button>
+              <button class="btn btn--quiet" type="submit" name="delivery" value="link">Create link</button>
+            </div>
           </form>
           <p class="form-result" data-invite-result role="status" aria-live="polite"></p>
         </section>
@@ -100,6 +104,9 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
   .control-card--future { opacity: .82; }
   .control-field { display: grid; gap: 7px; margin: 20px 0 16px; font-weight: 700; }
   .control-field input { width: 100%; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); font: inherit; }
+  .invite-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .invite-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 10px; }
+  .invite-link input { min-width: 0; padding: 9px 10px; border: 1px solid var(--edge); border-radius: 6px; background: var(--paper); font: 12px/1.35 $font-mono; }
   .form-result { min-height: 1.6em; margin-top: 14px; color: var(--ink-soft); }
   .soft { color: var(--ink-soft); }
 </style>

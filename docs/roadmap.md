@@ -835,12 +835,18 @@ and mail is an **inbox, not an address**.
 
 ## If you only do one thing
 
-**Finish MP.3 — the invite-only alpha shell.** MP.2's player-triggered
-screenshot feedback, offline Retry, private review desk, redacted export, and
-restart recovery are proved. Join codes, honest connection states, failure
-recovery, and clean solo return are now built and locally browser-proved. Next
-add host removal, mute/block, deployment configuration, and the hosted
-`https://`/`wss://` smoke. Colyseus 0.17 and its clean audit are already in place.
+**Finish the account-authority migration.** Clerk signup, hand invitations,
+account claims, permanent solo/Shared World membership, the account desk, and
+authenticated world doors are now built. An administrator can email an invite
+or copy its email-bound private link, and a first-time player is provisioned at
+their desk without needing a legacy neighborhood code.
+
+Next, make the explicit one-time migration preview for local scrapbook
+inventory and learned techniques, then move those accepted balances into the
+account-owned ledger. Keep houses, placed storage, crops, and terrain in their
+world. This is the remaining trust boundary to settle before a wider invited
+playtest; once it is firm, world-local containers, crops, and home plots can
+build on it without inventing a second source of truth.
 
 Phase 1 is complete as infrastructure. Future furniture, decoration, clothing,
 building, and structure plans are content within their respective creation
