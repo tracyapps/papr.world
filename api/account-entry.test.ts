@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { readPass } from '../lib/gate';
 import accountEntryFunction, {
@@ -33,6 +34,12 @@ function backend(body: unknown, status = 200): typeof fetch {
 }
 
 describe('account entry through the alpha door', () => {
+  it('keeps local imports resolvable after Vercel compiles the Node function', () => {
+    const source = readFileSync(new URL('./account-entry.ts', import.meta.url), 'utf8');
+    expect(source).toContain("from '../lib/gate.js'");
+    expect(source).not.toContain("from '../lib/gate';");
+  });
+
   it('mints an HttpOnly pass only after Railway confirms world entry', async () => {
     const fetcher = backend({
       claimed: true,

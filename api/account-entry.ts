@@ -1,11 +1,11 @@
 /**
  * POST /api/account-entry — let a claimed account through the alpha door.
  *
- * Clerk verification and world authorization stay on Railway. This edge
+ * Clerk verification and world authorization stay on Railway. This Vercel
  * function forwards the short-lived bearer token, confirms the requested
  * world has `enter`, then mints the same HttpOnly pass used by alpha codes.
  */
-import { gateIsOpen, mintPass, passCookie } from '../lib/gate';
+import { gateIsOpen, mintPass, passCookie } from '../lib/gate.js';
 
 type AccountHome = {
   claimed?: boolean;
