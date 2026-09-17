@@ -27,7 +27,7 @@ import {
   type ModerationStatus,
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
-import { accounts, feedbackStore, mail, moderation, OWNER_ACCOUNT } from './stores';
+import { accounts, feedbackStore, mail, moderation, soloMigrations, accountTech, OWNER_ACCOUNT } from './stores';
 import { createAdminHandlers, readAdminConfig } from './admin';
 import { createAccountIdentityHandlers } from './accountIdentity';
 import { database } from './runtime';
@@ -46,7 +46,9 @@ const admin = createAdminHandlers({
   databaseConfigured: Boolean(database),
   inviteLinks: database ?? undefined,
 }, clerkConfig);
-const accountIdentity = createAccountIdentityHandlers({ accounts, database, mail, clerk: clerkConfig });
+const accountIdentity = createAccountIdentityHandlers({
+  accounts, database, mail, migrations: soloMigrations, tech: accountTech, clerk: clerkConfig,
+});
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
   // The 0.17 SDK's matchmaking request is credentialed. Browsers reject a
@@ -400,6 +402,12 @@ const gameServer = new Server({
     });
     app.post('/account/claim', (req: Request, res: Response) => {
       void accountIdentity.claim(req, res);
+    });
+    app.post('/account/import-solo-save', (req: Request, res: Response) => {
+      void accountIdentity.importSoloSave(req, res);
+    });
+    app.post('/account/claim-mail', (req: Request, res: Response) => {
+      void accountIdentity.claimMail(req, res);
     });
     app.post('/feedback', (req: Request, res: Response) => {
       void handleFeedback(req, res);

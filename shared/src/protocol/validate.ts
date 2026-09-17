@@ -5,7 +5,7 @@
 // trip. Because the logic lives here once, both sides always agree.
 
 import { LIMITS } from './constants';
-import type { AccountInventory, AvatarRef, MailItem } from './state';
+import type { AccountInventory, AccountTech, AvatarRef, MailItem, SoloMigrationSnapshot } from './state';
 import type {
   AccountCredentials,
   ClaimMailIntent,
@@ -130,6 +130,59 @@ export function sanitizeAccountInventory(raw: unknown): AccountInventory | null 
     revision: value.revision as number,
     chips: Math.min(value.chips as number, LIMITS.inventoryStackMax),
     resources, tools, items,
+  };
+}
+
+/** Validate a server tech record before exposing it to UI state. */
+export function sanitizeAccountTech(raw: unknown): AccountTech | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const value = raw as Partial<AccountTech>;
+  if (!Number.isSafeInteger(value.revision) || (value.revision ?? 0) < 1) return null;
+  if (!Array.isArray(value.plans)) return null;
+  const plans = [...new Set(
+    value.plans.filter((id): id is string => typeof id === 'string' && id.length > 0 && id.length <= 128),
+  )].slice(0, LIMITS.accountPlansMax);
+  return { revision: value.revision as number, plans };
+}
+
+/**
+ * Validate a self-reported solo-save snapshot before it is even shown on
+ * the review screen, let alone imported. Every count is clamped to
+ * `soloMigrationStackMax` (far below `inventoryStackMax`) rather than
+ * rejected outright, on the theory that a tampered save should be
+ * visibly capped in the review the player confirms, not silently refused
+ * with no explanation.
+ */
+export function sanitizeSoloMigrationSnapshot(raw: unknown): SoloMigrationSnapshot | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const value = raw as Partial<SoloMigrationSnapshot>;
+  if (!Number.isFinite(value.chips)) return null;
+  const safeBag = (bag: unknown): Record<string, number> | null => {
+    if (!bag || typeof bag !== 'object' || Array.isArray(bag)) return null;
+    const entries = Object.entries(bag);
+    if (entries.length > LIMITS.soloMigrationBagKeysMax) return null;
+    const result: Record<string, number> = {};
+    for (const [key, count] of entries) {
+      if (!key || key.length > 128 || !Number.isFinite(count)) return null;
+      const clamped = Math.max(0, Math.min(LIMITS.soloMigrationStackMax, Math.floor(count as number)));
+      if (clamped > 0) result[key] = clamped;
+    }
+    return result;
+  };
+  const resources = safeBag(value.resources);
+  const tools = safeBag(value.tools);
+  const items = safeBag(value.items);
+  if (!resources || !tools || !items) return null;
+  if (!Array.isArray(value.plans) || value.plans.length > LIMITS.soloMigrationPlansMax) return null;
+  const plans = [...new Set(
+    value.plans.filter((id): id is string => typeof id === 'string' && id.length > 0 && id.length <= 128),
+  )];
+  return {
+    chips: Math.max(0, Math.min(LIMITS.soloMigrationStackMax, Math.floor(value.chips as number))),
+    resources,
+    tools,
+    items,
+    plans,
   };
 }
 

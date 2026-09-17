@@ -147,10 +147,19 @@ members`, or `nobody`). Gifts may be allowed separately.
 - Existing `accountId` values remain canonical and are claimable.
 - The server-owned Neighborhood Pouch becomes the first account scrapbook
   ledger; rename it after the landing page makes the scope clear.
-- Today's local solo bag and tech tree are not continuously uploaded. On first
-  claim, offer one explicit, idempotent alpha migration with a review summary.
-  After acceptance, the server owns account inventory and tech. Offline play
-  becomes a separate unsynced sandbox unless a conflict protocol is built.
+- Today's local solo bag and tech tree are not continuously uploaded.
+  **Implemented:** on the desk, the scrapbook card offers one explicit,
+  reviewed, idempotent import of the local solo save's transferable
+  inventory (chips, resources, tools, general items) — the player sees the
+  counts before confirming, and `POST /account/import-solo-save` reserves a
+  receipt (`SoloMigrationStore.reserveOnce`) before granting anything, so a
+  repeat attempt returns the same receipt rather than granting twice. After
+  acceptance the server owns that inventory; offline play stays a separate,
+  unsynced sandbox — there is no background sync and no plan to build one.
+  The tech side is implemented too: the snapshot's learned plan ids are
+  granted into the account tech store (`AccountTechStore`) under the same
+  one-time gate, and the desk's scrapbook card shows the account's learned
+  techniques.
 - Existing neighborhood save filenames seed world records. The first verified
   owner/admin claims them; terrain and pieces are not rewritten.
 
@@ -177,13 +186,22 @@ members`, or `nobody`). Gifts may be allowed separately.
    short-lived Clerk session to the game without exposing it in the URL;
    Railway verifies the identity and `enter` capability before matchmaking,
    Vercel grants the existing signed alpha-door pass to that verified member,
-   and the durable world UUID selects the room save. Add an always-reachable
-   **Return to desk** action inside the game before broadening the alpha; it
-   should leave the room cleanly and navigate to `/account`, without implying
-   that the player is still present in-world. Inbox, avatar editor, account
-   inventory/tech summary, and settings remain.
-5. **Authority migration.** Account inventory + tech, then world-local
-   containers/crops/homes.
+   and the durable world UUID selects the room save. An always-reachable
+   **Return to desk** action is implemented inside the game (Settings overlay
+   → "Leaving"): it disconnects the shared session for real before navigating
+   to `/account/`, so it never implies the player is still present in-world.
+  Verified against the root test/build suite only — not yet clicked in a
+  real browser; see `next-session.md`. The inbox is implemented too — the
+  full mailbox view with desk-side parcel collection through
+  `POST /account/claim-mail`, which shares `MailStore.claim`'s exactly-once
+  record with the in-world scrapbook — as is the account inventory/tech
+  summary. The avatar editor and settings remain.
+5. **Authority migration.** Both halves implemented: the desk offers a
+   reviewed, idempotent one-time import of a local solo save's transferable
+   inventory and learned plans into the account (`POST /account/import-solo-save`;
+   see "Migration from today's prototype" above), with learned plans landing
+   in the account tech store. World-local containers/crops/homes remain after
+   that.
 6. **Social graph.** Search, requests, DMs, presence/privacy, and wayfinding.
 7. **Spatial conversation.** Page-radius delivery, bubbles, and activity filters.
 

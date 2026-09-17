@@ -10,6 +10,8 @@ import {
 import { openAvatarLookEditor } from '../game/avatarLook';
 import { openFeedbackPanel } from './feedbackPanel';
 import { openMultiplayerPanel } from './multiplayerPanel';
+import { disconnectSharedSession } from '../net/sharedSession';
+import { accountDeskUrl } from '../net/accountDesk';
 
 // The two top-right icon buttons and the overlays they open.
 //
@@ -176,6 +178,13 @@ function buildSettingsOverlay(): HTMLElement {
         </button>
         <small>Open an invite-only neighborhood, enter a friend's code, or return safely to solo play.</small>
       </div>
+      <h3 class="hud-overlay-subhead">Leaving</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-return-to-desk">
+          Return to your desk
+        </button>
+        <small>Leaves this world cleanly and takes you back to your account — you will not still look present here.</small>
+      </div>
       <h3 class="hud-overlay-subhead">Alpha notebook</h3>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="setting-send-feedback">
@@ -265,6 +274,13 @@ function buildSettingsOverlay(): HTMLElement {
   overlay.querySelector<HTMLButtonElement>('#setting-play-with-friends')?.addEventListener('click', () => {
     closeHudMenu();
     openMultiplayerPanel();
+  });
+  overlay.querySelector<HTMLButtonElement>('#setting-return-to-desk')?.addEventListener('click', () => {
+    // Same cleanup the "Return to solo play" button uses: leave the room for
+    // real before navigating, so no stale presence lingers for anyone still
+    // inside. Safe to call even when never connected (plain solo play).
+    disconnectSharedSession();
+    window.location.assign(accountDeskUrl());
   });
   return overlay;
 }

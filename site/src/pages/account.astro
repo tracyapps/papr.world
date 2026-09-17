@@ -65,12 +65,22 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
           <p class="label">Traveling with you</p>
           <h2>Scrapbook</h2>
           <div data-inventory-summary><p class="soft">Opening your neighborhood pouch…</p></div>
-          <span class="coming">Local solo inventory and learned techniques migrate next</span>
+          <div class="tech" data-tech hidden>
+            <h3 class="tech__title">Learned techniques</h3>
+            <div data-tech-summary><p class="soft">Opening your learned techniques…</p></div>
+          </div>
+          <div class="migration" data-migration hidden>
+            <h3 class="migration__title">Bring your solo save home</h3>
+            <p class="soft" data-migration-description>Checking this browser for a solo save…</p>
+            <button class="btn btn--quiet" type="button" data-migration-button hidden>Bring it into your account</button>
+            <p class="migration__note" data-migration-note role="status" aria-live="polite"></p>
+          </div>
         </section>
         <section class="paper-card">
           <p class="label">Mailbox</p>
           <h2>Letters and parcels</h2>
           <div data-mailbox-summary><p class="soft">Opening your mailbox…</p></div>
+          <p class="mailbox__note" data-mailbox-note role="status" aria-live="polite"></p>
         </section>
       </div>
     </div>
@@ -110,4 +120,17 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
   :global(.desk-list small) { color: var(--ink-soft); }
   .soft, :global(.coming) { color: var(--ink-soft); }
   :global(.coming) { display: inline-block; margin-top: 12px; font: 700 11px/1.35 $font-mono; text-transform: uppercase; letter-spacing: .06em; }
+  .migration { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--edge); }
+  .migration__title { margin: 0 0 6px; font-size: 16px; }
+  .migration__note { margin-top: 8px; }
+  .migration [data-migration-button] { margin-top: 4px; }
+  .tech { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--edge); }
+  .tech__title { margin: 0 0 6px; font-size: 16px; }
+  .tech :global(.tech-list) { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .tech :global(.tech-list li) { padding: 3px 10px; border: 1px solid var(--edge); border-radius: 999px; background: var(--paper-2); font-size: 13px; }
+  .mailbox__heading { margin: 14px 0 0; font-size: 16px; }
+  .mailbox__heading + :global(.desk-list) { margin-top: 8px; }
+  .mailbox__note { margin: 8px 0 0; }
+  .mailbox__note:empty { display: none; }
+  :global(.desk-list .btn) { display: inline-block; margin-top: 10px; }
 </style>

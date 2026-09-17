@@ -74,6 +74,26 @@ export const LIMITS = {
    * of the ring the server keeps in memory per neighborhood.
    */
   chatHistory: 50,
+
+  /**
+   * Caps for the one-time solo-save-into-account import
+   * (`accounts-worlds-and-social.md`'s "Migration from today's prototype").
+   * A local save is self-reported and unverifiable, unlike everything else
+   * `AccountInventory` ever receives — these stay far below
+   * `inventoryStackMax` on purpose, since the review screen (a human reading
+   * the numbers before confirming) is the primary defense, not this ceiling.
+   */
+  soloMigrationStackMax: 5_000,
+  /** Distinct resource/tool/item ids one solo-save report may name. */
+  soloMigrationBagKeysMax: 200,
+  /** Distinct learned-plan ids one solo-save report may name. */
+  soloMigrationPlansMax: 200,
+  /**
+   * Distinct learned-plan ids one account may own across its whole life —
+   * every recipe the catalog will ever grow to, plus headroom, so honest
+   * accounts never hit it.
+   */
+  accountPlansMax: 500,
 } as const;
 
 /** Default room name / neighborhood the first slice joins. */

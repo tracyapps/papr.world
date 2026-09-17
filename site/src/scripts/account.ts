@@ -26,8 +26,10 @@ type AccountResponse = {
   account: Account | null;
   worlds?: World[];
   inventory?: AccountInventory;
+  tech?: AccountTech;
   mailbox?: MailItem[];
   claimedMailIds?: string[];
+  soloMigration?: SoloMigrationReceipt | null;
   error?: string;
 };
 
@@ -39,6 +41,33 @@ type AccountInventory = {
   items: Record<string, number>;
 };
 
+/** The server-owned record of plan ids this account has learned. */
+type AccountTech = {
+  revision: number;
+  plans: string[];
+};
+
+/** What this browser reports finding in the game's own local solo save. */
+type SoloSaveSnapshot = {
+  chips: number;
+  resources: Record<string, number>;
+  tools: Record<string, number>;
+  items: Record<string, number>;
+  plans: string[];
+};
+
+/** The durable, one-time record `/account/import-solo-save` returns once granted. */
+type SoloMigrationReceipt = SoloSaveSnapshot & { at: number };
+
+type ImportSoloSaveResponse = {
+  ok?: boolean;
+  receipt?: SoloMigrationReceipt;
+  inventory?: AccountInventory;
+  tech?: AccountTech;
+  alreadyMigrated?: boolean;
+  error?: string;
+};
+
 type MailItem = {
   id: string;
   fromName: string;
@@ -47,11 +76,87 @@ type MailItem = {
   at: number;
 };
 
+type ClaimMailResponse = {
+  ok?: boolean;
+  inventory?: AccountInventory;
+  claimedMailIds?: string[];
+  error?: string;
+};
+
 type MintedPassport = {
   accountId?: string;
   secret?: string;
   error?: string;
 };
+
+// The game (`/play/`) and this desk (`/account/`) are the same origin in
+// production (see hosting.md), so localStorage set by the game is directly
+// readable here — no bridge needed. This key and shape must be kept in sync
+// with `SAVE_STORAGE_KEY`/`GameState` in `src/sim/state.ts` by hand, since
+// this Astro site does not build against that package (see account.ts's
+// existing duplicated `AccountInventory`/`MailItem` types above).
+const SOLO_SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
+
+function nonEmptyCounts(value: unknown): Record<string, number> {
+  const result: Record<string, number> = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return result;
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) result[key] = Math.floor(raw);
+  }
+  return result;
+}
+
+/**
+ * Read whatever solo save this browser has, defensively — a parse failure
+ * or an unexpected shape just means "nothing to offer," never a thrown
+ * error on desk load. Returns null when there is no save at all, which is
+ * what keeps the migration card hidden for a player who has never touched
+ * solo play on this device.
+ */
+function readLocalSoloSave(): SoloSaveSnapshot | null {
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(SOLO_SAVE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as {
+      player?: { chips?: unknown; inventory?: unknown; tools?: unknown; items?: unknown; plans?: unknown };
+    };
+    const player = parsed.player ?? {};
+    const plans = Array.isArray(player.plans)
+      ? [...new Set(player.plans.filter((id): id is string => typeof id === 'string' && id.length > 0))]
+      : [];
+    const chips = typeof player.chips === 'number' && Number.isFinite(player.chips)
+      ? Math.max(0, Math.floor(player.chips))
+      : 0;
+    return {
+      chips,
+      resources: nonEmptyCounts(player.inventory),
+      tools: nonEmptyCounts(player.tools),
+      items: nonEmptyCounts(player.items),
+      plans,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** One warm sentence for the review card — never a raw JSON dump. */
+function describeSnapshot(snapshot: SoloSaveSnapshot): string {
+  const stackTotal = [snapshot.resources, snapshot.tools, snapshot.items]
+    .flatMap((bag) => Object.values(bag))
+    .reduce((sum, count) => sum + count, 0);
+  const parts: string[] = [];
+  if (snapshot.chips > 0) parts.push(`${snapshot.chips} shiny chip${snapshot.chips === 1 ? '' : 's'}`);
+  if (stackTotal > 0) parts.push(`${stackTotal} item${stackTotal === 1 ? '' : 's'} across your bag`);
+  if (snapshot.plans.length > 0) {
+    parts.push(`${snapshot.plans.length} learned technique${snapshot.plans.length === 1 ? '' : 's'}`);
+  }
+  return parts.length > 0 ? parts.join(', ') : 'nothing worth bringing over yet';
+}
 
 const shell = document.querySelector<HTMLElement>('[data-account-shell]');
 
@@ -70,7 +175,14 @@ if (shell) {
   const accountId = shell.querySelector<HTMLElement>('[data-account-id]');
   const worldList = shell.querySelector<HTMLElement>('[data-world-list]');
   const inventorySummary = shell.querySelector<HTMLElement>('[data-inventory-summary]');
+  const techSection = shell.querySelector<HTMLElement>('[data-tech]');
+  const techSummary = shell.querySelector<HTMLElement>('[data-tech-summary]');
   const mailboxSummary = shell.querySelector<HTMLElement>('[data-mailbox-summary]');
+  const mailboxNote = shell.querySelector<HTMLElement>('[data-mailbox-note]');
+  const migration = shell.querySelector<HTMLElement>('[data-migration]');
+  const migrationDescription = shell.querySelector<HTMLElement>('[data-migration-description]');
+  const migrationButton = shell.querySelector<HTMLButtonElement>('[data-migration-button]');
+  const migrationNote = shell.querySelector<HTMLElement>('[data-migration-note]');
 
   const tell = (text: string, kind: 'info' | 'error' = 'info') => {
     if (!message) return;
@@ -170,46 +282,257 @@ if (shell) {
     inventorySummary.replaceChildren(list);
   };
 
-  const renderMailbox = (mailbox: MailItem[] = [], claimedIds: string[] = []) => {
+  /**
+   * The account-owned view of learned techniques — the tech half of the
+   * scrapbook, granted by a solo-save import today and by shared-world
+   * learning later. Plan ids render as friendly names the same way pouch
+   * ids do; this desk never needed the game's recipe catalog for that.
+   */
+  const renderTech = (tech?: AccountTech) => {
+    if (!techSection || !techSummary) return;
+    if (!tech) {
+      techSection.hidden = true;
+      return;
+    }
+    techSection.hidden = false;
+    if (tech.plans.length === 0) {
+      techSummary.textContent = 'Nothing learned yet — the Professor has lessons waiting in-world.';
+      return;
+    }
+    const list = document.createElement('ul');
+    list.className = 'tech-list';
+    for (const planId of tech.plans) {
+      const item = document.createElement('li');
+      item.textContent = planId.replaceAll(/[-_.]+/g, ' ');
+      list.append(item);
+    }
+    techSummary.replaceChildren(list);
+  };
+
+  /**
+   * A parcel's contents in one warm line, or null for plain letters. The
+   * desk has no recipe or resource catalogs (see the type-duplication note
+   * above), so ids render as friendly names the same way the pouch does.
+   */
+  const parcelLabel = (letter: MailItem): string | null => {
+    const quantity = letter.payload.quantity;
+    const kind = letter.payload.attachmentKind;
+    if (typeof quantity !== 'number' || !Number.isFinite(quantity) || quantity < 1) return null;
+    const friendly = (value: unknown): value is string => typeof value === 'string' && value.length > 0;
+    if (kind === 'chips') return `${quantity} shiny chip${quantity === 1 ? '' : 's'}`;
+    if (kind === 'resource' && friendly(letter.payload.resource)) {
+      return `${quantity} ${letter.payload.resource.replaceAll(/[-_.]+/g, ' ')}`;
+    }
+    if (kind === 'tool' && friendly(letter.payload.toolId)) {
+      return `${quantity} ${letter.payload.toolId.replaceAll(/[-_.]+/g, ' ')}`;
+    }
+    if (kind === 'item' && friendly(letter.payload.itemId)) {
+      const label = typeof letter.payload.label === 'string' && letter.payload.label.trim()
+        ? letter.payload.label
+        : letter.payload.itemId.replaceAll(/[-_.]+/g, ' ');
+      return `${quantity} ${label}`;
+    }
+    return null;
+  };
+
+  /**
+   * The real inbox: waiting parcels first (each collectable into the pouch
+   * right here, through the same exactly-once claim the in-world scrapbook
+   * uses), then the chronological record of letters and collected parcels.
+   */
+  const renderMailbox = (
+    mailbox: MailItem[] = [],
+    claimedIds: string[] = [],
+    getToken: () => Promise<string | null> = () => Promise.resolve(null),
+  ) => {
     if (!mailboxSummary) return;
     if (mailbox.length === 0) {
       mailboxSummary.textContent = 'No letters yet. The mailbox is listening.';
       return;
     }
     const claimed = new Set(claimedIds);
-    const list = document.createElement('ul');
-    list.className = 'desk-list';
-    for (const letter of mailbox.slice(0, 5)) {
-      const item = document.createElement('li');
-      const subject = document.createElement('strong');
-      subject.textContent = typeof letter.payload.subject === 'string'
-        ? letter.payload.subject
-        : `A ${letter.kind} from ${letter.fromName}`;
-      const detail = document.createElement('span');
-      detail.textContent = typeof letter.payload.text === 'string' ? letter.payload.text : '';
-      const meta = document.createElement('small');
-      const claimedLabel = claimed.has(letter.id)
-        ? ' · parcel collected'
-        : letter.kind === 'gift' ? ' · parcel waiting in-world' : '';
-      meta.textContent = `${new Date(letter.at).toLocaleDateString()}${claimedLabel}`;
-      item.append(subject, detail, meta);
-      list.append(item);
+    const collect = async (letter: MailItem, button: HTMLButtonElement) => {
+      button.disabled = true;
+      button.textContent = 'Collecting…';
+      try {
+        const token = await getToken();
+        if (!token) throw new Error('Your sign-in session could not be refreshed.');
+        const response = await fetch(`${apiUrl}/account/claim-mail`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ mailId: letter.id }),
+        });
+        const result = await response.json() as ClaimMailResponse;
+        if (!response.ok || !result.ok || !result.inventory) {
+          throw new Error(result.error || 'That parcel could not be collected.');
+        }
+        renderInventory(result.inventory);
+        renderMailbox(mailbox, result.claimedMailIds ?? [...claimedIds], getToken);
+        if (mailboxNote) mailboxNote.textContent = 'Collected into your neighborhood pouch.';
+      } catch (error) {
+        if (mailboxNote) {
+          mailboxNote.textContent = error instanceof Error ? error.message : 'That parcel could not be collected.';
+        }
+        button.disabled = false;
+        button.textContent = 'Collect into pouch';
+      }
+    };
+
+    const container = document.createElement('div');
+    const waiting = mailbox.filter((letter) => parcelLabel(letter) !== null && !claimed.has(letter.id));
+    if (waiting.length > 0) {
+      const heading = document.createElement('h3');
+      heading.className = 'mailbox__heading';
+      heading.textContent = `Parcels waiting (${waiting.length})`;
+      const waitingList = document.createElement('ul');
+      waitingList.className = 'desk-list';
+      for (const letter of waiting) {
+        const item = document.createElement('li');
+        const subject = document.createElement('strong');
+        subject.textContent = typeof letter.payload.subject === 'string' && letter.payload.subject.trim()
+          ? letter.payload.subject
+          : `A parcel from ${letter.fromName}`;
+        const detail = document.createElement('span');
+        const label = parcelLabel(letter);
+        detail.textContent = `${label ?? 'Something tucked in'} · from ${letter.fromName}`;
+        const button = document.createElement('button');
+        button.className = 'btn btn--quiet';
+        button.type = 'button';
+        button.textContent = 'Collect into pouch';
+        button.addEventListener('click', () => void collect(letter, button));
+        item.append(subject, detail, button);
+        waitingList.append(item);
+      }
+      container.append(heading, waitingList);
     }
-    mailboxSummary.replaceChildren(list);
+
+    const rest = mailbox.filter((letter) => !waiting.includes(letter));
+    const shown = rest.slice(0, 20);
+    if (shown.length > 0) {
+      const heading = document.createElement('h3');
+      heading.className = 'mailbox__heading';
+      heading.textContent = waiting.length > 0 ? 'Letters and collected parcels' : 'Recent letters';
+      const list = document.createElement('ul');
+      list.className = 'desk-list';
+      for (const letter of shown) {
+        const item = document.createElement('li');
+        const subject = document.createElement('strong');
+        subject.textContent = typeof letter.payload.subject === 'string' && letter.payload.subject.trim()
+          ? letter.payload.subject
+          : `A ${letter.kind} from ${letter.fromName}`;
+        const detail = document.createElement('span');
+        const label = parcelLabel(letter);
+        const text = typeof letter.payload.text === 'string' ? letter.payload.text.trim() : '';
+        detail.textContent = label
+          ? `${label}${text ? ` — ${text}` : ''}`
+          : text;
+        const meta = document.createElement('small');
+        const parcelState = label ? (claimed.has(letter.id) ? ' · parcel collected' : ' · parcel waiting above') : '';
+        meta.textContent = `From ${letter.fromName} · ${new Date(letter.at).toLocaleDateString()}${parcelState}`;
+        item.append(subject, detail, meta);
+        list.append(item);
+      }
+      container.append(heading, list);
+      if (rest.length > shown.length) {
+        const more = document.createElement('p');
+        more.className = 'soft';
+        more.textContent = `…and ${rest.length - shown.length} more, older still.`;
+        container.append(more);
+      }
+    }
+    mailboxSummary.replaceChildren(container);
+  };
+
+  /**
+   * Renders the "Bring your solo save home" card. Three states: already
+   * migrated (show the receipt, no button — this account will never accept
+   * a second one), a local save this browser can offer (review text + a
+   * confirm button), or nothing to offer (hidden entirely — most players on
+   * a browser that never played solo, or on a second device).
+   *
+   * Called every time the desk loads, not just right after claiming: a
+   * player who closes the tab before deciding, or claims on one day and
+   * opens the desk again later, should still see this until they act on it
+   * or it is already done.
+   */
+  const renderMigration = (
+    receipt: SoloMigrationReceipt | null | undefined,
+    getToken: () => Promise<string | null>,
+  ) => {
+    if (!migration) return;
+    if (receipt) {
+      migration.hidden = false;
+      if (migrationDescription) {
+        migrationDescription.textContent =
+          `Solo save brought in on ${new Date(receipt.at).toLocaleDateString()}: ${describeSnapshot(receipt)}.`;
+      }
+      if (migrationButton) migrationButton.hidden = true;
+      return;
+    }
+    const snapshot = readLocalSoloSave();
+    if (!snapshot) {
+      migration.hidden = true;
+      return;
+    }
+    migration.hidden = false;
+    if (migrationDescription) {
+      migrationDescription.textContent =
+        `This browser has a solo save: ${describeSnapshot(snapshot)}. Bring it into your account? `
+        + 'This can only be done once, so check it looks right first.';
+    }
+    if (migrationNote) migrationNote.textContent = '';
+    if (!migrationButton) return;
+    migrationButton.hidden = false;
+    migrationButton.disabled = false;
+    migrationButton.textContent = 'Bring it into your account';
+    migrationButton.onclick = async () => {
+      migrationButton.disabled = true;
+      migrationButton.textContent = 'Bringing it in…';
+      if (migrationNote) migrationNote.textContent = '';
+      try {
+        const token = await getToken();
+        if (!token) throw new Error('Your sign-in session could not be refreshed.');
+        const response = await fetch(`${apiUrl}/account/import-solo-save`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify(snapshot),
+        });
+        const result = await response.json() as ImportSoloSaveResponse;
+        if (!response.ok || !result.ok || !result.receipt) {
+          throw new Error(result.error || 'That solo save could not be brought in.');
+        }
+        renderInventory(result.inventory);
+        renderTech(result.tech);
+        renderMigration(result.receipt, getToken);
+        if (migrationNote) {
+          migrationNote.textContent = result.alreadyMigrated
+            ? 'This account already had a solo save on file, so nothing was imported twice.'
+            : 'Brought in — it travels with your account from here on.';
+        }
+      } catch (error) {
+        if (migrationNote) {
+          migrationNote.textContent = error instanceof Error ? error.message : 'That solo save could not be brought in.';
+        }
+        migrationButton.disabled = false;
+        migrationButton.textContent = 'Bring it into your account';
+      }
+    };
   };
 
   const showAccount = (
     account: Account,
     worlds: World[] = [],
     getToken: () => Promise<string | null>,
-    carry?: Pick<AccountResponse, 'inventory' | 'mailbox' | 'claimedMailIds'>,
+    carry?: Pick<AccountResponse, 'inventory' | 'tech' | 'mailbox' | 'claimedMailIds' | 'soloMigration'>,
   ) => {
     if (claim) claim.hidden = true;
     if (displayName) displayName.textContent = account.displayName;
     if (accountId) accountId.textContent = account.id;
     renderWorlds(worlds, account, getToken);
     renderInventory(carry?.inventory);
-    renderMailbox(carry?.mailbox, carry?.claimedMailIds);
+    renderTech(carry?.tech);
+    renderMailbox(carry?.mailbox, carry?.claimedMailIds, getToken);
+    renderMigration(carry?.soloMigration, getToken);
     if (claimed) claimed.hidden = false;
     tell(`Your account is connected. ${worlds.length} world${worlds.length === 1 ? '' : 's'} available.`);
   };

@@ -567,9 +567,12 @@ its saved neighborhood. A valid-looking code with no save is still refused.
 
 Still owed for the full PWMS/economy bridge: more server-validated gathering
 and ways to spend account inventory through shared crafting and building, plus
-the later garden-harvest mirror. `accounts-worlds-and-social.md` defines a
-one-time reviewed migration for old solo saves; continuous client upload stays
-forbidden. A physical mailbox remains a future home/decor ritual, never
+the later garden-harvest mirror. `accounts-worlds-and-social.md` describes a
+one-time reviewed migration for old solo saves; both halves are built —
+`POST /account/import-solo-save` moves inventory through the pouch and
+learned plans through the account tech store (`AccountTechStore`), each under
+the same reserve-then-credit gate. Continuous client upload stays forbidden
+regardless. A physical mailbox remains a future home/decor ritual, never
 delivery plumbing.
 
 ### 3.6 Giving made creations — **S**
@@ -778,9 +781,14 @@ world work.
   slice; still accurate, item 4 (persistence) now done.
 - `accounts-worlds-and-social.md` — the account/world boundary and delivery
   order. **Auth, claims, durable memberships, the account desk, hand-invites,
-  and authenticated world entry shipped 2026-09-15.** Before continuing the
-  authority migration, add one always-reachable in-game **Return to desk**
-  action that leaves the current room and returns to `/account`.
+  authenticated world entry, an in-game Return to desk action, and a reviewed
+  one-time solo-save migration of both inventory and learned techniques
+  (the account tech store) shipped 2026-09-15/17.** The desk inbox is real
+  too — the full mailbox with desk-side parcel collection
+  (`POST /account/claim-mail`, the same exactly-once claim the in-world
+  scrapbook uses). Next up: browser proof of the import and desk flows, the
+  avatar library/editor, and a server credit route for shared-world
+  learning — see `next-session.md`.
 
 The cross-dependency to keep in mind: avatar Phase D (designs over the
 wire) needs multiplayer Phase B (wire the slice) first; everything else in
@@ -841,20 +849,27 @@ and mail is an **inbox, not an address**.
 ## If you only do one thing
 
 **Finish the account-authority migration.** Clerk signup, hand invitations,
-account claims, permanent solo/Shared World membership, the account desk, and
-authenticated world doors are now built. An administrator can email an invite
-or make a one-use link without knowing the friend's email; the friend supplies
-it before Clerk signup. A first-time player is then provisioned at their desk
-without needing a legacy neighborhood code.
+account claims, permanent solo/Shared World membership, the account desk,
+authenticated world doors, an always-reachable in-game **Return to desk**
+action, and a reviewed, idempotent one-time import of local scrapbook
+inventory are now built. An administrator can email an invite or make a
+one-use link without knowing the friend's email; the friend supplies it
+before Clerk signup. A first-time player is then provisioned at their desk
+without needing a legacy neighborhood code, can always get back to it
+cleanly from inside any world, and can bring their solo inventory with them
+once, explicitly, with the counts shown before they confirm.
 
-First, close the small navigation loop with an always-reachable in-game
-**Return to desk** action. Then make the explicit one-time migration preview
-for local scrapbook inventory and learned techniques, and move those accepted
-balances into the account-owned ledger. Keep houses, placed storage, crops,
-and terrain in their world. This is the remaining trust boundary to settle
-before a wider invited playtest; once it is firm, world-local containers,
-crops, and home plots can build on it without inventing a second source of
-truth.
+What is left: learned techniques — **now built (2026-09-17)**. The migration
+records which plan ids a solo save had learned, and the account-owned tech
+store (`AccountTechStore`, carried by the account desk snapshot and granted
+under the import's same reserve-then-credit gate) is their authoritative
+home. Houses, placed storage, crops, and terrain stay in their world. The
+trust boundary is now settled in code; what remains before a wider invited
+playtest is the by-hand browser proof of the import and desk flows, and —
+when the gameplay arrives — a server-side credit route so knowledge earned
+in a Shared World writes to the same store instead of only a local save.
+World-local containers, crops, and home plots can build on it without
+inventing a second source of truth.
 
 Phase 1 is complete as infrastructure. Future furniture, decoration, clothing,
 building, and structure plans are content within their respective creation

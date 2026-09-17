@@ -1,9 +1,37 @@
 # Next Session
 
-Updated 2026-09-16 after the account desk and authenticated world-entry slice.
+Updated 2026-09-17 after the account tech store landed on top of the
+solo-save authority migration.
 Start here.
 
 ## What landed
+
+- **The account tech store.** Learned plans now have an authoritative,
+  account-owned home: `AccountTechStore` (`server/src/accountTech.ts`,
+  `data/account-tech.json`), with the bounded `AccountTech` shape and
+  `sanitizeAccountTech` in the shared protocol and a new
+  `LIMITS.accountPlansMax` (500). `grantPlans` is a union — replaying a
+  grant can never double-count knowledge — and a grant that adds nothing
+  leaves the record byte-identical.
+- **The tech half of the solo-save import.** `importSoloSaveIntoAccount`
+  now grants the snapshot's plan ids through that store under the same
+  reserve-then-credit gate as the pouch: the receipt is still committed
+  first, a second attempt still grants nothing (plans included), and both
+  `/account/me` and `/account/claim` now carry a `tech` record in the
+  account carry snapshot alongside the pouch.
+- **Learned techniques on the desk.** The Scrapbook card shows the
+  account's learned techniques as friendly names (starter plans included —
+  the server stores plan ids opaquely and does not know which are starters,
+  which is deliberate), refreshed immediately after a solo-save import.
+- **The desk inbox is real.** The Mailbox card now shows the whole bounded
+  inbox, not a five-letter preview: waiting parcels come first, each with a
+  **Collect into pouch** button, followed by the chronological record of
+  letters and collected parcels. Collection from the desk funnels through
+  the new authenticated `POST /account/claim-mail` into the same
+  `MailStore.claim` the in-world scrapbook uses — one exactly-once
+  claimed-id record shared by both doors, so a parcel collected here shows
+  as collected in-world and vice versa. The in-game mailbox stays a warm
+  ritual; it stops being the only door.
 
 - **Clerk-backed accounts.** Production sign-in supports the managed identity
   layer while the game keeps its own durable account id. Existing paper
@@ -26,6 +54,33 @@ Start here.
   uses Vercel's callable Node handler, reports non-JSON server failures clearly,
   and uses a Node-ESM-resolvable `.js` import in the compiled function. The
   deployed Solo and Shared World entry buttons are working.
+- **Return to desk.** The Settings overlay (the in-game menu — see
+  `hudMenus.ts`) has an always-reachable "Return to your desk" action under a
+  new "Leaving" section. It calls the same `disconnectSharedSession()` cleanup
+  the "Return to solo play" button already used — leaving the Colyseus room
+  for real, not just navigating away, so no stale presence lingers for anyone
+  still inside — then navigates to `/account/`. The desk URL
+  (`src/net/accountDesk.ts`) is same-origin in production (game and site are
+  one Vercel deploy) and points at the site's own `astro dev` server locally,
+  since the two only share an origin once deployed.
+- **Solo-save authority migration.** The desk's scrapbook card now offers a
+  one-time, reviewable import of a local solo save. `sanitizeSoloMigrationSnapshot`
+  (`shared/src/protocol/validate.ts`) clamps whatever `account.ts` reads out of
+  `localStorage['pencil-and-paper.game-save.v1']` — bounded stacks, bounded bag
+  size, bounded plan-id list — before it ever reaches the server. The player
+  sees the counts (chips, resource/tool/item stacks, learned-plan count) and
+  must explicitly confirm before anything is granted; there is no background
+  upload. `SoloMigrationStore` (`server/src/soloMigration.ts`) reserves the
+  receipt to disk *before* crediting a single unit — `importSoloSaveIntoAccount`
+  in `server/src/accountIdentity.ts` then grants chips/resources/tools/items
+  through the existing `MailStore.grant` primitive, the same one-time-crediting
+  path the Neighborhood Pouch already trusts. A second import attempt (reload,
+  double-click, retry after a network blip) returns the original receipt
+  instead of granting twice. `POST /account/import-solo-save` is the new
+  endpoint; the desk renders the stored receipt afterward with no button left
+  to press. Learned plans recorded in the receipt are now granted into the
+  account tech store under the same one-time gate (see the tech-store bullet
+  above).
 
 ## Verification at closeout
 
@@ -36,21 +91,71 @@ Start here.
   `api/account-entry.js` resolving `lib/gate.js`.
 - Production sign-in, account provisioning, desk world cards, and world entry
   were exercised after deployment by the owner.
+- Return to desk is verified against the root suite only: 519 tests across 49
+  files pass (one pre-existing Playwright-download failure, unrelated — see
+  `pencil-and-paper-sandbox-build` notes), `npx tsc --noEmit` clean,
+  `npm run edge:check` clean, `npx vite build` clean. **Not yet exercised in a
+  real browser** — this session's sandbox cannot run Playwright or reach a
+  deployed environment. The owner should click it once from inside a shared
+  room before trusting it: confirm the avatar actually disappears for the
+  other player and `/account/` loads clean.
+- Solo-save authority migration (previous pass): root suite 570/571 pass across 59
+  files (same pre-existing Playwright-download failure as above, still
+  unrelated), `npx tsc --noEmit` clean, `npx vite build` clean. Server package
+  checked on its own (`server/` copied fresh, its own `npm install`):
+  `npx tsc --noEmit` clean, `npx vitest run` **52/52 pass**, including the new
+  `soloMigration.test.ts` and the `accountIdentity.test.ts` import-flow cases.
+  Site package checked on its own the same way: `npx astro check` is clean for
+  both changed files (`account.astro`, `account.ts`); the 17 errors it reports
+  elsewhere are pre-existing and untouched by this pass (redeclared
+  block-scoped names across unrelated page scripts, plus a `vitest`-types
+  error astro check picks up from a `.test.ts` file — worth a look someday,
+  not blocking); `npx astro build` completes and bundles `account.astro`'s
+  script.
+- Account tech store (this pass): root suite **584/584 pass across 61 files**
+  (that Playwright-download failure did not reproduce this time), root
+  `npx tsc --noEmit` and `npm run edge:check` clean, `npm run build:web`
+  completes. Server package: `npx tsc --noEmit` clean, `npx vitest run`
+  **60/60 pass** including the new `accountTech.test.ts`, the expanded
+  `accountIdentity.test.ts` plan cases, and `sanitizeAccountTech` in the
+  shared protocol tests. Site package: `npx astro check` reports zero
+  diagnostics in the changed files (`account.astro`, `account.ts`) and only
+  the same pre-existing errors elsewhere; `npx astro build` completes. (The
+  checker itself, `@astrojs/check`, was missing from this environment's
+  `site/node_modules` and was installed with `--no-save` to run the gate;
+  `site/package.json` and the lockfile are untouched.) **Still not exercised
+  in a real browser** — the hand proof in "Do this next" item 1 now also
+  covers the learned-techniques list after an import.
+- Desk inbox (same pass, same gates re-run green): the new endpoint is thin
+  glue over `MailStore.claim` (already covered by `mail.test.ts`'s
+  exactly-once cases), so the identity tests cover its collaborators rather
+  than the Express wrapper, matching house style. The bundled account page
+  (`dist/_astro/account.astro_astro_type_script_*.js`) contains the
+  claim-mail call. **By-hand proof owed with the rest of item 1:** receive a
+  parcel (Pip's welcome parcel will do), collect it from the desk, reload,
+  confirm it now reads "parcel collected" and the pouch total rose by the
+  attachment.
 
 ## Do this next
 
-1. **Add Return to desk.** Put an always-reachable action in the in-game menu
-   that leaves the current multiplayer room cleanly and navigates to
-   `/account`. It must not leave stale presence behind or imply the avatar is
-   still standing in the world. This is a small closure task, not a new portal
-   system.
-2. **Resume account authority migration.** Show an explicit, reviewable,
-   idempotent import of the device's scrapbook inventory and learned techniques,
-   then store accepted balances on the account. Do not continuously merge an
-   offline sandbox into authoritative state.
-3. **Continue the desk in dependency order.** Account inventory/tech summary
-   follows the authority migration. Inbox, avatar library/editor, settings,
-   and the social graph remain later slices.
+1. **Still owed on browser proof.** The solo-save import (inventory and now
+   tech) and Return to desk have only been verified against the test/build
+   suite, never a real browser or a real solo save. Play solo long enough to
+   bank a few resources/tools/a learned plan, sign in at the desk, confirm
+   the review counts match, accept, reload, and confirm the receipt, the
+   pouch amounts, and the learned-techniques list all match; then click
+   Return to desk once from inside a shared room and confirm the avatar
+   disappears for the other player.
+2. **Continue the desk in dependency order.** The inventory/tech summary and
+   the inbox (full view, plus desk-side parcel collection via
+   `/account/claim-mail`) are built; the next slice is the avatar
+   library/editor, usable without entering a world. Settings and the social
+   graph remain later slices.
+3. **Give shared-world learning a server credit route.** The tech store's
+   `grantPlans` is the seam; nothing calls it in-world yet, so knowledge
+   earned in a Shared World still lives only in local saves. Wire server-side
+   learning completion (or the first shared crafting slice) to it when that
+   gameplay lands.
 
 ## Watch out for
 
@@ -66,4 +171,7 @@ Start here.
 - `PROTOCOL_VERSION` is 8. Bump it for wire-shape changes, not for the desk-only
   navigation control.
 - Preserve the plain offline/solo sandbox distinction. It must not silently
-  overwrite authoritative account inventory or tech progress.
+  overwrite authoritative account inventory or tech progress — the migration
+  is explicit, reviewed, and one-time by design (`SoloMigrationStore.reserveOnce`
+  writes its receipt before crediting anything, precisely so a second attempt
+  can never double-grant); do not turn it into a background sync.

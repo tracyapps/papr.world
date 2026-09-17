@@ -3,6 +3,7 @@ import { LIMITS } from './constants';
 import {
   sanitizeClaimMail,
   sanitizeAccountInventory,
+  sanitizeAccountTech,
   sanitizeMailAttachment,
   sanitizeMailItem,
   sanitizeMailText,
@@ -50,6 +51,19 @@ describe('mail protocol validation', () => {
     expect(sanitizeAccountInventory({
       revision: 2, chips: 0, resources: { seed: 1.5 }, tools: {}, items: {},
     })).toBeNull();
+  });
+
+  it('accepts bounded tech records and rejects malformed ones', () => {
+    expect(sanitizeAccountTech({ revision: 2, plans: ['kids-scissors', 'kids-scissors'] }))
+      .toEqual({ revision: 2, plans: ['kids-scissors'] });
+    expect(sanitizeAccountTech({ revision: 0, plans: [] })).toBeNull();
+    expect(sanitizeAccountTech({ revision: 2, plans: 'nope' })).toBeNull();
+    expect(sanitizeAccountTech(null)).toBeNull();
+    const oversized = sanitizeAccountTech({
+      revision: 1,
+      plans: Array.from({ length: LIMITS.accountPlansMax + 50 }, (_, index) => `plan-${index}`),
+    });
+    expect(oversized?.plans).toHaveLength(LIMITS.accountPlansMax);
   });
 
   it('accepts a safe mail item while dropping non-primitive payload fields', () => {

@@ -112,6 +112,46 @@ export type AccountInventory = {
   items: Record<string, number>;
 };
 
+/**
+ * Server-owned record of the techniques an account has learned — the
+ * account-scoped half of the knowledge tree ("tech-tree knowledge" in
+ * `docs/accounts-worlds-and-social.md`'s account/world table). Plan ids are
+ * opaque strings here for the same reason `SoloMigrationSnapshot.plans`
+ * keeps them: this shared layer has no recipe catalog, so validation is a
+ * bounded shape, not a membership test.
+ */
+export type AccountTech = {
+  /** Monotonic account-local revision; clients ignore stale snapshots. */
+  revision: number;
+  /** Learned plan ids, deduped, first-seen order, bounded by LIMITS.accountPlansMax. */
+  plans: string[];
+};
+
+/**
+ * What a client reports finding in today's local solo save, for the
+ * account desk to show a human-readable review before importing it.
+ * Unlike `AccountInventory` this is self-reported and never trusted at
+ * face value — see `sanitizeSoloMigrationSnapshot` and
+ * `soloMigrationStackMax`/`soloMigrationBagKeysMax`.
+ */
+export type SoloMigrationSnapshot = {
+  chips: number;
+  resources: Record<string, number>;
+  tools: Record<string, number>;
+  items: Record<string, number>;
+  /** Recipe ids the solo save had learned, starters included — the server
+   *  does not know which ids are starters, so it records them all rather
+   *  than guessing; harmless, since starters are granted to every account
+   *  anyway. */
+  plans: string[];
+};
+
+/** The durable, one-time record of what a solo-save import actually granted. */
+export type SoloMigrationReceipt = SoloMigrationSnapshot & {
+  /** Server epoch ms when the import was reserved (see `SoloMigrationStore`). */
+  at: number;
+};
+
 export type ResourceNode = {
   id: string;
   /** e.g. "scrap.lined", "scrap.cardboard". */
