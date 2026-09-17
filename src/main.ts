@@ -35,6 +35,7 @@ import {
   initializeHudWidgets,
   isHudWidgetInteractionActive,
   refreshHudWidgets,
+  settleDefaultHudWidgetPositions,
   updateCompass,
 } from './ui/hud';
 import { renderMiniMap, resizeMiniMapCanvas, revealMiniMapAround } from './ui/minimap';
@@ -146,6 +147,9 @@ initializeCozyInteractions();
 initializeHarvesting();
 initializeToolActions();
 initializeToolToolbar();
+// The rail the minimap's default position clears only exists from the line
+// above; re-place any widget still sitting on a blind wire-time default.
+settleDefaultHudWidgetPositions();
 initializeInteractionCursor();
 initializeGardenOverlay();
 initializePlacement();

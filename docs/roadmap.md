@@ -772,9 +772,13 @@ world work.
   first-run pass for new players; the shape pipeline now fits artwork from
   any viewBox (58 shapes), and **stamps** landed — 39 pre-drawn details a
   player places, including arms, legs and hair that hang outside the cutout
-  (the sheet grew to 130 × 180 around a 100 × 140 cutout box to make room). Next up is **Phase C — wardrobe UI, then the
-  closet**: C1 is the panel (save slots, rename, duplicate, wear, delete,
-  per-design share toggle); C2 makes the wardrobe a **buildable closet in
+  (the sheet grew to 130 × 180 around a 100 × 140 cutout box to make room). **Phase C1 shipped 2026-09-17**: the
+  wardrobe panel (settings → "Open your wardrobe…") — save slots with
+  previews, wear, rename, duplicate (copies start private), delete, the
+  per-design share toggle, and the full-wardrobe fix: a design that no
+  longer fits is handed to the panel as a pending save so the player
+  replaces a slot on purpose instead of silently losing the work. Next up is **Phase C2 — the
+  closet**: it makes the wardrobe a **buildable closet in
   your house** that displays the looks you chose to share. Tiers are style
   and display only — never capacity (decision 2026-08-15, §2.3).
 - `multiplayer-readiness.md` — the wiring checklist for the first two-player

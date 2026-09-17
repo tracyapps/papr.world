@@ -1,10 +1,32 @@
 # Next Session
 
-Updated 2026-09-17 after the account tech store landed on top of the
-solo-save authority migration.
+Updated 2026-09-17 after the wardrobe panel (avatar Phase C1) and a
+pre-existing HUD layout fix landed on top of the account tech store.
 Start here.
 
 ## What landed
+
+- **The wardrobe panel — avatar Phase C1.** Settings → "Open your wardrobe…"
+  shows every saved look with a rendered preview: wear, rename, duplicate,
+  delete, edit in the studio, and the per-design "Show on my player card"
+  toggle (`sharedOnCard`). Copies start private; the share toggle does not
+  reorder the list. The full-wardrobe rough edge from Phase B is fixed: a
+  design that will not fit is worn anyway and handed to the panel as a
+  pending save — save it into a freed slot, replace an existing look, or
+  keep it worn-only. See `src/ui/avatarEditor/wardrobePanel.ts` and the
+  store's new `renameDesign`/`duplicateDesign`/`setSharedOnCard` seams.
+- **A pre-existing HUD overlap, found and fixed.** `npm run hud:check` —
+  which recent sandbox sessions could not run at all — was failing at HEAD:
+  every fresh player's minimap defaulted to (16, 16), squarely over the
+  tool rail slots. Two causes, both in `src/ui/hud.ts`: the minimap's
+  default position read a `.tool-toolbar` element captured at module scope
+  before the toolbar is built (always null), and even resolved it measured
+  the 160px rail strip rather than the 184px slots box that actually shows.
+  Defaults are now computed lazily from the slots box (transform-aware, so
+  the dock's rail re-scale is included), and
+  `settleDefaultHudWidgetPositions()` re-places widgets still on their
+  wire-time defaults once the rail exists — a saved position is never
+  touched. The check passes again across all 7 viewports × 2 dock states.
 
 - **The account tech store.** Learned plans now have an authoritative,
   account-owned home: `AccountTechStore` (`server/src/accountTech.ts`,
@@ -135,6 +157,19 @@ Start here.
   parcel (Pip's welcome parcel will do), collect it from the desk, reload,
   confirm it now reads "parcel collected" and the pouch total rose by the
   attachment.
+- Wardrobe panel + HUD fix (this pass): root suite **592/592 across 62
+  files** (8 new tests in `src/ui/avatarEditor/wardrobe.test.ts` —
+  round-trips, the wardrobe cap, rename normalization, copy-name bounds,
+  private-by-default duplicates, share toggle without reordering, worn
+  pointer cleanup, corrupt-entry skipping), `npx tsc --noEmit` clean,
+  `npm run styles:check` clean (781 rules, no shadowed declarations),
+  `npm run edge:check` clean, `npx vite build` completes, and
+  `npm run hud:check` passes against a real dev server across 7 viewports ×
+  2 dock states — it was failing at HEAD before the minimap fix above, so
+  run it after pulling. **Not yet clicked in a real browser by hand**: save
+  a few looks, then wear/rename/duplicate/delete/share them from Settings →
+  "Open your wardrobe…", and stuff the wardrobe past 24 looks once to see
+  the pending-save card.
 
 ## Do this next
 
@@ -148,9 +183,15 @@ Start here.
    disappears for the other player.
 2. **Continue the desk in dependency order.** The inventory/tech summary and
    the inbox (full view, plus desk-side parcel collection via
-   `/account/claim-mail`) are built; the next slice is the avatar
-   library/editor, usable without entering a world. Settings and the social
-   graph remain later slices.
+   `/account/claim-mail`) are built, and avatar Phase C1 (the wardrobe
+   panel) is live in-game. The desk's avatar library/editor needs designs
+   stored server-side, so the next slice is **avatar Phase D** — the
+   account-side design store (`sanitizeAvatarDesign` is already the wire
+   validator, `DESIGN_LIMITS.maxBytes` the size cap), `drawingKey`
+   resolution, remote rendering with template fallback, and the one-time
+   device-wardrobe → account import (the same explicit, reviewed pattern as
+   the solo-save migration). Settings and the social graph remain later
+   slices.
 3. **Give shared-world learning a server credit route.** The tech store's
    `grantPlans` is the seam; nothing calls it in-world yet, so knowledge
    earned in a Shared World still lives only in local saves. Wire server-side

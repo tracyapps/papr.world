@@ -18,6 +18,7 @@ import * as THREE from 'three';
 import { setAvatarTexture } from './avatar';
 import { openAvatarEditor } from '../ui/avatarEditor/editor';
 import { designToDataUrl } from '../ui/avatarEditor/render';
+import { openWardrobePanel } from '../ui/avatarEditor/wardrobePanel';
 import { getWornDesign, saveDesign, setWornId } from '../ui/avatarEditor/wardrobe';
 import { DESIGN_SHEET, type AvatarDesign } from '../../shared/src/index';
 
@@ -102,17 +103,21 @@ export function getCurrentDesign(): AvatarDesign | null {
 }
 
 /**
- * Open the editor on the current look. Saving stores it in the wardrobe, marks
- * it worn, and puts it on the avatar immediately.
+ * Open the editor on the current look (or a specific one, from the wardrobe
+ * panel's Edit). Saving stores it in the wardrobe, marks it worn, and puts it
+ * on the avatar immediately.
  */
-export function openAvatarLookEditor(options: { firstRun?: boolean } = {}): void {
+export function openAvatarLookEditor(
+  options: { firstRun?: boolean; design?: AvatarDesign } = {},
+): void {
   openAvatarEditor({
-    initial: currentDesign ?? undefined,
+    initial: options.design ?? currentDesign ?? undefined,
     onSave: ({ design }) => {
       // A full wardrobe must not cost the player the design they just made:
-      // wear it either way and say so.
+      // wear it either way, and hand it to the wardrobe panel so they can
+      // choose a slot to replace instead of reading a console warning.
       if (!saveDesign(design)) {
-        console.warn('avatar look: wardrobe full — wearing without saving');
+        openWardrobePanel({ pendingSave: design, onWear: (toWear) => void wearDesign(toWear) });
       } else {
         setWornId(design.id);
       }

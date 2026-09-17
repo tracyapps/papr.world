@@ -7,7 +7,8 @@ import {
   onSettingsChanged,
   setSetting,
 } from '../game/settings';
-import { openAvatarLookEditor } from '../game/avatarLook';
+import { openAvatarLookEditor, wearDesign } from '../game/avatarLook';
+import { openWardrobePanel } from './avatarEditor/wardrobePanel';
 import { openFeedbackPanel } from './feedbackPanel';
 import { openMultiplayerPanel } from './multiplayerPanel';
 import { disconnectSharedSession } from '../net/sharedSession';
@@ -163,6 +164,12 @@ function buildSettingsOverlay(): HTMLElement {
           Nothing is lost — old looks stay in your wardrobe.
         </small>
       </div>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-open-wardrobe">
+          Open your wardrobe…
+        </button>
+        <small>Wear a saved look again, rename or copy one, or choose which may appear on your player card.</small>
+      </div>
       <h3 class="hud-overlay-subhead">Learning</h3>
       <label class="hud-setting">
         <input type="checkbox" id="setting-learning-timer">
@@ -258,6 +265,15 @@ function buildSettingsOverlay(): HTMLElement {
     // two dialogs and one Escape key. Close first, then hand over.
     closeHudMenu();
     openAvatarLookEditor();
+  });
+
+  const openWardrobe = overlay.querySelector<HTMLButtonElement>('#setting-open-wardrobe');
+  openWardrobe?.addEventListener('click', () => {
+    closeHudMenu();
+    openWardrobePanel({
+      onWear: (design) => void wearDesign(design),
+      onEdit: (design) => openAvatarLookEditor({ design }),
+    });
   });
 
   const learningTimer = overlay.querySelector<HTMLInputElement>('#setting-learning-timer');

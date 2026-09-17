@@ -72,11 +72,20 @@ const miniMapWidget = document.querySelector<HTMLElement>('#mini-map-widget');
 const compassRoseElement = document.querySelector<HTMLElement>('#compass-rose');
 const compassHeadingElement = document.querySelector<HTMLElement>('#compass-heading');
 const professorWidget = document.querySelector<HTMLElement>('#professor-widget');
-// The left tool rail (`hudLayout.ts`'s `--hud-rail-width`), read via its
-// resolved layout box rather than re-parsing the clamp() that sizes it, so
-// the minimap's default position can clear it without duplicating the rail
-// width's own source of truth.
-const toolRailElement = document.querySelector<HTMLElement>('.tool-toolbar');
+
+/**
+ * The left tool rail's visible right edge, for the minimap's default
+ * position. Measured from the SLOTS container rather than the rail strip —
+ * slot art overhangs the strip, and the default must clear what the player
+ * actually sees — and read lazily at use time (transform-aware, so the
+ * dock's rail re-scale is included), because the toolbar is built later in
+ * boot than widgets are wired and a module-scope query never finds it.
+ */
+function leftRailRightEdge(): number {
+  const slots = document.querySelector<HTMLElement>('.tool-toolbar-slots');
+  if (slots) return slots.getBoundingClientRect().right;
+  return document.querySelector<HTMLElement>('.tool-toolbar')?.getBoundingClientRect().right ?? 0;
+}
 
 /** Screen-edge margin used by every widget's default position. */
 const HUD_WIDGET_MARGIN = 16;
@@ -110,12 +119,12 @@ const hudWidgetConfigs: HudWidgetConfig[] = [
     ),
     // Anchored past the left tool rail rather than top-right: the
     // top-right corner is where `#hud-actions` (activity log / help /
-    // settings) sits, so a first-time player who has never dragged the
-    // minimap used to find it hidden under those buttons. Only the
-    // *default* moves — anyone who already dragged the minimap keeps their
-    // saved localStorage position untouched.
+    // settings) sits, so a first-time player who never dragged the minimap
+    // used to find it hidden under those buttons. Only the *default* moves —
+    // anyone who already dragged the minimap keeps their saved localStorage
+    // position untouched.
     defaultPosition: () => ({
-      x: (toolRailElement?.getBoundingClientRect().right ?? 0) + HUD_WIDGET_MARGIN,
+      x: leftRailRightEdge() + HUD_WIDGET_MARGIN,
       y: HUD_WIDGET_MARGIN,
     }),
     afterApply: resizeMiniMapCanvas,
@@ -157,12 +166,19 @@ function getDefaultHudWidgetState(config: HudWidgetConfig): HudWidgetState {
   return base;
 }
 
-function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
-  const fallback = getDefaultHudWidgetState(config);
+/**
+ * Widgets placed by default rather than by the player. Widgets wire before
+ * all HUD chrome exists — the tool rail is built later in boot, and the
+ * minimap's default clears the rail's slots — so a default computed at wire
+ * time can be blind. `settleDefaultHudWidgetPositions` recomputes them once
+ * the late chrome is up.
+ */
+const defaultedWidgetIds = new Set<HudWidgetId>();
 
+function readStoredHudWidgetState(config: HudWidgetConfig): HudWidgetState | null {
   try {
     const stored = localStorage.getItem(getHudWidgetStorageKey(config.id));
-    if (!stored) return fallback;
+    if (!stored) return null;
 
     const parsed = JSON.parse(stored) as Partial<HudWidgetState>;
     const parsedX = parsed.x;
@@ -173,7 +189,7 @@ function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
       || !Number.isFinite(parsedX)
       || !Number.isFinite(parsedY)
     ) {
-      return fallback;
+      return null;
     }
 
     if (config.resizeMode === 'dimensions') {
@@ -185,7 +201,7 @@ function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
         || !Number.isFinite(parsedWidth)
         || !Number.isFinite(parsedHeight)
       ) {
-        return fallback;
+        return null;
       }
       return {
         scale: 1,
@@ -198,7 +214,7 @@ function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
 
     const parsedScale = parsed.scale;
     if (typeof parsedScale !== 'number' || !Number.isFinite(parsedScale)) {
-      return fallback;
+      return null;
     }
 
     return {
@@ -207,13 +223,36 @@ function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
       scale: clamp(parsedScale, config.minScale, config.maxScale),
     };
   } catch {
-    return fallback;
+    return null;
+  }
+}
+
+function loadHudWidgetState(config: HudWidgetConfig): HudWidgetState {
+  const stored = readStoredHudWidgetState(config);
+  if (stored) return stored;
+  defaultedWidgetIds.add(config.id);
+  return getDefaultHudWidgetState(config);
+}
+
+/**
+ * Recompute placement for widgets still sitting on their default position,
+ * once the late-built HUD chrome (the tool rail) exists. A widget the player
+ * has already placed keeps its saved position — this never moves anything a
+ * human chose.
+ */
+export function settleDefaultHudWidgetPositions(): void {
+  for (const id of defaultedWidgetIds) {
+    defaultedWidgetIds.delete(id);
+    const config = getHudWidgetConfig(id);
+    if (config?.element) applyHudWidgetState(config, getDefaultHudWidgetState(config));
   }
 }
 
 function saveHudWidgetState(id: HudWidgetId) {
   const state = hudWidgetStates.get(id);
   if (!state) return;
+  // A saved position is a choice; it is never overridden by a default again.
+  defaultedWidgetIds.delete(id);
 
   try {
     localStorage.setItem(getHudWidgetStorageKey(id), JSON.stringify(state));

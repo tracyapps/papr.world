@@ -4405,6 +4405,143 @@ body.is-feedback-reviewing { overflow: hidden; }
    gives the palettes an artist's table to spread out on, and makes it
    obvious that the world is not listening. */
 
+/* The wardrobe panel (avatar Phase C1): a settings-family card listing every
+   saved look. Previews keep the sheet's proportions; rows wrap their actions
+   so the card stays usable on a narrow window. */
+.avatar-wardrobe-card {
+  max-width: 640px;
+}
+
+.avatar-wardrobe-status {
+  min-height: 1.2em;
+}
+
+.avatar-wardrobe-count {
+  color: #7d6753;
+  margin: 4px 0 10px;
+}
+
+.avatar-wardrobe-empty {
+  color: #7d6753;
+}
+
+.avatar-wardrobe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.avatar-wardrobe-pending {
+  align-items: center;
+  background: #f8f2e2;
+  border: 1px dashed rgba(74, 69, 60, 0.4);
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+}
+
+.avatar-wardrobe-pending strong { display: block; }
+
+.avatar-wardrobe-pending small {
+  color: #7d6753;
+  display: block;
+  margin-top: 2px;
+}
+
+.avatar-wardrobe-pending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.avatar-wardrobe-pending-actions button {
+  background: #f0e7d4;
+  border: 1px solid rgba(74, 69, 60, 0.35);
+  border-radius: 7px;
+  color: #453324;
+  cursor: pointer;
+  font: 600 0.75rem/1.2 system-ui, sans-serif;
+  padding: 5px 10px;
+}
+
+.avatar-wardrobe-pending-actions button[disabled] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.avatar-wardrobe-row {
+  align-items: center;
+  border: 1px solid rgba(74, 69, 60, 0.25);
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.avatar-wardrobe-preview {
+  background: #f4eddc;
+  border-radius: 6px;
+  flex: none;
+  height: 96px;
+  object-fit: contain;
+  width: 70px;
+}
+
+.avatar-wardrobe-row-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-wardrobe-row-details strong { display: block; }
+
+.avatar-wardrobe-row-details small {
+  color: #7d6753;
+  display: block;
+}
+
+.avatar-wardrobe-share {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.avatar-wardrobe-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.avatar-wardrobe-row-actions button {
+  background: #f0e7d4;
+  border: 1px solid rgba(74, 69, 60, 0.35);
+  border-radius: 7px;
+  color: #453324;
+  cursor: pointer;
+  font: 600 0.75rem/1.2 system-ui, sans-serif;
+  padding: 5px 10px;
+}
+
+.avatar-wardrobe-row-actions button:hover:not([disabled]) { background: #f6f1e3; }
+
+.avatar-wardrobe-row-actions button[disabled] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.avatar-wardrobe-rename {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.avatar-wardrobe-rename .avatar-editor-name { flex: 1; min-width: 12ch; }
+
 .avatar-studio {
   padding: 0;
   /* Opaque: the world behind is paused and hidden, not dimmed. */

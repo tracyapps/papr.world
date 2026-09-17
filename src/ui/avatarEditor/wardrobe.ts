@@ -70,6 +70,70 @@ export function deleteDesign(id: string): void {
   if (getWornId() === id) localStorage.removeItem(WORN_KEY);
 }
 
+/**
+ * Rename in place. The name is normalized exactly the way the studio's save
+ * step normalizes it, so a name can never enter the wardrobe through one
+ * door that the other would reject.
+ */
+export function renameDesign(id: string, name: string): AvatarDesign | null {
+  const designs = readAll();
+  const design = designs.find((d) => d.id === id);
+  if (!design) return null;
+  const normalized = name.replace(/\s+/g, ' ').trim().slice(0, DESIGN_LIMITS.nameMaxLength);
+  design.name = normalized.length > 0 ? normalized : 'untitled cutout';
+  design.updatedAt = Date.now();
+  writeAll(designs);
+  return structuredClone(design);
+}
+
+/** "rainy day snail" → "rainy day snail (copy)", always within the name limit. */
+export function duplicateName(name: string): string {
+  const suffix = ' (copy)';
+  if (name.length + suffix.length <= DESIGN_LIMITS.nameMaxLength) return `${name}${suffix}`;
+  return name.slice(0, DESIGN_LIMITS.nameMaxLength - suffix.length) + suffix;
+}
+
+/**
+ * Copy a design into a new slot, or null when the wardrobe is full.
+ *
+ * The copy starts PRIVATE: `sharedOnCard` is opt-in per design (decision
+ * 2026-08-10), and consent must never be inherited silently by a duplicate
+ * the player has not re-read — the copy is re-shared on purpose or not at all.
+ */
+export function duplicateDesign(id: string): AvatarDesign | null {
+  const designs = readAll();
+  const source = designs.find((d) => d.id === id);
+  if (!source || designs.length >= DESIGN_LIMITS.wardrobeMax) return null;
+  const now = Date.now();
+  const copy: AvatarDesign = {
+    ...structuredClone(source),
+    id: crypto.randomUUID(),
+    name: duplicateName(source.name),
+    sharedOnCard: false,
+    createdAt: now,
+    updatedAt: now,
+  };
+  designs.push(copy);
+  writeAll(designs);
+  return structuredClone(copy);
+}
+
+/**
+ * The per-design consent flag (docs/avatar-and-identity.md §2.2).
+ *
+ * Deliberately does NOT bump `updatedAt`: sharing is a setting *about* the
+ * design, not a change to it, and a wardrobe that quietly reorders itself
+ * every time a toggle flips feels unstable for no reason.
+ */
+export function setSharedOnCard(id: string, shared: boolean): AvatarDesign | null {
+  const designs = readAll();
+  const design = designs.find((d) => d.id === id);
+  if (!design) return null;
+  design.sharedOnCard = shared;
+  writeAll(designs);
+  return structuredClone(design);
+}
+
 export function getWornId(): string | null {
   return localStorage.getItem(WORN_KEY);
 }

@@ -494,12 +494,18 @@ papr.world model (all-opt-in decision):
   Nothing here runs per frame — one raster per design change, cached on the
   material. ✅ your drawing walks around with a correct cutout shadow.
 - **C. Wardrobe UI + the closet** (§2.3) — in two halves, in this order:
-  - **C1, the panel:** save slots, rename, duplicate, wear, delete, and the
-    per-design "share this look" toggle (writes `sharedOnCard`). Opened from
-    the settings overlay. Also fixes the Phase B rough edge: a design saved
-    into a full wardrobe is currently *worn but not saved* with only a
-    console warning — the player must be told, and offered a slot to
-    replace. ✅ when: switching looks is two clicks and survives reload.
+  - **C1, the panel: ✅ shipped 2026-09-17.** `src/ui/avatarEditor/wardrobePanel.ts`,
+    opened from the settings overlay ("Open your wardrobe…"): every saved
+    look in one list with a rendered preview, wear / rename / duplicate /
+    delete / edit, and the per-design "Show on my player card" toggle
+    (writes `sharedOnCard` through the wardrobe store, which deliberately
+    does not bump `updatedAt` — a consent flag must not reorder the list).
+    Duplicates start private (consent is opt-in per design, never
+    inherited). The Phase B rough edge is fixed: a design that no longer
+    fits is worn anyway and handed to the panel as a *pending save*, where
+    the player saves it into a freed slot, replaces an existing look, or
+    keeps it worn-only — never a silent loss. ✅ acceptance held: switching
+    looks is two clicks and survives reload.
   - **C2, the closet:** a `wardrobe` build piece in `buildPieces.ts`
     (solid, `overlap: 'none'`), placed like any other; walking up and using
     it opens the same panel. Tiers are separate template keys, not a level
