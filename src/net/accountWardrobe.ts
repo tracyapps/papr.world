@@ -179,11 +179,16 @@ function publish(status: WardrobeSyncStatus): void {
 }
 
 /** Flush hook for pagehide; set once sync is running. */
-let flushNow: (() => void) | null = null;
+let flushNow: (() => Promise<void>) | null = null;
 
-/** Push anything waiting right away (the studio calls this on close). */
-export function flushWardrobeSync(): void {
-  flushNow?.();
+/**
+ * Push anything waiting right away (the studio calls this on close). The
+ * promise settles when the account has it — or after `maxWaitMs`, so a
+ * caller about to navigate away never hangs on a slow network.
+ */
+export function flushWardrobeSync(maxWaitMs = 4000): Promise<void> {
+  const pending = flushNow?.() ?? Promise.resolve();
+  return Promise.race([pending, new Promise<void>((resolve) => setTimeout(resolve, maxWaitMs))]);
 }
 
 /**
@@ -289,6 +294,8 @@ export async function startAccountWardrobeSync(options: SyncOptions = {}): Promi
   // ── Then, follow every change ─────────────────────────────────────────
   const waiting = new Map<string, AvatarDesign>();
   let timer: ReturnType<typeof setTimeout> | null = null;
+  /** One push at a time, in order. */
+  let draining: Promise<void> = Promise.resolve();
 
   const drain = async () => {
     timer = null;
@@ -325,10 +332,14 @@ export async function startAccountWardrobeSync(options: SyncOptions = {}): Promi
     if (!timer) waitingSince = now;
     else if (now - waitingSince >= PUSH_MAX_WAIT_MS) return; // let the pending push happen
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => void drain(), delay);
+    timer = setTimeout(() => {
+      timer = null;
+      draining = draining.then(drain);
+    }, delay);
   };
 
   onWardrobeChange((change: WardrobeChange) => {
+    if (change.kind === 'pulled') return;
     if (change.kind === 'saved') {
       waiting.set(change.design.id, change.design);
       pendingDeletes = pendingDeletes.filter((id) => id !== change.design.id);
@@ -341,15 +352,17 @@ export async function startAccountWardrobeSync(options: SyncOptions = {}): Promi
   });
 
   flushNow = () => {
-    if (waiting.size > 0 || pendingDeletes.length > 0) {
+    if (timer || waiting.size > 0 || pendingDeletes.length > 0) {
       if (timer) clearTimeout(timer);
-      void drain();
+      timer = null;
+      draining = draining.then(drain);
     }
+    return draining;
   };
   // Leaving the page (or backgrounding it on a phone) sends what is waiting.
-  window.addEventListener('pagehide', () => flushNow?.());
+  window.addEventListener('pagehide', () => void flushNow?.());
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flushNow?.();
+    if (document.visibilityState === 'hidden') void flushNow?.();
   });
   window.addEventListener('online', () => schedule(500));
 }

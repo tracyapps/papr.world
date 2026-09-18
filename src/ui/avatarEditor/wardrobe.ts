@@ -46,12 +46,15 @@ function writeAll(designs: AvatarDesign[]): void {
  * The account sync (src/net/accountWardrobe.ts) listens here so every save —
  * the studio's autosave included — travels to the account without each
  * caller having to remember to send it. Changes that arrive FROM the account
- * are written with `applyAccountWardrobe` and deliberately do not emit, or
- * a pull would echo straight back out as a push.
+ * are written with `applyAccountWardrobe`, which emits only `pulled` — the
+ * sync ignores that kind, or a pull would echo straight back out as a push.
+ * Anything that SHOWS the wardrobe should redraw on every kind.
  */
 export type WardrobeChange =
   | { kind: 'saved'; design: AvatarDesign }
-  | { kind: 'deleted'; id: string };
+  | { kind: 'deleted'; id: string }
+  /** Looks arrived from the account. Lists should redraw; sync ignores it. */
+  | { kind: 'pulled' };
 
 const changeListeners = new Set<(change: WardrobeChange) => void>();
 
@@ -93,6 +96,7 @@ export function applyAccountWardrobe(
   }
   writeAll(designs);
   if (remove.has(getWornId() ?? '')) localStorage.removeItem(WORN_KEY);
+  emitChange({ kind: 'pulled' });
   return { skipped };
 }
 

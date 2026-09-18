@@ -1,3 +1,4 @@
+import { flushWardrobeSync } from '../net/accountWardrobe';
 import {
   CAMERA_SENSITIVITY_MAX,
   CAMERA_SENSITIVITY_MIN,
@@ -372,7 +373,8 @@ function buildSettingsOverlay(): HTMLElement {
     // real before navigating, so no stale presence lingers for anyone still
     // inside. Safe to call even when never connected (plain solo play).
     disconnectSharedSession();
-    window.location.assign(accountDeskUrl());
+    // Let the account receive any look saved moments ago before the desk reads it.
+    void flushWardrobeSync().then(() => window.location.assign(accountDeskUrl()));
   });
   return overlay;
 }

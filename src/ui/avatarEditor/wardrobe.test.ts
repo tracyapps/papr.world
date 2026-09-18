@@ -127,7 +127,8 @@ describe('wardrobe change events (what the account sync listens to)', () => {
     const { onWardrobeChange } = await import('./wardrobe');
     const seen: string[] = [];
     const stop = onWardrobeChange((change) => {
-      seen.push(change.kind === 'saved' ? `saved:${change.design.id}` : `deleted:${change.id}`);
+      if (change.kind === 'saved') seen.push(`saved:${change.design.id}`);
+      else if (change.kind === 'deleted') seen.push(`deleted:${change.id}`);
     });
     saveDesign(design('a'));
     renameDesign('a', 'new name');
@@ -144,7 +145,7 @@ describe('wardrobe change events (what the account sync listens to)', () => {
     const stop = onWardrobeChange((change) => seen.push(change));
     applyAccountWardrobe([design('from-account', { updatedAt: 5_000 })], ['old']);
     stop();
-    expect(seen).toEqual([]);
+    expect(seen).toEqual([{ kind: 'pulled' }]);
     expect(listDesigns().map((entry) => entry.id)).toEqual(['from-account']);
   });
 });

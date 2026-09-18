@@ -1,3 +1,4 @@
+import { flushWardrobeSync } from '../net/accountWardrobe';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { accountDeskUrl } from '../net/accountDesk';
 import { disconnectSharedSession } from '../net/sharedSession';
@@ -103,7 +104,8 @@ export function initializeActivityLog() {
   // when they're looking for the way out, not the settings cog.
   drawer.querySelector<HTMLButtonElement>('#activity-log-return-to-desk')?.addEventListener('click', () => {
     disconnectSharedSession();
-    window.location.assign(accountDeskUrl());
+    // Let the account receive any look saved moments ago before the desk reads it.
+    void flushWardrobeSync().then(() => window.location.assign(accountDeskUrl()));
   });
   for (const eventName of ['pointerdown', 'pointerup', 'wheel'] as const) {
     drawer.addEventListener(eventName, (event) => event.stopPropagation());

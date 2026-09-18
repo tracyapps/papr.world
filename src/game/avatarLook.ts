@@ -132,7 +132,7 @@ export function openAvatarLookEditor(
       }
       localStorage.setItem(FIRST_RUN_KEY, '1');
       void wearDesign(design);
-      flushWardrobeSync();
+      void flushWardrobeSync();
     },
     onCancel: (result) => {
       // Skipping first-run is a real choice, not a postponement — the
@@ -145,13 +145,15 @@ export function openAvatarLookEditor(
       const design = result.design;
       if (design) {
         const wornId = getWornId();
-        const wearIt = wornId === design.id || (!wornId && result.changed);
+        // "Save to wardrobe" never changes what you wear — it only refreshes
+        // the look if it IS the one you are wearing.
+        const wearIt = wornId === design.id || (!wornId && result.changed && !result.savedOnly);
         if (wearIt && (result.changed || currentDesign?.id !== design.id)) {
           setWornId(design.id);
           void wearDesign(design);
         }
       }
-      flushWardrobeSync();
+      void flushWardrobeSync();
     },
   });
 }

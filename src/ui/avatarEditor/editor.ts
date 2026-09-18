@@ -81,7 +81,7 @@ export type AvatarEditorOptions = {
    * `design` differs from what was there when the studio opened, and
    * `design` is null when the player chose "Undo my changes" on a new look.
    */
-  onCancel?: (result: { design: AvatarDesign | null; changed: boolean }) => void;
+  onCancel?: (result: { design: AvatarDesign | null; changed: boolean; savedOnly?: boolean }) => void;
 };
 
 /**
@@ -579,6 +579,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
           <p class="avatar-editor-autosave" data-role="autosave">Saves as you go</p>
           <button type="button" data-action="revert">Undo my changes</button>
           <button type="button" data-action="cancel">Close</button>
+          <button type="button" data-action="save-only">Save to wardrobe</button>
           <button type="button" class="avatar-editor-save" data-action="save">Save &amp; wear</button>
         </div>
       </div>
@@ -1636,6 +1637,20 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
         undoThisVisit();
         close();
         options.onCancel?.({ design: original ? structuredClone(original) : null, changed: false });
+      }
+      if (action === 'save-only') {
+        // Keep it, finish, but do not change what you are wearing.
+        design.name = nameInput.value.replace(/\s+/g, ' ').trim() || 'untitled cutout';
+        design.updatedAt = Date.now();
+        const saved = structuredClone(design);
+        if (!saveDesign(saved)) {
+          announce('Your wardrobe is stuffed — delete a look there first. This one is kept as a draft.');
+          writeDraft(saved);
+          return;
+        }
+        clearDraft(design.id);
+        close();
+        options.onCancel?.({ design: saved, changed: true, savedOnly: true });
       }
       if (action === 'save') {
         design.name = nameInput.value.replace(/\s+/g, ' ').trim() || 'untitled cutout';

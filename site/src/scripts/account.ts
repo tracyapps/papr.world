@@ -609,8 +609,21 @@ if (shell) {
     };
   };
 
+  let wardrobeRefreshWired = false;
   const loadWardrobe = async (getToken: () => Promise<string | null>) => {
     wireStudioButton(getToken);
+    // Coming back from the studio or a world (a new tab, the back button, or
+    // switching tabs) re-reads the list, so a look saved moments ago shows up
+    // without a manual reload.
+    if (!wardrobeRefreshWired) {
+      wardrobeRefreshWired = true;
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted) void loadWardrobe(getToken);
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void loadWardrobe(getToken);
+      });
+    }
     try {
       const token = await getToken();
       if (!token) return;

@@ -22,6 +22,7 @@ import {
   listDesigns,
   renameDesign,
   saveDesign,
+  onWardrobeChange,
   setSharedOnCard,
   setWornId,
 } from './wardrobe';
@@ -75,6 +76,7 @@ export function openWardrobePanel(options: WardrobePanelOptions = {}): void {
   };
 
   const close = () => {
+    stopListening();
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('keydown', swallowStrayKeys, true);
     window.removeEventListener('keyup', swallowStrayKeys, true);
@@ -316,6 +318,14 @@ export function openWardrobePanel(options: WardrobePanelOptions = {}): void {
   for (const eventName of ['pointerdown', 'pointerup', 'wheel', 'click', 'contextmenu'] as const) {
     overlay.addEventListener(eventName, (event) => event.stopPropagation());
   }
+
+  // The list is always the wardrobe as it is NOW: a save from the studio, an
+  // autosave, or looks arriving from the account redraw it while it is open.
+  // (Not mid-rename — redrawing would throw away what is being typed.)
+  const stopListening = onWardrobeChange(() => {
+    if (overlay.querySelector('.avatar-wardrobe-rename')) return;
+    render();
+  });
 
   document.body.appendChild(overlay);
   window.addEventListener('keydown', swallowStrayKeys, true);

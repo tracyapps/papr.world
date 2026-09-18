@@ -57,11 +57,14 @@ const edit = (design?: AvatarDesign) => {
       } else {
         wear(saved);
       }
-      flushWardrobeSync();
+      void flushWardrobeSync();
     },
-    onCancel: () => {
+    onCancel: (result) => {
+      if (result.savedOnly && result.design) {
+        syncNote.textContent = `Saved “${result.design.name}” to your wardrobe.`;
+      }
       render();
-      flushWardrobeSync();
+      void flushWardrobeSync();
     },
   });
 };
@@ -120,5 +123,20 @@ $('[data-action="wardrobe"]').addEventListener('click', () => {
 // Anything that changes the wardrobe — the studio's autosave, the wardrobe
 // panel, or a pull from the account — redraws the list.
 onWardrobeChange(() => render());
+// Coming back to this tab (or back/forward into it) shows the latest too.
+window.addEventListener('pageshow', () => render());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') render();
+});
+
+// "Back to My desk": let the account finish receiving the latest save first,
+// so the desk's list is not read a moment before the look arrives.
+const back = root.querySelector<HTMLAnchorElement>('.studio-page-back');
+back?.addEventListener('click', (event) => {
+  event.preventDefault();
+  back.textContent = 'Saving, then back to My desk…';
+  back.setAttribute('aria-disabled', 'true');
+  void flushWardrobeSync().then(() => window.location.assign(back.href));
+});
 render();
 void startAccountWardrobeSync({ onPulled: render }).then(render);
