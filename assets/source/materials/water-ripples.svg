@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<style>
+:root {
+  --background: #2E6E86;
+  --foreground-01: #5FA6BC;
+  --foreground-02: #9FD3DE;
+}
+</style>
+<defs>
+<filter id="grain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="46" numOctaves="1" seed="5501" result="t"/>
+<feColorMatrix in="t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.34" result="c"/>
+<feComposite in="c" in2="SourceAlpha" operator="in" result="x"/>
+<feBlend in="x" in2="SourceGraphic" mode="overlay"/>
+</filter>
+
+</defs>
+<g filter="url(#grain)">
+<rect x="0" y="0" width="512" height="512" fill="var(--background)"/>
+<g opacity="0.85"><path d="M0 8 Q 64 -8 128 8 T 256 8 T 384 8 T 512 8" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="7"/><path d="M0 52 Q 64 36 128 52 T 256 52 T 384 52 T 512 52" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="5.4"/><path d="M0 96 Q 64 80 128 96 T 256 96 T 384 96 T 512 96" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="3.8"/><path d="M0 140 Q 64 124 128 140 T 256 140 T 384 140 T 512 140" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="7"/><path d="M0 184 Q 64 168 128 184 T 256 184 T 384 184 T 512 184" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="5.4"/><path d="M0 228 Q 64 212 128 228 T 256 228 T 384 228 T 512 228" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="3.8"/><path d="M0 272 Q 64 256 128 272 T 256 272 T 384 272 T 512 272" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="7"/><path d="M0 316 Q 64 300 128 316 T 256 316 T 384 316 T 512 316" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="5.4"/><path d="M0 360 Q 64 344 128 360 T 256 360 T 384 360 T 512 360" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="3.8"/><path d="M0 404 Q 64 388 128 404 T 256 404 T 384 404 T 512 404" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="7"/><path d="M0 448 Q 64 432 128 448 T 256 448 T 384 448 T 512 448" fill="none" opacity="0.7" stroke="var(--foreground-01)" stroke-width="5.4"/><path d="M0 492 Q 64 476 128 492 T 256 492 T 384 492 T 512 492" fill="none" opacity="0.7" stroke="var(--foreground-02)" stroke-width="3.8"/></g>
+</g>
+</svg>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<style>
+:root {
+  --background: #FFFFFF;
+  --foreground-01: #23301a;
+  --foreground-02: #44562a;
+  --foreground-03: #6d7f42;
+  --foreground-04: #8f9455;
+}
+</style>
+<!--
+  Jungle loam — the tropics' own wet-ground soil, dark and green where
+  ochre paperclay is warm and orange. Follows the resource-tile authoring
+  rules: every tweakable colour on :root, read with var().
+-->
+<rect x="0" y="0" width="512" height="512" fill="var(--background)"/>
+<rect x="-6" y="-6" width="523" height="523" fill="var(--foreground-01)"/>
+<!-- Wet leaf-mould clods: overlapping soft blobs in two greens. -->
+<g fill="var(--foreground-02)">
+  <ellipse cx="64" cy="70" rx="52" ry="38" transform="rotate(-14 64 70)"/>
+  <ellipse cx="178" cy="46" rx="44" ry="30" transform="rotate(9 178 46)"/>
+  <ellipse cx="292" cy="74" rx="56" ry="36" transform="rotate(-6 292 74)"/>
+  <ellipse cx="416" cy="52" rx="46" ry="32" transform="rotate(15 416 52)"/>
+  <ellipse cx="36" cy="196" rx="48" ry="34" transform="rotate(7 36 196)"/>
+  <ellipse cx="158" cy="172" rx="58" ry="40" transform="rotate(-11 158 172)"/>
+  <ellipse cx="284" cy="198" rx="46" ry="32" transform="rotate(12 284 198)"/>
+  <ellipse cx="406" cy="174" rx="52" ry="36" transform="rotate(-8 406 174)"/>
+  <ellipse cx="70" cy="322" rx="50" ry="34" transform="rotate(-13 70 322)"/>
+  <ellipse cx="196" cy="300" rx="44" ry="30" transform="rotate(8 196 300)"/>
+  <ellipse cx="318" cy="326" rx="56" ry="38" transform="rotate(-5 318 326)"/>
+  <ellipse cx="440" cy="300" rx="44" ry="30" transform="rotate(11 440 300)"/>
+  <ellipse cx="48" cy="444" rx="52" ry="36" transform="rotate(6 48 444)"/>
+  <ellipse cx="172" cy="424" rx="46" ry="32" transform="rotate(-9 172 424)"/>
+  <ellipse cx="300" cy="448" rx="54" ry="36" transform="rotate(13 300 448)"/>
+  <ellipse cx="424" cy="422" rx="48" ry="34" transform="rotate(-7 424 422)"/>
+</g>
+<!-- Drier crumbs catching light on the clod edges. -->
+<g fill="var(--foreground-03)">
+  <ellipse cx="96" cy="104" rx="26" ry="16" transform="rotate(-20 96 104)"/>
+  <ellipse cx="322" cy="106" rx="28" ry="17" transform="rotate(24 322 106)"/>
+  <ellipse cx="126" cy="204" rx="25" ry="15" transform="rotate(14 126 204)"/>
+  <ellipse cx="438" cy="210" rx="24" ry="15" transform="rotate(-17 438 210)"/>
+  <ellipse cx="228" cy="332" rx="27" ry="16" transform="rotate(-12 228 332)"/>
+  <ellipse cx="348" cy="356" rx="24" ry="15" transform="rotate(19 348 356)"/>
+  <ellipse cx="86" cy="474" rx="26" ry="16" transform="rotate(-22 86 474)"/>
+  <ellipse cx="334" cy="478" rx="25" ry="15" transform="rotate(10 334 478)"/>
+</g>
+<!-- Leaf-litter flecks: small bright slivers a scatter of fallen fronds leaves behind. -->
+<g fill="var(--foreground-04)">
+  <rect x="140" y="122" width="26" height="7" rx="3.5" transform="rotate(-28 140 122)"/>
+  <rect x="352" y="140" width="22" height="6" rx="3" transform="rotate(35 352 140)"/>
+  <rect x="60" y="262" width="24" height="6" rx="3" transform="rotate(18 60 262)"/>
+  <rect x="248" y="248" width="20" height="6" rx="3" transform="rotate(-40 248 248)"/>
+  <rect x="452" y="340" width="25" height="7" rx="3.5" transform="rotate(8 452 340)"/>
+  <rect x="160" y="368" width="22" height="6" rx="3" transform="rotate(-15 160 368)"/>
+  <rect x="382" y="452" width="24" height="6" rx="3" transform="rotate(30 382 452)"/>
+  <rect x="256" y="440" width="20" height="6" rx="3" transform="rotate(-24 256 440)"/>
+</g>
+</svg>

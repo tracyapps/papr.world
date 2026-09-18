@@ -56,6 +56,9 @@ export type TreeKind =
   | 'palm-3'
   | 'palm-4'
   | 'palm-5'
+  | 'banana-1'
+  | 'jungle-1'
+  | 'jungle-2'
   | 'redwood-1'
   | 'redwood-2'
   | 'redwood-3'
@@ -67,7 +70,9 @@ export type TreeKind =
 /**
  * Non-interactive scenery cutouts: decorative like a tree, but never
  * trimmable/harvestable/growable. Cactus lives here rather than in
- * `TreeKind` so desert scenery never enters the tree-growth economy.
+ * `TreeKind` so desert scenery never enters the tree-growth economy — and
+ * so do the biome undergrowth plants (ferns, flowers, shrubs, boulders),
+ * which share a page's scenery budget without joining its yields.
  */
 export type DecorKind =
   | 'cactus-1'
@@ -77,7 +82,34 @@ export type DecorKind =
   | 'cactus-5'
   | 'cactus-6'
   | 'cactus-7'
-  | 'cactus-8';
+  | 'cactus-8'
+  // Dunes understory: succulents, dry shrubs, and one hardy flower.
+  | 'agave-1'
+  | 'agave-2'
+  | 'prickly-pear-1'
+  | 'shrub-desert-1'
+  | 'shrub-desert-2'
+  | 'marigold-1'
+  // Forest floor: ferns, fungi, a berry shrub, and one mossy rock.
+  | 'fern-1'
+  | 'fern-2'
+  | 'fern-3'
+  | 'mushroom-1'
+  | 'mushroom-2'
+  | 'berry-shrub-1'
+  | 'boulder-mossy-1'
+  // Tropical understory: the broadleaf plant the biome plan asked for,
+  // jungle shrubs, its three signature flowers, bamboo, and mangrove.
+  | 'broadleaf-plant-1'
+  | 'broadleaf-plant-2'
+  | 'shrub-tropical-1'
+  | 'shrub-tropical-2'
+  | 'shrub-tropical-3'
+  | 'hibiscus-1'
+  | 'anthurium-1'
+  | 'bird-of-paradise-1'
+  | 'bamboo-1'
+  | 'mangrove-1';
 
 export type HarvestVisual =
   | 'fiberTuft'

@@ -278,6 +278,17 @@ const SPECIES_IDLE: Record<CritterSpecies, WeightedAction[]> = {
     { id: 'settle', weight: 2 },
     { id: 'groom', weight: 2 },
   ],
+  // Parrot idles are social and busy — the head-cock glance and the
+  // one-legged settle, with plenty of preening between. (The one-leg pose
+  // is the rig's preen swing plus settle; no dedicated pose yet.)
+  parrot: [
+    { id: 'look-around', weight: 5 },
+    { id: 'groom', weight: 5 },
+    { id: 'perk-up', weight: 4 },
+    { id: 'settle', weight: 3 },
+    { id: 'sniff-ground', weight: 2 },
+    { id: 'shake-off', weight: 1 },
+  ],
 };
 
 /**

@@ -712,6 +712,27 @@ persistence remain.
 
 ---
 
+## Side build — The tropical biome — ✅ built (2026-09-18)
+
+<!-- site: title: The tropical biome -->
+<!-- site: summary: The sixth biome, warm and wet and crowded: palms in a real canopy, a parrot flagship, its own loam and folded stone, and the biggest art drop yet wired end to end. -->
+
+Tracked in its own doc (`tropical-biome-plan.md`, which now carries the build
+notes) rather than a numbered phase, because it was a content build gated on
+art rather than a system. The owner's art drop of 35 props and 15 papers is
+what it was waiting on. What landed: `tropical` in every exhaustive
+`Record<Biome, …>` table; a field mix of
+`meadow 34 · dunes 23 · forest 17 · scrapflats 16 · tropical 11` tuned with
+the sampler (the altitude split — tropical wet-low, forest wet-high — is what
+kept the redwoods from starving); a parrot flagship; `banana`/`jungle` trees
+in the canopy; `jungle-loam` scattered and `rainfold-pebbles` dug; tomato
+seed packets finding the warm ground; and understory decor for dunes, forest,
+and the tropics, plus river-reed/flower/duckweed shoreline work in
+`water.ts`. Deliberately left: hanging vines (want canopy anchors — vertical
+space), and the banana tree as the first wild food source (its own slice).
+
+---
+
 ## Phase 5 — Deferred: map, then underground
 
 <!-- site: title: The map, then underground -->
@@ -812,6 +833,8 @@ useful part, because it tells you what would have to change for it to move.
 | Idea | Parked because |
 | --- | --- |
 | Diary annotation and highlighting UI | Needs a diary with entries in it first (2.4). The *data shape* is not parked. |
+| Canopy layer — hanging vines, epiphytes | Art exists (`hanging-vine-*`, compiled) but a ground-plane cutout cannot hang; wants anchor points above ground level, the first vertical-space system. See the tropical plan's build notes. |
+| Wild food — the banana tree's fruit drop | Food today comes only from plants a player grew; the first wild source changes what food *means*, so it is its own slice, not a trim yield. |
 | Player-authored plans and a marketplace | Version-two at the earliest. Constrains today only in that plan ids, recipe shape, and output type must stay open rather than enumerated. |
 | Clothing, including the light-up mining helmet | Wants the `affix` verb and the plan engine generalised past tools. Delightful, not foundational. |
 | Houses, multi-storey building, furniture | Wants `build`, `disassemble`, and placed-entity persistence. The mailbox (3.5) is the cheapest excuse to build that persistence. Design intent now captured in `land-and-dwellings.md` — read it before starting, since spacing and maker-id are cheap now and expensive later. |

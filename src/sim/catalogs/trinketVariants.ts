@@ -82,6 +82,11 @@ const PALETTES: PaletteSeed[] = [
   { name: 'Autumnash', base: '#d1663a', accent: '#9c4120', detail: '#f2c14e', season: 'autumn' },
   { name: 'Springbud', base: '#c98fb0', accent: '#9a6284', detail: '#e8cfe0', season: 'spring' },
   { name: 'Summerskip', base: '#9aa7a0', accent: '#6d7a73', detail: '#cdd7d2', season: 'summer' },
+  // The tropical batch (2026-09-18), wearing the biome's own new papers so
+  // a handful of jungle keepsakes reads as jungle from across the shelf.
+  { name: 'Hibiscus', base: '#e0576a', accent: '#a03048', detail: '#f7c9cf', textureUrl: `${M}/flower-scatter.png` },
+  { name: 'Parrot', base: '#3fae5a', accent: '#1f7a3c', detail: '#f2c14e', textureUrl: `${M}/tropical-frond.png` },
+  { name: 'Lagoon', base: '#4fa8a8', accent: '#2f7a80', detail: '#d8f0ec', textureUrl: `${M}/water-ripples.png` },
 ];
 
 type ShapeSeed = {

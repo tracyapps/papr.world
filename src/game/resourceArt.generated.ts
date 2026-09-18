@@ -410,6 +410,30 @@ export const GENERATED_RESOURCE_ART = {
       }
     ]
   },
+  "jungle-loam": {
+    "surfaceUrl": "/assets/runtime/materials/resources/soil/jungle-loam.png",
+    "colorways": [],
+    "looseTemplate": "soil",
+    "orientation": "flat",
+    "variants": [
+      {
+        "sourceUrl": "/assets/runtime/resources/jungle-loam/loose-01.png",
+        "aspectRatio": 1.3571428571428572
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/jungle-loam/loose-02.png",
+        "aspectRatio": 1.3571428571428572
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/jungle-loam/loose-03.png",
+        "aspectRatio": 1.3571428571428572
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/jungle-loam/loose-04.png",
+        "aspectRatio": 1.3571428571428572
+      }
+    ]
+  },
   "ochre-paperclay": {
     "surfaceUrl": "/assets/runtime/materials/resources/soil/ochre-paperclay.png",
     "colorways": [],
@@ -718,6 +742,38 @@ export const GENERATED_RESOURCE_ART = {
       },
       {
         "sourceUrl": "/assets/runtime/resources/quartz/loose-06.png",
+        "aspectRatio": 1.2
+      }
+    ]
+  },
+  "rainfold-pebbles": {
+    "surfaceUrl": "/assets/runtime/materials/resources/stone/rainfold-pebbles.png",
+    "colorways": [],
+    "looseTemplate": "stone",
+    "orientation": "flat",
+    "variants": [
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-01.png",
+        "aspectRatio": 1.2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-02.png",
+        "aspectRatio": 1.2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-03.png",
+        "aspectRatio": 1.2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-04.png",
+        "aspectRatio": 1.2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-05.png",
+        "aspectRatio": 1.2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/rainfold-pebbles/loose-06.png",
         "aspectRatio": 1.2
       }
     ]

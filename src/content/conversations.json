@@ -118,6 +118,19 @@
         "The wind is on your side. I will permit it.",
         "I followed your trail here for fun. Do not read into it. (Read into it.)",
         "Hello. I have been practicing being mysterious and may have overdone it."
+      ],
+      "parrot": [
+        "Hello! Hello! I have been saying that to the trees for practice, and you are a much better audience.",
+        "You walked the whole way here? I only had to fly. No offense meant to your legs.",
+        "I repeat everything the jungle says, but with better timing.",
+        "Careful what you say around me. I keep it forever and I quote it at parties.",
+        "A visitor! The flock will want a full report. I intend to embellish it.",
+        "I was mid-argument with a hibiscus. You are a far more reasonable listener.",
+        "You look like someone with snacks. I said it out loud because I am honest.",
+        "The canopy said somebody was coming. The canopy is never wrong, only dramatic.",
+        "I learned a new word today. I will use it whether it fits or not.",
+        "Finally, someone new to talk at. The other parrots have heard all my material.",
+        "I saw you from three trees away and flew zero of them. Efficiency."
       ]
     },
     "placeFacts": {
@@ -185,6 +198,19 @@
         "Nothing here is trash. It is material between drafts.",
         "The flats are a library where the pages fell out and got the good ideas.",
         "Match two torn edges and you have solved a small, satisfying crime."
+      ],
+      "tropical": [
+        "Everything here grows in the loud green. The jungle does not have an indoor voice.",
+        "The banana trees fold their leaves at night like they are closing up a small shop.",
+        "Hibiscus blossoms only last a day, so the jungle hands them out like compliments.",
+        "The loam is always damp. The ground here has never once been in a hurry to dry.",
+        "Rainfold pebbles get their crease from rain that fell, folded, and stayed for the climate.",
+        "Mangroves stand on their toes in the wet ground and pretend it is a perfectly normal way to live.",
+        "Bamboo grows faster than gossip, and the jungle gossips constantly.",
+        "Somewhere in the canopy a parrot is repeating everything you just said, but with flair.",
+        "The vines hang where a tree once held a branch out and never took it back.",
+        "Even the shade is green here. It soaks through the canopy on the way down.",
+        "The jungle floor is a layered letter that someone is always in the middle of writing."
       ]
     },
     "selfReplies": {
@@ -286,6 +312,17 @@
         "I can hear a beetle cross a page. I usually choose not to mention it.",
         "I look clever, and I am, but mostly I am comfortable.",
         "I have never lost a chase I was not hosting."
+      ],
+      "parrot": [
+        "I say what the jungle says, but louder, so it carries.",
+        "My feathers are four colors and every one of them is my favorite.",
+        "I can crack the hardest cardboard nut with this beak. I mostly choose not to show off.",
+        "I sleep holding the branch with one foot. The other foot is off duty.",
+        "I remember every word anyone has ever said to me. Verbatim. Sorry in advance.",
+        "The flock calls me the town crier. I call myself an archivist.",
+        "I once flew a whole river without landing. Then I landed and talked about it for a week.",
+        "My tail is long enough to have opinions of its own.",
+        "Whistling is just talking with the windows open."
       ]
     },
     "traitReplies": {

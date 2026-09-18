@@ -8,10 +8,12 @@ const REGION_NAMES: Record<Biome, string[]> = {
   meadow: ['Notebook Meadow', 'Confetti Prairie', 'Patchwork Grasslands', 'Doodlegrass Downs'],
   dunes: ['Cardboard Desert', 'Kraftpaper Dunes', 'Corrugated Sands', 'Torn-Edge Desert'],
   scrapflats: ['Offcut Flats', 'Crumplefield Badlands', 'Cardstock Flats', 'The Scissor-Scrap Barrens'],
+  tropical: ['Creaseline Jungle', 'Ribbonfrond Tropics', 'Sunfold Jungle', 'Confetti-Blossom Coast', 'Tapedrop Jungle'],
 };
 
 const BIOME_LABELS: Record<Biome, string> = {
   clearing: 'home clearing', forest: 'forest', meadow: 'meadow', dunes: 'desert', scrapflats: 'scrap flats',
+  tropical: 'tropics',
 };
 
 export function getRegionName(px: number, pz: number, biome: Biome) {

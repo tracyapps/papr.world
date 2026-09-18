@@ -36,6 +36,10 @@ const BIOME_SPECIES: Record<Biome, WeightedSpecies> = {
   // Meerkats are dune country's signature species — same flagship density raccoons get in scrapflats.
   dunes: [['meerkat', 0.28], ['fox', 0.18], ['bird', 0.2], ['bunny', 0.13], ['raccoon', 0.12], ['butterfly', 0.06], ['cat', 0.03]],
   scrapflats: [['raccoon', 0.45], ['cat', 0.15], ['bird', 0.15], ['bunny', 0.13], ['squirrel', 0.12]],
+  // Parrots are the tropics' flagship, one per the biome plan ("do not add
+  // three"), at the same flagship density meerkats get on the dunes. The
+  // commons are reweighted around them, not thinned out of recognition.
+  tropical: [['parrot', 0.28], ['bird', 0.17], ['butterfly', 0.17], ['bunny', 0.14], ['raccoon', 0.12], ['squirrel', 0.07], ['cat', 0.05]],
 };
 
 const BIOME_COUNTS: Record<Biome, [number, number]> = {
@@ -44,6 +48,8 @@ const BIOME_COUNTS: Record<Biome, [number, number]> = {
   meadow: [3, 4],
   dunes: [1, 2],
   scrapflats: [2, 3],
+  // Lush and noisy — a jungle page should feel inhabited.
+  tropical: [3, 5],
 };
 
 function pickSpecies(table: WeightedSpecies, roll: number): CritterSpecies {

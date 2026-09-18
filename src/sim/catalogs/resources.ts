@@ -57,6 +57,13 @@ export const RESOURCE_CORE_DEFS = {
   'terracotta-pebbles': { id: 'terracotta-pebbles', label: 'Terracotta pebbles', shortLabel: 'Terracottas', category: 'stones', iconKey: 'resource.terracotta-pebbles', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'sunbaked-cardboard': { id: 'sunbaked-cardboard', label: 'Sunbaked cardboard', shortLabel: 'Sunbaked card', category: 'cardboard', iconKey: 'resource.sunbaked-cardboard', processStage: 0, structuralClass: 1, tags: ['board'] },
   'ochre-paperclay': { id: 'ochre-paperclay', label: 'Ochre paperclay', shortLabel: 'Ochre clay', category: 'soil', iconKey: 'resource.ochre-paperclay', processStage: 0, structuralClass: 1, tags: ['clay', 'soil'] },
+  // The tropics' wet-ground soil, per the biome plan: "a wet-ground soil or
+  // clay distinct from ochre paperclay." Dark, green, and always damp.
+  'jungle-loam': { id: 'jungle-loam', label: 'Jungle loam', shortLabel: 'Jungle loam', category: 'soil', iconKey: 'resource.jungle-loam', processStage: 0, structuralClass: 1, tags: ['clay', 'soil'] },
+  // Its dig-table stone — "folded over like a letter," the same idea as
+  // bluefolds, in wetter paper. Dug, never scattered: the tropics' shovel
+  // story mirrors the redwood's scissors story.
+  'rainfold-pebbles': { id: 'rainfold-pebbles', label: 'Rainfold pebbles', shortLabel: 'Rainfolds', category: 'stones', iconKey: 'resource.rainfold-pebbles', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'carbon-soil': { id: 'carbon-soil', label: 'Carbon soil', shortLabel: 'Carbon soil', category: 'soil', iconKey: 'resource.carbon-soil', processStage: 0, structuralClass: 0, tags: ['soil'] },
   'carbon-copy-shale': { id: 'carbon-copy-shale', label: 'Carbon-copy shale', shortLabel: 'Copy shale', category: 'stones', iconKey: 'resource.carbon-copy-shale', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'buttonbloom-seeds': { id: 'buttonbloom-seeds', label: 'Buttonbloom seeds', shortLabel: 'Buttonbloom seeds', category: 'seeds', iconKey: 'resource.buttonbloom-seeds', processStage: 0, structuralClass: 0, tags: ['seed'] },

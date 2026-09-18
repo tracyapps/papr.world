@@ -8,7 +8,7 @@ import {
 } from './fields';
 import { PAGE_SIZE, type Biome } from './types';
 
-const GENERATED: Biome[] = ['meadow', 'forest', 'dunes', 'scrapflats'];
+const GENERATED: Biome[] = ['meadow', 'forest', 'dunes', 'scrapflats', 'tropical'];
 
 describe('world fields', () => {
   it('is deterministic — the same point always answers the same', () => {

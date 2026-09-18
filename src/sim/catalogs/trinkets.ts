@@ -574,6 +574,56 @@ export const TRINKET_AUTHORED_DEFS = {
     palette: { base: '#8fb0c4', accent: '#5f8a9c', detail: '#5b8849' },
     scale: 1.1, rarity: 3, tags: ['glass', 'plant'],
   },
+  // --- The tropical batch (2026-09-18), with the biome's own tag so
+  // jungle quests can ask for a jungle keepsake by name. ---
+  'pressed-hibiscus': {
+    id: 'pressed-hibiscus',
+    label: 'Pressed Hibiscus',
+    description: 'Pressed flat the day it opened. It kept every bit of the color.',
+    family: 'natural', shape: 'leaf', motion: 'still', parts: [],
+    palette: { base: '#e0576a', accent: '#a03048', detail: '#f7c9cf' },
+    scale: 1, rarity: 1, tags: ['plant', 'biome:tropical'],
+  },
+  'parrot-feather': {
+    id: 'parrot-feather',
+    label: 'Parrot Feather',
+    description: 'Fell mid-argument, apparently. The parrot has spares.',
+    family: 'natural', shape: 'leaf', motion: 'sway', parts: ['feather'],
+    palette: { base: '#3fae5a', accent: '#1f7a3c', detail: '#f2c14e' },
+    scale: 1, rarity: 2, tags: ['feather', 'biome:tropical'],
+  },
+  'banana-leaf-boat': {
+    id: 'banana-leaf-boat',
+    label: 'Banana-leaf Boat',
+    description: 'Sailed one puddle magnificently before retiring to a shelf.',
+    family: 'handmade', shape: 'shell', motion: 'bob', parts: [],
+    palette: { base: '#4c9a52', accent: '#2f6e3a', detail: '#c8e6b0' },
+    scale: 1.05, rarity: 2, tags: ['craft', 'biome:tropical'],
+  },
+  'bamboo-whistle': {
+    id: 'bamboo-whistle',
+    label: 'Bamboo Whistle',
+    description: 'Three notes, all of them cheerful. The fourth is a work in progress.',
+    family: 'handmade', shape: 'cylinder', motion: 'still', parts: ['stripes'],
+    palette: { base: '#9bb35a', accent: '#6e8a3a', detail: '#e8e2c0' },
+    scale: 0.95, rarity: 1, tags: ['craft', 'biome:tropical'],
+  },
+  'bird-of-paradise-bloom': {
+    id: 'bird-of-paradise-bloom',
+    label: 'Bird-of-paradise Bloom',
+    description: 'The flower that points at the sky on purpose.',
+    family: 'natural', shape: 'star', motion: 'sway', parts: ['beak'],
+    palette: { base: '#d9963e', accent: '#2f5a7a', detail: '#f2c14e' },
+    scale: 1.05, rarity: 2, tags: ['plant', 'biome:tropical'],
+  },
+  'mossy-pebble-friend': {
+    id: 'mossy-pebble-friend',
+    label: 'Mossy Pebble Friend',
+    description: 'A pebble wearing a little moss cap. It looks like it has opinions.',
+    family: 'natural', shape: 'pebble', motion: 'still', parts: ['eyes', 'spots'],
+    palette: { base: '#7d9670', accent: '#4f6e44', detail: '#5b8849' },
+    scale: 1, rarity: 2, tags: ['plant', 'biome:forest'],
+  },
 } as const satisfies Record<string, TrinketDef>;
 
 export type AuthoredTrinketId = keyof typeof TRINKET_AUTHORED_DEFS;

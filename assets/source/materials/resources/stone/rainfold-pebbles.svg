@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<style>
+:root {
+  --background: #FFFFFF;
+  --foreground-01: #175a66;
+  --foreground-02: #3f8a96;
+  --foreground-03: #7fbfc9;
+  --foreground-04: #d8eef0;
+}
+</style>
+<!--
+  Rainfold pebbles — the tropics' dig-table stone, cool rain-folded aqua
+  where bluefold pebbles are meadow-soft blue. "Folded over like a letter,"
+  the same idea, wetter paper. Every tweakable colour on :root.
+-->
+<rect x="0" y="0" width="512" height="512" fill="var(--background)"/>
+<rect x="-6" y="-6" width="523" height="523" fill="var(--foreground-01)"/>
+<!-- Folded pebble bodies: rounded rectangles laid at paper-cut angles. -->
+<g fill="var(--foreground-02)">
+  <rect x="28" y="42" width="96" height="64" rx="26" transform="rotate(-12 28 42)"/>
+  <rect x="168" y="26" width="84" height="56" rx="23" transform="rotate(8 168 26)"/>
+  <rect x="296" y="44" width="100" height="66" rx="27" transform="rotate(-6 296 44)"/>
+  <rect x="434" y="30" width="82" height="54" rx="22" transform="rotate(14 434 30)"/>
+  <rect x="14" y="172" width="88" height="58" rx="24" transform="rotate(10 14 172)"/>
+  <rect x="150" y="156" width="102" height="66" rx="27" transform="rotate(-9 150 156)"/>
+  <rect x="296" y="174" width="86" height="56" rx="23" transform="rotate(6 296 174)"/>
+  <rect x="424" y="156" width="94" height="62" rx="25" transform="rotate(-13 424 156)"/>
+  <rect x="34" y="296" width="98" height="64" rx="26" transform="rotate(-8 34 296)"/>
+  <rect x="182" y="282" width="82" height="54" rx="22" transform="rotate(11 182 282)"/>
+  <rect x="312" y="300" width="100" height="64" rx="26" transform="rotate(-5 312 300)"/>
+  <rect x="446" y="284" width="84" height="56" rx="23" transform="rotate(9 446 284)"/>
+  <rect x="22" y="424" width="90" height="58" rx="24" transform="rotate(7 22 424)"/>
+  <rect x="162" y="408" width="100" height="64" rx="26" transform="rotate(-11 162 408)"/>
+  <rect x="308" y="426" width="88" height="58" rx="24" transform="rotate(5 308 426)"/>
+  <rect x="438" y="410" width="94" height="60" rx="25" transform="rotate(-10 438 410)"/>
+</g>
+<!-- The fold: a lighter crease across each pebble, like a letter folded once. -->
+<g fill="var(--foreground-03)">
+  <rect x="52" y="66" width="52" height="18" rx="9" transform="rotate(-12 52 66)"/>
+  <rect x="186" y="46" width="46" height="16" rx="8" transform="rotate(8 186 46)"/>
+  <rect x="320" y="70" width="54" height="18" rx="9" transform="rotate(-6 320 70)"/>
+  <rect x="452" y="50" width="45" height="16" rx="8" transform="rotate(14 452 50)"/>
+  <rect x="34" y="194" width="48" height="17" rx="8.5" transform="rotate(10 34 194)"/>
+  <rect x="176" y="182" width="56" height="19" rx="9.5" transform="rotate(-9 176 182)"/>
+  <rect x="314" y="196" width="47" height="16" rx="8" transform="rotate(6 314 196)"/>
+  <rect x="446" y="180" width="51" height="18" rx="9" transform="rotate(-13 446 180)"/>
+  <rect x="58" y="320" width="53" height="18" rx="9" transform="rotate(-8 58 320)"/>
+  <rect x="200" y="304" width="45" height="16" rx="8" transform="rotate(11 200 304)"/>
+  <rect x="336" y="326" width="53" height="18" rx="9" transform="rotate(-5 336 326)"/>
+  <rect x="464" y="308" width="46" height="16" rx="8" transform="rotate(9 464 308)"/>
+  <rect x="42" y="448" width="49" height="17" rx="8.5" transform="rotate(7 42 448)"/>
+  <rect x="186" y="432" width="54" height="18" rx="9" transform="rotate(-11 186 432)"/>
+  <rect x="330" y="450" width="48" height="17" rx="8.5" transform="rotate(5 330 450)"/>
+  <rect x="462" y="434" width="51" height="18" rx="9" transform="rotate(-10 462 434)"/>
+</g>
+<!-- Rain-sparkle edges: thin bright ticks where a fold catches the light. -->
+<g fill="var(--foreground-04)">
+  <rect x="118" y="88" width="20" height="5" rx="2.5" transform="rotate(-30 118 88)"/>
+  <rect x="284" y="70" width="18" height="5" rx="2.5" transform="rotate(38 284 70)"/>
+  <rect x="128" y="212" width="19" height="5" rx="2.5" transform="rotate(22 128 212)"/>
+  <rect x="404" y="204" width="20" height="5" rx="2.5" transform="rotate(-26 404 204)"/>
+  <rect x="262" y="330" width="18" height="5" rx="2.5" transform="rotate(-15 262 330)"/>
+  <rect x="412" y="344" width="19" height="5" rx="2.5" transform="rotate(30 412 344)"/>
+  <rect x="136" y="460" width="20" height="5" rx="2.5" transform="rotate(-33 136 460)"/>
+  <rect x="392" y="462" width="18" height="5" rx="2.5" transform="rotate(18 392 462)"/>
+</g>
+</svg>

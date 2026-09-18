@@ -67,13 +67,18 @@ const SCATTERED_IN: Partial<Record<ResourceId, Biome[]>> = {
   'bluefold-pebbles': ['meadow'],
   'terracotta-pebbles': ['dunes'],
   'sunbaked-cardboard': ['dunes', 'scrapflats'],
+  // The tropics' wet ground gives up its own soil the way dunes give up
+  // sunbaked board — loose, walkable, distinctly not ochre.
+  'jungle-loam': ['tropical'],
   // Seed packets lie about near the kind of ground they want to grow in —
   // the farm finds the player almost as often as the player finds the farm.
   'raspberry-bush-seeds': ['clearing', 'meadow'],
   'crinkle-carrot-seeds': ['clearing', 'meadow'],
   'ribbon-corn-seeds': ['meadow', 'scrapflats'],
   'folded-cabbage-seeds': ['clearing', 'forest'],
-  'paper-tomato-seeds': ['meadow', 'dunes'],
+  // Tomatoes like it warm: dunes and now the tropics. This also keeps the
+  // "what grows well here?" knowledge lane alive in every live biome.
+  'paper-tomato-seeds': ['meadow', 'dunes', 'tropical'],
 };
 
 /** Seeds you can gather from a plant you grew. */
@@ -185,10 +190,13 @@ export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
   pine: ['clearing', 'forest', 'meadow'],
   leafy: ['clearing', 'forest', 'meadow'],
   redwood: ['forest'],
-  // Palms are dunes-only for now. When the tropical biome lands (see
-  // `docs/tropical-biome-plan.md`) it joins this list, and palm clippings
-  // stop being biome-exclusive on their own.
-  palm: ['dunes'],
+  // The tropical biome landed (2026-09-18): palms are at home there and
+  // merely sparse visitors on the dunes, so palm clippings and fiber stopped
+  // being dunes-exclusive on their own, exactly as the plan predicted.
+  palm: ['dunes', 'tropical'],
+  // Bananas are tropical-only; jungle broadleafs are `leafy` and grow in
+  // forest and meadow too, which is correct — they are big leafy trees.
+  banana: ['tropical'],
 };
 
 /**

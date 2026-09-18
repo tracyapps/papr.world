@@ -28,6 +28,7 @@ const SPECIES_LABELS: Record<Critter['species'], string> = {
   woodchuck: 'paper woodchuck',
   meerkat: 'paper meerkat',
   fox: 'paper fox',
+  parrot: 'paper parrot',
 };
 
 let panel: HTMLElement | null = null;

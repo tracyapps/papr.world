@@ -5,7 +5,7 @@ import { createRng } from '../core/math';
 // agree without syncing). Variation comes from swapping paper textures,
 // colors, scale, speed, shyness, and a name.
 
-export type CritterSpecies = 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck' | 'meerkat' | 'fox';
+export type CritterSpecies = 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck' | 'meerkat' | 'fox' | 'parrot';
 
 export type PersonalityTrait =
   | 'bold'
@@ -103,6 +103,17 @@ const COATS: Record<CritterSpecies, Coat[]> = {
     { url: null, color: '#c1531f', accent: '#241b16' }, // classic red fox
     { url: `${M}/curving-deeper-redpink-blues.png`, color: '#ffffff', accent: '#3a2018' }, // deep patterned red
   ],
+  // The tropics' flagship, in the plan's own words: "reuses the existing
+  // bird rig with new colours and a beak." Coats lean on the new jungle
+  // papers so a flock reads as the biome it lives in.
+  parrot: [
+    { url: `${M}/tropical-frond.png`, color: '#ffffff', accent: '#e8a03c' }, // frond-green, sunbeak
+    { url: `${M}/banana-leaf.png`, color: '#ffffff', accent: '#d96a5c' }, // leaf-green, hibiscus beak
+    { url: `${M}/flower-scatter.png`, color: '#ffffff', accent: '#f2c14e' }, // blossom-flecked
+    { url: `${M}/vine-lattice.png`, color: '#ffffff', accent: '#e0902f' }, // vine-patterned
+    { url: null, color: '#3fae5a', accent: '#f2c14e' }, // plain bright green
+    { url: null, color: '#2f8ac4', accent: '#e8a03c' }, // a blue one, every flock has one
+  ],
 };
 
 /** Cozy craft-table names. Seeded pick; duplicates across the world are fine. */
@@ -128,6 +139,9 @@ const BASE: Record<CritterSpecies, { speed: number; wander: number }> = {
   meerkat: { speed: 1.35, wander: 5.5 },
   // A quicker, wider-ranging trot than the raccoon's waddle.
   fox: { speed: 1.55, wander: 8.5 },
+  // Flies like a bird, but a parrot ranges further and lands more often —
+  // a flagship should be all over its biome, not a glimpse.
+  parrot: { speed: 1.45, wander: 11 },
 };
 
 const SECONDARY_TRAITS: PersonalityTrait[] = [
@@ -182,4 +196,5 @@ export const SPECIES_MAP_COLORS: Record<CritterSpecies, string> = {
   woodchuck: '#9b683d',
   meerkat: '#c9a06a',
   fox: '#c1531f',
+  parrot: '#3fae5a',
 };

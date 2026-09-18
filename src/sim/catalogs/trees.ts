@@ -49,7 +49,7 @@ export type TreeStage = 'flourishing' | 'trimmed' | 'cropped' | 'resting';
  * would mean every new drawing needed a yield entry, and would drag
  * renderer-side identities into the simulation.
  */
-export type TreeSpecies = 'pine' | 'leafy' | 'redwood' | 'palm';
+export type TreeSpecies = 'pine' | 'leafy' | 'redwood' | 'palm' | 'banana';
 
 /** Where a trimmable tree lives, in terms a server could validate. */
 export type TreeAddress = {
@@ -189,6 +189,17 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     // redwood — you cannot pick palm clippings up off the ground anywhere.
     // The variety find is the dunes' own board rather than a fourth new
     // material: a flourishing palm sheds fronds that dry flat in the sun.
+    primary: 'palm-clippings',
+    secondary: 'palm-fiber',
+    variety: 'sunbaked-cardboard',
+  },
+  banana: {
+    // A banana "trunk" is a roll of leaf sheaths, so its trimmings read as
+    // clippings and fiber rather than timber — the tropical tree layer runs
+    // on the palm material pair, exactly as the biome plan intended ("palm
+    // clippings and palm fiber already cover the tree"). A wild fruit drop
+    // is deliberately not modeled yet: food still comes only from plants a
+    // player grew, and the first wild source deserves its own slice.
     primary: 'palm-clippings',
     secondary: 'palm-fiber',
     variety: 'sunbaked-cardboard',

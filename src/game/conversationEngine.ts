@@ -203,6 +203,7 @@ const BIOME_LABELS: Record<Biome, string> = {
   meadow: 'meadow',
   dunes: 'desert',
   scrapflats: 'scrap flats',
+  tropical: 'tropics',
 };
 
 function hasAll(memory: ConversationMemory, flags: string[] | undefined) {

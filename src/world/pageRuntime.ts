@@ -58,6 +58,9 @@ export const TREE_DEFS: Record<TreeKind, { url: string; aspectRatio: number; map
   'palm-3': { url: '/assets/runtime/props/palm-03.png', aspectRatio: aspect(1101, 1581), mapColor: '#5a8b3f' },
   'palm-4': { url: '/assets/runtime/props/palm-04.png', aspectRatio: aspect(1121, 1115), mapColor: '#2e9217' },
   'palm-5': { url: '/assets/runtime/props/palm-05.png', aspectRatio: aspect(1007, 1482), mapColor: '#24a414' },
+  'banana-1': { url: '/assets/runtime/props/tree-banana-01.png', aspectRatio: aspect(760, 1080), mapColor: '#4c8a3e' },
+  'jungle-1': { url: '/assets/runtime/props/tree-broadleaf-01.png', aspectRatio: aspect(900, 1220), mapColor: '#3f8a48' },
+  'jungle-2': { url: '/assets/runtime/props/tree-broadleaf-02.png', aspectRatio: aspect(900, 1220), mapColor: '#4a9a50' },
   'redwood-1': { url: '/assets/runtime/props/redwood.png', aspectRatio: aspect(787, 2385), mapColor: '#194f2d' },
   'redwood-2': { url: '/assets/runtime/props/redwood2.png', aspectRatio: aspect(787, 2385), mapColor: '#194f2d' },
   'redwood-3': { url: '/assets/runtime/props/redwood3.png', aspectRatio: aspect(787, 2385), mapColor: '#145735' },
@@ -77,6 +80,33 @@ export const DECOR_DEFS: Record<DecorKind, { url: string; aspectRatio: number; m
   'cactus-6': { url: '/assets/runtime/props/cactus-06.png', aspectRatio: aspect(444, 500), mapColor: '#4d8d41' },
   'cactus-7': { url: '/assets/runtime/props/cactus-07.png', aspectRatio: aspect(342, 352), mapColor: '#57923f' },
   'cactus-8': { url: '/assets/runtime/props/cactus-08.png', aspectRatio: aspect(209, 471), mapColor: '#4a8339' },
+  // Dunes understory — map colors are the sampled opaque-pixel average of
+  // each cutout, nudged toward the palette the minimap already uses.
+  'agave-1': { url: '/assets/runtime/props/agave-01.png', aspectRatio: aspect(520, 440), mapColor: '#5e7a44' },
+  'agave-2': { url: '/assets/runtime/props/agave-02.png', aspectRatio: aspect(520, 440), mapColor: '#566f3c' },
+  'prickly-pear-1': { url: '/assets/runtime/props/prickly-pear-01.png', aspectRatio: aspect(520, 520), mapColor: '#7da25a' },
+  'shrub-desert-1': { url: '/assets/runtime/props/shrub-desert-01.png', aspectRatio: aspect(440, 340), mapColor: '#6d7a4e' },
+  'shrub-desert-2': { url: '/assets/runtime/props/shrub-desert-02.png', aspectRatio: aspect(440, 340), mapColor: '#6d7a4d' },
+  'marigold-1': { url: '/assets/runtime/props/flower-desert-marigold-01.png', aspectRatio: aspect(360, 420), mapColor: '#c2a94e' },
+  // Forest floor.
+  'fern-1': { url: '/assets/runtime/props/fern-cluster-01.png', aspectRatio: aspect(520, 440), mapColor: '#3f7a3d' },
+  'fern-2': { url: '/assets/runtime/props/fern-cluster-02.png', aspectRatio: aspect(520, 440), mapColor: '#3f7a3d' },
+  'fern-3': { url: '/assets/runtime/props/fern-cluster-03.png', aspectRatio: aspect(520, 440), mapColor: '#376e35' },
+  'mushroom-1': { url: '/assets/runtime/props/mushroom-cluster-01.png', aspectRatio: aspect(420, 340), mapColor: '#a06b52' },
+  'mushroom-2': { url: '/assets/runtime/props/mushroom-cluster-02.png', aspectRatio: aspect(420, 340), mapColor: '#a26551' },
+  'berry-shrub-1': { url: '/assets/runtime/props/shrub-forest-berry-01.png', aspectRatio: aspect(460, 380), mapColor: '#54885a' },
+  'boulder-mossy-1': { url: '/assets/runtime/props/boulder-mossy-01.png', aspectRatio: aspect(560, 420), mapColor: '#7d9670' },
+  // Tropical understory.
+  'broadleaf-plant-1': { url: '/assets/runtime/props/broadleaf-plant-01.png', aspectRatio: aspect(560, 520), mapColor: '#3f9a52' },
+  'broadleaf-plant-2': { url: '/assets/runtime/props/broadleaf-plant-02.png', aspectRatio: aspect(560, 520), mapColor: '#429d55' },
+  'shrub-tropical-1': { url: '/assets/runtime/props/shrub-tropical-01.png', aspectRatio: aspect(460, 360), mapColor: '#3f9a4e' },
+  'shrub-tropical-2': { url: '/assets/runtime/props/shrub-tropical-02.png', aspectRatio: aspect(460, 360), mapColor: '#45a054' },
+  'shrub-tropical-3': { url: '/assets/runtime/props/shrub-tropical-03.png', aspectRatio: aspect(460, 360), mapColor: '#3c9a4f' },
+  'hibiscus-1': { url: '/assets/runtime/props/flower-hibiscus-01.png', aspectRatio: aspect(420, 420), mapColor: '#d96a5c' },
+  'anthurium-1': { url: '/assets/runtime/props/flower-anthurium-01.png', aspectRatio: aspect(420, 440), mapColor: '#c25a44' },
+  'bird-of-paradise-1': { url: '/assets/runtime/props/flower-bird-of-paradise-01.png', aspectRatio: aspect(460, 600), mapColor: '#d9963e' },
+  'bamboo-1': { url: '/assets/runtime/props/bamboo-cluster-01.png', aspectRatio: aspect(520, 760), mapColor: '#5a9440' },
+  'mangrove-1': { url: '/assets/runtime/props/mangrove-sapling-01.png', aspectRatio: aspect(480, 520), mapColor: '#5c8a48' },
 };
 
 const GROUND_MAP_COLORS: Record<string, string> = {
@@ -85,6 +115,7 @@ const GROUND_MAP_COLORS: Record<string, string> = {
   meadow: '#6f9153',
   dunes: '#cbb27a',
   scrapflats: '#b5a276',
+  tropical: '#3f7f4a',
 };
 
 function buildProp(page: PageData, prop: PropData, index: number, group: THREE.Group) {

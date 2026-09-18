@@ -1,12 +1,73 @@
 # Next Session
 
-Updated 2026-09-17 after home markers (a neighbor's Home is now visible to
-everyone, staked out like a building lot) landed on top of the "leave the
-world" fix, avatar Phase E1 (the player card + click-a-player entry point),
-Phase D, the wardrobe panel, a HUD layout fix, and the gathering feel pass.
-Start here.
+Updated 2026-09-18 after the tropical biome build, the marsh/desert/forest
+art wiring, the parrot flagship, and the tropical quests/trinkets batch, on
+top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
+
+- **The tropical biome is real — the sixth biome, built end to end.** The
+  owner's art drop (35 new prop cutouts, 15 new material papers, all compiled
+  through the ordinary `assets:compile`) was the unblock; the build followed
+  `tropical-biome-plan.md`'s own order. `tropical` joined `BIOME_IDS` and
+  every exhaustive table TypeScript then demanded (ground paper
+  `ground.tropical` from the new leaf-canopy-green sheet, region names
+  Creaseline/Ribbonfrond/Sunfold/Confetti-Blossom/Tapedrop, both
+  `BIOME_LABELS` copies, `GROUND_MAP_COLORS`, `DIG_TABLES`, dig scatter,
+  species mix and counts). The field was retuned with `npm run
+  fields:sample` to **meadow 34 · dunes 23 · forest 17 · scrapflats 16 ·
+  tropical 11** — the load-bearing part was the altitude split (tropical
+  takes the wet *low* ground, forest keeps the wet *high* ground and a wider
+  roughness tolerance), because the naive version starved forest to 7.7%.
+  The migration shuffle (option 1 in the plan) is accepted for alpha; tree
+  growth survives by page id + tree key as designed. Full build notes,
+  including the mistakes worth rereading before tuning the field again, are
+  at the bottom of `tropical-biome-plan.md`.
+- **The new props live in the world, three biomes' worth of understory.**
+  `generate.ts` gained an `UNDERGROWTH` table: dunes scatter agave, prickly
+  pear, dry shrubs, and a marigold on their own budget (cactus density
+  untouched, the palm precedent); forest floors get fern clusters,
+  mushrooms, a berry shrub, and one mossy boulder; tropical pages crowd
+  broadleaf plants, jungle shrubs, hibiscus/anthurium/bird-of-paradise,
+  bamboo, and mangrove saplings among a real canopy (palms anchored, `jungle-1/2`
+  broadleafs, `banana-1`). New `TreeKind`s register in `TREE_DEFS` and the
+  horizon impostor map; `banana` is a new `TreeSpecies` whose yields are the
+  palm material pair, per the plan's "palm clippings and palm fiber already
+  cover the tree."
+- **Marsh shores got the new waterplants (render-side, `water.ts`).** Marsh
+  banks now roll between cattails, marsh grass, river reeds, and an
+  occasional pickerelweed/water-iris accent; calm reaches scatter lily pads,
+  a lily-pad cluster, or a duckweed skim. Woodland banks keep their original
+  look. The hanging-vine art stays unplaced on purpose — a ground cutout
+  cannot hang; it wants the canopy-anchor system (parking lot).
+- **Two new tropical materials, the dunes precedent.** `jungle-loam` (wet
+  green-brown soil — scattered loose *and* dug) and `rainfold-pebbles`
+  (aqua stone, **dug only**, the shovel's answer to the redwood's scissors).
+  Both tiles were authored in the resource-pipeline house style under
+  `materials/resources/{soil,stone}/` — swapping the SVGs later changes
+  nothing else. `paper-tomato-seeds` now also scatter in tropical, which
+  keeps the "what grows well here?" knowledge lane alive in every live
+  biome. Palm clippings/fiber stopped being dunes-exclusive on their own.
+- **Parrots — the tropical flagship.** One new `CritterSpecies`, built the
+  way the plan said ("reuses the existing bird rig with new colours and a
+  beak"): hooked two-cone beak, long swinging two-panel tail, slow broad
+  wings, jungle-paper coats (including one blue one — every flock has one),
+  preen-swing idle, head-cock curious tell at flagship weight 0.28.
+  Eleven greetings, nine self-replies, and eleven tropical place facts
+  joined `conversations.json` in the established voice.
+- **Six new quests and the tropical trinket batch.** Quests: two favors
+  (jungle loam for a wallow; palm fronds for a preening parrot), two errands
+  (walk to the tropics; trim a banana tree), one dig favor (rainfolds,
+  second layer), and one odyssey (carry a word to a parrot in the jungle —
+  `talk { critterId: 'parrot' }`, species-addressed like the authored set).
+  Trinkets: six authored tropical/forest keepsakes (pressed hibiscus, parrot
+  feather, banana-leaf boat, bamboo whistle, bird-of-paradise bloom, mossy
+  pebble friend — tagged `biome:tropical` so jungle quests pay out jungle
+  things) and three generator palettes (Hibiscus, Parrot, Lagoon) wearing
+  the new papers; the pool grew to **1,255 defs**. Catalog totals now: 45
+  quests, 55 authored + 1,200 generated trinkets; counts refreshed in
+  `trinkets-and-quests.md`.
+
 
 - **"Return to your desk" is now where players actually look for it.** The
   owner reported checking the Activity drawer for a way out and not finding
@@ -195,6 +256,19 @@ Start here.
 
 ## Verification at closeout
 
+- Tropical build + art wiring (2026-09-18 pass): root suite **638/638 pass
+  across 67 files** (two stale tests updated: `fields.test.ts`'s
+  generated-biome list, and the place-knowledge conversation test now passes
+  because tropical has a scattered seed keeping the harvest lane alive),
+  root `npx tsc --noEmit` clean, `npm run content:check` clean, `node
+  tools/validate-quests.mjs` clean at 45 quests, `npm run styles:check`
+  clean at **802 rules** (no CSS touched), `npx vite build` completes,
+  `npm run edge:check` clean, `npm run fields:sample` records the mix in the
+  entry above. `npm run assets:compile` compiled all 51 new SVGs with zero
+  failures (446 assets, 34 resource materials, 186 loose variants); `npm run
+  art:check` reports the two new tiles as picked up. **Not yet exercised in
+  a real browser** — the by-hand proof is item 0 in "Do this next." Site and
+  server packages untouched this pass, not re-checked.
 - Home markers (this pass): root suite **595/596 pass across 62 files**
   (the one failure is the same pre-existing Playwright-download gap noted
   throughout this doc — `chromium_headless_shell` isn't installed in this
@@ -327,6 +401,17 @@ Start here.
 
 ## Do this next
 
+0. **Walk to the tropics and look around (the 2026-09-18 by-hand proof).**
+   Follow the wet air until the ground turns dark green (the minimap should
+   show the new jungle color): confirm the canopy mixes palms, jungle
+   broadleafs, and bananas over a crowded understory; that parrots
+   fly-and-preen and say tropical things; that jungle loam piles collect on
+   walk-over and a layer-2 dig yields rainfold pebbles; and that a tomato
+   seed packet turns up there. On the way, check a marsh river bank for
+   reeds/pickerelweed/iris and a calm reach for duckweed and lily-pad
+   clusters, and confirm dunes/forest pages picked up their new understory
+   without thinning the cactus. Talk to a parrot, take one tropical quest
+   start to finish, and watch the trinket land on the shelf.
 1. **Still owed on browser proof — now including the two newest features.**
    The solo-save import (inventory and tech), Return to desk (both entry
    points now), and the player card have only been verified against the
@@ -376,11 +461,15 @@ Start here.
   tokens in game URLs, logs, or persistent browser storage.
 - Signup links may expire; accepted account and world memberships do not depend
   on retaining an invitation link.
-- `PROTOCOL_VERSION` is 8. Bump it for wire-shape changes, not for the desk-only
+- `PROTOCOL_VERSION` is 9. Bump it for wire-shape changes, not for the desk-only
   navigation control. The `wear-design` room message (Phase D) was added
   without a bump, deliberately: it is purely additive — no existing shape
   changed, older clients simply never send it, and an older server ignores
   it — unlike the v4/v8 changes that altered what existing messages mean.
+  The tropical build changed no wire shapes at all (it is page generation
+  and catalogs), but it *did* reshuffle what already-visited land looks
+  like — accepted on purpose during alpha (option 1 in
+  `tropical-biome-plan.md`); tree growth survives by page id + tree key.
 - Preserve the plain offline/solo sandbox distinction. It must not silently
   overwrite authoritative account inventory or tech progress — the migration
   is explicit, reviewed, and one-time by design (`SoloMigrationStore.reserveOnce`

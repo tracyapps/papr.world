@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<style>
+:root {
+  --background: #2E6E86;
+  --foreground-01: #4E8B4A;
+  --foreground-02: #69A85C;
+}
+</style>
+<defs>
+<filter id="grain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="46" numOctaves="1" seed="5401" result="t"/>
+<feColorMatrix in="t" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 0.34" result="c"/>
+<feComposite in="c" in2="SourceAlpha" operator="in" result="x"/>
+<feBlend in="x" in2="SourceGraphic" mode="overlay"/>
+</filter>
+
+</defs>
+<g filter="url(#grain)">
+<rect x="0" y="0" width="512" height="512" fill="var(--background)"/>
+<g opacity="0.96"><g transform="translate(85.33 85.33)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(-12 -10) scale(58 54)"/><path d="M -12.83 -8.75 Q 3 0 17.72 10.42 L 18.28 9.58 Q 3 0 -11.17 -11.25 Z" fill="var(--background)"/><path d="M 0 -1 A 1 1 0 1 1 0.34 -0.94 L 0 0 Z" fill="var(--foreground-02)" transform="translate(14 12) scale(38 36)"/></g><g transform="translate(256 85.33)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(12 -10) scale(58 54)"/><path d="M 11.17 -8.75 Q 27 0 41.72 10.42 L 42.28 9.58 Q 27 0 12.83 -11.25 Z" fill="var(--background)"/></g><g transform="translate(426.67 85.33)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(-12 -10) scale(58 54)"/><path d="M -12.83 -8.75 Q 3 0 17.72 10.42 L 18.28 9.58 Q 3 0 -11.17 -11.25 Z" fill="var(--background)"/><path d="M 0 -1 A 1 1 0 1 1 0.34 -0.94 L 0 0 Z" fill="var(--foreground-02)" transform="translate(14 12) scale(38 36)"/></g><g transform="translate(85.33 256)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(12 10) scale(58 54)"/><path d="M 11.17 11.25 Q 27 20 41.72 30.42 L 42.28 29.58 Q 27 20 12.83 8.75 Z" fill="var(--background)"/></g><g transform="translate(256 256)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(-12 10) scale(58 54)"/><path d="M -12.83 11.25 Q 3 20 17.72 30.42 L 18.28 29.58 Q 3 20 -11.17 8.75 Z" fill="var(--background)"/></g><g transform="translate(426.67 256)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(12 10) scale(58 54)"/><path d="M 11.17 11.25 Q 27 20 41.72 30.42 L 42.28 29.58 Q 27 20 12.83 8.75 Z" fill="var(--background)"/></g><g transform="translate(85.33 426.67)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(-12 -10) scale(58 54)"/><path d="M -12.83 -8.75 Q 3 0 17.72 10.42 L 18.28 9.58 Q 3 0 -11.17 -11.25 Z" fill="var(--background)"/><path d="M 0 -1 A 1 1 0 1 1 0.34 -0.94 L 0 0 Z" fill="var(--foreground-02)" transform="translate(14 12) scale(38 36)"/></g><g transform="translate(256 426.67)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(12 -10) scale(58 54)"/><path d="M 11.17 -8.75 Q 27 0 41.72 10.42 L 42.28 9.58 Q 27 0 12.83 -11.25 Z" fill="var(--background)"/></g><g transform="translate(426.67 426.67)"><path d="M 0 -1 A 1 1 0 1 1 0.36 -0.93 L 0 0 Z" fill="var(--foreground-01)" transform="translate(-12 -10) scale(58 54)"/><path d="M -12.83 -8.75 Q 3 0 17.72 10.42 L 18.28 9.58 Q 3 0 -11.17 -11.25 Z" fill="var(--background)"/><path d="M 0 -1 A 1 1 0 1 1 0.34 -0.94 L 0 0 Z" fill="var(--foreground-02)" transform="translate(14 12) scale(38 36)"/></g></g>
+</g>
+</svg>

@@ -457,6 +457,17 @@ const DRIFTWOOD = [[907.12, 627.84], [940.14, 442.56], [886.85, 585.89]] as cons
 const MARSH_GRASS = [
   [701, 605], [701, 605], [701, 605], [701, 605],
 ] as const;
+// The taller, blunter reeds that crowd a riverbank — marsh banks mix them
+// in with the cattails rather than replacing them, so the original look
+// survives where it already worked.
+const RIVER_REEDS = [[480, 620], [480, 620]] as const;
+// Marsh-bank flowers: pickerelweed's blunt purple spike and a water iris,
+// placed as occasional accents rather than a row of them.
+const SHORE_FLOWERS = [[380, 520], [400, 560]] as const;
+// Calm-water floaters beyond the water lilies: a duckweed skim and a lily
+// pad cluster, so still reaches are not three identical blossoms.
+const DUCKWEED = [560, 380] as const;
+const LILY_PAD_CLUSTER = [640, 470] as const;
 
 function flatWaterProp(url: string, aspectRatio: number, width: number): THREE.Mesh {
   const entry = getCutoutMaterial(url);
@@ -521,19 +532,43 @@ function buildChannelDetails(body: ChannelWaterBody): THREE.Group {
     ) continue;
 
     if (body.bankStyle === 'marsh' || (body.bankStyle === 'woodland' && index % 2 === 0)) {
-      // Marsh banks mix in loose grass tufts alongside cattail clusters for
-      // visual variety; woodland banks (which borrow this same roll every
-      // other point) keep the original cattail-only look.
+      // Marsh banks mix tufts, cattails, river reeds, and an occasional
+      // shore flower — a wet bank reads as crowded, not repeating; woodland
+      // banks (which borrow this same roll every other point) keep the
+      // original cattail-only look.
       const placeGrassOrCattail = (px: number, pz: number) => {
-        const useMarshGrass = body.bankStyle === 'marsh' && rng() < 0.45;
-        const variants = useMarshGrass ? MARSH_GRASS : CATTAILS;
+        const roll = rng();
+        if (body.bankStyle === 'marsh' && roll < 0.12) {
+          const variant = Math.floor(rng() * SHORE_FLOWERS.length);
+          const [artWidth, artHeight] = SHORE_FLOWERS[variant];
+          const height = 1.0 + rng() * 0.5;
+          details.add(createCutout({
+            textureUrl: `/assets/runtime/props/flower-${variant === 0 ? 'marsh-pickerelweed' : 'water-iris'}-01.png`,
+            aspectRatio: artWidth / artHeight,
+            height,
+            position: [px, groundedCutoutY(sampleTerrainHeight(px, pz), height), pz],
+            rotationY: rng() * Math.PI,
+          }));
+          return;
+        }
+        const useRiverReeds = body.bankStyle === 'marsh' && roll < 0.42;
+        const useMarshGrass = body.bankStyle === 'marsh' && roll < 0.72;
+        let variants = CATTAILS as readonly (readonly [number, number])[];
+        let url: (variant: number) => string;
+        if (useRiverReeds) {
+          variants = RIVER_REEDS;
+          url = (variant) => `/assets/runtime/props/river-reeds-0${variant + 1}.png`;
+        } else if (useMarshGrass) {
+          variants = MARSH_GRASS;
+          url = () => `/assets/runtime/props/marsh-grass-tuft-0${Math.floor(rng() * 4) + 1}.png`;
+        } else {
+          url = (variant) => `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`;
+        }
         const variant = Math.floor(rng() * variants.length);
         const [artWidth, artHeight] = variants[variant];
         const height = 0.85 + rng() * 0.55;
         details.add(createCutout({
-          textureUrl: useMarshGrass
-            ? `/assets/runtime/props/marsh-grass-tuft-0${variant + 1}.png`
-            : `/assets/runtime/props/cattail-cluster-0${variant + 1}.png`,
+          textureUrl: url(variant),
           aspectRatio: artWidth / artHeight,
           height,
           position: [px, groundedCutoutY(sampleTerrainHeight(px, pz), height), pz],
@@ -574,14 +609,28 @@ function buildChannelDetails(body: ChannelWaterBody): THREE.Group {
       details.add(rock);
     }
 
-    // Calm reaches collect lilies; woody banks occasionally catch driftwood.
+    // Calm reaches collect lilies, a duckweed skim, or a lily-pad cluster;
+    // woody banks occasionally catch driftwood.
     if (body.flowSpeed < 0.055 && index % 5 === 0) {
-      const variant = Math.floor(rng() * WATER_LILIES.length);
-      const [artWidth, artHeight] = WATER_LILIES[variant];
-      const lily = flatWaterProp(`/assets/runtime/props/water-lily-0${variant + 1}.png`, artWidth / artHeight, 1 + rng() * 0.55);
-      lily.position.set(x - normalX * width * 0.18, sampleTerrainHeight(x, z) + 0.035, z - normalZ * width * 0.18);
-      lily.rotation.y = rng() * Math.PI * 2;
-      details.add(lily);
+      const roll = rng();
+      if (roll < 0.5) {
+        const variant = Math.floor(rng() * WATER_LILIES.length);
+        const [artWidth, artHeight] = WATER_LILIES[variant];
+        const lily = flatWaterProp(`/assets/runtime/props/water-lily-0${variant + 1}.png`, artWidth / artHeight, 1 + rng() * 0.55);
+        lily.position.set(x - normalX * width * 0.18, sampleTerrainHeight(x, z) + 0.035, z - normalZ * width * 0.18);
+        lily.rotation.y = rng() * Math.PI * 2;
+        details.add(lily);
+      } else if (roll < 0.78) {
+        const pads = flatWaterProp('/assets/runtime/props/lily-pad-cluster-01.png', LILY_PAD_CLUSTER[0] / LILY_PAD_CLUSTER[1], 1.1 + rng() * 0.7);
+        pads.position.set(x - normalX * width * 0.15, sampleTerrainHeight(x, z) + 0.032, z - normalZ * width * 0.15);
+        pads.rotation.y = rng() * Math.PI * 2;
+        details.add(pads);
+      } else {
+        const weed = flatWaterProp('/assets/runtime/props/duckweed-01.png', DUCKWEED[0] / DUCKWEED[1], 0.9 + rng() * 0.5);
+        weed.position.set(x - normalX * width * 0.12, sampleTerrainHeight(x, z) + 0.028, z - normalZ * width * 0.12);
+        weed.rotation.y = rng() * Math.PI * 2;
+        details.add(weed);
+      }
     } else if (body.bankStyle === 'woodland' && index % 5 === 0) {
       const variant = Math.floor(rng() * DRIFTWOOD.length);
       const [artWidth, artHeight] = DRIFTWOOD[variant];

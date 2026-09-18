@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T21:22:51.358Z",
+  "generatedAt": "2026-09-18T17:51:57.150Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -57,6 +57,24 @@
       "usage": "material",
       "sourceSize": "100x100",
       "size": "100x100"
+    },
+    {
+      "key": "materials.banana-leaf",
+      "source": "assets/source/materials/banana-leaf.svg",
+      "runtime": "assets/runtime/materials/banana-leaf.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.bark-striations",
+      "source": "assets/source/materials/bark-striations.svg",
+      "runtime": "assets/runtime/materials/bark-striations.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
     },
     {
       "key": "materials.building-blocks-aqua",
@@ -230,6 +248,15 @@
       "size": "512x512"
     },
     {
+      "key": "materials.crystal-facets",
+      "source": "assets/source/materials/crystal-facets.svg",
+      "runtime": "assets/runtime/materials/crystal-facets.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
       "key": "materials.curving-deeper-bluegreens",
       "source": "assets/source/materials/curving-deeper-bluegreens.svg",
       "runtime": "assets/runtime/materials/curving-deeper-bluegreens.png",
@@ -275,6 +302,24 @@
       "size": "1920x1080"
     },
     {
+      "key": "materials.fern-frond",
+      "source": "assets/source/materials/fern-frond.svg",
+      "runtime": "assets/runtime/materials/fern-frond.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.flower-scatter",
+      "source": "assets/source/materials/flower-scatter.svg",
+      "runtime": "assets/runtime/materials/flower-scatter.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
       "key": "materials.folded-stripes-blue-green-yellow",
       "source": "assets/source/materials/folded-stripes-blue-green-yellow.svg",
       "runtime": "assets/runtime/materials/folded-stripes-blue-green-yellow.png",
@@ -309,6 +354,42 @@
       "usage": "material",
       "sourceSize": "360x200",
       "size": "360x200"
+    },
+    {
+      "key": "materials.gravel-speckle",
+      "source": "assets/source/materials/gravel-speckle.svg",
+      "runtime": "assets/runtime/materials/gravel-speckle.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.leaf-canopy-green",
+      "source": "assets/source/materials/leaf-canopy-green.svg",
+      "runtime": "assets/runtime/materials/leaf-canopy-green.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.lily-pad",
+      "source": "assets/source/materials/lily-pad.svg",
+      "runtime": "assets/runtime/materials/lily-pad.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.moss-speckle",
+      "source": "assets/source/materials/moss-speckle.svg",
+      "runtime": "assets/runtime/materials/moss-speckle.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
     },
     {
       "key": "materials.mossy-wall",
@@ -350,6 +431,24 @@
       "key": "materials.paper-notebook-blue-lined-01",
       "source": "assets/source/materials/paper_notebook_blue_lined_01.svg",
       "runtime": "assets/runtime/materials/paper_notebook_blue_lined_01.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.pebble-bed",
+      "source": "assets/source/materials/pebble-bed.svg",
+      "runtime": "assets/runtime/materials/pebble-bed.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.reed-stitch",
+      "source": "assets/source/materials/reed-stitch.svg",
+      "runtime": "assets/runtime/materials/reed-stitch.png",
       "type": "texture",
       "usage": "material",
       "sourceSize": "512x512",
@@ -1579,6 +1678,71 @@
       "size": "256x440"
     },
     {
+      "key": "materials.resources.soil.jungle-loam",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "runtime": "assets/runtime/materials/resources/soil/jungle-loam.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "resource.jungle-loam.loose-01",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "runtime": "assets/runtime/resources/jungle-loam/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "soil",
+        "variant": 1
+      },
+      "sourceSize": "512x512",
+      "size": "380x280"
+    },
+    {
+      "key": "resource.jungle-loam.loose-02",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "runtime": "assets/runtime/resources/jungle-loam/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "soil",
+        "variant": 2
+      },
+      "sourceSize": "512x512",
+      "size": "380x280"
+    },
+    {
+      "key": "resource.jungle-loam.loose-03",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "runtime": "assets/runtime/resources/jungle-loam/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "soil",
+        "variant": 3
+      },
+      "sourceSize": "512x512",
+      "size": "380x280"
+    },
+    {
+      "key": "resource.jungle-loam.loose-04",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "runtime": "assets/runtime/resources/jungle-loam/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "soil",
+        "variant": 4
+      },
+      "sourceSize": "512x512",
+      "size": "380x280"
+    },
+    {
       "key": "materials.resources.soil.ochre-paperclay",
       "source": "assets/source/materials/resources/soil/ochre-paperclay.svg",
       "runtime": "assets/runtime/materials/resources/soil/ochre-paperclay.png",
@@ -2478,6 +2642,99 @@
         "variant": 6
       },
       "sourceSize": "462.96x463.23",
+      "size": "360x300"
+    },
+    {
+      "key": "materials.resources.stone.rainfold-pebbles",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/materials/resources/stone/rainfold-pebbles.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-01",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 1
+      },
+      "sourceSize": "512x512",
+      "size": "360x300"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-02",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 2
+      },
+      "sourceSize": "512x512",
+      "size": "360x300"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-03",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 3
+      },
+      "sourceSize": "512x512",
+      "size": "360x300"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-04",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 4
+      },
+      "sourceSize": "512x512",
+      "size": "360x300"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-05",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 5
+      },
+      "sourceSize": "512x512",
+      "size": "360x300"
+    },
+    {
+      "key": "resource.rainfold-pebbles.loose-06",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "runtime": "assets/runtime/resources/rainfold-pebbles/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "stone",
+        "variant": 6
+      },
+      "sourceSize": "512x512",
       "size": "360x300"
     },
     {
@@ -3888,6 +4145,15 @@
       "size": "306x316"
     },
     {
+      "key": "materials.sand-ripples",
+      "source": "assets/source/materials/sand-ripples.svg",
+      "runtime": "assets/runtime/materials/sand-ripples.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
       "key": "materials.subtle-bubbles-blues",
       "source": "assets/source/materials/subtle-bubbles-blues.svg",
       "runtime": "assets/runtime/materials/subtle-bubbles-blues.png",
@@ -3924,6 +4190,24 @@
       "size": "1024x1024"
     },
     {
+      "key": "materials.tropical-frond",
+      "source": "assets/source/materials/tropical-frond.svg",
+      "runtime": "assets/runtime/materials/tropical-frond.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
+      "key": "materials.vine-lattice",
+      "source": "assets/source/materials/vine-lattice.svg",
+      "runtime": "assets/runtime/materials/vine-lattice.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
+    },
+    {
       "key": "materials.wall-siding-01",
       "source": "assets/source/materials/wall-siding-01.svg",
       "runtime": "assets/runtime/materials/wall-siding-01.png",
@@ -3940,6 +4224,15 @@
       "usage": "material",
       "sourceSize": "282x201",
       "size": "282x201"
+    },
+    {
+      "key": "materials.water-ripples",
+      "source": "assets/source/materials/water-ripples.svg",
+      "runtime": "assets/runtime/materials/water-ripples.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "512x512",
+      "size": "512x512"
     },
     {
       "key": "materials.wooden-floor-grey",
@@ -4035,6 +4328,60 @@
       "usage": "material",
       "sourceSize": "148x150",
       "size": "148x150"
+    },
+    {
+      "key": "props.agave-01",
+      "source": "assets/source/props/agave-01.svg",
+      "runtime": "assets/runtime/props/agave-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x440",
+      "size": "520x440"
+    },
+    {
+      "key": "props.agave-02",
+      "source": "assets/source/props/agave-02.svg",
+      "runtime": "assets/runtime/props/agave-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x440",
+      "size": "520x440"
+    },
+    {
+      "key": "props.bamboo-cluster-01",
+      "source": "assets/source/props/bamboo-cluster-01.svg",
+      "runtime": "assets/runtime/props/bamboo-cluster-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x760",
+      "size": "520x760"
+    },
+    {
+      "key": "props.boulder-mossy-01",
+      "source": "assets/source/props/boulder-mossy-01.svg",
+      "runtime": "assets/runtime/props/boulder-mossy-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "560x420",
+      "size": "560x420"
+    },
+    {
+      "key": "props.broadleaf-plant-01",
+      "source": "assets/source/props/broadleaf-plant-01.svg",
+      "runtime": "assets/runtime/props/broadleaf-plant-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "560x520",
+      "size": "560x520"
+    },
+    {
+      "key": "props.broadleaf-plant-02",
+      "source": "assets/source/props/broadleaf-plant-02.svg",
+      "runtime": "assets/runtime/props/broadleaf-plant-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "560x520",
+      "size": "560x520"
     },
     {
       "key": "props.cactus-01",
@@ -4190,6 +4537,96 @@
       "size": "887x586"
     },
     {
+      "key": "props.duckweed-01",
+      "source": "assets/source/props/duckweed-01.svg",
+      "runtime": "assets/runtime/props/duckweed-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "560x380",
+      "size": "560x380"
+    },
+    {
+      "key": "props.fern-cluster-01",
+      "source": "assets/source/props/fern-cluster-01.svg",
+      "runtime": "assets/runtime/props/fern-cluster-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x440",
+      "size": "520x440"
+    },
+    {
+      "key": "props.fern-cluster-02",
+      "source": "assets/source/props/fern-cluster-02.svg",
+      "runtime": "assets/runtime/props/fern-cluster-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x440",
+      "size": "520x440"
+    },
+    {
+      "key": "props.fern-cluster-03",
+      "source": "assets/source/props/fern-cluster-03.svg",
+      "runtime": "assets/runtime/props/fern-cluster-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x440",
+      "size": "520x440"
+    },
+    {
+      "key": "props.flower-anthurium-01",
+      "source": "assets/source/props/flower-anthurium-01.svg",
+      "runtime": "assets/runtime/props/flower-anthurium-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "420x440",
+      "size": "420x440"
+    },
+    {
+      "key": "props.flower-bird-of-paradise-01",
+      "source": "assets/source/props/flower-bird-of-paradise-01.svg",
+      "runtime": "assets/runtime/props/flower-bird-of-paradise-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "460x600",
+      "size": "460x600"
+    },
+    {
+      "key": "props.flower-desert-marigold-01",
+      "source": "assets/source/props/flower-desert-marigold-01.svg",
+      "runtime": "assets/runtime/props/flower-desert-marigold-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "360x420",
+      "size": "360x420"
+    },
+    {
+      "key": "props.flower-hibiscus-01",
+      "source": "assets/source/props/flower-hibiscus-01.svg",
+      "runtime": "assets/runtime/props/flower-hibiscus-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "420x420",
+      "size": "420x420"
+    },
+    {
+      "key": "props.flower-marsh-pickerelweed-01",
+      "source": "assets/source/props/flower-marsh-pickerelweed-01.svg",
+      "runtime": "assets/runtime/props/flower-marsh-pickerelweed-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "380x520",
+      "size": "380x520"
+    },
+    {
+      "key": "props.flower-water-iris-01",
+      "source": "assets/source/props/flower-water-iris-01.svg",
+      "runtime": "assets/runtime/props/flower-water-iris-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "400x560",
+      "size": "400x560"
+    },
+    {
       "key": "props.green-hills-01",
       "source": "assets/source/props/green-hills-01.svg",
       "runtime": "assets/runtime/props/green-hills-01.png",
@@ -4233,6 +4670,51 @@
       "usage": "prop",
       "sourceSize": "1106x953",
       "size": "1106x953"
+    },
+    {
+      "key": "props.hanging-vine-01",
+      "source": "assets/source/props/hanging-vine-01.svg",
+      "runtime": "assets/runtime/props/hanging-vine-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "360x620",
+      "size": "360x620"
+    },
+    {
+      "key": "props.hanging-vine-02",
+      "source": "assets/source/props/hanging-vine-02.svg",
+      "runtime": "assets/runtime/props/hanging-vine-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "360x620",
+      "size": "360x620"
+    },
+    {
+      "key": "props.hanging-vine-flowering-01",
+      "source": "assets/source/props/hanging-vine-flowering-01.svg",
+      "runtime": "assets/runtime/props/hanging-vine-flowering-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "360x620",
+      "size": "360x620"
+    },
+    {
+      "key": "props.lily-pad-cluster-01",
+      "source": "assets/source/props/lily-pad-cluster-01.svg",
+      "runtime": "assets/runtime/props/lily-pad-cluster-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "640x470",
+      "size": "640x470"
+    },
+    {
+      "key": "props.mangrove-sapling-01",
+      "source": "assets/source/props/mangrove-sapling-01.svg",
+      "runtime": "assets/runtime/props/mangrove-sapling-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "480x520",
+      "size": "480x520"
     },
     {
       "key": "props.marsh-grass-tuft-01",
@@ -4314,6 +4796,24 @@
       "usage": "prop",
       "sourceSize": "2635x1058",
       "size": "2635x1058"
+    },
+    {
+      "key": "props.mushroom-cluster-01",
+      "source": "assets/source/props/mushroom-cluster-01.svg",
+      "runtime": "assets/runtime/props/mushroom-cluster-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "420x340",
+      "size": "420x340"
+    },
+    {
+      "key": "props.mushroom-cluster-02",
+      "source": "assets/source/props/mushroom-cluster-02.svg",
+      "runtime": "assets/runtime/props/mushroom-cluster-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "420x340",
+      "size": "420x340"
     },
     {
       "key": "props.palm-01",
@@ -4406,6 +4906,15 @@
       "size": "384x410"
     },
     {
+      "key": "props.prickly-pear-01",
+      "source": "assets/source/props/prickly-pear-01.svg",
+      "runtime": "assets/runtime/props/prickly-pear-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "520x520",
+      "size": "520x520"
+    },
+    {
       "key": "props.redwood",
       "source": "assets/source/props/redwood.svg",
       "runtime": "assets/runtime/props/redwood.png",
@@ -4476,6 +4985,78 @@
       "usage": "prop",
       "sourceSize": "1920x1080",
       "size": "1920x1080"
+    },
+    {
+      "key": "props.river-reeds-01",
+      "source": "assets/source/props/river-reeds-01.svg",
+      "runtime": "assets/runtime/props/river-reeds-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "480x620",
+      "size": "480x620"
+    },
+    {
+      "key": "props.river-reeds-02",
+      "source": "assets/source/props/river-reeds-02.svg",
+      "runtime": "assets/runtime/props/river-reeds-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "480x620",
+      "size": "480x620"
+    },
+    {
+      "key": "props.shrub-desert-01",
+      "source": "assets/source/props/shrub-desert-01.svg",
+      "runtime": "assets/runtime/props/shrub-desert-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "440x340",
+      "size": "440x340"
+    },
+    {
+      "key": "props.shrub-desert-02",
+      "source": "assets/source/props/shrub-desert-02.svg",
+      "runtime": "assets/runtime/props/shrub-desert-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "440x340",
+      "size": "440x340"
+    },
+    {
+      "key": "props.shrub-forest-berry-01",
+      "source": "assets/source/props/shrub-forest-berry-01.svg",
+      "runtime": "assets/runtime/props/shrub-forest-berry-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "460x380",
+      "size": "460x380"
+    },
+    {
+      "key": "props.shrub-tropical-01",
+      "source": "assets/source/props/shrub-tropical-01.svg",
+      "runtime": "assets/runtime/props/shrub-tropical-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "460x360",
+      "size": "460x360"
+    },
+    {
+      "key": "props.shrub-tropical-02",
+      "source": "assets/source/props/shrub-tropical-02.svg",
+      "runtime": "assets/runtime/props/shrub-tropical-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "460x360",
+      "size": "460x360"
+    },
+    {
+      "key": "props.shrub-tropical-03",
+      "source": "assets/source/props/shrub-tropical-03.svg",
+      "runtime": "assets/runtime/props/shrub-tropical-03.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "460x360",
+      "size": "460x360"
     },
     {
       "key": "props.single-green-hill-01",
@@ -4557,6 +5138,33 @@
       "usage": "prop",
       "sourceSize": "825x952",
       "size": "825x952"
+    },
+    {
+      "key": "props.tree-banana-01",
+      "source": "assets/source/props/tree-banana-01.svg",
+      "runtime": "assets/runtime/props/tree-banana-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "760x1080",
+      "size": "760x1080"
+    },
+    {
+      "key": "props.tree-broadleaf-01",
+      "source": "assets/source/props/tree-broadleaf-01.svg",
+      "runtime": "assets/runtime/props/tree-broadleaf-01.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "900x1220",
+      "size": "900x1220"
+    },
+    {
+      "key": "props.tree-broadleaf-02",
+      "source": "assets/source/props/tree-broadleaf-02.svg",
+      "runtime": "assets/runtime/props/tree-broadleaf-02.png",
+      "type": "texture",
+      "usage": "prop",
+      "sourceSize": "900x1220",
+      "size": "900x1220"
     },
     {
       "key": "props.water-lily-01",
@@ -5186,6 +5794,35 @@
       ]
     },
     {
+      "resourceId": "jungle-loam",
+      "source": "assets/source/materials/resources/soil/jungle-loam.svg",
+      "surface": "assets/runtime/materials/resources/soil/jungle-loam.png",
+      "surfaceColorways": [],
+      "looseTemplate": "soil",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/jungle-loam/loose-01.png",
+          "size": "380x280",
+          "aspectRatio": 1.3571428571428572
+        },
+        {
+          "runtime": "assets/runtime/resources/jungle-loam/loose-02.png",
+          "size": "380x280",
+          "aspectRatio": 1.3571428571428572
+        },
+        {
+          "runtime": "assets/runtime/resources/jungle-loam/loose-03.png",
+          "size": "380x280",
+          "aspectRatio": 1.3571428571428572
+        },
+        {
+          "runtime": "assets/runtime/resources/jungle-loam/loose-04.png",
+          "size": "380x280",
+          "aspectRatio": 1.3571428571428572
+        }
+      ]
+    },
+    {
       "resourceId": "ochre-paperclay",
       "source": "assets/source/materials/resources/soil/ochre-paperclay.svg",
       "surface": "assets/runtime/materials/resources/soil/ochre-paperclay.png",
@@ -5560,6 +6197,45 @@
         },
         {
           "runtime": "assets/runtime/resources/quartz/loose-06.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        }
+      ]
+    },
+    {
+      "resourceId": "rainfold-pebbles",
+      "source": "assets/source/materials/resources/stone/rainfold-pebbles.svg",
+      "surface": "assets/runtime/materials/resources/stone/rainfold-pebbles.png",
+      "surfaceColorways": [],
+      "looseTemplate": "stone",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-01.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        },
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-02.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        },
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-03.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        },
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-04.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        },
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-05.png",
+          "size": "360x300",
+          "aspectRatio": 1.2
+        },
+        {
+          "runtime": "assets/runtime/resources/rainfold-pebbles/loose-06.png",
           "size": "360x300",
           "aspectRatio": 1.2
         }

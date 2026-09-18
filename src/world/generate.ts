@@ -21,12 +21,65 @@ const REDWOODS: TreeKind[] = [
 const CACTI: DecorKind[] = [
   'cactus-1', 'cactus-2', 'cactus-3', 'cactus-4', 'cactus-5', 'cactus-6', 'cactus-7', 'cactus-8',
 ];
-// Palms are the one trimmable tree that grows on dunes, and for now the only
-// place they grow at all. They get their own small budget rather than a share
-// of the cactus slot, so adding them does not thin the cactus out; a dunes
-// page has only two to four scenery pieces to begin with. The tropical biome
-// is where palms are meant to be common — see `docs/tropical-biome-plan.md`.
+// Palms are the one trimmable tree that grows on dunes, sparse and on their
+// own budget. In the tropical biome palms are the anchor of a proper tree
+// layer instead — see `TROPICAL_TREES` below and
+// `docs/tropical-biome-plan.md`.
 const PALMS: TreeKind[] = ['palm-1', 'palm-2', 'palm-3', 'palm-4', 'palm-5'];
+
+// The tropical canopy, in three roles: palms as the anchor (the biome plan's
+// word), broadleaf jungle trees as the mass, and a banana here and there as
+// the odd one that makes the layer read as jungle rather than a palm
+// plantation. Jungle trees are `leafy` species, bananas are `banana` — see
+// `treeSpeciesOf`.
+const TROPICAL_CANOPY: Array<{ kind: TreeKind; weight: number }> = [
+  { kind: 'palm-1', weight: 3 },
+  { kind: 'palm-2', weight: 3 },
+  { kind: 'palm-3', weight: 3 },
+  { kind: 'palm-4', weight: 2 },
+  { kind: 'palm-5', weight: 2 },
+  { kind: 'jungle-1', weight: 4 },
+  { kind: 'jungle-2', weight: 4 },
+  { kind: 'banana-1', weight: 2 },
+];
+
+/**
+ * Low scenery that shares a page without joining the tree economy — the
+ * biome plan's "understory" ask. Counts stay modest on purpose: this is
+ * garnish around the tree and harvestable budgets, not a second forest.
+ */
+const UNDERGROWTH: Partial<Record<Biome, DecorKind[]>> = {
+  dunes: ['agave-1', 'agave-2', 'prickly-pear-1', 'shrub-desert-1', 'shrub-desert-2', 'marigold-1'],
+  forest: ['fern-1', 'fern-2', 'fern-3', 'mushroom-1', 'mushroom-2', 'berry-shrub-1', 'boulder-mossy-1'],
+  tropical: [
+    'broadleaf-plant-1', 'broadleaf-plant-2', 'shrub-tropical-1', 'shrub-tropical-2',
+    'shrub-tropical-3', 'hibiscus-1', 'anthurium-1', 'bird-of-paradise-1', 'bamboo-1',
+    'mangrove-1', 'fern-1', 'fern-2',
+  ],
+};
+
+/** Height range per undergrowth cutout, in world units. */
+const UNDERGROWTH_SIZES: Partial<Record<DecorKind, [number, number]>> = {
+  'agave-1': [1.0, 1.5], 'agave-2': [0.9, 1.3], 'prickly-pear-1': [0.8, 1.15],
+  'shrub-desert-1': [0.7, 1.0], 'shrub-desert-2': [0.7, 1.0], 'marigold-1': [0.55, 0.8],
+  'fern-1': [0.7, 1.05], 'fern-2': [0.7, 1.05], 'fern-3': [0.65, 0.95],
+  'mushroom-1': [0.45, 0.65], 'mushroom-2': [0.45, 0.65],
+  'berry-shrub-1': [0.85, 1.15], 'boulder-mossy-1': [0.75, 1.05],
+  'broadleaf-plant-1': [1.0, 1.45], 'broadleaf-plant-2': [1.0, 1.45],
+  'shrub-tropical-1': [0.8, 1.1], 'shrub-tropical-2': [0.8, 1.1], 'shrub-tropical-3': [0.8, 1.1],
+  'hibiscus-1': [0.9, 1.25], 'anthurium-1': [0.8, 1.05], 'bird-of-paradise-1': [1.0, 1.35],
+  'bamboo-1': [2.3, 3.4], 'mangrove-1': [1.2, 1.7],
+};
+
+function pickWeightedKind(entries: Array<{ kind: TreeKind; weight: number }>, roll: number): TreeKind {
+  const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+  let cursor = roll * total;
+  for (const entry of entries) {
+    cursor -= entry.weight;
+    if (cursor <= 0) return entry.kind;
+  }
+  return entries[entries.length - 1].kind;
+}
 
 /**
  * A page's biome is now just "whatever the field says at its centre".
@@ -96,6 +149,7 @@ export function generatePage(px: number, pz: number): PageData {
   const props: PropData[] = [];
 
   const treeCount = biome === 'forest' ? 48 + Math.floor(rng() * 21)
+    : biome === 'tropical' ? 26 + Math.floor(rng() * 15)
     : biome === 'meadow' ? 5 + Math.floor(rng() * 5)
     : 2 + Math.floor(rng() * 3);
   for (let i = 0; i < treeCount; i += 1) {
@@ -119,6 +173,24 @@ export function generatePage(px: number, pz: number): PageData {
       continue;
     }
 
+    if (biome === 'tropical') {
+      const tree = pickWeightedKind(TROPICAL_CANOPY, rng());
+      // Palms keep their dunes proportions; jungle broadleafs are the
+      // canopy; bananas sit under it with their own sprawl.
+      const height = tree.startsWith('palm') ? 4.2 + rng() * 3.4
+        : tree.startsWith('jungle') ? 5.4 + rng() * 3.6
+        : 3.2 + rng() * 1.8;
+      props.push({
+        kind: 'tree',
+        tree,
+        x,
+        z,
+        rotY: rng() * 0.9 - 0.45,
+        height,
+      });
+      continue;
+    }
+
     const redwood = biome === 'forest' && rng() < 0.16;
     const giant = !redwood && biome === 'forest' && rng() < 0.08;
     props.push({
@@ -136,7 +208,35 @@ export function generatePage(px: number, pz: number): PageData {
     });
   }
 
-  // Sparse palms on dunes: about one a page, never a grove.
+  // Understory: low decor that shares the scenery without joining the tree
+  // economy. Sparse on the dunes, a proper floor in the forest, crowded in
+  // the tropics — the biome plan's own words for it.
+  const undergrowthPool = UNDERGROWTH[biome];
+  if (undergrowthPool) {
+    const undergrowthCount = biome === 'tropical' ? 9 + Math.floor(rng() * 6)
+      : biome === 'forest' ? 5 + Math.floor(rng() * 5)
+      : 2 + Math.floor(rng() * 3);
+    for (let i = 0; i < undergrowthCount; i += 1) {
+      const { x, z } = spot();
+      // Fade with the field like the trees do, so understory never stands
+      // in a neighbouring biome's ground.
+      if (dominantBiomeAt(x, z) !== biome && rng() > biomeConfidenceAt(x, z) * 0.35) continue;
+      const art = undergrowthPool[Math.floor(rng() * undergrowthPool.length)];
+      const [minHeight, maxHeight] = UNDERGROWTH_SIZES[art] ?? [0.8, 1.2];
+      props.push({
+        kind: 'decor',
+        art,
+        x,
+        z,
+        rotY: rng() * Math.PI * 2,
+        height: minHeight + rng() * (maxHeight - minHeight),
+      });
+    }
+  }
+
+  // Sparse palms on dunes: about one a page, never a grove. In the tropics
+  // palms instead come through the ordinary tree budget, dense and mixed
+  // into the canopy.
   const palmCount = biome === 'dunes' && rng() < 0.55 ? 1 + Math.floor(rng() * 2) : 0;
   for (let i = 0; i < palmCount; i += 1) {
     const { x, z } = spot();
@@ -154,8 +254,9 @@ export function generatePage(px: number, pz: number): PageData {
   }
 
   // Harvestables use the same page seed as scenery, so their types and
-  // locations remain stable across clients and revisits.
-  const resourceCount = biome === 'forest' ? 14 + Math.floor(rng() * 7)
+  // locations remain stable across clients and revisits. The tropics gather
+  // like a forest — wet ground grows things.
+  const resourceCount = biome === 'forest' || biome === 'tropical' ? 14 + Math.floor(rng() * 7)
     : biome === 'scrapflats' ? 10 + Math.floor(rng() * 6)
     : 8 + Math.floor(rng() * 6);
   const resourcePool = BIOME_RESOURCES[biome];

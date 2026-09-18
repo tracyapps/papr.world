@@ -55,7 +55,7 @@ All targeting fields are optional. When several fields are present, all of them 
 - `friendshipLevels`: exact allowed relationship levels.
 - `minFriendship` / `maxFriendship`: a relationship range instead of an exact list.
 - `pageIds`: exact world pages such as `"0,0"`.
-- `biomes`: location types: `clearing`, `forest`, `meadow`, `dunes`, or `scrapflats`.
+- `biomes`: location types: `clearing`, `forest`, `meadow`, `dunes`, `scrapflats`, or `tropical`.
 - `regionNames`: exact named regions shown in the game, such as `"The Paper Clearing"`.
 - `requiresFlags`: facts that must already be remembered.
 - `excludesFlags`: facts that must not yet be remembered.

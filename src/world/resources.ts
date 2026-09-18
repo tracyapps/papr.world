@@ -79,6 +79,17 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'ochre-paperclay': {
     material: 'paper.brown.warm', visual: 'stoneCluster', mapColor: '#b9824f',
   },
+  // The compiled jungle-loam tile wins on the ground; monstera green is the
+  // primitive-geometry fallback while it loads or if art ever goes missing.
+  'jungle-loam': {
+    material: 'paper.monstera', visual: 'stoneCluster', mapColor: '#5c6e3a',
+  },
+  // Deliberately absent from `BIOME_RESOURCES`: rainfolds come out of the
+  // shovel, never lying loose — the dig layer is their only route, the way
+  // bark curls are the shears' reward.
+  'rainfold-pebbles': {
+    material: 'paper.aqua', visual: 'stoneCluster', mapColor: '#4c91a8',
+  },
   'carbon-soil': {
     material: 'paper.grey', visual: 'stoneCluster', mapColor: '#4d4945',
   },

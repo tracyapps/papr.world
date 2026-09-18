@@ -110,6 +110,25 @@ export const DIG_TABLES: Record<Biome, Record<DigLayer, WeightedResource[]>> = {
       { resource: 'confetti-stones', weight: 38 },
     ],
   },
+  // The tropics' shovel story: wet loam near the surface, the biome's own
+  // rain-folded stone below it. Rainfolds appear at every depth past the
+  // first so a better shovel keeps paying off, but never lie loose — the
+  // dug route is their only door (see `world/resources.ts`).
+  tropical: {
+    1: [
+      { resource: 'jungle-loam', weight: 78 },
+      { resource: 'rainfold-pebbles', weight: 22 },
+    ],
+    2: [
+      { resource: 'rainfold-pebbles', weight: 50 },
+      { resource: 'jungle-loam', weight: 30 },
+      { resource: 'carbon-copy-shale', weight: 20 },
+    ],
+    3: [
+      { resource: 'rainfold-pebbles', weight: 46 },
+      { resource: 'graphite-cardstone', weight: 54 },
+    ],
+  },
 };
 function hashText(value: string) {
   let hash = 2166136261;

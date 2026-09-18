@@ -84,14 +84,14 @@ hold, which is what makes the rule satisfiable at all.
 The catalog has two halves, merged by id in `allTrinketDefs()`:
 
 - **Authored defs** — `TRINKET_AUTHORED_DEFS` in
-  `src/sim/catalogs/trinkets.ts`: **49** named objects, each with a sentence
+  `src/sim/catalogs/trinkets.ts`: **55** named objects, each with a sentence
   worth reading ("Bent a little out of shape from a very good day.").
 - **Generated variants** — `TRINKET_GENERATED_DEFS` in
-  `src/sim/catalogs/trinketVariants.ts`: **1,085** deterministic recombinations
+  `src/sim/catalogs/trinketVariants.ts`: **1,200** deterministic recombinations
   of the same vocabulary.
 
-That is **1,134 trinket definitions total**. Split by family: handmade 364,
-found 238, natural 171, curious 154, seasonal 119, story 88. (`trinkets.test.ts`
+That is **1,255 trinket definitions total**. Split by family: handmade 402,
+found 263, natural 193, curious 170, seasonal 130, story 97. (`trinkets.test.ts`
 only asserts the pool is deeper than 300 — the exact figure is meant to grow.)
 
 ### The vocabulary
@@ -121,7 +121,7 @@ rarity (1–3), and free-form lower-case tags.
   hard quest feels like it paid out.
 
 Generated defs reuse this exact vocabulary — nothing is invented, only
-arranged. The generator is `PALETTES` (27 colourways) crossed with `SHAPES`
+arranged. The generator is `PALETTES` (30 colourways) crossed with `SHAPES`
 (18 non-windup shapes, each declaring which families, motions and part-combos
 suit it), plus the ten-strong `WINDUPS` list over every other palette. That is
 why the pool can be deep without anyone hand-drawing a thousand wind-up frogs,
@@ -149,7 +149,7 @@ seasonal quests find thematic rewards.
 **Add a shape.** Add one `ShapeSeed` to the `SHAPES` array in the same file,
 listing the families it suits (first is the default), the motions it may take,
 the part-combos it may carry, its extra tags, and its rarity. Each added shape
-multiplies by the 27 palettes — roughly 27 new defs per motion slot. If the
+multiplies by the 30 palettes — roughly 30 new defs per motion slot. If the
 shape is a wind-up, also add it to `WINDUP_SHAPES` in `trinkets.ts` and the
 `WINDUPS` table so the rig can build it (`trinketRigs.ts` holds the per-species
 build functions).
@@ -172,10 +172,10 @@ tiers — the owner's own ladder:
   tool/plan ladder. An odyssey is not even *considered* until the player has
   finished at least five quests (`ODYSSEY_COMPLETED_REQUESTS`).
 
-The catalog holds **39 quests**: 16 in `src/sim/catalogs/quests.ts`
-(`AUTHORED_QUESTS`) and 23 in `src/sim/catalogs/questCatalog.expansion.ts`
-(`QUEST_EXPANSION_DEFS`); `allQuestDefs()` merges the two by id. By tier: 15
-favor, 13 errand, 11 odyssey.
+The catalog holds **45 quests**: 16 in `src/sim/catalogs/quests.ts`
+(`AUTHORED_QUESTS`) and 29 in `src/sim/catalogs/questCatalog.expansion.ts`
+(`QUEST_EXPANSION_DEFS`); `allQuestDefs()` merges the two by id. By tier: 18
+favor, 15 errand, 12 odyssey.
 
 ### "Never out of reach — it is the next step"
 

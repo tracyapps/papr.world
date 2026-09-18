@@ -767,6 +767,126 @@ function buildBird(params: CritterParams): CritterRig {
   };
 }
 
+/**
+ * The tropical flagship — the biome plan's cheapest-right answer: "a parrot
+ * or toucan (reuses the existing bird rig with new colours and a beak)."
+ * Same skeleton plan as `buildBird`, but the three silhouette cues that make
+ * a parrot read as one from across a page: a stout hooked beak, a long
+ * tapered tail, and slow broad wings instead of a small bird's quick ones.
+ */
+function buildParrot(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = bodyMaterial(params, [1.1, 1.1]);
+  const dark = createColorMaterial('#26201b', 0.82);
+  const beakMaterial = createColorMaterial(params.accentColor, 0.7);
+
+  // Stouter than the songbird body — a parrot is a handful of bird.
+  const body = sphere(0.19, coat, 20, 14);
+  body.scale.set(0.95, 0.95, 1.25);
+  body.position.y = 0.2;
+
+  const head = sphere(0.125, coat, 18, 12);
+  head.position.set(0, 0.38, -0.1);
+
+  // The hook: a fat upper cone curving down over a small lower one, so the
+  // profile says "parrot" even at minimap distance.
+  const beakUpper = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.13, 8), beakMaterial));
+  beakUpper.rotation.x = -Math.PI / 2 - 0.7;
+  beakUpper.position.set(0, 0.36, -0.24);
+  const beakLower = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.06, 6), dark));
+  beakLower.rotation.x = -Math.PI / 2 - 0.35;
+  beakLower.position.set(0, 0.335, -0.225);
+
+  const eyes: THREE.Mesh[] = [];
+  for (const x of [-0.062, 0.062]) {
+    const eye = sphere(0.021, dark, 8, 6);
+    eye.position.set(x, 0.41, -0.16);
+    eyes.push(eye);
+  }
+
+  // Broad, slow wings — a parrot flaps like it means it.
+  const wings: THREE.Mesh[] = [];
+  for (const side of [-1, 1] as const) {
+    const wing = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.16), coat));
+    wing.position.set(side * 0.17, 0.22, 0.02);
+    wing.rotation.z = side * 0.5;
+    wing.rotation.y = side * 0.25;
+    wings.push(wing);
+  }
+
+  // A long two-panel tail that drags behind, the second parrot cue.
+  const tailLong = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.42), coat));
+  tailLong.position.set(0, 0.16, 0.4);
+  tailLong.rotation.x = 0.5;
+  const tailTip = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.2), beakMaterial));
+  tailTip.position.set(0, 0.1, 0.58);
+  tailTip.rotation.x = 0.62;
+
+  const legs: THREE.Mesh[] = [];
+  for (const x of [-0.055, 0.055]) {
+    const leg = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.1, 6), dark));
+    leg.position.set(x, 0.05, 0);
+    legs.push(leg);
+  }
+
+  group.add(body, ...wings, tailLong, tailTip, ...legs);
+  const headGroup = makeHead(group, [0, 0.32, -0.06], [head, beakUpper, beakLower, ...eyes]);
+  const headRest = headGroup.position.clone();
+
+  const o = params.animOffset;
+  return {
+    group,
+    flying: false,
+    hopper: true,
+    groundOffset: 0.02,
+    hopHeight: 0.12,
+    parts: partsOf({ head: headGroup, body, tail: tailLong }),
+    animate: (t, _dt, moving, speedRatio, curious) => {
+      if (moving) {
+        // Slow and deliberate: half the songbird's flap rate, more travel.
+        wings.forEach((wing, index) => {
+          const side = index === 0 ? -1 : 1;
+          wing.rotation.z = side * (0.5 + Math.sin(t * 9 + o) * 0.42 * speedRatio);
+        });
+        headGroup.position.copy(headRest);
+        headGroup.rotation.x = 0;
+      } else {
+        wings.forEach((wing, index) => {
+          wing.rotation.z = (index === 0 ? -1 : 1) * 0.5;
+        });
+        // Idle preening: the head swings back toward the wing instead of a
+        // songbird's peck — parrot idles are sideways, not downward.
+        const preenWave = Math.sin(t * 1.8 + o);
+        const preenAmount = preenWave > 0.6 ? (preenWave - 0.6) / 0.4 : 0;
+        const swing = Math.sin(preenAmount * Math.PI);
+        headGroup.position.copy(headRest);
+        headGroup.rotation.x = 0;
+        headGroup.rotation.y = swing * 0.85;
+      }
+      // The same curious head-cock the bird has — a parrot just commits.
+      if (curious) headGroup.rotation.z = Math.sin(t * 1.6 + o) > 0 ? 0.42 : -0.42;
+      tailLong.rotation.x = 0.5 + Math.sin(t * 2.4 + o) * 0.08;
+      tailTip.rotation.x = 0.62 + Math.sin(t * 2.4 + o + 0.3) * 0.08;
+    },
+    flourish: (progress, t) => {
+      // Big wing stretch, tail lift, and an indignant little shimmy.
+      const stretch = Math.sin(progress * Math.PI);
+      wings.forEach((wing, index) => {
+        const side = index === 0 ? -1 : 1;
+        wing.rotation.z = side * (0.5 + 0.95 * stretch);
+      });
+      tailLong.rotation.x = 0.5 - 0.35 * stretch;
+      tailTip.rotation.x = 0.62 - 0.4 * stretch;
+      body.rotation.y = Math.sin(t * 14) * 0.08 * stretch;
+      if (progress >= 1) {
+        body.rotation.y = 0;
+        tailLong.rotation.x = 0.5;
+        tailTip.rotation.x = 0.62;
+      }
+    },
+  };
+}
+
 function buildCat(params: CritterParams): CritterRig {
   const group = new THREE.Group();
   const coat = bodyMaterial(params, [1.2, 1.2]);
@@ -1122,6 +1242,7 @@ const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = 
   woodchuck: buildWoodchuck,
   meerkat: buildMeerkat,
   fox: buildFox,
+  parrot: buildParrot,
 };
 
 export function buildCritterRig(species: CritterSpecies, params: CritterParams): CritterRig {

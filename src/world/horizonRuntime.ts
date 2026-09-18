@@ -5,7 +5,7 @@ import { createTerrainPageMesh, sampleTerrainHeight } from './terrain';
 import { TREE_DEFS } from './pageRuntime';
 import type { PageData, TreeKind } from './types';
 
-type HorizonTreeStyle = 'leafy' | 'palm' | 'pine' | 'redwood';
+type HorizonTreeStyle = 'leafy' | 'palm' | 'pine' | 'redwood' | 'banana' | 'jungle';
 
 const HORIZON_TREE_KIND: Record<TreeKind, HorizonTreeStyle> = {
   'pine-medium-1': 'pine',
@@ -19,6 +19,9 @@ const HORIZON_TREE_KIND: Record<TreeKind, HorizonTreeStyle> = {
   'palm-3': 'palm',
   'palm-4': 'palm',
   'palm-5': 'palm',
+  'banana-1': 'banana',
+  'jungle-1': 'jungle',
+  'jungle-2': 'jungle',
   'redwood-1': 'redwood',
   'redwood-2': 'redwood',
   'redwood-3': 'redwood',
@@ -33,6 +36,8 @@ const HORIZON_TREE_ART: Record<HorizonTreeStyle, TreeKind> = {
   palm: 'palm-1',
   pine: 'pine-tall',
   redwood: 'redwood-1',
+  banana: 'banana-1',
+  jungle: 'jungle-1',
 };
 
 function addTreeSilhouettes(page: PageData, group: THREE.Group) {

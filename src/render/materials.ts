@@ -18,6 +18,7 @@ export type MaterialKey =
   | 'ground.forest'
   | 'ground.meadow'
   | 'ground.dunes'
+  | 'ground.tropical'
   | 'paper.brown'
   | 'paper.brown.warm'
   | 'paper.green'
@@ -55,6 +56,10 @@ const MATERIAL_DEFS: Record<MaterialKey, PaperMaterialOptions> = {
   'ground.forest': { textureUrl: '/assets/runtime/materials/construction-paper-green-3.png', repeat: [6.5, 6.5] },
   'ground.meadow': { textureUrl: '/assets/runtime/materials/construction-paper-green-2.png', repeat: [6.5, 6.5] },
   'ground.dunes': { textureUrl: '/assets/runtime/materials/camouflage-blobs-desert.png', repeat: [5, 5] },
+  // A canopy-green leaf-cluster sheet: darker and busier than meadow's
+  // construction paper, so the tropics read as somewhere the ground itself
+  // is growing.
+  'ground.tropical': { textureUrl: '/assets/runtime/materials/leaf-canopy-green.png', repeat: [5.5, 5.5] },
   'paper.brown': { textureUrl: '/assets/runtime/materials/construction-paper-brown-3.png', repeat: [2, 2] },
   'paper.brown.warm': { textureUrl: '/assets/runtime/materials/construction-paper-brown-2.png', repeat: [1.6, 1.6] },
   'paper.green': { textureUrl: '/assets/runtime/materials/construction-paper-green-2.png', repeat: [2, 2] },
