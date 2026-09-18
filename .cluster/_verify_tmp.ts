@@ -1,0 +1,11 @@
+import { allTrinketDefs, TRINKET_AUTHORED_DEFS } from '../src/sim/catalogs/trinkets';
+import { TRINKET_GENERATED_DEFS } from '../src/sim/catalogs/trinketVariants';
+const defs = allTrinketDefs();
+const shapes = new Set(defs.map(d=>d.shape));
+const motions = new Set(defs.map(d=>d.motion));
+const parts = new Set(defs.flatMap(d=>d.parts));
+console.log('shapeValues', shapes.size, [...shapes].join(','));
+console.log('motionValues', motions.size, [...motions].join(','));
+console.log('partValues', parts.size, [...parts].join(','));
+console.log('generatedHasCylinder', TRINKET_GENERATED_DEFS.some(d=>d.shape==='cylinder'));
+console.log('authoredHasCylinder', Object.values(TRINKET_AUTHORED_DEFS).some((d:any)=>d.shape==='cylinder'));

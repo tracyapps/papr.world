@@ -22,6 +22,16 @@ import {
   getSharedInventory,
   onSharedInventoryChanged,
 } from '../net/sharedInventory';
+import {
+  getTrinkets,
+  pickUpTrinket,
+  placeTrinket,
+  trinketCount,
+} from '../game/trinkets';
+import { getTrinketDef, TRINKET_FAMILIES } from '../sim/catalogs/trinkets';
+import { avatar } from '../game/avatar';
+import { getCurrentPageId } from '../world/streaming';
+import { openMyPlayerCard } from './playerCard';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
 // a pop-up book. Rationale:
@@ -41,7 +51,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'plans' | 'diary' | 'mail' | 'pouch';
+type TabId = ResourceCategoryId | 'tools' | 'plans' | 'trinkets' | 'diary' | 'mail' | 'pouch';
 
 type TabDefinition = {
   id: TabId;
@@ -83,6 +93,7 @@ const TABS: TabDefinition[] = [
     },
   })),
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
+  { id: 'trinkets', label: 'Trinkets', summary: () => String(trinketCount()) },
   { id: 'plans', label: 'Plans', summary: () => null },
   { id: 'diary', label: 'Diary', summary: () => String(getGameState().player.diaryEntries.length) },
   { id: 'mail', label: 'Mail', summary: () => String(getGameState().player.mailbox.length) },
@@ -326,10 +337,47 @@ function renderPouchTab() {
         .join('')}</ul>`}`;
 }
 
+/**
+ * Trinkets: everything critters have given the player.
+ *
+ * Kept trinkets sit on the bio-card shelf and can be set down in the world;
+ * placed ones can be taken back up. The two lists are the whole state — a
+ * trinket is either kept or placed, never both.
+ */
+function renderTrinketsTab() {
+  const trinkets = getTrinkets();
+  if (trinkets.length === 0) {
+    return '<p class="scrapbook-empty">No trinkets yet. Befriend a critter and it may ask a small favour — finished favours come back as little keepsakes.</p>';
+  }
+  const row = (trinket: (typeof trinkets)[number]) => {
+    const def = getTrinketDef(trinket.defId);
+    const label = def?.label ?? trinket.defId;
+    const family = def ? TRINKET_FAMILIES[def.family].label : 'Trinket';
+    const placed = trinket.placed !== null;
+    const action = placed
+      ? `<button type="button" data-pickup-trinket="${escapeHtml(trinket.id)}">Take back</button>`
+      : `<button type="button" data-place-trinket="${escapeHtml(trinket.id)}">Set down here</button>`;
+    return `
+      <li class="scrapbook-item trinket-item">
+        <span class="scrapbook-item-copy">
+          <strong>${escapeHtml(label)}</strong>
+          <small>${escapeHtml(family)}${trinket.fromName ? ` · from ${escapeHtml(trinket.fromName)}` : ''}${placed ? ' · on display in the world' : ''}</small>
+          ${def ? `<small class="trinket-note">${escapeHtml(def.description)}</small>` : ''}
+        </span>
+        ${action}
+      </li>`;
+  };
+  return `
+    <p class="scrapbook-panel-note">Trinkets are keepsakes, not goods — they cannot be sold. Set one down to decorate the world, or take it back to the shelf.</p>
+    <p class="scrapbook-panel-note"><button type="button" class="scrapbook-inline-button" data-open-my-card>Show your bio card</button> — the shelf a visitor to your lot will see.</p>
+    <ul class="scrapbook-items">${trinkets.map(row).join('')}</ul>`;
+}
+
 function renderPanel() {
   if (!panelElement) return;
 
   if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
+  else if (activeTab === 'trinkets') panelElement.innerHTML = renderTrinketsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
   else if (activeTab === 'diary') panelElement.innerHTML = renderDiaryTab();
   else if (activeTab === 'mail') panelElement.innerHTML = renderMailTab();
@@ -411,6 +459,26 @@ export function initializeScrapbook() {
       }
       const result = dispatchGameCommand({ type: 'collectMail', mailId });
       mailMessage = result.ok ? result.message : result.reason;
+      render();
+      return;
+    }
+
+    if (target.closest('[data-open-my-card]')) {
+      openMyPlayerCard();
+      return;
+    }
+
+    const placeId = target.closest<HTMLButtonElement>('[data-place-trinket]')?.dataset.placeTrinket;
+    if (placeId) {
+      const placed = placeTrinket(placeId, getCurrentPageId(), avatar.position.x, avatar.position.z, 0);
+      mailMessage = placed ? 'Set down near your feet. It will be here when you return.' : 'That trinket could not be placed.';
+      render();
+      return;
+    }
+    const pickupId = target.closest<HTMLButtonElement>('[data-pickup-trinket]')?.dataset.pickupTrinket;
+    if (pickupId) {
+      const picked = pickUpTrinket(pickupId);
+      mailMessage = picked ? 'Back on the shelf it goes.' : 'That trinket is not out in the world.';
       render();
       return;
     }

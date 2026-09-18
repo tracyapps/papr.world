@@ -7,63 +7,117 @@
         "You came back! I saved the sunniest patch of paper.",
         "I reorganized my acorns by mood. They were all 'nervous', so I started over.",
         "Careful where you step—there is a very important pile pretending to be a mess.",
-        "Hello! I was about to take a break from counting. You saved me from myself."
+        "Hello! I was about to take a break from counting. You saved me from myself.",
+        "One moment—I am alphabetizing my acorns. They are all A. Almost done.",
+        "You have excellent timing. I was just about to announce something, and now I forget what.",
+        "I stored a snack somewhere safe. I will find it in autumn, dramatically.",
+        "Mind the pile. It is load-bearing.",
+        "Shh. I am being still. It is a new hobby and I am very good at it.",
+        "Hello! I was checking the wind. It passed. I passed too, later, out of politeness."
       ],
       "butterfly": [
         "The air tastes like blue paper today.",
         "I have been practicing a very small loop-de-loop.",
         "I dreamed I was a bookmark. I woke up still holding the page together.",
         "You float along on two feet. I have always admired that.",
-        "The wind and I are not speaking. It keeps finishing my sentences."
+        "The wind and I are not speaking. It keeps finishing my sentences.",
+        "Oh, good, a landmark. I have been circling for the last three breezes.",
+        "I landed somewhere perfect and then immediately left. Regrets.",
+        "The colors came back this morning. I checked each one personally.",
+        "I am practicing being a small, pleasing mystery.",
+        "You walk so steadily. I keep forgetting that is an option.",
+        "A flower told me to say hello. I forget the message. The hello survives."
       ],
       "raccoon": [
         "Psst. I found something extremely interesting. It was a button.",
         "Hello, neighbor. Your pockets sound promising.",
         "Do not look in the hollow log. That is where I keep the things I am not hiding.",
         "I have upgraded my collection. It now has a second button.",
-        "You look like someone who appreciates a good shiny rock. I respect that."
+        "You look like someone who appreciates a good shiny rock. I respect that.",
+        "Evening, neighbor. Or morning. My schedule is a rumor.",
+        "I have a new system for my collection. It is sorted by how much I like it.",
+        "Watch your step. That is my second-favorite spot and my first-favorite mess.",
+        "Do not mind the humming. I hum when the pockets are full.",
+        "I found a thing today. It is not useful. It is perfect.",
+        "Hello. If you are here for the shiny rock, so am I. We can be civil."
       ],
       "bunny": [
         "Hi! I heard your footsteps before I saw you.",
         "Everything is especially sniffable today.",
         "I listened to the whole meadow this morning. It mostly said 'grass'.",
         "If you find a clover with four leaves, it might be mine. I am still looking for it.",
-        "Your shadow hopped along with you the whole way here. We are officially a trio."
+        "Your shadow hopped along with you the whole way here. We are officially a trio.",
+        "Oh! Hello! I was busy doing absolutely nothing at high speed.",
+        "I fluffed the grass so it would look its best for you.",
+        "I heard you a whole field away. You have a friendly footstep.",
+        "There is a very good cloud today. I have been keeping an eye on it.",
+        "I brought a clover, just in case. It is a regular one. Still special.",
+        "Hi hi! I did not expect anyone, and yet here you are, pleasantly."
       ],
       "bird": [
         "Cheep! That means hello. It also means cheep.",
         "I have news from the tall tree. Most of it is about wind.",
         "I saw the whole page from up there. It is even better upside down.",
         "A worm told me a secret. I kept it, but I do not know what it means.",
-        "Cheep-cheep! That is hello-hello. I am twice as glad to see you."
+        "Cheep-cheep! That is hello-hello. I am twice as glad to see you.",
+        "Cheep! I mean—hello. Same thing, shorter.",
+        "I found a new perch. It is exactly where I already was, but higher.",
+        "The morning sounded good from up there. I have notes.",
+        "I dropped a twig on purpose to see where it landed. It landed. Science.",
+        "Cheep-cheep! Two hellos, because you deserve the deluxe version.",
+        "I have been singing to the sky. It has not answered. It listens well, though."
       ],
       "cat": [
         "Oh. It is you. You may stay.",
         "I was not waiting here. This simply happens to be where you arrived.",
         "I have decided today is acceptable. You may tell the others.",
         "That spot is mine now. The spot I was in before is also mine. Everything scales.",
-        "I have considered petting you back. The paperwork is in progress."
+        "I have considered petting you back. The paperwork is in progress.",
+        "You again. Good. The other spot grew cold.",
+        "I have been here the whole time. You simply took a while.",
+        "Sit if you like. The sun and I have an understanding.",
+        "I allow exactly one visitor per nap. You have made the list.",
+        "Do not look so pleased. I have not decided anything about you yet. (I have.)",
+        "I moved three inches for you. That is nearly a parade."
       ],
       "woodchuck": [
         "Mind the cutter guard! The big lever is still finding its manners.",
         "Welcome to the mill. We make straight edges, useful scraps, and excellent sawdust confetti.",
         "If the sawdust piles look taller, that is not your imagination. It was a productive week.",
         "Measure twice, cut once, then measure the offcut for scrap. Mill wisdom, free of charge.",
-        "Safety squint engaged. Good to see you."
+        "Safety squint engaged. Good to see you.",
+        "Hail, traveler! Mind the shavings, they are organized by grain.",
+        "The big cutter is napping. We do not wake the big cutter.",
+        "I measured the morning. It came up short. I am compensating with sawdust.",
+        "Welcome in. Wipe your feet on the offcut pile.",
+        "Busy day. Built a straight edge and then admired it for an hour.",
+        "The mill hums in G when it is happy. It is humming. So am I."
       ],
       "meerkat": [
         "I saw you coming from three dunes away. Sentry duty has its perks.",
         "Hello! I was just standing very tall and looking very serious about it.",
         "You interrupted my watch shift, but you are a much better view than the horizon.",
         "The whole mob says hello. I am translating on their behalf. They say hello.",
-        "I stood up the moment I heard footsteps. It is mostly for style at this point."
+        "I stood up the moment I heard footsteps. It is mostly for style at this point.",
+        "Sentry report: one visitor, friendly, approaching at a reasonable pace.",
+        "I was watching the horizon. It was mostly sky. I watched it thoroughly.",
+        "Hello! I stood up the instant I spotted you. Reflexes and manners.",
+        "The mob says hello. I say hello louder, to be safe.",
+        "Everything is quiet. I have confirmed this three times from three dunes.",
+        "You are the most interesting thing on the horizon, and I have checked."
       ],
       "fox": [
         "I heard you before I saw you. The ears are not just for show.",
         "You are upwind of me. I will allow it, just this once.",
         "Careful. I already counted your pockets from here.",
         "I was midway through pretending to be asleep. You caught me mid-nap-face.",
-        "Quiet feet. I respect that in a stranger."
+        "Quiet feet. I respect that in a stranger.",
+        "I smelled you before I heard you. Then I heard you. It was a whole event.",
+        "Quiet feet today. Yours, I mean. Mine are always quiet.",
+        "I was nearly asleep. Now I am nearly awake and entirely interested.",
+        "The wind is on your side. I will permit it.",
+        "I followed your trail here for fun. Do not read into it. (Read into it.)",
+        "Hello. I have been practicing being mysterious and may have overdone it."
       ]
     },
     "placeFacts": {
@@ -72,35 +126,65 @@
         "The blue paper pond keeps one tiny bubble tucked under its edge, as if it is saving a thought.",
         "The clearing is quiet on purpose. It gives every new adventure somewhere gentle to begin.",
         "The porch creaks in a friendly way, like it is clearing its throat to say hello.",
-        "Paper clouds drift slower over the clearing. Even the sky is in no hurry here."
+        "Paper clouds drift slower over the clearing. Even the sky is in no hurry here.",
+        "The clearing keeps a spare sunbeam somewhere for exactly the day you need it.",
+        "Everything here is arranged by nobody, and yet it always looks tidy.",
+        "The first path was a pencil sketch somebody shrugged at. It became the road.",
+        "The pond stays shallow on purpose, so small worries can still see the bottom.",
+        "Nothing loud ever starts in the clearing. It is the world’s quiet waiting room.",
+        "The clearing knows everyone’s name and pretends not to. That is its hospitality."
       ],
       "forest": [
         "The trees trade rumors whenever the breeze turns their paper edges sideways.",
         "A redwood canopy makes its own small weather—cool underneath, rustly above, and always dropping a little shade.",
         "Old forest paths rarely run straight. Roots, folds, and good thinking trees all get a vote.",
         "Deep in the forest the paper grows a darker green. Old ink, the old-timers say.",
-        "At dusk the redwoods trade their long shadows like neighbors borrowing tools."
+        "At dusk the redwoods trade their long shadows like neighbors borrowing tools.",
+        "Older trees here fold their shade to whichever side a tired walker needs.",
+        "The forest floor keeps a ledger of every leaf, written in leaf.",
+        "Redwoods are patient, which is easy when you measure time in rings.",
+        "Follow the moss if you are lost. The moss never claimed to know either.",
+        "There is a quiet deeper in that only the quietest walkers ever find.",
+        "The canopy trades one long shadow for another, and calls it weather."
       ],
       "meadow": [
         "Meadow paper warms quickly in the sun, so butterflies often find the bright folds before anyone else.",
         "The soft green patches are warmer than the big sheet. Someone very thorough checked all of them.",
         "In a meadow, even a short breeze has room to practice being dramatic.",
         "The grass here grows in neat little pen strokes. A very tidy field, as fields go.",
-        "On windy days the whole meadow ripples like a page being turned somewhere far away."
+        "On windy days the whole meadow ripples like a page being turned somewhere far away.",
+        "The meadow is drawn in short strokes, so a windy day looks hand-drawn.",
+        "Every flower here leans a little toward whoever walks past. It is flattering.",
+        "The grass keeps its opinions low, mainly about rain.",
+        "Bee lines crisscross the field like someone corrected the page and liked it.",
+        "On hot days the meadow smells like a folded letter, warm and patient.",
+        "The wind here has room, and it uses all of it."
       ],
       "dunes": [
         "The corrugated ridges hum softly when wind crosses them at an angle.",
         "Dune shadows are excellent clocks until the wind rearranges the clock.",
         "Warm cardboard keeps the day's heat folded inside it after the sun has moved on.",
         "The dunes rearrange themselves at night. Nobody has ever caught them doing it.",
-        "Somewhere out here is a sheet of sandpaper that dreams of being a proper dune."
+        "Somewhere out here is a sheet of sandpaper that dreams of being a proper dune.",
+        "The ridges are honest; they only move when the wind is sure of itself.",
+        "Cardboard country keeps the afternoon heat in its folds like a coat.",
+        "At night the dunes practice being different dunes. Nobody has seen the rehearsal.",
+        "A footprint out here lasts exactly as long as a rumor.",
+        "The sand writes its diary in ripples and erases the page by morning.",
+        "Palms hold the only shade for pages, and they know it."
       ],
       "scrapflats": [
         "Every scrap pile is a treasure pile with poor publicity.",
         "The flats collect offcuts from faraway paper weather; matching two edges can tell you where they came from.",
         "A shiny glint out here might be foil, a button, or sunlight being mischievous. All three reward a closer look.",
         "Rumor says a whole sewing kit is buried out here. The scissors inside are legendary.",
-        "The flats are honest country. What you see is exactly one layer of what is there."
+        "The flats are honest country. What you see is exactly one layer of what is there.",
+        "Every offcut out here is a story that got cut short, so the flats are very talkative.",
+        "The glint on the ground is either foil, glass, or an invitation. All three count.",
+        "Sort the flats by shape and they reveal the shape of the wind that carried them.",
+        "Nothing here is trash. It is material between drafts.",
+        "The flats are a library where the pages fell out and got the good ideas.",
+        "Match two torn edges and you have solved a small, satisfying crime."
       ]
     },
     "selfReplies": {
@@ -108,55 +192,100 @@
         "I collect tiny things with important shapes.",
         "My tail is five pieces of paper and one piece of confidence.",
         "My cheeks can hold eleven acorns. Twelve is showing off.",
-        "I nap in supply closets I build myself. Other people call them 'nests'."
+        "I nap in supply closets I build myself. Other people call them 'nests'.",
+        "I can hold two thoughts and one acorn at the same time. The acorn wins.",
+        "I invented a nut drawer. It has one drawer and infinite nuts.",
+        "My tail reports the weather. The report is usually—fluffy.",
+        "I do not forget where I hide things. I forget that I hid them. Different skill.",
+        "I have a favorite branch. We are on speaking terms, mostly."
       ],
       "butterfly": [
         "My wings never agree on which color is the favorite.",
         "I can land on a pencil line without smudging it. Usually.",
         "I once followed a rainbow for three pages. It was walking faster than me.",
-        "If I hold very still, flowers tell me things."
+        "If I hold very still, flowers tell me things.",
+        "I taste the air with my feet. It is mostly seasonal.",
+        "I have four wings and no idea how they coordinate. Neither do they.",
+        "I collect colors and release them in spirals when I am excited.",
+        "I once slept in a folded page. Best crease I ever had.",
+        "I am the smallest character and the biggest scenery."
       ],
       "raccoon": [
         "I wash my paws even when there is no water. It is about the ceremony.",
         "My mask is formalwear. I am always ready for an occasion.",
         "Everything I own fits in three pockets and one secret fourth pocket.",
-        "I am not a hoarder. I am a curator with generous standards."
+        "I am not a hoarder. I am a curator with generous standards.",
+        "I have a pocket for emergencies and an emergency for every pocket.",
+        "My whiskers are for inspecting. My hands are for improving.",
+        "I keep a mental map of every good hiding spot in four biomes.",
+        "I open things carefully, then decide whether they wanted opening.",
+        "I never steal. I relocate, with strong opinions."
       ],
       "bunny": [
         "I know seven kinds of quiet and three kinds of lettuce.",
         "My ears are excellent umbrellas for very small friends.",
         "I can hear a carrot being peeled from two pages away. It is a burden.",
-        "I dig test holes for science. The science is 'where should I dig next'."
+        "I dig test holes for science. The science is 'where should I dig next'.",
+        "I have two modes, resting and leaping, and a third I invented called ‘nearly resting’.",
+        "My nose twitches when I am thinking. I think constantly. It is tiring.",
+        "I know which grass is friendliest. It is not the tallest. It is the calmest.",
+        "I keep a list of good hiding places and forget it in them.",
+        "I can hear a seed think about sprouting. It says—soon."
       ],
       "bird": [
         "I keep songs in the folds under my wings.",
         "I am working on a duet with the wind chime. The wind chime does not know yet.",
         "I have mapped every updraft on this page. This one is the good one.",
-        "My nest has a guest room. Nobody has visited yet, but it is ready."
+        "My nest has a guest room. Nobody has visited yet, but it is ready.",
+        "I have three songs and one of them is a secret I hum to myself.",
+        "I keep an updraft like other people keep a favorite chair.",
+        "My feathers are arranged by mood. Today: jaunty.",
+        "I once flew into a page and back out. It felt like applause.",
+        "I do not fall. I descend with intent."
       ],
       "cat": [
         "My hobbies include sitting near things and improving them.",
         "I have never knocked anything off a table without a reason. The reasons are private.",
         "I am on a strict schedule: sunbeam, patrol, judge everyone, nap.",
-        "I know every quiet place on this page. That information is not free."
+        "I know every quiet place on this page. That information is not free.",
+        "I am not aloof. I am precisely placed.",
+        "My schedule has a nap at every hour and still runs long.",
+        "I sharpen my claws on the day, not on the furniture.",
+        "I blink slowly because fast feelings are for other species.",
+        "I own three patches of sunlight and rent one out."
       ],
       "woodchuck": [
         "I am Chisel: miller, measurer, and occasional sandwich inspector.",
         "These teeth are for wood. The big cutter is for paper. Mixing those jobs is how meetings happen.",
         "The mill keeps a lost-and-found drawer. It is mostly sawdust and one very patient snail.",
-        "I built my own front door. It squeaks in E. I am getting it tuned."
+        "I built my own front door. It squeaks in E. I am getting it tuned.",
+        "I am the only one who reads the sawdust. It is a slow read.",
+        "I keep a pencil behind each ear and a spare behind the first one.",
+        "Every straight edge here was once a wobbly one I believed in.",
+        "I run the mill, the ledger, and, reluctantly, a very small lost and found.",
+        "My teeth grow back. My patience grows back slower."
       ],
       "meerkat": [
         "I can stand taller than I am wide. It is my best trick and also my only trick.",
         "My tail counts as a third leg when I am on watch. Nobody question the math.",
         "I dig for grubs and gossip in roughly equal measure.",
-        "The sun patches on the sand are reserved seating, and I reserved the best one."
+        "The sun patches on the sand are reserved seating, and I reserved the best one.",
+        "I have one job and infinite shifts.",
+        "I can see a cloud change its mind from here.",
+        "My tail is a chair for when I forget to sit down.",
+        "I keep watch over the whole desert and worry about all of it equally.",
+        "I have memorized the horizon. It has not changed. I check anyway."
       ],
       "fox": [
         "I curl my tail over my nose to sleep. It doubles as a very small blanket.",
         "My ears swivel independently. It is less useful than it sounds, but very charming.",
         "I trot everywhere. Walking felt like a waste of legs this nice.",
-        "I am not sneaking. I am simply very quiet on purpose."
+        "I am not sneaking. I am simply very quiet on purpose.",
+        "I keep my best ideas for dusk, when the light is on my side.",
+        "My tail is a scarf, a signal, and a blanket, in that order.",
+        "I can hear a beetle cross a page. I usually choose not to mention it.",
+        "I look clever, and I am, but mostly I am comfortable.",
+        "I have never lost a chase I was not hosting."
       ]
     },
     "traitReplies": {
@@ -164,43 +293,78 @@
         "I tried something before deciding whether it was sensible. It was excellent.",
         "Today feels like a good day to go first.",
         "I once stared down a gust of wind. We are friends now, but it knows I won.",
-        "If something looks impossible, I like to be nearby when it changes its mind."
+        "If something looks impossible, I like to be nearby when it changes its mind.",
+        "I signed up before I read the sign. The sign was fine.",
+        "Fear is just excitement that forgot to introduce itself.",
+        "I led the way. I did not know the way. The way came around.",
+        "I will do it twice: once to see, once to prove the first one.",
+        "Someone had to be first, so I volunteered. Loudly."
       ],
       "curious": [
         "I have had three questions since breakfast and breakfast was one of them.",
         "I keep wondering what is behind things. Usually it is more things!",
         "I asked the pond why it is blue. It is still thinking. So am I.",
-        "I opened an empty box to check. It was even emptier than expected. Great day."
+        "I opened an empty box to check. It was even emptier than expected. Great day.",
+        "I have a question, and it has a question, and they are pen pals now.",
+        "I peeked behind the scenery. There is more scenery. This is the best news.",
+        "I once followed a beetle just to learn where he was going. Good beetle.",
+        "I do not know why the pond ripples. I have narrowed it down to—everything.",
+        "I tasted the rain to check its grade. Acceptable. Refreshing. Slightly—green."
       ],
       "dramatic": [
         "A breeze moved my favorite scrap. I may write a play about the betrayal.",
         "Everything today has been enormous, even the tiny parts.",
         "Today I saw a leaf fall. I will not spoil the ending, but it was devastating.",
-        "When I sneeze, the whole clearing knows. I consider it community theater."
+        "When I sneeze, the whole clearing knows. I consider it community theater.",
+        "A single leaf fell. I will be recovering all afternoon.",
+        "The sunset was understated today. I said so. Vocally.",
+        "I do everything in three acts, including lunch.",
+        "The wind betrayed me. I forgive it. Mostly. On the record.",
+        "Even my sighs have a set and a spotlight."
       ],
       "gentle": [
         "I found a quiet spot and left half of it empty in case a friend came by.",
         "I am taking special care not to crease the morning.",
         "I smoothed the wrinkles out of a path so the next walker has an easy time.",
-        "I keep the softest scrap for whoever needs it. Today that might be you."
+        "I keep the softest scrap for whoever needs it. Today that might be you.",
+        "I left the best sunbeam for someone smaller.",
+        "I stepped around a flower, and the flower noticed. Good.",
+        "I speak softly so the day does not startle.",
+        "I mended a torn page and told no one. That is the point of mending.",
+        "I keep a spare calm, and today I am sharing it."
       ],
       "mischievous": [
         "I moved one small thing two inches. Nobody suspects me yet.",
         "I know a joke that only works if you are standing beside a scrap pile.",
         "I switched two pebbles on the path. If you notice, we are co-conspirators.",
-        "My plans are small, harmless, and extremely satisfying. Two out of three so far."
+        "My plans are small, harmless, and extremely satisfying. Two out of three so far.",
+        "I moved the path marker one step left. The path is fine. The marker is thriving.",
+        "I know where everything is, and I am not always saying.",
+        "I left a gift for someone and did not sign it. Delicious.",
+        "I once swapped two clouds. Nobody proved anything.",
+        "My only crime is tiny and extremely clever."
       ],
       "shy": [
         "It has been a quiet day. I liked it, but I am glad you visited.",
         "I practiced saying hello before you arrived. Hello.",
         "I wrote a note to the mailbox. The mailbox did not write back. I understand.",
-        "If you hear rustling in the hedges, that is me, being social at a distance."
+        "If you hear rustling in the hedges, that is me, being social at a distance.",
+        "I rehearse my hellos. Today’s went well. You came.",
+        "I was hiding, but pleasantly, in case I got found.",
+        "I waved from behind a leaf. You may have seen half of it.",
+        "I like you from a respectful, gentle distance. It is a compliment.",
+        "I know a quiet path. I could show you. Eventually. Maybe now."
       ],
       "sleepy": [
         "I am awake in all the important places.",
         "I found a sunbeam shaped exactly like a nap.",
         "I slept through the sunrise. I hear it was good. I will catch the rerun.",
-        "My dream had a nap in it. Very efficient."
+        "My dream had a nap in it. Very efficient.",
+        "I am ninety percent nap and ten percent logistics.",
+        "I found a new pillow. It was the old pillow, re-examined.",
+        "I fall asleep the way a page closes—slowly, then all at once.",
+        "My best ideas arrive in dreams and leave before I wake.",
+        "I have been awake for minutes. It has been lovely. I will rest now."
       ]
     },
     "choices": [
@@ -245,6 +409,16 @@
           "{{name}} gives a contented wiggle, as if someone has gently shaken a paper bell."
         ],
         "action": "pet"
+      },
+      {
+        "id": "tools",
+        "label": "What should I bring with me?",
+        "replyPool": "tool"
+      },
+      {
+        "id": "next",
+        "label": "What should I work on next?",
+        "replyPool": "next"
       }
     ]
   },
@@ -619,8 +793,7 @@
           "endsScene": true
         }
       ]
-    }
-    ,
+    },
     {
       "id": "bold-first-leap",
       "personalities": [
@@ -2013,6 +2186,864 @@
           "endsScene": true
         }
       ]
+    },
+    {
+      "id": "forest-floor-knowledge",
+      "biomes": [
+        "forest"
+      ],
+      "priority": 40,
+      "maxPlays": 4,
+      "storyArc": "What grows here",
+      "opening": [
+        "“The forest gives twice,” {{name}} says. “Once in the branches, once underfoot. Most folk only look up.”"
+      ],
+      "choices": [
+        {
+          "id": "up",
+          "label": "What is up in the branches?",
+          "replies": [
+            "“{{material:ribbonwood-sticks}} come loose and fall your way, and the redwoods keep {{material:redwood-bark-curls}} up high for anyone with {{tool-for:redwood-bark-curls}}.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "down",
+          "label": "And underfoot?",
+          "replies": [
+            "“{{material:carbon-soil}} is right at the surface. {{material:graphite-cardstone}} sits deeper — a better shovel is what reaches it.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "why",
+          "label": "Why does the forest give so freely?",
+          "replies": [
+            "“Because a forest is patient. Cut a little, wait a little, and it has already forgiven you.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "dunes-palm-knowledge",
+      "biomes": [
+        "dunes"
+      ],
+      "priority": 40,
+      "maxPlays": 4,
+      "storyArc": "What grows here",
+      "opening": [
+        "“Palm country,” {{name}} says, shading their eyes. “The palms give {{material:palm-clippings}} and {{material:palm-fiber}}, {{only-here:palm-clippings}}.”"
+      ],
+      "choices": [
+        {
+          "id": "how",
+          "label": "How do I cut {{material-short:palm-clippings}}?",
+          "replies": [
+            "“Trim the new growth with {{tool-for:palm-clippings}}. The palm barely notices, and it grows it all back.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "board",
+          "label": "What about the board here?",
+          "replies": [
+            "“{{material:sunbaked-cardboard}} bakes flat in the sun and digs up easy. Honest building stock, and plenty of it.”"
+          ],
+          "friendship": 1
+        },
+        {
+          "id": "stones",
+          "label": "Anything under the sand?",
+          "replies": [
+            "“{{material:terracotta-pebbles}} rattle up out of the shallows. Pretty things, and warm to hold.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "scrapflats-salvage-knowledge",
+      "biomes": [
+        "scrapflats"
+      ],
+      "priority": 40,
+      "maxPlays": 4,
+      "storyArc": "What grows here",
+      "opening": [
+        "“Salvage rules,” {{name}} recites. “Pick up what lies loose, dig for what hides, and trust nothing that sparkles until you have inspected it twice.”"
+      ],
+      "choices": [
+        {
+          "id": "loose",
+          "label": "What lies loose here?",
+          "replies": [
+            "“{{material:ribbonwood-sticks}}, {{material:confetti-stones}}, {{material:sunbaked-cardboard}} — all of it free for the walking across.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "dig",
+          "label": "What can I dig up?",
+          "replies": [
+            "“{{material:graphite-cardstone}} sits deep here. You will want {{tool-for:graphite-cardstone}} if you mean to reach it.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "tell",
+          "label": "How do I tell good scrap from bad?",
+          "replies": [
+            "“There is no bad scrap. There is scrap you have not thought of a use for yet. Give it time. It will think of one.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "meadow-grow-knowledge",
+      "biomes": [
+        "meadow"
+      ],
+      "priority": 38,
+      "maxPlays": 4,
+      "storyArc": "What grows here",
+      "opening": [
+        "“This is sowing country,” {{name}} says, flicking a seed packet with one toe. “Packets blow in and settle exactly where they would like to be planted. Kindly of them.”"
+      ],
+      "choices": [
+        {
+          "id": "what",
+          "label": "What grows well here?",
+          "replies": [
+            "“{{material:raspberry-bush-seeds}} and {{material:crinkle-carrot-seeds}} both take to meadow paper. {{material:ribbon-corn-seeds}} too, if you have the patience.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "stones",
+          "label": "Any good stones?",
+          "replies": [
+            "“{{material:bluefold-pebbles}} and {{material:confetti-stones}} lie about in the open. Bluefolds are a meadow speciality — boast about those.”"
+          ],
+          "friendship": 1
+        },
+        {
+          "id": "fiber",
+          "label": "What is the soft stuff?",
+          "replies": [
+            "“{{material:mossy-paper-fiber}}. Stuffing, weaving, quiet little nests. Everyone wants it and nobody picks enough.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "clearing-starter-knowledge",
+      "biomes": [
+        "clearing"
+      ],
+      "priority": 8,
+      "maxPlays": 4,
+      "storyArc": "Local knowledge",
+      "opening": [
+        "“New around here?” {{name}} says. “Start simple. {{material:kraft-twigs}} and {{material:mossy-paper-fiber}} lie loose all over the clearing, free for the picking up.”"
+      ],
+      "choices": [
+        {
+          "id": "clay",
+          "label": "And under the ground?",
+          "replies": [
+            "“{{material:ochre-paperclay}} sits just beneath the surface. Any {{tool-for:ochre-paperclay}} turns it up, no skill required.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "seed",
+          "label": "Anything to plant?",
+          "replies": [
+            "“{{material:folded-cabbage-seeds}} turn up in the open. Slow eaters, but they fill a bed handsomely.”"
+          ],
+          "friendship": 1
+        },
+        {
+          "id": "thanks",
+          "label": "Thanks for the starter tips",
+          "replies": [
+            "“Everyone starts with twigs. Nobody stays with twigs. Off you go.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "maker-lumber-1-ask",
+      "personalities": [
+        "curious",
+        "gentle",
+        "bold"
+      ],
+      "minFriendship": "curious",
+      "priority": 44,
+      "maxPlays": 1,
+      "excludesFlags": [
+        "maker:lumber-promised",
+        "maker:lumber-done"
+      ],
+      "storyArc": "The Thing Maker Job",
+      "opening": [
+        "“I have a project,” {{name}} says, and produces a page of plans that is mostly arrows. “To make {{material:bound-lumber}}, I need someone to fetch, and someone to lean on the maker. I have the maker. Are you the someone?”"
+      ],
+      "choices": [
+        {
+          "id": "in",
+          "label": "I am in. What do you need?",
+          "replies": [
+            "“Raw wood, mostly. {{material:kraft-twigs}} and {{material:ribbonwood-sticks}} will do to start. Meet me back here, and we will feed the Thing Maker.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "maker:lumber-promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "what",
+          "label": "What is {{material:bound-lumber}} for?",
+          "replies": [
+            "“Plans. Real ones. Bound lumber is wood that finally agrees with itself — walls, frames, things that stand up.” A pause. “I would like to build something that stands up.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "maker:lumber-promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "maker-lumber-2-fetch",
+      "requiresFlags": [
+        "maker:lumber-promised"
+      ],
+      "excludesFlags": [
+        "maker:lumber-fetched",
+        "maker:lumber-done"
+      ],
+      "priority": 44,
+      "maxPlays": 1,
+      "storyArc": "The Thing Maker Job",
+      "opening": [
+        "“You brought materials!” {{name}} eyes the pile. “Feed the Thing Maker gently. It has moods, and the moods are load-bearing.”"
+      ],
+      "choices": [
+        {
+          "id": "feed",
+          "label": "Feed the maker",
+          "replies": [
+            "The scraps go in, and the Thing Maker works them over with a sound like a page turning twice. A neat length of {{material:bound-lumber}} comes out the far side. “It did the thing!” {{name}} whispers. “The thing it does!”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "maker:lumber-fetched"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "watch",
+          "label": "Ask if the maker needs watching",
+          "replies": [
+            "“Always. A maker is a friend with teeth.” {{name}} tracks every handle and lever, narrating softly. The {{material:bound-lumber}} that emerges is straight and proud."
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "maker:lumber-fetched"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "maker-lumber-3-build",
+      "requiresFlags": [
+        "maker:lumber-fetched"
+      ],
+      "excludesFlags": [
+        "maker:lumber-done"
+      ],
+      "priority": 44,
+      "maxPlays": 1,
+      "storyArc": "The Thing Maker Job",
+      "opening": [
+        "{{name}} stands over the finished {{material:bound-lumber}} with a plan in one paw and a hammer in the other, looking like a critter about to become a builder. “Last part. I need an extra pair of hands and a very small amount of courage.”"
+      ],
+      "choices": [
+        {
+          "id": "build",
+          "label": "Build the thing",
+          "replies": [
+            "You hold, {{name}} hammers, and the two of you raise a small crooked shelf that is somehow perfect. {{name}} steps back. “It stands up,” they say, hushed. “I told you it would.”"
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "maker:lumber-done"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "name-it",
+          "label": "Suggest it needs a name first",
+          "replies": [
+            "“A NAME.” {{name}} considers the shelf for a long moment. “The Leaning Tidy,” they declare. You write it on the plans in neat letters. The shelf, agreeably, leans."
+          ],
+          "friendship": 8,
+          "addFlags": [
+            "maker:lumber-done"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "maker-refining-talk",
+      "priority": 26,
+      "maxPlays": 3,
+      "storyArc": "At the Thing Maker",
+      "opening": [
+        "“Raw finds go in, refined things come out,” {{name}} says, patting the Thing Maker. “{{material:carbon-copy-shale}} and {{material:ochre-paperclay}} are the plain stock. Work them up, and you have better than you started with.”"
+      ],
+      "choices": [
+        {
+          "id": "how",
+          "label": "How does refining work?",
+          "replies": [
+            "“Patiently. You gather what the ground gave you, arrange it the way the plan says, and the maker does the convincing. Nothing mystical about it. Mostly.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "lumber",
+          "label": "And {{material:bound-lumber}}?",
+          "replies": [
+            "“The first real refine. Wood pressed until it holds a shape. Everything sturdy starts there.”"
+          ],
+          "friendship": 1
+        },
+        {
+          "id": "needs",
+          "label": "Does it need a tool?",
+          "replies": [
+            "“Only the maker, and a critter willing to wait for it. It is the waiting that thins the crowd.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "ladder-shovel-deeper",
+      "personalities": [
+        "curious",
+        "bold",
+        "gentle"
+      ],
+      "priority": 28,
+      "maxPlays": 3,
+      "storyArc": "The tool ladder",
+      "opening": [
+        "“A better shovel is not a bigger shovel,” {{name}} says, tapping the ground. “It is permission. The surface layer is only the first page of what is under this one.”"
+      ],
+      "choices": [
+        {
+          "id": "tier2",
+          "label": "What does the next shovel reach?",
+          "replies": [
+            "“{{tool:okayish-shovel}} takes on compact ground and steep banks. Denser paper, deeper down — the kind a real build wants.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "tier3",
+          "label": "And the best one?",
+          "replies": [
+            "“{{tool:heavy-duty-shovel}} opens the deep seams. {{material:graphite-cardstone}}, mostly, and whatever the local geology is proudest of.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "why",
+          "label": "Why bother digging at all?",
+          "replies": [
+            "“Because the ground is a scrapbook nobody has opened yet. You would be the first reader down there.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "ladder-scissors-redwood",
+      "priority": 28,
+      "maxPlays": 3,
+      "storyArc": "The tool ladder",
+      "opening": [
+        "“Scissors are the gentlest tool,” {{name}} says, snipping at the air. “You do not take a tree. You borrow from it, and it grows the loan back.”"
+      ],
+      "choices": [
+        {
+          "id": "kids",
+          "label": "What do the little scissors cut?",
+          "replies": [
+            "“{{tool:kids-scissors}} take a small trim from ordinary trees. {{material:kraft-twigs}}, soft shoots — enough to keep you building.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "sturdy",
+          "label": "So why upgrade?",
+          "replies": [
+            "“Because {{tool:sturdy-scissors}} cut redwoods. {{material:redwood-bark-curls}} exist nowhere a lighter pair can reach. That is the whole ladder.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "renewable",
+          "label": "The trees do not mind?",
+          "replies": [
+            "“Trees here are patient and renewable. Cut well, wait a little, come back. The forest keeps its own accounts.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "ladder-hammer-build",
+      "priority": 28,
+      "maxPlays": 3,
+      "storyArc": "The tool ladder",
+      "opening": [
+        "“Building is just convincing paper to hold still,” {{name}} says, brandishing a hammer. “The trick is having a hammer polite enough to ask.”"
+      ],
+      "choices": [
+        {
+          "id": "first",
+          "label": "What can I build first?",
+          "replies": [
+            "“{{tool:squeaky-hammer}} places the little pieces you already know how to make. Small things, honest things, a shelf for a friend.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "next",
+          "label": "What unlocks next?",
+          "replies": [
+            "“{{tool:basic-mallet}}, and then {{tool:standard-hammer}}, take on bigger plans as they arrive — real frames, bound-lumber work, things that outlast the afternoon.”"
+          ],
+          "friendship": 2
+        },
+        {
+          "id": "undo",
+          "label": "Can I take things apart?",
+          "replies": [
+            "“Every join comes back open if you ask it nicely. A build you can unbuild is a build you can learn from.”"
+          ],
+          "friendship": 1,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "trust-errand-1-ask",
+      "minFriendship": "friend",
+      "priority": 52,
+      "maxPlays": 1,
+      "excludesFlags": [
+        "trust:errand",
+        "trust:done"
+      ],
+      "storyArc": "A small errand",
+      "opening": [
+        "{{name}} fidgets with the corner of a paper, then holds it out. “I trust you with this,” they say, which lands heavier than the paper does. “It is a list. Small things. Will you help?”"
+      ],
+      "choices": [
+        {
+          "id": "yes",
+          "label": "Of course. What is on the list?",
+          "replies": [
+            "“Three things: a little {{material:mossy-paper-fiber}}, a careful walk, and no questions until the end.” {{name}} smiles. “You already did the hard one. Come back when you have the fiber.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "trust:errand"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "why-me",
+          "label": "Why me?",
+          "replies": [
+            "“Because you come back,” {{name}} says simply. “Most things do not. You do. That is a whole qualification.”"
+          ],
+          "friendship": 3,
+          "addFlags": [
+            "trust:errand"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "trust-errand-2-done",
+      "minFriendship": "friend",
+      "priority": 52,
+      "maxPlays": 1,
+      "requiresFlags": [
+        "trust:errand"
+      ],
+      "excludesFlags": [
+        "trust:done"
+      ],
+      "storyArc": "A small errand",
+      "opening": [
+        "{{name}} is waiting exactly where they said. The list is folded small in their paw. “No questions till the end,” they remind you. “Ready?”"
+      ],
+      "choices": [
+        {
+          "id": "done",
+          "label": "Hand over the fiber",
+          "replies": [
+            "The walk is long, the fiber is soft, and the questions hold until the very end. {{name}} tucks the bundle away like treasure. “Thank you for coming back,” they say. It is the whole reward. It is enough."
+          ],
+          "friendship": 6,
+          "addFlags": [
+            "trust:done"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "ask-early",
+          "label": "Ask one question early",
+          "replies": [
+            "“One,” {{name}} allows. You spend it on something kind. They answer, then smile. “Good question. Now walk, and I will tell you the rest at the end.”"
+          ],
+          "friendship": 5,
+          "addFlags": [
+            "trust:done"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "buddy-memory-box",
+      "minFriendship": "buddy",
+      "priority": 22,
+      "maxPlays": 2,
+      "storyArc": "Remembering you",
+      "opening": [
+        "“I keep a box of things I remember,” {{name}} says, sliding a folded carton into view. “Not objects. Moments. You are in it more than once.”"
+      ],
+      "choices": [
+        {
+          "id": "which",
+          "label": "Which moments?",
+          "replies": [
+            "“The day you first said hello. The day you ‘happened’ to walk past three times.” {{name}} counts on their toes. “That is two. I am saving room for more.”"
+          ],
+          "friendship": 3,
+          "followUps": [
+            {
+              "id": "add",
+              "label": "Add this one to the box",
+              "replies": [
+                "“Consider it added,” {{name}} says, folding the moment in carefully. “The box is getting full. Good problem to have.”"
+              ],
+              "friendship": 2,
+              "endsScene": true
+            },
+            {
+              "id": "peek",
+              "label": "Ask to see inside",
+              "replies": [
+                "The box is mostly light and a few soft scraps, each one a day. {{name}} closes it before you can be embarrassed. “Later,” they say, fond."
+              ],
+              "friendship": 2,
+              "endsScene": true
+            }
+          ]
+        },
+        {
+          "id": "keep",
+          "label": "Tell them you keep one too",
+          "replies": [
+            "{{name}} goes still, then bright. “A matching box? We are doing the same hobby,” they say. “This is the best kind of duplicate.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "pet-home-invite",
+      "minFriendship": "pet",
+      "priority": 21,
+      "maxPlays": 1,
+      "storyArc": "The long friendship",
+      "opening": [
+        "“I have been thinking about homes,” {{name}} says. “Mine is here.” A pause. “Yours is—wherever you keep going. I would like to see it once, if that is allowed.”"
+      ],
+      "choices": [
+        {
+          "id": "invite",
+          "label": "Come see it anytime",
+          "replies": [
+            "{{name}} does not answer for a moment. When they do, their voice is very small and very sure. “Then I will,” they say. “Twice, maybe. To be thorough.”"
+          ],
+          "friendship": 6,
+          "addFlags": [
+            "home:invited"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "why",
+          "label": "Why now?",
+          "replies": [
+            "“Because being friends a long while changes a thing,” {{name}} says. “Now I want to know where you go when you leave. Not to follow. Just to picture it kindly.”"
+          ],
+          "friendship": 5,
+          "addFlags": [
+            "home:invited"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "helper-arc-1-promise",
+      "biomes": [
+        "clearing",
+        "meadow"
+      ],
+      "minFriendship": "curious",
+      "priority": 34,
+      "maxPlays": 1,
+      "excludesFlags": [
+        "build:promised",
+        "build:done"
+      ],
+      "storyArc": "The bench nobody asked for",
+      "opening": [
+        "“I want to build a bench where the path bends,” {{name}} announces, “and I want it to be a secret. So if you help, you have to help quietly.”"
+      ],
+      "choices": [
+        {
+          "id": "quiet",
+          "label": "I can be quiet",
+          "replies": [
+            "“Excellent. I will fetch the pieces; you keep the plan. We meet at the bend, with {{material:kraft-twigs}} and exactly no witnesses.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "build:promised"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "why-secret",
+          "label": "Why secret?",
+          "replies": [
+            "“Because a bench that appears by surprise belongs to everyone who finds it,” {{name}} says. “That is the best way to give something.”"
+          ],
+          "friendship": 2,
+          "addFlags": [
+            "build:promised"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "helper-arc-2-help",
+      "biomes": [
+        "clearing",
+        "meadow"
+      ],
+      "minFriendship": "curious",
+      "priority": 34,
+      "maxPlays": 1,
+      "requiresFlags": [
+        "build:promised"
+      ],
+      "excludesFlags": [
+        "build:done"
+      ],
+      "storyArc": "The bench nobody asked for",
+      "opening": [
+        "The path bends around a quiet corner, and {{name}} is already there, sitting on a pile of untidy materials and looking extremely guilty. “It is going worse than planned,” they whisper. “Help?”"
+      ],
+      "choices": [
+        {
+          "id": "build",
+          "label": "Help build the bench",
+          "replies": [
+            "You hold, {{name}} taps, and the bench that appears at the bend is small and level and better than any plan deserved. “Nobody asked for it,” {{name}} says, delighted. “That makes it a gift.”"
+          ],
+          "friendship": 7,
+          "addFlags": [
+            "build:done"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "fix",
+          "label": "Rescue the crooked leg first",
+          "replies": [
+            "You straighten the culprit leg with a scrap folded into a shim. The bench settles, satisfied. “Engineering,” {{name}} breathes, as if it were a spell. “Thank you for the engineering.”"
+          ],
+          "friendship": 6,
+          "addFlags": [
+            "build:done"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "dunes-friend-watch",
+      "biomes": [
+        "dunes"
+      ],
+      "minFriendship": "friend",
+      "priority": 46,
+      "maxPlays": 2,
+      "storyArc": "Watching the horizon",
+      "opening": [
+        "“I watch this horizon every day,” {{name}} says from their post, “and I have decided I want company for the watch. Not help. Just company.”"
+      ],
+      "choices": [
+        {
+          "id": "join",
+          "label": "Join the watch",
+          "replies": [
+            "You stand beside {{name}} as the light moves across the corrugated ridges. Neither of you spots anything. Both of you feel important."
+          ],
+          "friendship": 3,
+          "followUps": [
+            {
+              "id": "quiet",
+              "label": "Stay quiet and keep watching",
+              "replies": [
+                "You keep watch without words until the light runs long. {{name}} leans, just slightly, into the quiet beside you."
+              ],
+              "friendship": 3,
+              "endsScene": true
+            },
+            {
+              "id": "what-if",
+              "label": "Ask what happens if something comes",
+              "replies": [
+                "“Then we deal with it,” {{name}} says calmly. “Together, which is the whole point of company.”"
+              ],
+              "friendship": 2,
+              "endsScene": true
+            }
+          ]
+        },
+        {
+          "id": "ask",
+          "label": "What are you watching for?",
+          "replies": [
+            "“Nothing, usually. But if something ever came, I would want to have been watching.” {{name}} rises onto their tail, serious. “That is the job. And now you are part of it.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "forest-friend-seedling",
+      "biomes": [
+        "forest"
+      ],
+      "species": [
+        "squirrel",
+        "bird",
+        "bunny",
+        "raccoon"
+      ],
+      "minFriendship": "friend",
+      "priority": 46,
+      "maxPlays": 2,
+      "storyArc": "A favor, growing",
+      "opening": [
+        "{{name}} is cupping a palmful of {{material:folded-cabbage-seeds}}. “I planted these somewhere important and forgot where. Help me reason it out?”"
+      ],
+      "choices": [
+        {
+          "id": "think",
+          "label": "Reason it out together",
+          "replies": [
+            "You retrace the morning: the cool patch, the good light, the spot with the nicest view. “There!” {{name}} says, and off you both go to find a tiny green row already coming up. Found, by logic."
+          ],
+          "friendship": 4,
+          "endsScene": true
+        },
+        {
+          "id": "walk",
+          "label": "Just walk until you find them",
+          "replies": [
+            "You wander the forest floor until, inevitably, a small neat row of cabbage sprouts waves you over. “See?” {{name}} says. “The seeds wanted to be found. They are show-offs.”"
+          ],
+          "friendship": 3,
+          "endsScene": true
+        }
+      ]
     }
-  ]
+  ],
+  "continuations": {
+    "materials": [
+      "“Picking up where we left off on {{lastTopic}} — I had another look.”",
+      "“Yesterday I went on about the local materials, and I stand by it. {{material:kraft-twigs}} are still lying all over the ground for the taking.”",
+      "“I promised I would think about {{material-short:redwood-bark-curls}}. Turns out you want {{tool-for:redwood-bark-curls}} for it, which I should have mentioned.”",
+      "“More on {{material:ribbonwood-sticks}}: they turn up in {{found-in:ribbonwood-sticks}}, {{only-here:ribbonwood-sticks}}.”",
+      "“I asked around about {{material:graphite-cardstone}} since we spoke. It keeps to the deeper ground, and {{tool-for:graphite-cardstone}} reaches it.”",
+      "“Continuing our talk on materials — {{material:terracotta-pebbles}} lie loose in {{found-in:terracotta-pebbles}}. Warm little things. Go and see.”"
+    ],
+    "harvest": [
+      "“Since we were discussing what grows, here is the rest: {{material:raspberry-bush-seeds}} want a little room between the rows.”",
+      "“Continuing the harvest chat — {{material:crinkle-carrot-seeds}} come up quick, and the frilly tops are decorative even before the roots are useful.”",
+      "“Remember the garden talk? Note that {{material:paper-tomato-seeds}} do best on the hotter pages.”",
+      "“More on the harvest I promised: {{material:mend-me-seeds}} feed nobody, but they stitch a tired bed back into the sheet.”",
+      "“To finish the thought about food — {{material:ribbon-corn-seeds}} take their time, and they are worth every minute of it.”"
+    ],
+    "wayfinding": [
+      "“I mentioned a good walk last time, and I have walked it again since. From {{region}} the way bends about the way you remember.”",
+      "“Continuing where we left off: start from this {{biome}}, and the next page over always surprises people.”",
+      "“About the route I described — keep {{region}} behind you and the paper stays kind the whole way.”",
+      "“Since you asked about the way, here is the trick: follow the moss, then ignore the moss and follow the path.”",
+      "“The directions I gave you? Still good. Landmarks do not move unless the wind is showing off.”"
+    ],
+    "fun": [
+      "“I had another thought about {{region}}, seeing as you liked the last one.”",
+      "“More on this {{biome}}, as promised — it is even quieter in the early folds of the day.”",
+      "“Remember the thing I said about this place? It is still true. I checked twice.”",
+      "“A follow-up on the local scenery: today it did something new, and by new I mean it blinked.”",
+      "“I owe you the rest of the story about this {{biome}}. The rest is—well, it is lovely, mostly.”"
+    ],
+    "place": [
+      "“Last visit I told you about {{region}}. I went back to check, and it holds up.”",
+      "“Continuing our talk about this {{biome}}: every corner keeps a small secret, and I only know two of them.”",
+      "“About the place I described — the shady side is still the best side, even now.”",
+      "“I said I would keep an eye on {{region}}. Report: unchanged, pleasant, well worth the walk.”",
+      "“More on {{biome}}, as requested. It has a mood today, and the mood is gold.”"
+    ]
+  }
 }

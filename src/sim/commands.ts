@@ -966,7 +966,9 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       // a nearly bare tree takes it to rest rather than into debt. Growth is
       // a quantity of tree, not a health bar to drive negative.
       const remaining = Math.max(0, treeGrowthAt(record, command.now) - profile.cost);
-      page.treeGrowth[target.treeKey] = { growth: remaining, trimmedAt: command.now, trims };
+      page.treeGrowth[target.treeKey] = {
+        growth: remaining, trimmedAt: command.now, trims, species: target.species,
+      };
 
       const drops: ResourceAllocation = {};
       for (const [index, entry] of yields.entries()) {

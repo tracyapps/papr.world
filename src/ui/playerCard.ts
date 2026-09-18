@@ -22,6 +22,9 @@ import { designToDataUrl } from './avatarEditor/render';
 import { fetchDesignJson } from '../net/remoteAvatarVisuals';
 import { countMakerPiecesOnPage } from '../net/sharedPieceVisuals';
 import { getCurrentPageId } from '../world/streaming';
+import { getTrinkets } from '../game/trinkets';
+import { getTrinketDef, TRINKET_FAMILIES } from '../sim/catalogs/trinkets';
+import type { TrinketInstance } from '../sim/state';
 
 const PLACEHOLDER_AVATAR = '/assets/runtime/avatars/avatar_placeholder_flat_01.png';
 
@@ -87,6 +90,100 @@ async function renderSharedLooks(host: HTMLElement, designIds: string[]): Promis
     img.src = designToDataUrl(design, { shadow: true });
     list.append(img);
   }
+}
+
+/**
+ * The trinket shelf.
+ *
+ * Drawn as coloured paper medallions rather than rendered 3D: the card is a
+ * DOM overlay, and spinning up a second WebGL context per card to show twelve
+ * tiny objects would cost far more than it is worth. The colour and the name
+ * carry the identity; the world placement is where the real model lives.
+ *
+ * `mine` is true for the player's own card — the one place trinkets are shown
+ * today, since trinket ownership is not yet synced to the server. When it is,
+ * `renderTrinketShelf` takes the other player's list the same way.
+ */
+function renderTrinketShelf(host: HTMLElement, trinkets: readonly TrinketInstance[], mine: boolean): void {
+  const section = document.createElement('div');
+  section.className = 'player-card-trinkets';
+  const heading = mine ? 'Your trinket shelf' : 'Trinket shelf';
+  section.innerHTML = `<h3 class="hud-overlay-subhead">${heading}</h3><div class="player-card-trinket-list"></div>`;
+  host.append(section);
+  const list = section.querySelector<HTMLElement>('.player-card-trinket-list');
+  if (!list) return;
+  if (trinkets.length === 0) {
+    list.innerHTML = '<p class="player-card-trinket-empty">No trinkets yet. Critters hand them out for favours done.</p>';
+    return;
+  }
+  for (const trinket of trinkets) {
+    const def = getTrinketDef(trinket.defId);
+    const chip = document.createElement('span');
+    chip.className = 'player-card-trinket';
+    const color = def?.palette.base ?? '#cdc4b4';
+    const accent = def?.palette.accent ?? '#9a8f7c';
+    chip.style.setProperty('--trinket-base', color);
+    chip.style.setProperty('--trinket-accent', accent);
+    chip.title = def ? `${def.label} — ${TRINKET_FAMILIES[def.family].label}` : trinket.defId;
+    chip.innerHTML = `<span class="player-card-trinket-medal" aria-hidden="true"></span><span class="player-card-trinket-label">${def?.label ?? trinket.defId}</span>`;
+    list.append(chip);
+  }
+}
+
+/**
+ * The player's own bio card, so they can see their shelf the way a visitor to
+ * their lot eventually will. Built on the same overlay as a neighbour's card.
+ */
+export function openMyPlayerCard(): void {
+  if (close) close();
+  const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'hud-overlay player-card is-open';
+  overlay.innerHTML = `
+    <div class="hud-overlay-card player-card-sheet" role="dialog" aria-modal="true" aria-labelledby="player-card-name">
+      <button class="hud-overlay-close" type="button" aria-label="Close player card">×</button>
+      <p class="hud-overlay-kicker">Pencil and Paper</p>
+      <img class="player-card-avatar" alt="" src="${PLACEHOLDER_AVATAR}">
+      <h2 id="player-card-name">You</h2>
+      <p class="player-card-meta">${creationsLine('local-player')}</p>
+    </div>`;
+
+  const sheet = overlay.querySelector<HTMLElement>('.player-card-sheet');
+  if (sheet) renderTrinketShelf(sheet, getTrinkets().filter((trinket) => trinket.placed === null), true);
+
+  const onKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      closePlayerCard();
+    }
+  };
+  const swallowStrayKeys = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') return;
+    if (event.target instanceof Node && overlay.contains(event.target)) return;
+    event.stopPropagation();
+  };
+  close = () => {
+    document.removeEventListener('keydown', onKeydown, true);
+    window.removeEventListener('keydown', swallowStrayKeys, true);
+    window.removeEventListener('keyup', swallowStrayKeys, true);
+    overlay.remove();
+    close = null;
+    openAccountId = null;
+    metaElement = null;
+    sharedElement = null;
+    opener?.focus();
+  };
+  overlay.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).classList.contains('hud-overlay-close')) closePlayerCard();
+  });
+  for (const eventName of ['pointerdown', 'pointerup', 'wheel', 'click', 'contextmenu'] as const) {
+    overlay.addEventListener(eventName, (event) => event.stopPropagation());
+  }
+  document.addEventListener('keydown', onKeydown, true);
+  window.addEventListener('keydown', swallowStrayKeys, true);
+  window.addEventListener('keyup', swallowStrayKeys, true);
+  document.body.appendChild(overlay);
 }
 
 /** True if a card was open and this closed it — mirrors closeCritterDialogue. */

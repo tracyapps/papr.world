@@ -6,7 +6,42 @@ import {
   plantHarvest,
   type SeedId,
 } from '../sim/catalogs/seeds';
-import { TOOL_DEFS, toolsInFamily, type ToolId } from '../sim/catalogs/tools';
+import {
+  TOOL_DEFS,
+  TOOL_FAMILIES,
+  TOOL_FAMILY_ORDER,
+  toolsInFamily,
+  type ToolId,
+} from '../sim/catalogs/tools';
+import {
+  TECH_DEFS,
+  TECH_NODE_ORDER,
+  techNodeStatus,
+  formatLearningDuration,
+  type TechNodeId,
+} from '../sim/catalogs/techTree';
+import { describeObjective, getQuestDef, type QuestDef } from '../sim/catalogs/quests';
+import { getGameState } from '../sim/state';
+import { createRng } from '../core/math';
+import {
+  acceptQuest,
+  activeQuestDefFor,
+  completeQuest,
+  declineQuest,
+  hasTurnInReady,
+  noteMetCritter,
+  questProgress,
+  refreshQuest,
+  selectQuestFor,
+} from './quests';
+import {
+  noteRecentLine,
+  isRecentLine,
+  endConversationVisit,
+  recordJournalEntry,
+  takeContinuableThread,
+  type ConversationJournalEntry,
+} from './conversationMemory';
 import {
   BIOME_SCATTER,
   biomesFor,
@@ -47,6 +82,15 @@ export type ConversationChoice = {
   followUps?: ConversationChoice[];
   /** Return from a generated thread to the critter's everyday questions. */
   returnToEveryday?: boolean;
+  /** Side effect a quest scene choice performs when chosen. */
+  questAction?: 'accept' | 'decline' | 'turn-in';
+  /** Which quest the action refers to; defaults to the critter's active one. */
+  questId?: string;
+  /**
+   * Record this reply as a thread the critter can pick back up next visit.
+   * `materials`, `harvest`, `wayfinding`, `fun`, `tool`, `next`, `self`, `trait`.
+   */
+  journalKind?: string;
   /** Record the exact rotating reply without using that memory to close a topic. */
   rememberReplyAs?: string;
   /**
@@ -62,6 +106,13 @@ export type ConversationScene = {
   opening: string;
   choices: ConversationChoice[];
   storyArc?: string;
+  /**
+   * Where the scene happened. Carried on the scene so a resolved choice can
+   * file its journal entry without asking the critter's rig for a position
+   * again — which both avoids a duplicate terrain lookup and keeps the scene
+   * testable without a live rig.
+   */
+  pageId?: string;
 };
 
 type Storylet = {
@@ -86,7 +137,12 @@ type Storylet = {
 
 type EverydayChoice = Omit<ConversationChoice, 'replies'> & {
   replies?: string[];
-  replyPool?: 'trait' | 'place' | 'self';
+  /**
+   * Generated answer families. `trait`/`place`/`self` are the original three;
+   * `tool` is tool-ladder advice for where the player is standing, and `next`
+   * is a gentle nudge toward the next thing the knowledge tree offers.
+   */
+  replyPool?: 'trait' | 'place' | 'self' | 'tool' | 'next';
 };
 
 type Milestone = {
@@ -108,6 +164,11 @@ type DialogueContent = {
   };
   milestones: Milestone[];
   storylets: Storylet[];
+  /**
+   * Lines for picking a thread back up on a later visit, keyed by topic kind.
+   * `place` is the fallback for any kind without its own list.
+   */
+  continuations?: Record<string, string[]>;
 };
 
 export type ChoiceResult = {
@@ -295,6 +356,80 @@ function adjacentBiomeReplies(context: ConversationContext): string[] {
   });
 }
 
+/**
+ * Push reply lines this critter has used recently to the back of the pool.
+ *
+ * Repeat advice is the thing the owner most wanted reduced. The pools are
+ * already rotated by visit count, but rotation alone still walks straight into
+ * a line said two minutes ago. Reordering by recency means a returning player
+ * hears the fresh end of the pool first, and only circles back when there is
+ * genuinely nothing new left to say. Read-only on purpose — nothing is marked
+ * as "said" until the player actually reads it, in `resolveConversationChoice`.
+ */
+function deprioritizeRecent(pool: string[], critterId: string, topicKey: string): string[] {
+  if (pool.length === 0) return pool;
+  const fresh: string[] = [];
+  const stale: string[] = [];
+  for (const line of pool) {
+    (isRecentLine(critterId, `${topicKey}:${stableHash(line).toString(36)}`) ? stale : fresh).push(line);
+  }
+  return [...fresh, ...stale];
+}
+
+/**
+ * Tool-ladder advice for wherever the player actually stands.
+ *
+ * Reads the player's own tool roll and names the next rung in each family in
+ * the game's own words (`limitation` from the tool catalog), so a critter
+ * explains the ladder the same way the Thing Maker does. Grows itself as the
+ * ladder grows.
+ */
+function buildToolReplies(biome: Biome): string[] {
+  const state = getGameState();
+  const replies: string[] = [];
+  for (const family of TOOL_FAMILY_ORDER) {
+    const ladder = toolsInFamily(family);
+    const owned = [...ladder].reverse().find((toolId) => (state.player.tools[toolId] ?? 0) > 0) ?? null;
+    if (!owned) {
+      const first = ladder[0];
+      replies.push(`“For ${TOOL_FAMILIES[family].label.toLowerCase()}, a ${TOOL_DEFS[first].name} is the honest place to begin. ${TOOL_DEFS[first].limitation}”`);
+      continue;
+    }
+    const next = ladder.find((toolId) => TOOL_DEFS[toolId].tier > TOOL_DEFS[owned].tier);
+    if (next) {
+      replies.push(`“Your ${TOOL_DEFS[owned].name} is doing fine work here. When you are ready for more, a ${TOOL_DEFS[next].name} would open things up: ${TOOL_DEFS[next].limitation}”`);
+    } else {
+      replies.push(`“Your ${TOOL_DEFS[owned].name} is as far up that ladder as anyone has got. Nothing better exists yet, which I find restful.”`);
+    }
+  }
+  const local = localMaterialReplies(biome);
+  if (local.length > 0) replies.push(local[0]);
+  return replies;
+}
+
+/**
+ * A gentle "what next" built from the knowledge tree's own available nodes.
+ *
+ * "Available" here is `techNodeStatus` — prerequisites already met, not yet
+ * learned — which is precisely the next step the owner wanted critters to
+ * nudge. Nothing is promised that the tree does not already offer.
+ */
+function buildNextStepReplies(): string[] {
+  const state = getGameState();
+  const replies: string[] = [];
+  for (const nodeId of TECH_NODE_ORDER) {
+    if (replies.length >= 3) break;
+    const node = TECH_DEFS[nodeId as TechNodeId];
+    if (!node || node.readiness !== 'ready') continue;
+    if (techNodeStatus(nodeId as TechNodeId, state) !== 'available') continue;
+    replies.push(`“The Professor could walk you through ${node.name} — ${node.summary.toLowerCase()} It takes ${formatLearningDuration(node.learningHours)}, or less if you keep your hands busy while you wait.”`);
+  }
+  if (replies.length === 0) {
+    replies.push('“You have learned everything close to hand. Wander a page or two and ask whoever lives there what they know — the tree grows outward, not just upward.”');
+  }
+  return replies;
+}
+
 function interleavePlaceKnowledge(
   pools: Record<PlaceKnowledgeKind, string[]>,
   order: PlaceKnowledgeKind[],
@@ -353,6 +488,7 @@ export function placeKnowledgeFollowUps(
         replies: pools[kind],
         rememberReplyAs: `place:${context.pageId}:${kind}`,
         rememberReplyContext: { pageId: context.pageId, kind },
+        journalKind: kind,
       }]
     )),
     {
@@ -494,6 +630,7 @@ function fromStorylet(
   const seen = markConversationSeen(critter.id, storylet.id);
   return {
     id: storylet.id,
+    pageId: context.pageId,
     opening: fillTemplate(pickLine(storylet.opening, memory.visits + seen), critter, context),
     choices: storylet.choices.map((choice) => fillChoice(choice, critter, context)),
     storyArc: storylet.storyArc,
@@ -514,6 +651,7 @@ function relationshipMilestone(
 
   return {
     id: milestone.flag,
+    pageId: context.pageId,
     opening: fillTemplate(milestone.opening, critter, context),
     choices: [{
       id: 'acknowledge',
@@ -533,24 +671,207 @@ export function everydayConversation(critter: Critter): ConversationScene {
   const seen = markConversationSeen(critter.id, 'everyday');
   const choices = CONTENT.everyday.choices.map((choice): ConversationChoice => {
     let replies = choice.replies;
-    if (choice.replyPool === 'trait') replies = CONTENT.everyday.traitReplies[primaryTrait];
+    if (choice.replyPool === 'trait') {
+      replies = deprioritizeRecent(CONTENT.everyday.traitReplies[primaryTrait], critter.id, 'trait');
+    }
     if (choice.replyPool === 'place') replies = placeKnowledgeReplies(context, primaryTrait);
-    if (choice.replyPool === 'self') replies = CONTENT.everyday.selfReplies[critter.species];
+    if (choice.replyPool === 'self') {
+      replies = deprioritizeRecent(CONTENT.everyday.selfReplies[critter.species], critter.id, 'self');
+    }
+    if (choice.replyPool === 'tool') replies = deprioritizeRecent(buildToolReplies(context.biome), critter.id, 'tool');
+    if (choice.replyPool === 'next') replies = deprioritizeRecent(buildNextStepReplies(), critter.id, 'next');
     const followUps = choice.replyPool === 'place'
       ? placeKnowledgeFollowUps(context, primaryTrait)
       : choice.followUps;
-    return fillChoice({ ...choice, replies: replies ?? ['...'], followUps }, critter, context);
+    const journalKind = choice.journalKind ?? choice.replyPool;
+    return fillChoice({ ...choice, replies: replies ?? ['...'], followUps, journalKind }, critter, context);
   });
   return {
     id: 'everyday',
+    pageId: context.pageId,
     opening: fillTemplate(pickLine(CONTENT.everyday.greetings[critter.species], memory.visits + seen), critter, context),
     choices,
   };
 }
 
+// --- Quest scenes ----------------------------------------------------------
+
+function questObjectivesLine(quest: QuestDef): string {
+  const parts = quest.objectives.map((objective) => describeObjective(objective));
+  return parts.length === 1
+    ? `“Just the one thing: ${parts[0]}.”`
+    : `“${parts.join(', then ')}. That is the whole of it.”`;
+}
+
+function questOfferScene(
+  critter: Critter,
+  quest: QuestDef,
+  memory: ConversationMemory,
+  context: ConversationContext,
+): ConversationScene {
+  return {
+    id: `quest-offer:${quest.id}`,
+    pageId: context.pageId,
+    storyArc: `A favour: ${quest.title}`,
+    opening: fillTemplate(pickLine(quest.opening, memory.visits), critter, context),
+    choices: [
+      {
+        id: 'accept',
+        label: fillTemplate(quest.acceptLabel, critter, context),
+        replies: quest.acceptReply.map((line) => fillTemplate(line, critter, context)),
+        questAction: 'accept',
+        questId: quest.id,
+        friendship: 1,
+        endsScene: true,
+      },
+      {
+        id: 'details',
+        label: 'What exactly do you need?',
+        replies: [fillTemplate(questObjectivesLine(quest), critter, context)],
+        endsScene: false,
+      },
+      {
+        id: 'decline',
+        label: fillTemplate(quest.declineLabel ?? 'Not right now', critter, context),
+        replies: (quest.declineReply ?? ['“No rush at all.”']).map((line) => fillTemplate(line, critter, context)),
+        questAction: 'decline',
+        questId: quest.id,
+        endsScene: true,
+      },
+    ],
+  };
+}
+
+function questProgressScene(
+  critter: Critter,
+  quest: QuestDef,
+  memory: ConversationMemory,
+  context: ConversationContext,
+): ConversationScene {
+  const progress = questProgress(critter.id);
+  const remaining = progress ? progress.lines.filter((line) => !line.done).map((line) => line.text) : [];
+  const summary = remaining.length === 0
+    ? '“You have done every part of it. Whenever you are ready.”'
+    : `“What is still needed: ${remaining.join(', and ')}.”`;
+  return {
+    id: `quest-progress:${quest.id}`,
+    pageId: context.pageId,
+    storyArc: `A favour: ${quest.title}`,
+    opening: fillTemplate(pickLine(quest.progressOpening, memory.visits), critter, context),
+    choices: [
+      { id: 'remind', label: 'Remind me what you needed?', replies: [summary], endsScene: false },
+      { id: 'back', label: 'Let’s talk about something else', replies: ['“Of course.”'], returnToEveryday: true },
+    ],
+  };
+}
+
+function questTurnInScene(
+  critter: Critter,
+  quest: QuestDef,
+  memory: ConversationMemory,
+  context: ConversationContext,
+): ConversationScene {
+  return {
+    id: `quest-turnin:${quest.id}`,
+    pageId: context.pageId,
+    storyArc: `A favour: ${quest.title}`,
+    opening: fillTemplate(pickLine(quest.turnInOpening, memory.visits), critter, context),
+    choices: [
+      {
+        id: 'turnin',
+        label: quest.tier === 'odyssey' ? 'Here it is, as promised' : 'Here you go',
+        replies: quest.turnInReply.map((line) => fillTemplate(line, critter, context)),
+        questAction: 'turn-in',
+        questId: quest.id,
+        friendship: 2,
+        endsScene: true,
+      },
+      { id: 'later', label: 'In a moment', replies: ['“Whenever you like.”'], endsScene: false },
+    ],
+  };
+}
+
+const TOPIC_LABELS: Record<string, string> = {
+  materials: 'the materials around here',
+  harvest: 'what grows here',
+  wayfinding: 'the places nearby',
+  fun: 'why this place is special',
+  tool: 'the tools you carry',
+  next: 'what to learn next',
+  self: 'myself',
+  trait: 'how I am, generally',
+  place: 'this place',
+};
+
+/**
+ * A critter picking a thread back up on a later visit.
+ *
+ * This is the "if Scraps told me something yesterday, they have more to add
+ * today" mechanic. The line comes from the content file's `continuations`
+ * section (keyed by what the thread was about), and the follow-up questions
+ * are the same local-knowledge threads used everywhere else — so returning to
+ * a topic always leads somewhere useful rather than just repeating it.
+ */
+function continuationScene(
+  critter: Critter,
+  thread: ConversationJournalEntry,
+  context: ConversationContext,
+): ConversationScene {
+  const lines = CONTENT.continuations?.[thread.kind] ?? CONTENT.continuations?.place ?? [];
+  const opening = lines.length > 0
+    ? fillTemplate(
+      pickLine(lines, stableHash(thread.id)).replaceAll('{{lastTopic}}', TOPIC_LABELS[thread.kind] ?? 'this place'),
+      critter,
+      context,
+    )
+    : '“I kept thinking about what I told you. I noticed something new, if you have a moment.”';
+  return {
+    id: `continuation:${thread.id}`,
+    pageId: context.pageId,
+    storyArc: 'Something I meant to add',
+    opening,
+    choices: placeKnowledgeFollowUps(context, critter.params.personality[0]),
+  };
+}
+
+/**
+ * Whether to actually put a favour to the player this visit.
+ *
+ * Quests should feel like a moment, not a pop-up on every greeting. Visits are
+ * seeded so the same visit replays the same way, and a player is never asked
+ * before they have properly met the animal.
+ */
+function wantsToAsk(critterId: string, visits: number): boolean {
+  if (visits < 3) return false;
+  return (stableHash(`${critterId}:ask:${visits}`) % 100) < 60;
+}
+
 export function beginCritterConversation(critter: Critter): ConversationScene {
   const memory = beginConversationVisit(critter.id);
   const context = getContext(critter);
+  noteMetCritter(critter.id, critter.params.name, critter.species);
+  refreshQuest(critter.id);
+
+  // 1. A favour already in flight outranks everything: hand it in, or be
+  //    reminded of it, before any new small talk.
+  const activeEntry = activeQuestDefFor(critter.id);
+  if (activeEntry) {
+    return hasTurnInReady(critter.id)
+      ? questTurnInScene(critter, activeEntry.quest, memory, context)
+      : questProgressScene(critter, activeEntry.quest, memory, context);
+  }
+
+  // 2. A critter with something to ask, if it is the right visit for it.
+  const offered = selectQuestFor(critter, context.biome);
+  if (offered && wantsToAsk(critter.id, memory.visits)) {
+    return questOfferScene(critter, offered, memory, context);
+  }
+
+  // 3. A thread left hanging from an earlier sitting.
+  const thread = takeContinuableThread(critter.id);
+  if (thread) return continuationScene(critter, thread, context);
+
+  // 4. Authored scenes, then milestones, then the everyday fallback.
   const authored = CONTENT.storylets
     .filter((storylet) => isEligible(storylet, critter, memory, context))
     .sort((a, b) => (
@@ -570,12 +891,36 @@ export function resolveConversationChoice(
   const seen = markConversationSeen(critter.id, `${scene.id}:${choice.id}`);
   if (choice.addFlags) addConversationFlags(critter.id, choice.addFlags);
   if (choice.friendship) addFriendshipPoints(critter.id, choice.friendship);
-  const reply = pickConversationLine(
+  let reply = pickConversationLine(
     choice.replies,
     seen,
     choice.replyMode,
     `${critter.id}:${scene.id}:${choice.id}`,
   );
+  // Remember what was actually said, so the next visit can open on it and the
+  // same line is not served twice in a row.
+  noteRecentLine(critter.id, `${choice.journalKind ?? 'line'}:${stableHash(reply).toString(36)}`);
+  if (choice.journalKind) {
+    recordJournalEntry({
+      id: `${critter.id}:${scene.id}:${choice.id}:${seen}`,
+      critterId: critter.id,
+      kind: choice.journalKind,
+      text: reply,
+      pageId: choice.rememberReplyContext?.pageId ?? scene.pageId ?? '',
+    });
+    endConversationVisit(critter.id);
+  }
+  if (choice.questAction) {
+    const questId = choice.questId ?? activeQuestDefFor(critter.id)?.quest.id;
+    if (questId) {
+      if (choice.questAction === 'accept') acceptQuest(critter.id, questId);
+      else if (choice.questAction === 'decline') declineQuest(critter.id, questId);
+      else {
+        const result = completeQuest(critter.id);
+        if (result) reply = `${reply}  (You tuck ${result.trinketLabel} into your pocket.)`;
+      }
+    }
+  }
   if (choice.rememberReplyAs) {
     const replyIndex = choice.replies.indexOf(reply);
     const flagKey = `${choice.rememberReplyAs}:${Math.max(0, replyIndex)}`;
@@ -595,6 +940,7 @@ export function resolveConversationChoice(
   if (choice.followUps?.length) {
     nextScene = {
       id: `${scene.id}:${choice.id}`,
+      ...(scene.pageId ? { pageId: scene.pageId } : {}),
       opening: reply,
       choices: choice.followUps,
       storyArc: scene.storyArc,

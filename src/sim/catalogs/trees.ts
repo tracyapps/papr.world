@@ -69,6 +69,16 @@ export type TreeGrowthState = {
   trimmedAt: number;
   /** Cuts so far. Seeds the deterministic yield roll. */
   trims: number;
+  /**
+   * What kind of tree this was, recorded on the first cut.
+   *
+   * Optional because saves written before this field existed have no species
+   * on their tree records. New cuts always write it. A quest that asks for a
+   * *particular* species can therefore only be satisfied by a trim made since,
+   * which is the honest answer: an old cut cannot be reinterpreted as a
+   * species it never recorded.
+   */
+  species?: TreeSpecies;
 };
 
 /** Lower bound of each stage, richest first. */

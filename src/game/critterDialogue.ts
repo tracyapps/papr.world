@@ -9,6 +9,7 @@ import {
   type ConversationScene,
 } from './conversationEngine';
 import { pickCritterAtScreen } from './critters';
+import { activeQuestDefFor, questProgress } from './quests';
 import { addFriendshipPoints, getFriendshipLevel, getFriendshipPoints } from './friendship';
 import { petCritter, showPetToast } from './petting';
 import { camera } from '../render/context';
@@ -46,7 +47,14 @@ function refreshMeta() {
   const level = getFriendshipLevel(activeCritter.id);
   const points = getFriendshipPoints(activeCritter.id);
   const personality = activeCritter.params.personality.join(' + ');
-  metaElement.textContent = `${SPECIES_LABELS[activeCritter.species]} · ${personality} · ${level} · ${points}/100 friendship`;
+  const base = `${SPECIES_LABELS[activeCritter.species]} · ${personality} · ${level} · ${points}/100 friendship`;
+  // A favour in flight is worth showing on its own line, so a player who
+  // forgot which critter asked for what does not have to reopen the thread.
+  const favour = activeQuestDefFor(activeCritter.id);
+  const progress = favour ? questProgress(activeCritter.id) : null;
+  metaElement.textContent = favour && progress
+    ? `${base} · favour: ${favour.quest.title} (${progress.done}/${progress.total})`
+    : base;
 }
 
 function keepToastsClearOfDialogue() {
@@ -100,6 +108,14 @@ function choose(choice: ConversationChoice) {
   if (!activeCritter || !activeScene) return;
   const result = resolveConversationChoice(activeCritter, activeScene, choice);
   if (result.action === 'pet') petCritter(activeCritter);
+  // A finished favour earns a trinket. Make that land as a moment, not a
+  // silent state change: a chime and a line, the same as a finished craft.
+  if (choice.questAction === 'turn-in') {
+    playCozySound('chime');
+    showPetToast('A trinket for your collection — see the scrapbook');
+  } else if (choice.questAction === 'accept') {
+    playCozySound('tap');
+  }
   refreshMeta();
   speak(result.reply, true);
   if (result.nextScene) {

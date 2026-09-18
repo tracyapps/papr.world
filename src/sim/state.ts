@@ -3,8 +3,9 @@ import { TOOL_DEFS, type ToolId } from './catalogs/tools';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import type { DigDiscovery } from './catalogs/geology';
 import { PLANT_STAGE_ORDER, SEED_DEFS, type PlantStage, type SeedId } from './catalogs/seeds';
-import { MAX_TREE_GROWTH, type TreeGrowthState } from './catalogs/trees';
+import { MAX_TREE_GROWTH, type TreeGrowthState, type TreeSpecies } from './catalogs/trees';
 import { LIMITS, type MailItem, type PlacedPiece } from '../../shared/src/index';
+import type { Biome } from './catalogs/biomes';
 import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
 
@@ -33,6 +34,12 @@ export type ConversationMemoryState = {
   flags: string[];
   seen: Record<string, number>;
   visits: number;
+  /** Epoch ms of the last conversation — lets a critter say "yesterday". */
+  lastChatAt?: number;
+  /** Newest first; what this critter has told the player, for continuations. */
+  journal?: Array<{ id: string; kind: string; text: string; pageId: string; at: number; continued?: boolean }>;
+  /** Recently-used reply line ids, so a critter stops repeating itself. */
+  recentLines?: string[];
 };
 
 export type SavedPlaceState = {
@@ -140,6 +147,56 @@ export type ActivityEntry = {
 };
 
 /**
+ * One trinket a player holds.
+ *
+ * A trinket is a *collectible*, not a resource: it is never sold, never spent,
+ * and never stacks. `defId` points at the catalog entry that decides what it
+ * looks like (see `sim/catalogs/trinkets.ts`); `seed` is folded in so two
+ * trinkets of the same definition still differ slightly. `placed` is the whole
+ * of its world presence — null means it is kept on the bio card shelf, set
+ * means it is sitting out in the world as decoration.
+ */
+export type TrinketInstance = {
+  id: string;
+  defId: string;
+  seed: number;
+  acquiredAt: number;
+  /** Where it came from, e.g. 'quest:favor-first-shiny' or 'critter:0,0#raccoon'. */
+  source: string;
+  fromName?: string;
+  placed: { pageId: string; x: number; z: number; rotY: number } | null;
+};
+
+/**
+ * One accepted critter quest, in flight.
+ *
+ * `baselines` and `satisfied` are parallel to the quest's objective list.
+ * Baselines snapshot the measuring count at accept time so "collect 3 twigs"
+ * means *three more from now*, and `satisfied` latches each objective true so
+ * a player who gathers the twigs and then spends them is not asked again.
+ */
+export type ActiveQuestState = {
+  questId: string;
+  giverId: string;
+  acceptedAt: number;
+  baselines: number[];
+  satisfied: boolean[];
+  step: number;
+};
+
+export type QuestLogState = {
+  /** Keyed by giver critter id — a critter can hold only one quest at a time. */
+  active: Record<string, ActiveQuestState>;
+  /** Quest ids ever finished, so a storyline never repeats by accident. */
+  completed: string[];
+  completedByCritter: Record<string, string[]>;
+  /** Times a quest has been offered, for taming the offer rate. */
+  offered: Record<string, number>;
+  /** Critter id -> epoch ms before which it will not ask again. */
+  cooldownUntil: Record<string, number>;
+};
+
+/**
  * One thing a critter has told the player, written down like something kept
  * rather than generated.
  *
@@ -188,6 +245,27 @@ export type GameState = {
     mailbox: MailItem[];
     /** Stable mail ids whose attachment has already been taken. */
     claimedMailIds: string[];
+    /** Everything the player has been given by a critter, kept or set down. */
+    trinkets: TrinketInstance[];
+    /** Side quests in flight and finished. See `game/quests.ts`. */
+    quests: QuestLogState;
+    /** Biomes the player has stood in — drives "explore the next biome" quests. */
+    visitedBiomes: Biome[];
+    /** Pages the player has walked on, by id. */
+    visitedPages: string[];
+    /** Critter ids the player has spoken with at least once. */
+    metCritters: string[];
+    /** Display names of met critters, for message-carrying quests. */
+    metCritterNames: Record<string, string>;
+    /**
+     * Species of every met critter, keyed by critter id.
+     *
+     * A message-carrying quest may name *a* meerkat rather than one particular
+     * animal — "tell a meerkat out in the dunes" is a more natural request
+     * than "tell Skrit", and a player cannot be expected to find one specific
+     * individual. This is the table that makes "any of that species" possible.
+     */
+    metCritterSpecies: Record<string, string>;
   };
   world: {
     harvestRespawns: Record<string, number>;
@@ -213,6 +291,25 @@ type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
 const listeners = new Set<() => void>();
 let cachedState: GameState | null = null;
 
+/**
+ * Validation hook for quest ids on load.
+ *
+ * Registered by `game/quests.ts` at module load rather than imported here, so
+ * the foundational state module never has to depend on the quest catalog (and
+ * the catalogs it pulls in) — which would be a runtime import cycle. With no
+ * validator registered, every quest id is kept, which is the safe default for
+ * tests that never load the quest system.
+ */
+let activeQuestValidator: ((questId: string) => boolean) | null = null;
+
+export function setActiveQuestValidator(validator: ((questId: string) => boolean) | null) {
+  activeQuestValidator = validator;
+}
+
+function questExists(questId: string): boolean {
+  return activeQuestValidator ? activeQuestValidator(questId) : true;
+}
+
 export function createDefaultGameState(): GameState {
   return {
     schemaVersion: SAVE_SCHEMA_VERSION,
@@ -233,6 +330,13 @@ export function createDefaultGameState(): GameState {
       diaryEntries: [],
       mailbox: [createWelcomeMail()],
       claimedMailIds: [],
+      trinkets: [],
+      quests: { active: {}, completed: [], completedByCritter: {}, offered: {}, cooldownUntil: {} },
+      visitedBiomes: ['clearing'],
+      visitedPages: ['0,0'],
+      metCritters: [],
+      metCritterNames: {},
+      metCritterSpecies: {},
     },
     world: {
       harvestRespawns: {},
@@ -353,6 +457,7 @@ function normalizeTreeGrowth(value: unknown): Record<string, TreeGrowthState> {
       trimmedAt: tree.trimmedAt,
       trims: typeof tree.trims === 'number' && Number.isFinite(tree.trims)
         ? Math.max(0, Math.floor(tree.trims)) : 0,
+      ...(typeof tree.species === 'string' ? { species: tree.species as TreeSpecies } : {}),
     };
   }
   return result;
@@ -490,7 +595,48 @@ function normalizeState(value: unknown): GameState | null {
     ? player.selectedSeed as SeedId
     : null;
   state.player.friendships = finiteCounts(player.friendships, 100);
-  state.player.conversations = safeObject(player.conversations) as Record<string, ConversationMemoryState>;
+  // Conversation memory is normalized per critter rather than trusted wholesale:
+  // a hand-edited or half-written save with `journal: 5` used to crash the
+  // continuation lookup the moment the player spoke to that animal.
+  state.player.conversations = Object.fromEntries(
+    Object.entries(safeObject(player.conversations)).flatMap(([critterId, rawMemory]) => {
+      const memory = safeObject(rawMemory);
+      const flags = Array.isArray(memory.flags)
+        ? memory.flags.filter((flag): flag is string => typeof flag === 'string').slice(0, 400) : [];
+      const seen: Record<string, number> = {};
+      for (const [key, value] of Object.entries(safeObject(memory.seen))) {
+        if (typeof value === 'number' && Number.isFinite(value)) seen[key.slice(0, 160)] = Math.max(0, Math.floor(value));
+      }
+      const journal = Array.isArray(memory.journal)
+        ? memory.journal.flatMap((rawEntry) => {
+          const entry = safeObject(rawEntry);
+          if (typeof entry.id !== 'string' || typeof entry.kind !== 'string') return [];
+          if (typeof entry.text !== 'string' || typeof entry.pageId !== 'string') return [];
+          if (typeof entry.at !== 'number' || !Number.isFinite(entry.at)) return [];
+          return [{
+            id: entry.id.slice(0, 160),
+            kind: entry.kind.slice(0, 40),
+            text: entry.text.slice(0, 400),
+            pageId: entry.pageId.slice(0, 40),
+            at: Math.max(0, entry.at),
+            ...(entry.continued === true ? { continued: true } : {}),
+          }];
+        }).slice(0, 12) : [];
+      const recentLines = Array.isArray(memory.recentLines)
+        ? memory.recentLines.filter((line): line is string => typeof line === 'string').slice(0, 24) : undefined;
+      const normalized: ConversationMemoryState = {
+        flags,
+        seen,
+        visits: typeof memory.visits === 'number' && Number.isFinite(memory.visits)
+          ? Math.max(0, Math.floor(memory.visits)) : 0,
+        ...(typeof memory.lastChatAt === 'number' && Number.isFinite(memory.lastChatAt)
+          ? { lastChatAt: Math.max(0, memory.lastChatAt) } : {}),
+        ...(journal.length > 0 ? { journal } : {}),
+        ...(recentLines && recentLines.length > 0 ? { recentLines } : {}),
+      };
+      return [[critterId.slice(0, 120), normalized] as [string, ConversationMemoryState]];
+    }),
+  );
   state.player.places = Array.isArray(player.places)
     ? player.places.filter((place): place is SavedPlaceState => {
       const item = safeObject(place);
@@ -537,6 +683,85 @@ function normalizeState(value: unknown): GameState | null {
       }];
     }).slice(0, DIARY_ENTRY_LIMIT)
     : [];
+  state.player.trinkets = Array.isArray(player.trinkets)
+    ? player.trinkets.flatMap((rawTrinket) => {
+      const trinket = safeObject(rawTrinket);
+      if (typeof trinket.id !== 'string' || typeof trinket.defId !== 'string') return [];
+      const placed = safeObject(trinket.placed);
+      const hasPlacement = typeof placed.pageId === 'string'
+        && typeof placed.x === 'number' && Number.isFinite(placed.x)
+        && typeof placed.z === 'number' && Number.isFinite(placed.z);
+      return [{
+        id: trinket.id.slice(0, 80),
+        defId: trinket.defId.slice(0, 80),
+        seed: typeof trinket.seed === 'number' && Number.isFinite(trinket.seed) ? Math.floor(trinket.seed) : 0,
+        acquiredAt: typeof trinket.acquiredAt === 'number' && Number.isFinite(trinket.acquiredAt) ? trinket.acquiredAt : 0,
+        source: typeof trinket.source === 'string' ? trinket.source.slice(0, 80) : '',
+        ...(typeof trinket.fromName === 'string' ? { fromName: trinket.fromName.slice(0, 80) } : {}),
+        placed: hasPlacement
+          ? {
+            pageId: String(placed.pageId),
+            x: placed.x as number,
+            z: placed.z as number,
+            rotY: typeof placed.rotY === 'number' && Number.isFinite(placed.rotY) ? placed.rotY : 0,
+          }
+          : null,
+      }];
+    }).slice(0, 400)
+    : [];
+  const quests = safeObject(player.quests);
+  const activeQuests: Record<string, ActiveQuestState> = {};
+  for (const [critterId, rawActive] of Object.entries(safeObject(quests.active))) {
+    const active = safeObject(rawActive);
+    if (typeof active.questId !== 'string') continue;
+    // A quest that no longer exists (renamed, retired) must not stay attached to
+    // a critter: it could never be satisfied, and would block that animal from
+    // ever offering anything again. Dropping it hands the critter back.
+    if (!questExists(active.questId)) continue;
+    activeQuests[critterId] = {
+      questId: active.questId.slice(0, 80),
+      giverId: typeof active.giverId === 'string' ? active.giverId.slice(0, 80) : critterId,
+      acceptedAt: typeof active.acceptedAt === 'number' && Number.isFinite(active.acceptedAt) ? active.acceptedAt : 0,
+      baselines: Array.isArray(active.baselines)
+        ? active.baselines.slice(0, 12).map((value) => (typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0))
+        : [],
+      satisfied: Array.isArray(active.satisfied) ? active.satisfied.slice(0, 12).map(Boolean) : [],
+      step: typeof active.step === 'number' && Number.isFinite(active.step) ? Math.max(0, Math.floor(active.step)) : 0,
+    };
+  }
+  state.player.quests = {
+    active: activeQuests,
+    completed: Array.isArray(quests.completed)
+      ? quests.completed.filter((id): id is string => typeof id === 'string').slice(0, 400) : [],
+    completedByCritter: Object.fromEntries(
+      Object.entries(safeObject(quests.completedByCritter)).map(([critterId, ids]) => [
+        critterId,
+        Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string').slice(0, 200) : [],
+      ]),
+    ),
+    offered: finiteCounts(quests.offered),
+    cooldownUntil: finiteCounts(quests.cooldownUntil),
+  };
+  const validBiomes: Biome[] = ['clearing', 'forest', 'meadow', 'dunes', 'scrapflats'];
+  state.player.visitedBiomes = Array.isArray(player.visitedBiomes)
+    ? [...new Set(player.visitedBiomes.filter((biome): biome is Biome => typeof biome === 'string' && validBiomes.includes(biome as Biome)))]
+    : ['clearing'];
+  state.player.visitedPages = Array.isArray(player.visitedPages)
+    ? player.visitedPages.filter((id): id is string => typeof id === 'string').slice(0, 2000)
+    : ['0,0'];
+  state.player.metCritters = Array.isArray(player.metCritters)
+    ? player.metCritters.filter((id): id is string => typeof id === 'string').slice(0, 500)
+    : [];
+  state.player.metCritterNames = Object.fromEntries(
+    Object.entries(safeObject(player.metCritterNames))
+      .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+      .map(([id, name]) => [id, name.slice(0, 80)]),
+  );
+  state.player.metCritterSpecies = Object.fromEntries(
+    Object.entries(safeObject(player.metCritterSpecies))
+      .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+      .map(([id, species]) => [id, species.slice(0, 40)]),
+  );
   state.player.mailbox = Array.isArray(player.mailbox)
     ? player.mailbox.flatMap((rawMail) => {
       const mail = safeObject(rawMail);

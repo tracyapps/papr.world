@@ -26,6 +26,9 @@ import {
 import { pickCritterAtScreen, updateCritters } from './game/critters';
 import { initializePetting, showPetToast, tryPetAt, updatePetEffects } from './game/petting';
 import { closeCritterDialogue, initializeCritterDialogue, tryStartCritterConversationAt } from './game/critterDialogue';
+import { pickUpTrinket as pickUpPlacedTrinket } from './game/trinkets';
+import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from './game/trinketVisuals';
+import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
 import { pickSharedHomeAtScreen } from './net/sharedHomeVisuals';
@@ -47,6 +50,7 @@ import { buildPlacesControls, markCurrentSpot, updatePlacesPanel } from './ui/pl
 import { closeHudMenu, initializeHudMenus } from './ui/hudMenus';
 import { initializeActivityLog, isActivityLogOpen, setActivityLogOpen } from './ui/activityLog';
 import { initializePlaces } from './world/places';
+import { getPage } from './world/pages';
 import { initializeRegionBanner, updateRegionBanner } from './ui/regionBanner';
 import { hasOrbitBlockingInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
 import { initializeGameState } from './sim/state';
@@ -146,6 +150,7 @@ initializeProfessor();
 initializeTechTreeView();
 initializePetting();
 initializeCritterDialogue();
+initializeTrinketVisuals();
 initializeCozyInteractions();
 initializeHarvesting();
 initializeToolActions();
@@ -219,6 +224,19 @@ registerScreenInteraction({
   priority: 80,
   hitTest: isHarvestableAtScreen,
   interact: tryHarvestAt,
+});
+// A trinket set down in the world is yours to pick back up. Sits just under
+// loose materials so a critter or dropped pile in front of it still wins.
+registerScreenInteraction({
+  id: 'placed-trinket',
+  priority: 78,
+  hitTest: (x, y) => pickTrinketAtScreen(x, y, camera) !== null,
+  interact: (x, y) => {
+    const hit = pickTrinketAtScreen(x, y, camera);
+    if (!hit) return false;
+    if (pickUpPlacedTrinket(hit.id)) showPetToast('Trinket back on the shelf');
+    return true;
+  },
 });
 registerScreenInteraction({
   id: 'plant-care',
@@ -352,6 +370,8 @@ const MINIMAP_REVEAL_DISTANCE_SQ = 0.12 ** 2;
 let nextAnimationTime = 0;
 let nextMiniMapRenderTime = 0;
 let lastMiniMapRevealX = Number.POSITIVE_INFINITY;
+/** Last page recorded into world knowledge, so "visit the forest" latches once. */
+let lastNotedPage = '';
 let lastMiniMapRevealZ = Number.POSITIVE_INFINITY;
 
 function animate(animationTime = 0) {
@@ -382,6 +402,12 @@ function animate(animationTime = 0) {
   updateGamepadCamera(delta);
   updateAvatar(delta);
   updateStreaming(avatar.position);
+  if (getCurrentPageId() !== lastNotedPage) {
+    lastNotedPage = getCurrentPageId();
+    const [notedX, notedZ] = lastNotedPage.split(',').map(Number);
+    noteVisitedPage(lastNotedPage, getPage(notedX, notedZ).biome);
+  }
+  updateTrinkets(delta, elapsed);
   updateSharedSession();
   const revealDx = avatar.position.x - lastMiniMapRevealX;
   const revealDz = avatar.position.z - lastMiniMapRevealZ;
