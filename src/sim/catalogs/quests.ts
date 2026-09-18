@@ -4,6 +4,7 @@ import { obtainRoutesFor, toolRequiredFor } from './obtaining';
 import { RECIPE_DEFS, isRecipeAvailable, recipeForTool, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { SEED_DEFS, type SeedId } from './seeds';
+import { MILL_REFINEMENTS, affordableMillBatches } from './millRefining';
 import { TOOL_DEFS, toolsInFamily, type ToolFamilyId, type ToolId } from './tools';
 import { techNodeGrantingRecipe, techNodeStatus, type TechNodeId } from './techTree';
 import { SPECIES_NAMES, SPECIES_YIELD, type TreeSpecies } from './trees';
@@ -45,6 +46,8 @@ export type QuestTier = 'favor' | 'errand' | 'odyssey';
 export type QuestObjective =
   | { kind: 'collect'; resource: ResourceId; quantity: number }
   | { kind: 'craft'; recipeId: RecipeId }
+  /** Have Chisel refine this material at the Wood Mill (counter or mail). */
+  | { kind: 'refine'; resource: ResourceId }
   | { kind: 'craftTool'; family: ToolFamilyId; tier?: 1 | 2 | 3 }
   | { kind: 'learnTech'; nodeId: TechNodeId }
   | { kind: 'plant'; seedId: SeedId }
@@ -312,15 +315,15 @@ const AUTHORED_QUESTS: QuestDef[] = [
     giverSpecies: ['woodchuck', 'raccoon', 'fox'],
     minFriendship: 'buddy',
     objectives: [
-      { kind: 'craft', recipeId: 'bound-lumber' },
+      { kind: 'refine', resource: 'bound-lumber' },
       { kind: 'place', templateKey: 'paper-bench' },
     ],
     reward: { trinketFamily: 'handmade', trinketTag: 'craft', friendship: 14 },
     opening: [
-      '“A neighbor with nowhere to sit is a sad thing,” {{name}} declares. “Bind some twigs and bark into lumber, then build a bench and put it somewhere. Anywhere. It just has to exist.”',
+      '“A neighbor with nowhere to sit is a sad thing,” {{name}} declares. “Get some twigs bound into lumber, then build a bench and put it somewhere. Anywhere. It just has to exist.”',
     ],
     acceptLabel: 'Consider it built',
-    acceptReply: ['“You will need the maker and a hammer. Bound lumber is twigs and curls, pressed flat.”'],
+    acceptReply: ['“Chisel at the Wood Mill binds lumber — twigs and a bit of long fiber, pressed flat. Or mail him an order if the walk is too long. Then you just need a hammer.”'],
     declineLabel: 'Later',
     declineReply: ['“Benches are for later, sometimes. I respect that.”'],
     progressOpening: ['“Lumber made? Bench down? I have been picturing it.”'],
@@ -543,6 +546,11 @@ export function objectiveReach(obj: QuestObjective, state: GameState): Objective
       return resourceReach(state, obj.resource, obj.quantity);
     case 'craft':
       return recipeReach(state, obj.recipeId);
+    case 'refine': {
+      const refinement = MILL_REFINEMENTS.find((entry) => entry.output === obj.resource);
+      if (!refinement) return 'far';
+      return affordableMillBatches(state.player.inventory, refinement, false, 1) > 0 ? 'ready' : 'next-step';
+    }
     case 'craftTool': {
       const ladder = toolsInFamily(obj.family);
       const target = obj.tier
@@ -625,6 +633,8 @@ export function describeObjective(objective: QuestObjective): string {
       return `bring ${objective.quantity}× ${RESOURCE_CORE_DEFS[objective.resource].shortLabel}`;
     case 'craft':
       return `make a ${RECIPE_DEFS[objective.recipeId]?.name ?? objective.recipeId}`;
+    case 'refine':
+      return `have Chisel refine some ${RESOURCE_CORE_DEFS[objective.resource]?.label.toLowerCase() ?? objective.resource} at the Wood Mill`;
     case 'craftTool':
       return objective.tier
         ? `make a tier-${objective.tier} ${objective.family}`

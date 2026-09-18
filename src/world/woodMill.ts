@@ -6,9 +6,11 @@ import { createColorMaterial, getMaterial } from '../render/materials';
 import { registerMapFeature } from './mapFeatures';
 import { buildWoodMillSignpost } from './signposts';
 import { sampleTerrainHeight } from './terrain';
+import { MILL_POSITION } from './millLayout';
+import { setMillPanelOpen } from '../game/millCounter';
 
-const MILL_X = -94;
-const MILL_Z = 0;
+const MILL_X = MILL_POSITION.x;
+const MILL_Z = MILL_POSITION.z;
 
 function buildPaperCutter(parent: THREE.Group) {
   const cutter = new THREE.Group();
@@ -67,6 +69,8 @@ function buildPaperCutter(parent: THREE.Group) {
       'This cutter can square up broad sheets and trim sturdy timber-paper without chewing the corners.',
       'A note on the guard reads: “Measure twice. Snack once. Cut after both.”',
     ],
+    // The cutter is also Chisel's counter: raw stock in, refined out.
+    onInteract: () => setMillPanelOpen(true, 'counter'),
   });
 }
 

@@ -110,4 +110,24 @@ describe('account entry through the alpha door', () => {
     expect(JSON.parse(responseBody)).toEqual({ ok: true });
     expect(headers.get('set-cookie')).toContain('HttpOnly');
   });
+
+  it('lets a claimed account into the avatar studio without naming a world', async () => {
+    const studio = new Request('https://papr.world/api/account-entry', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ purpose: 'studio' }),
+    });
+    const response = await handleAccountEntry(studio, env, backend({ claimed: true, worlds: [] }));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('set-cookie')).toContain('HttpOnly');
+
+    const unclaimed = new Request('https://papr.world/api/account-entry', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ purpose: 'studio' }),
+    });
+    const refused = await handleAccountEntry(unclaimed, env, backend({ claimed: false }));
+    expect(refused.status).toBe(403);
+    expect(refused.headers.has('set-cookie')).toBe(false);
+  });
 });

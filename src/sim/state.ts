@@ -266,6 +266,12 @@ export type GameState = {
      * individual. This is the table that makes "any of that species" possible.
      */
     metCritterSpecies: Record<string, string>;
+    /**
+     * Refined materials Chisel has made for this player at the Wood Mill,
+     * counted by output — in person or by mail. What a "refine" quest
+     * objective reads (see catalogs/millRefining.ts).
+     */
+    refinedCounts: Record<string, number>;
   };
   world: {
     harvestRespawns: Record<string, number>;
@@ -337,6 +343,7 @@ export function createDefaultGameState(): GameState {
       metCritters: [],
       metCritterNames: {},
       metCritterSpecies: {},
+      refinedCounts: {},
     },
     world: {
       harvestRespawns: {},
@@ -579,6 +586,7 @@ function normalizeState(value: unknown): GameState | null {
     if (tools[toolId] !== undefined) state.player.tools[toolId] = tools[toolId];
   }
   state.player.items = finiteCounts(player.items);
+  state.player.refinedCounts = finiteCounts(player.refinedCounts);
   if (Array.isArray(player.plans)) {
     const known = new Set(Object.keys(RECIPE_DEFS) as RecipeId[]);
     state.player.plans = player.plans.filter((id): id is RecipeId => known.has(id as RecipeId));
@@ -905,4 +913,84 @@ export function onGameStateChanged(listener: () => void) {
 /** Test-only seam: normal game code should never replace the whole state. */
 export function setGameStateForTests(state: GameState | null) {
   cachedState = state;
+}
+
+// --- Save backup: export and restore ---------------------------------------
+//
+// Promised to alpha testers (docs/alpha-invite-and-consent.md): before any
+// reset, "a reminder to export your save first". A backup is the save exactly
+// as stored, wrapped in a small labelled envelope so a stray JSON file is
+// never mistaken for one. Restoring runs the same `normalizeState` every load
+// runs, so a hand-edited or damaged file can only ever produce a valid save —
+// or be refused.
+
+export const SAVE_BACKUP_KIND = 'papr.world-save-backup';
+
+export type SaveBackupSummary = {
+  exportedAt: number | null;
+  chips: number;
+  materials: number;
+  tools: number;
+  gardenCells: number;
+  placedPieces: number;
+};
+
+export function exportSaveBackup(now = Date.now()): string {
+  return JSON.stringify({
+    kind: SAVE_BACKUP_KIND,
+    exportedAt: now,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    save: initializeGameState(),
+  });
+}
+
+export function summarizeSave(state: GameState, exportedAt: number | null = null): SaveBackupSummary {
+  let gardenCells = 0;
+  let placedPieces = 0;
+  for (const page of Object.values(state.world.pages)) {
+    gardenCells += Object.values(page.terrainEdits).filter((edit) => edit.plantedSeedId).length;
+    placedPieces += Object.keys(page.placedPieces).length;
+  }
+  return {
+    exportedAt,
+    chips: state.player.chips,
+    materials: Object.values(state.player.inventory).reduce((sum, count) => sum + (count ?? 0), 0),
+    tools: Object.values(state.player.tools).reduce((sum, count) => sum + (count ?? 0), 0),
+    gardenCells,
+    placedPieces,
+  };
+}
+
+export type SaveBackupParse =
+  | { ok: true; state: GameState; summary: SaveBackupSummary }
+  | { ok: false; reason: string };
+
+/** Read a backup file's text. Never touches the live save. */
+export function parseSaveBackup(text: string): SaveBackupParse {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, reason: 'That file is not a papr.world backup (it could not be read).' };
+  }
+  const envelope = safeObject(raw);
+  if (envelope.kind !== SAVE_BACKUP_KIND) {
+    return { ok: false, reason: 'That file is not a papr.world backup.' };
+  }
+  const state = normalizeState(envelope.save);
+  if (!state) {
+    return { ok: false, reason: 'That backup is from a different version of the game and cannot be restored here.' };
+  }
+  const exportedAt = typeof envelope.exportedAt === 'number' ? envelope.exportedAt : null;
+  return { ok: true, state, summary: summarizeSave(state, exportedAt) };
+}
+
+/**
+ * Replace the live save with a parsed backup. The caller reloads the page
+ * afterwards: pages, critters, and panels are all built from the save.
+ */
+export function restoreSaveBackup(state: GameState, storage = browserStorage()) {
+  cachedState = state;
+  if (storage) storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(state));
+  for (const listener of listeners) listener();
 }

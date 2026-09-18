@@ -438,6 +438,27 @@ Start with 3–5 testers, one neighborhood, and one or two specific questions pe
 build. Expand only after reports can be triaged and resolved reliably. This is
 a feedback milestone, not a claim that the game is content-complete.
 
+**Pre-invite pass, 2026-09-18.** Each criterion checked against the code:
+
+1. *Coherent loop* — built. Still wants one fresh-eyes playthrough by someone
+   other than the builder.
+2. *Two players by code* — built and proved locally; the **hosted smoke**
+   (`hosting.md`, now including the account/desk steps) is the owner's job.
+3. *No save-loss or dead end* — conversation dead ends fixed (every question
+   now leads somewhere, with a way out, walked by `conversationFlow.test.ts`);
+   testers can **download and restore a save backup** (Settings → Your save),
+   which the consent note already promised; bound lumber no longer needs
+   tier-2 scissors (Wood Mill: twigs + any long fiber).
+4. *Says it is an alpha* — now in three places: the invitation page, the
+   desk, and a once-per-browser card in the game that points at Send
+   feedback.
+5. *Safety* — built 2026-08-26; the neighborhood chat can now also be folded
+   away (it was the one HUD widget that could not).
+
+What is left is only what cannot be done from a sandbox: the hosted smoke,
+the by-hand browser proofs listed in `next-session.md`, and sending the first
+invitations (`alpha-invite-and-consent.md`, refreshed for the desk flow).
+
 ---
 
 ## Phase 3 — Economy, shops, mail

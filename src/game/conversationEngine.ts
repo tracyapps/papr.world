@@ -75,7 +75,13 @@ export type ConversationChoice = {
   replies: string[];
   /** Cycle is the default; random uses a stable shuffled pick per response. */
   replyMode?: 'cycle' | 'random';
-  action?: 'pet';
+  /** `goodbye` closes the conversation after the reply is shown. */
+  action?: 'pet' | 'goodbye' | 'open-mill';
+  /**
+   * The authored label, kept when a repeatable topic is relabelled "Tell me
+   * more about that" after it has been asked once (see `continueScene`).
+   */
+  baseLabel?: string;
   addFlags?: string[];
   friendship?: number;
   endsScene?: boolean;
@@ -175,7 +181,7 @@ type DialogueContent = {
 export type ChoiceResult = {
   reply: string;
   endsScene: boolean;
-  action?: 'pet';
+  action?: 'pet' | 'goodbye' | 'open-mill';
   nextScene?: ConversationScene;
 };
 
@@ -693,8 +699,97 @@ export function everydayConversation(critter: Critter): ConversationScene {
     id: 'everyday',
     pageId: context.pageId,
     opening: fillTemplate(pickLine(CONTENT.everyday.greetings[critter.species], memory.visits + seen), critter, context),
-    choices,
+    choices: [...residentChoices(critter), ...choices, goodbyeChoice()],
   };
+}
+
+/** Chisel's authored id — he keeps the mill counter. */
+const CHISEL_ID = '-2,0#woodchuck';
+
+/** Things only a particular resident can offer, placed first in the menu. */
+function residentChoices(critter: Critter): ConversationChoice[] {
+  if (critter.id !== CHISEL_ID) return [];
+  return [{
+    id: 'mill-counter',
+    label: 'Could you refine some materials for me?',
+    replies: [
+      '“Always. Let us see what you brought.”',
+      '“Raw in, refined out. Step up to the counter.”',
+      '“I was hoping you would ask. The cutter gets bored.”',
+    ],
+    replyMode: 'random',
+    action: 'open-mill',
+  }];
+}
+
+/**
+ * A way to say goodbye from inside the conversation, not only the × button —
+ * keyboard and screen-reader players should never have to hunt for the exit.
+ */
+function goodbyeChoice(): ConversationChoice {
+  return {
+    id: 'goodbye',
+    label: 'See you later',
+    replies: [
+      '“See you soon!”',
+      '“Come back anytime. I will probably be right about here.”',
+      '“Bye for now! Mind the loose twigs.”',
+      '“Until next time.”',
+      '“Off you go, then. Say hello to the trees for me.”',
+    ],
+    replyMode: 'random',
+    action: 'goodbye',
+    endsScene: true,
+  };
+}
+
+const SOMETHING_ELSE: ConversationChoice = {
+  id: 'back',
+  label: 'Let’s talk about something else',
+  replies: ['“Of course. What else is on your mind?”', '“Sure! Ask me anything.”', '“Mm-hm. What next?”'],
+  replyMode: 'random',
+  returnToEveryday: true,
+};
+
+const TELL_ME_MORE = 'Tell me more about that';
+
+/**
+ * What to show after a choice that neither ends the scene nor leads into
+ * written follow-ups.
+ *
+ * This used to be *nothing*: the same buttons stayed on screen, so asking a
+ * question looked like it had not registered, and storylets whose questions
+ * all stayed open had no way out except the × button. Now:
+ * - a one-off question disappears once asked;
+ * - a repeatable knowledge topic stays, relabelled "Tell me more about that",
+ *   because asking again genuinely gives the next fact;
+ * - every scene except the everyday menu gets a "something else" route back,
+ *   and an everyday menu that runs out refreshes itself.
+ */
+function continueScene(
+  critter: Critter,
+  scene: ConversationScene,
+  choice: ConversationChoice,
+  reply: string,
+): ConversationScene {
+  // A favour being offered or handed in keeps its own tight set of answers.
+  if (scene.id.startsWith('quest-offer:') || scene.id.startsWith('quest-turnin:')) {
+    return { ...scene, opening: reply, choices: scene.choices.filter((candidate) => candidate.id !== choice.id) };
+  }
+  const repeatable = choice.replies.length > 1 && Boolean(choice.rememberReplyAs || choice.journalKind);
+  const choices = scene.choices.flatMap((candidate): ConversationChoice[] => {
+    const base = candidate.baseLabel ?? candidate.label;
+    if (candidate.id !== choice.id) return [{ ...candidate, label: base, baseLabel: base }];
+    return repeatable ? [{ ...candidate, label: TELL_ME_MORE, baseLabel: base }] : [];
+  });
+  const substantive = choices.filter((candidate) => !candidate.returnToEveryday && candidate.action !== 'goodbye');
+  if (scene.id === 'everyday' && substantive.length === 0) {
+    return { ...everydayConversation(critter), opening: reply };
+  }
+  if (scene.id !== 'everyday' && !choices.some((candidate) => candidate.returnToEveryday)) {
+    choices.push(SOMETHING_ELSE);
+  }
+  return { ...scene, opening: reply, choices };
 }
 
 // --- Quest scenes ----------------------------------------------------------
@@ -789,7 +884,7 @@ function questTurnInScene(
         friendship: 2,
         endsScene: true,
       },
-      { id: 'later', label: 'In a moment', replies: ['“Whenever you like.”'], endsScene: false },
+      { id: 'later', label: 'In a moment', replies: ['“Whenever you like.”'], returnToEveryday: true },
     ],
   };
 }
@@ -874,16 +969,65 @@ export function beginCritterConversation(critter: Critter): ConversationScene {
   const thread = takeContinuableThread(critter.id);
   if (thread) return continuationScene(critter, thread, context);
 
-  // 4. Authored scenes, then milestones, then the everyday fallback.
-  const authored = CONTENT.storylets
-    .filter((storylet) => isEligible(storylet, critter, memory, context))
-    .sort((a, b) => (
-      (b.priority ?? 0) - (a.priority ?? 0)
-      || (memory.seen[a.id] ?? 0) - (memory.seen[b.id] ?? 0)
-      || a.id.localeCompare(b.id)
-    ))[0];
-  if (authored) return fromStorylet(authored, critter, memory, context);
-  return relationshipMilestone(critter, memory, context) ?? everydayConversation(critter);
+  // 4. A story arc in progress (multi-part chains, a named resident's
+  //    plot) still takes precedence, highest priority first — those are
+  //    sequences, and a sequence has to pick up where it left off.
+  const eligible = CONTENT.storylets.filter((storylet) => isEligible(storylet, critter, memory, context));
+  const arc = eligible
+    .filter((storylet) => (storylet.priority ?? 0) >= ARC_PRIORITY)
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.id.localeCompare(b.id))[0];
+  if (arc) return fromStorylet(arc, critter, memory, context);
+
+  // 5. Growing closer outranks small talk.
+  const milestone = relationshipMilestone(critter, memory, context);
+  if (milestone) return milestone;
+
+  // 6. Everything else is a weighted draw, not a leaderboard. Picking the
+  //    single highest-priority storylet meant every stranger in a biome
+  //    without its own knowledge scene opened on the same tool-ladder
+  //    lecture (`ladder-hammer-build`, first alphabetically at priority 28).
+  return pickOpening(critter, memory, context, eligible);
+}
+
+/** Storylets at or above this priority are sequential arcs, never drawn at random. */
+const ARC_PRIORITY = 50;
+/** Teaching scenes that make a poor first hello. */
+const LESSON_PREFIXES = ['ladder-', 'maker-refining'];
+/** How strongly the plain everyday chat (species greeting + menu) competes. */
+const EVERYDAY_WEIGHT = 30;
+const FIRST_MEETING_EVERYDAY_WEIGHT = 45;
+
+function pickOpening(
+  critter: Critter,
+  memory: ConversationMemory,
+  context: ConversationContext,
+  eligible: Storylet[],
+): ConversationScene {
+  const firstMeeting = memory.visits <= 1;
+  const options: Array<{ weight: number; scene: () => ConversationScene }> = [
+    {
+      weight: firstMeeting ? FIRST_MEETING_EVERYDAY_WEIGHT : EVERYDAY_WEIGHT,
+      scene: () => everydayConversation(critter),
+    },
+  ];
+  for (const storylet of eligible) {
+    if (firstMeeting && LESSON_PREFIXES.some((prefix) => storylet.id.startsWith(prefix))) continue;
+    // Priority still matters — it is now how *likely* a scene is, and a scene
+    // already seen gets rarer each time, so a critter works through its
+    // repertoire instead of repeating a favourite.
+    const seen = memory.seen[storylet.id] ?? 0;
+    const weight = Math.max(4, storylet.priority ?? 10) / (1 + seen * 2);
+    options.push({ weight, scene: () => fromStorylet(storylet, critter, memory, context) });
+  }
+  const total = options.reduce((sum, option) => sum + option.weight, 0);
+  // Seeded by critter and visit, like everything else in conversation: the
+  // same visit replays the same way after a reload.
+  let roll = (stableHash(`${critter.id}:opening:${memory.visits}`) % 10_000) / 10_000 * total;
+  for (const option of options) {
+    roll -= option.weight;
+    if (roll <= 0) return option.scene();
+  }
+  return options[0].scene();
 }
 
 export function resolveConversationChoice(
@@ -949,7 +1093,9 @@ export function resolveConversationChoice(
       storyArc: scene.storyArc,
     };
   } else if (choice.returnToEveryday) {
-    nextScene = everydayConversation(critter);
+    nextScene = { ...everydayConversation(critter), opening: reply };
+  } else if (!choice.endsScene) {
+    nextScene = continueScene(critter, scene, choice, reply);
   }
   return {
     action: choice.action,

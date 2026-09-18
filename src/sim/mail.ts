@@ -76,6 +76,19 @@ export function mailAttachment(mail: MailItem): MailAttachment | null {
   return null;
 }
 
+/**
+ * When a parcel lands, for mail that travels (mill orders). Mail without an
+ * `arrivesAt` has always already arrived.
+ */
+export function mailArrivesAt(mail: MailItem): number {
+  const arrivesAt = mail.payload.arrivesAt;
+  return typeof arrivesAt === 'number' && Number.isFinite(arrivesAt) ? arrivesAt : 0;
+}
+
+export function mailHasArrived(mail: MailItem, now: number): boolean {
+  return mailArrivesAt(mail) <= now;
+}
+
 /** Newest first, stable-id deduped, and bounded by the shared protocol limit. */
 export function deliverMail(state: GameState, mail: MailItem): boolean {
   if (state.player.mailbox.some((existing) => existing.id === mail.id)) return false;

@@ -121,3 +121,30 @@ describe('wardrobe store', () => {
     expect(listDesigns().map((entry) => entry.id)).toEqual(['good']);
   });
 });
+
+describe('wardrobe change events (what the account sync listens to)', () => {
+  it('reports saves and deletes made by the player', async () => {
+    const { onWardrobeChange } = await import('./wardrobe');
+    const seen: string[] = [];
+    const stop = onWardrobeChange((change) => {
+      seen.push(change.kind === 'saved' ? `saved:${change.design.id}` : `deleted:${change.id}`);
+    });
+    saveDesign(design('a'));
+    renameDesign('a', 'new name');
+    deleteDesign('a');
+    stop();
+    saveDesign(design('b'));
+    expect(seen).toEqual(['saved:a', 'saved:a', 'deleted:a']);
+  });
+
+  it('writes what came from the account quietly, so it never echoes back', async () => {
+    const { applyAccountWardrobe, onWardrobeChange } = await import('./wardrobe');
+    saveDesign(design('old'));
+    const seen: unknown[] = [];
+    const stop = onWardrobeChange((change) => seen.push(change));
+    applyAccountWardrobe([design('from-account', { updatedAt: 5_000 })], ['old']);
+    stop();
+    expect(seen).toEqual([]);
+    expect(listDesigns().map((entry) => entry.id)).toEqual(['from-account']);
+  });
+});

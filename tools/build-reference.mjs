@@ -67,12 +67,14 @@ function describeRoute(route, toolsById) {
     }
     case 'trimmed': {
       const tool = Object.values(toolsById).find((entry) => entry.verb === 'trim' && entry.tier >= route.minimumTier);
-      return `Trimmed from ${route.species} trees${tool ? ` with ${tool.name} or better` : ''}.`;
+      return `Trimmed from ${route.speciesName ?? `${route.species} trees`}${tool ? ` with ${tool.name} or better` : ''}.`;
     }
     case 'grown':
       return 'Gathered from a plant you grew.';
     case 'crafted':
       return 'Made at the Thing Maker.';
+    case 'refined':
+      return `Refined by ${route.refiner} at ${route.place} — trade raw stock at the counter, or order it by mail.`;
     case 'bought': {
       const barter = route.barter
         ? `, or bartered for ${route.barter.quantity} × ${resourceLabel(route.barter.resource)}`

@@ -19,7 +19,8 @@ import { setAvatarTexture } from './avatar';
 import { openAvatarEditor } from '../ui/avatarEditor/editor';
 import { designToDataUrl } from '../ui/avatarEditor/render';
 import { openWardrobePanel } from '../ui/avatarEditor/wardrobePanel';
-import { getWornDesign, saveDesign, setWornId } from '../ui/avatarEditor/wardrobe';
+import { getWornDesign, getWornId, listDesigns, saveDesign, setWornId } from '../ui/avatarEditor/wardrobe';
+import { flushWardrobeSync, startAccountWardrobeSync } from '../net/accountWardrobe';
 import { publishWornDesign } from '../net/sharedSession';
 import { DESIGN_SHEET, type AvatarDesign } from '../../shared/src/index';
 
@@ -131,12 +132,26 @@ export function openAvatarLookEditor(
       }
       localStorage.setItem(FIRST_RUN_KEY, '1');
       void wearDesign(design);
+      flushWardrobeSync();
     },
-    onCancel: () => {
+    onCancel: (result) => {
       // Skipping first-run is a real choice, not a postponement — the
       // placeholder cutout is a perfectly good way to exist, and the editor
       // stays one click away in settings.
       if (options.firstRun) localStorage.setItem(FIRST_RUN_KEY, '1');
+      // Closing keeps the (autosaved) work. If it was the look being worn —
+      // or nothing was being worn yet — show it on the avatar right away,
+      // so what you see in the world matches what you just made.
+      const design = result.design;
+      if (design) {
+        const wornId = getWornId();
+        const wearIt = wornId === design.id || (!wornId && result.changed);
+        if (wearIt && (result.changed || currentDesign?.id !== design.id)) {
+          setWornId(design.id);
+          void wearDesign(design);
+        }
+      }
+      flushWardrobeSync();
     },
   });
 }
@@ -149,11 +164,34 @@ export function openAvatarLookEditor(
  * who wants to look around first can close the editor and come back to it.
  */
 export function initializeAvatarLook(): void {
+  // Keep the wardrobe on the account whenever someone is signed in. When the
+  // account has a newer copy of the look being worn (edited at My desk, or
+  // on another computer), put that newer copy on.
+  const synced = startAccountWardrobeSync({
+    onPulled: () => {
+      const latest = getWornDesign();
+      if (latest && (!currentDesign || latest.updatedAt !== currentDesign.updatedAt || latest.id !== currentDesign.id)) {
+        void wearDesign(latest);
+      }
+    },
+  });
   const worn = getWornDesign();
   if (worn) {
     void wearDesign(worn);
     return;
   }
-  if (localStorage.getItem(FIRST_RUN_KEY) === '1') return;
-  openAvatarLookEditor({ firstRun: true });
+  // Nothing worn in this browser. Wait for the account first: someone
+  // signing in on a new computer already HAS looks, and greeting them with
+  // "make your first avatar" would be wrong.
+  void synced.then(() => {
+    if (getWornDesign()) return;
+    const [latest] = listDesigns();
+    if (latest) {
+      setWornId(latest.id);
+      void wearDesign(latest);
+      return;
+    }
+    if (localStorage.getItem(FIRST_RUN_KEY) === '1') return;
+    openAvatarLookEditor({ firstRun: true });
+  });
 }

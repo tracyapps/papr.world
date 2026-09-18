@@ -99,6 +99,17 @@ import {
   updateSharedSession,
 } from './net/sharedSession';
 import { initializeFeedbackPanel } from './ui/feedbackPanel';
+import { closeAlphaNotice, initializeAlphaNotice } from './ui/alphaNotice';
+import {
+  closeMillPanel,
+  initializeMillCounter,
+  isMillPanelOpen,
+  isNearMill,
+  isWheelInsideMillPanel,
+  onMillPanelOpened,
+  setMillPanelOpen,
+  updateMillPrompt,
+} from './game/millCounter';
 import { initializeFeedbackReview } from './ui/feedbackReview';
 import { initializeMultiplayerPanel } from './ui/multiplayerPanel';
 
@@ -129,11 +140,20 @@ initializeGuidance();
 initializeHudLayout();
 initializeTimedAction();
 initializeFeedbackPanel();
+// Once per browser: say plainly that this is an early alpha (gate 1, criterion 4).
+initializeAlphaNotice();
 initializeMultiplayerPanel();
 
 wireThingMakerDom();
 renderThingMakerPanel();
 wireSeedStoreDom();
+initializeMillCounter();
+// The mill counter, Pip's shop, and the Thing Maker share the right-hand
+// panel slot: opening one closes the others.
+onMillPanelOpened(() => {
+  closeSeedStorePanel();
+  setMakerPanelOpen(false);
+});
 renderSeedStorePanel();
 initializeScrapbook();
 initializeHudWidgets();
@@ -186,6 +206,7 @@ registerScreenInteraction({
   interact: () => {
     if (isNearThingMaker(avatar.position)) {
       closeSeedStorePanel();
+      closeMillPanel();
       setMakerPanelOpen(true);
     }
     else showPetToast('The Thing Maker is over there — walk closer to use it');
@@ -286,11 +307,17 @@ initializeInput({
   onToggleScrapbook: () => setScrapbookOpen(!isScrapbookOpen()),
   onToggleNearby: () => {
     if (isNearSeedStore(avatar.position)) {
+      closeMillPanel();
       setSeedStorePanelOpen(!isSeedStorePanelOpen());
+      return;
+    }
+    if (isNearMill(avatar.position)) {
+      setMillPanelOpen(!isMillPanelOpen(), 'counter');
       return;
     }
     if (isNearThingMaker(avatar.position)) {
       closeSeedStorePanel();
+      closeMillPanel();
       setMakerPanelOpen(!isMakerPanelOpen());
     }
   },
@@ -309,6 +336,7 @@ initializeInput({
     && !hasOrbitBlockingInteractionAt(event.clientX, event.clientY)
   ),
   onEscape: () => {
+    if (closeAlphaNotice()) return true;
     if (cancelCarryingPiece()) return true;
     if (cancelTimedAction('escape')) return true;
     if (closeTechTreeView()) return true;
@@ -316,6 +344,7 @@ initializeInput({
     if (closeCritterDialogue()) return true;
     if (closePlayerCard()) return true;
     if (closeSeedStorePanel()) return true;
+    if (closeMillPanel()) return true;
     if (isMakerPanelOpen()) {
       setMakerPanelOpen(false);
       return true;
@@ -334,7 +363,9 @@ initializeInput({
     }
     return false;
   },
-  isWheelCaptured: (event) => isWheelInsideMakerPanel(event) || isWheelInsideSeedStorePanel(event),
+  isWheelCaptured: (event) => (
+    isWheelInsideMakerPanel(event) || isWheelInsideSeedStorePanel(event) || isWheelInsideMillPanel(event)
+  ),
   isPointerCaptured: isHudWidgetInteractionActive,
   /**
    * The world is the canvas and nothing else.
@@ -422,6 +453,7 @@ function animate(animationTime = 0) {
   updateCritters(delta, elapsed, avatar.position);
   updateMakerPrompt(avatar.position);
   updateSeedStorePrompt(avatar.position);
+  updateMillPrompt(avatar.position);
 
   updateGuidance(avatar.position, elapsed);
   updatePetEffects(delta);

@@ -1,15 +1,31 @@
 import { readFile } from 'node:fs/promises';
 
 const fileUrl = new URL('../src/content/conversations.json', import.meta.url);
-const species = new Set([
-  'squirrel', 'butterfly', 'raccoon', 'bunny', 'bird', 'cat',
-  'woodchuck', 'meerkat', 'fox',
-]);
+
+// Species and biomes are read from the source that defines them, the same way
+// tools/validate-quests.mjs does. These used to be hand-copied lists here, and
+// they had quietly fallen behind (no parrot, no tropical) — so the check was
+// failing on perfectly good content.
+async function sourceText(path) {
+  return readFile(new URL(path, import.meta.url), 'utf8');
+}
+function quotedIn(fragment) {
+  return [...fragment.matchAll(/'([^']+)'/g)].map((match) => match[1]);
+}
+const variationSource = await sourceText('../src/game/critterVariation.ts');
+const speciesMatch = variationSource.match(/type\s+CritterSpecies\s*=([\s\S]*?);/);
+const species = new Set(speciesMatch ? quotedIn(speciesMatch[1]) : []);
+const biomeSource = await sourceText('../src/sim/catalogs/biomes.ts');
+const biomeMatch = biomeSource.match(/BIOME_IDS\s*=\s*\[([\s\S]*?)\]/);
 /** Generated answer families the engine understands (see conversationEngine.ts). */
 const replyPools = new Set(['trait', 'place', 'self', 'tool', 'next']);
 const personalities = new Set(['bold', 'curious', 'dramatic', 'gentle', 'mischievous', 'shy', 'sleepy']);
 const friendshipLevels = new Set(['stranger', 'curious', 'friend', 'buddy', 'pet']);
-const biomes = new Set(['clearing', 'forest', 'meadow', 'dunes', 'scrapflats']);
+const biomes = new Set(biomeMatch ? quotedIn(biomeMatch[1]) : []);
+if (species.size === 0 || biomes.size === 0) {
+  console.error('Could not read critter species or biome ids from source.');
+  process.exit(1);
+}
 const errors = [];
 
 let content;

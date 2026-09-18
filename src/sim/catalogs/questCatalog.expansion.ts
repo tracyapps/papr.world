@@ -428,14 +428,14 @@ export const QUEST_EXPANSION_DEFS: QuestDef[] = [
   {
     id: 'odyssey-curls-and-lumber',
     title: 'Curls and Lumber',
-    summary: 'Make heavier shears, cut bark curls from a redwood, and bind it all into lumber.',
+    summary: 'Make heavier shears, cut bark curls from a redwood, and have Chisel bind lumber at the mill.',
     tier: 'odyssey',
     giverSpecies: ['woodchuck', 'raccoon', 'fox'],
     minFriendship: 'buddy',
     objectives: [
       { kind: 'craftTool', family: 'scissors', tier: 2 },
       { kind: 'collect', resource: 'redwood-bark-curls', quantity: 2 },
-      { kind: 'craft', recipeId: 'bound-lumber' },
+      { kind: 'refine', resource: 'bound-lumber' },
     ],
     reward: { trinketFamily: 'handmade', trinketTag: 'craft', friendship: 14 },
     opening: [
@@ -443,7 +443,7 @@ export const QUEST_EXPANSION_DEFS: QuestDef[] = [
       '“There is no shortcut to good lumber. That is rather the point of it.”',
     ],
     acceptLabel: 'Curls, then lumber',
-    acceptReply: ['“Sturdy shears come from the tree of knowledge — make the kids’ pair first, then the heavier ones. The rest is just work.”'],
+    acceptReply: ['“Sturdy shears come from the tree of knowledge — make the kids’ pair first, then the heavier ones. Then take your twigs and a long curl of fiber to Chisel at the Wood Mill. He binds it; you brag about it.”'],
     declineLabel: 'Not the whole job',
     declineReply: ['“Good lumber is not a someday thing. Fair enough.”'],
     progressOpening: ['“Heavy shears? Curls? Lumber? Where has it got to?”'],

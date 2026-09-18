@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar studio · papr.world</title>
+  </head>
+  <body class="studio-page">
+    <main class="studio-page-main" id="studio-page">
+      <header class="studio-page-header">
+        <p class="hud-overlay-kicker">papr.world</p>
+        <h1>Your avatar studio</h1>
+        <p class="studio-page-lead">Make and change your looks here, without going into a world.
+          Everything saves as you go.</p>
+        <p class="studio-page-sync" data-role="sync" role="status" aria-live="polite">Checking your sign-in…</p>
+      </header>
+      <div class="studio-page-actions">
+        <button type="button" class="avatar-editor-save" data-action="new">Make a new look</button>
+        <button type="button" data-action="wardrobe">Rename, share, or delete looks…</button>
+        <a class="studio-page-back" href="/account/">Back to My desk</a>
+      </div>
+      <section aria-labelledby="studio-looks-title">
+        <h2 id="studio-looks-title">Your looks</h2>
+        <ul class="studio-page-looks" data-role="looks"></ul>
+      </section>
+    </main>
+    <script type="module" src="/src/studio/main.ts"></script>
+  </body>
+</html>

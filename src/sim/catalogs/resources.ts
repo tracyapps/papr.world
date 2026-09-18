@@ -20,7 +20,7 @@ export const RESOURCE_CATEGORIES = {
   food: { id: 'food', label: 'Harvests & Food', singularLabel: 'harvest', description: 'Paper fruits and vegetables picked from plants you grew.', iconKey: 'resource-category.food', color: '#c45d4a' },
   // Crafted, never found loose — see recipes.ts's 'resource'-kind
   // RecipeOutput. First entry: bound-lumber (2026-09-02).
-  refined: { id: 'refined', label: 'Refined Materials', singularLabel: 'piece', description: 'Multi-step supplies worked up from raw finds at the Thing Maker.', iconKey: 'resource-category.refined', color: '#7a5c3e' },
+  refined: { id: 'refined', label: 'Refined Materials', singularLabel: 'piece', description: 'Multi-step supplies worked up from raw finds by Chisel at the Wood Mill.', iconKey: 'resource-category.refined', color: '#7a5c3e' },
 } as const satisfies Record<string, ResourceCategoryDefinition>;
 
 export type ResourceCategoryId = keyof typeof RESOURCE_CATEGORIES;
@@ -86,6 +86,12 @@ export const RESOURCE_CORE_DEFS = {
   'paper-tomato': { id: 'paper-tomato', label: 'Paper tomatoes', shortLabel: 'Paper tomatoes', category: 'food', iconKey: 'resource.paper-tomato', processStage: 0, structuralClass: 0, tags: ['food'] },
   // Crafted at the Thing Maker, never found loose in the world — see
   // recipes.ts's 'resource'-kind RecipeOutput. First refined material.
+  // Refined at the Wood Mill (see catalogs/millRefining.ts) — the rest of the
+  // materials plan's stage-1 rung, 2026-09-18.
+  'binding-cord': { id: 'binding-cord', label: 'Binding cord', shortLabel: 'Binding cord', category: 'refined', iconKey: 'resource.binding-cord', processStage: 1, structuralClass: 1, tags: ['long-fiber'] },
+  'soft-pulp': { id: 'soft-pulp', label: 'Soft pulp', shortLabel: 'Soft pulp', category: 'refined', iconKey: 'resource.soft-pulp', processStage: 1, structuralClass: 0, tags: ['soft-fiber'] },
+  'stone-aggregate': { id: 'stone-aggregate', label: 'Stone aggregate', shortLabel: 'Aggregate', category: 'refined', iconKey: 'resource.stone-aggregate', processStage: 1, structuralClass: 1, tags: ['stone'] },
+  'paper-mortar': { id: 'paper-mortar', label: 'Paper mortar', shortLabel: 'Mortar', category: 'refined', iconKey: 'resource.paper-mortar', processStage: 1, structuralClass: 0, tags: ['clay'] },
   'bound-lumber': { id: 'bound-lumber', label: 'Bound lumber', shortLabel: 'Bound lumber', category: 'refined', iconKey: 'resource.bound-lumber', processStage: 1, structuralClass: 2, tags: ['wood', 'board'] },
 } as const satisfies Record<string, ResourceCoreDefinition>;
 

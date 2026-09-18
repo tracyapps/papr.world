@@ -6,6 +6,85 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Looks never get lost; worlds find you again (2026-09-18, sixth pass).**
+  Fix for "15 minutes of avatar work gone, and the world logged me out":
+  - **Studio autosave** (`editor.ts`): every change lands in the wardrobe
+    within ~1.5s, plus on tab hide/close. Close keeps the work; "Save &
+    wear" finishes; **Undo my changes** restores the look as it was when the
+    studio opened. A full wardrobe keeps a draft (`pp.avatar-draft.v1`) and
+    offers it back next time.
+  - **Account wardrobe sync** (`src/net/accountWardrobe.ts`): signed-in
+    players' looks sync both ways with `/account/designs` (newest copy wins;
+    deletes tracked with `pp.wardrobe.synced.v1` / pending-deletes). A new
+    browser wears the account's looks instead of the first-run prompt.
+  - **Studio from the desk** (`studio/index.html` → `/play/studio/`,
+    `src/studio/main.ts`). `/api/account-entry` accepts `{purpose:'studio'}`
+    to let any claimed account through the door without a world.
+  - **The game loads Clerk headlessly** (`src/net/accountAuth.ts`) for fresh
+    tokens: in-memory only, never URLs or storage. Needs
+    `PUBLIC_CLERK_PUBLISHABLE_KEY` in the game build (new `vite.config.ts`).
+  - **Reload = still signed in** (`resumeWorldEntry` in `worldEntry.ts`) and
+    **auto-rejoin** after a lost visit (`src/net/rejoin.ts`): 2s → 60s
+    backoff, immediate retry on wake/tab-visible/online; never after leaving
+    on purpose or being removed; stops with a clear message on sign-out,
+    lost access, or a protocol update.
+  - Why worlds dropped: not inactivity (pings allow 40s of silence). A
+    server deploy/restart, Railway App Sleeping, or a laptop asleep longer
+    than the 60s reconnect grace ends the seat; the old code never rejoined.
+
+- **Pre-invite tie-ups (2026-09-18, fifth pass).** Checked Alpha gate 1
+  criterion by criterion (status written under the gate in `roadmap.md`) and
+  closed what could be closed in code: an **early-alpha notice** on the
+  invitation page, the desk, and a once-per-browser in-game card
+  (`src/ui/alphaNotice.ts`, setting `alphaNoticeSeen`); **save backup and
+  restore** in Settings → Your save (`exportSaveBackup` / `parseSaveBackup` /
+  `restoreSaveBackup` in `state.ts` — restore runs the normal load
+  normalisation and asks before replacing anything; the consent note had
+  already promised testers this); the **neighborhood chat folds** to its
+  header with an unread count and joins "hide all HUD"; the **share card**
+  (`site/public/og.png`) re-rendered with the real Dokdo/Karla fonts; hosting
+  smoke and tester one-pager refreshed for the account/desk flow. Verified:
+  web tsc + 614 tests (the asset-pipeline render test needs the Mac's
+  Chromium, as always), server tsc + 68 tests, edge tsc, Astro site build,
+  content/quest/style checks.
+
+- **Refining moved to the Wood Mill — in person or by mail (2026-09-18,
+  fourth pass).** Raw → refined is now a trade with Chisel, not a Thing Maker
+  recipe. `src/sim/catalogs/millRefining.ts` is the one table: bound lumber
+  (4 kraft twigs + 1 any long fiber — the materials plan's starter recipe,
+  no redwood needed), plus four new stage-1 materials from the plan —
+  **binding cord**, **soft pulp**, **stone aggregate**, **paper mortar**.
+  "Any X" slots only accept *raw* materials with that tag, and take from
+  whatever you hold most of. Open the counter by clicking the big paper
+  cutter, pressing E at the mill, or asking Chisel ("Could you refine some
+  materials for me?"). **Mail order:** Scrapbook → Mail → "Order from the
+  Wood Mill…" opens the same board in mail mode; the fee is ₡3 *or* one
+  extra of each raw input, and the parcel arrives ~90 s later (the button
+  reads "On its way · …" until then). New command `refineAtMill`, new
+  `player.refinedCounts`, new quest objective `refine` (the two bound-lumber
+  quests use it), new obtain route `refined`. The Thing Maker's bound-lumber
+  plan is kept but `planned` (hidden) so old saves load. Chisel's and the
+  lumber storylets were rewritten to point at the mill. Four new materials
+  show in `npm run art:check` as TO DRAW.
+- **Conversation fixes (same pass).** (1) Openings are a weighted, seeded
+  draw instead of "highest priority wins" — every stranger in the jungle was
+  opening on the same tool-ladder lecture. Story arcs (priority ≥ 50) and
+  friendship milestones still come first; tool lessons are never a first
+  hello; seen scenes get rarer. (2) No more dead ends: a question that
+  neither ends the scene nor has follow-ups used to leave the *same* buttons
+  up. Now one-off questions disappear once asked, repeatable knowledge
+  becomes "Tell me more about that", every non-everyday scene gets "Let's
+  talk about something else", the everyday menu refreshes when used up and
+  always ends with "See you later" (closes the card after the reply). New
+  tropical knowledge scene and a canopy-critter first hello.
+  `conversationFlow.test.ts` walks every storylet two levels deep.
+  `tools/validate-conversations.mjs` now reads species/biomes from source
+  (its hand-copied lists were missing parrot and tropical).
+- **Upside-down hearts fixed.** Petting hearts billboarded with `lookAt()`
+  and then overwrote `rotation.z` — from some camera angles `lookAt` solves
+  with x ≈ π, so those hearts flipped. They now copy the camera's
+  orientation and roll in their own plane.
+
 - **Jungle animals: toucan, sloth, monkey — the canopy crowd (2026-09-18,
   third pass).** The first critters that live *in* trees. New
   `src/game/critterCanopy.ts` turns each page's jungle trees and palms into
@@ -437,6 +516,18 @@ top of home markers and the quests-and-trinkets system. Start here.
   with two live clients** — see "Do this next" item 2.
 
 ## Do this next
+
+**Before inviting testers (owner-only, in this order — everything codeable is done):**
+
+1. Commit, push, and let Vercel + Railway redeploy.
+2. Run the hosted smoke in `hosting.md` — the original list plus the new
+   "account-era additions" (fresh browser profile as the tester).
+3. Play the 30–45 minute loop once in a fresh profile yourself (or have a
+   friend do it) — the one-pager's path in `alpha-invite-and-consent.md`.
+4. Review and personalise `alpha-invite-and-consent.md` (refreshed for the
+   invite link → desk flow), then send Stage 1: 1–2 plumbing testers.
+5. Triage `?review=1` and the moderation queue weekly from the first invite.
+
 
 0. **Walk to the tropics and look around (the 2026-09-18 by-hand proof).**
    Follow the wet air until the ground turns dark green (the minimap should

@@ -28,6 +28,7 @@ import { sampleTerrainHeight } from '../world/terrain';
 import { buildSeedStoreResident } from './critters';
 import { registerCozyObject } from './cozyInteractions';
 import { setMakerPanelOpen } from './thingMaker';
+import { closeMillPanel } from './millCounter';
 
 const panel = document.querySelector<HTMLElement>('#seed-store-panel');
 const balanceElement = document.querySelector<HTMLElement>('#seed-store-balance');
@@ -385,7 +386,10 @@ export function renderSeedStorePanel() {
 }
 
 export function setSeedStorePanelOpen(open: boolean) {
-  if (open) setMakerPanelOpen(false);
+  if (open) {
+    setMakerPanelOpen(false);
+    closeMillPanel();
+  }
   panelOpen = open;
   renderSeedStorePanel();
 }

@@ -1,6 +1,6 @@
 # Alpha invitations, consent, and the tester one-pager
 
-2026-09-02 · **DRAFT — owner review before first send.** Fills item A0 of the 2026-09-02 roadmap plan. Pairs with [two-worlds-memo.md](two-worlds-memo.md), [alpha-testing.md](alpha-testing.md), and [hosting.md](hosting.md). Nothing here goes out before the hosted `https/wss` smoke passes (A1).
+2026-09-02, refreshed 2026-09-18 for the account/desk flow · **DRAFT — owner review before first send.** Fills item A0 of the 2026-09-02 roadmap plan. Pairs with [two-worlds-memo.md](two-worlds-memo.md), [alpha-testing.md](alpha-testing.md), and [hosting.md](hosting.md). Nothing here goes out before the hosted `https/wss` smoke passes (A1).
 
 ## 1. The invitation message
 
@@ -14,7 +14,7 @@ Copy, personalize the `[bracketed]` bits, send one per tester (personal, not a b
 >
 > I'm inviting a handful of people into the first alpha and I'd love your eyes on it. The ask: **one 30–45 minute session** in the next week or two, playing however you like, then telling me what felt good and what didn't. There's a feedback button built right into the game.
 >
-> Your invite code is **[CODE]** and your link is **[PLAY URL]** — it works in a regular browser, nothing to install. A couple of rough edges are known and expected (I'll list them so you don't chase ghosts): [link/summary of the one-pager's "known rough edges"].
+> Here's your private invitation link: **[INVITE LINK]** (made at papr.world/admin — it works once, and you choose the email when you open it). It works in a regular browser, nothing to install. A couple of rough edges are known and expected (I'll list them so you don't chase ghosts): [link/summary of the one-pager's "known rough edges"].
 >
 > What I do with feedback: it goes into a private queue only I can read. Details and data-retention notes are in the one-pager — short version: voluntary, deletable on request, never shared or sold.
 >
@@ -30,13 +30,15 @@ Keep this visible at opt-in (alpha-testing.md requires it "at that moment"). Inc
 - **Identity.** Reports carry your paper-passport account id by default; the form lets you **remove it** before sending.
 - **Where it lives.** A private feedback queue on the alpha game server, readable only by me through a token-protected review desk. Exports I generate are redacted (no passport ids, no private audit notes).
 - **Retention.** For the duration of the alpha plus a reasonable feedback window after. Want it deleted? Say the word — [contact form on papr.world] — and it's gone.
-- **Resets.** Early in the alpha a save reset is possible if something breaks badly, always with notice. After Day 30 of the alpha: **no resets without tester consent + 48h notice + a reminder to export your save first** (in-game save export is shipping in this alpha).
+- **Resets.** Early in the alpha a save reset is possible if something breaks badly, always with notice. After Day 30 of the alpha: **no resets without tester consent + 48h notice + a reminder to export your save first** — in the game, **Settings → Your save → Download a backup** (built 2026-09-18; **Restore from a backup…** puts it back).
 - **No marketing.** Your contact info is used for nothing but this alpha. Never shared, never sold.
 - **Who can join.** People I invited personally — 18+, or with a parent/guardian's okay.
 
 ## 3. The tester one-pager — "what a tester should know"
 
-**What papr.world is.** A cozy shared world made of paper. Draw yourself in, wander, gather paper materials, craft at the Thing Maker, buy seeds at Pip's, garden, and talk to the critters — they know things about the places they live. Nothing here is scarce and nothing punishes you for leaving and coming back.
+**What papr.world is.** A cozy shared world made of paper. Draw yourself in, wander, gather paper materials, craft at the Thing Maker, buy seeds at Pip's, trade raw stock for refined materials with Chisel at the Wood Mill (or by mail), garden, and talk to the critters — they know things about the places they live. Nothing here is scarce and nothing punishes you for leaving and coming back.
+
+**Getting in.** Open your private invitation link, enter your email, and sign up. You land at **your desk**, which holds your doors: your own solo world and the Shared World. You can always get back to the desk from inside the game (Settings, or the Activity drawer).
 
 **A good 30–45 minute path (do it in any order):**
 1. Draw yourself — messy is charming; the game accepts strange drawings on purpose.
@@ -51,14 +53,17 @@ Keep this visible at opt-in (alpha-testing.md requires it "at that moment"). Inc
 - Could you learn what to do next without being told?
 - Did another person make the world feel warmer, or merely busier?
 
-**How to give feedback.** The in-game sheet: settings or scrapbook → **Bug / Improvement / New idea / Other**. Attach a screenshot only if it helps. Small things welcome — "the pond ripple sounds wrong" is a real report.
+**How to give feedback.** The in-game sheet: the **?** Help menu or Settings → **Send feedback…** → **Bug / Improvement / New idea / Other**. Attach a screenshot only if it helps. Small things welcome — "the pond ripple sounds wrong" is a real report.
+
+**Keep a backup.** Settings → **Your save → Download a backup** every so often. If a reset ever happens, that file is how your progress comes back.
 
 **Known rough edges (expected — don't chase these):**
 - Harvest piles and critters are per-player; two people can harvest the same pile or meet different critters.
 - Gardens are private for now — your friend can't see yours yet.
 - Builds made while offline stay yours until you re-place them while connected.
 - Other players appear as a colored paper cutout + name until drawn designs arrive.
-- Your scrapbook, chips, and learning are personal and don't sync.
+- Parts of your progress live in your browser: download a backup now and then (Settings → Your save).
+- Critters up in the jungle trees (sloths, monkeys, toucans) are brand new — tell me if one gets stuck somewhere odd.
 
 **Ground rules.** Be kind; this is a small, gentle place. Blocks, reports, and host removal all exist and work.
 

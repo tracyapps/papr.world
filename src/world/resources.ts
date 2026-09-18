@@ -155,6 +155,20 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'bound-lumber': {
     material: 'paper.brown.warm', visual: 'twigBundle', mapColor: '#6b4423',
   },
+  // Mill-refined stock (catalogs/millRefining.ts). Never generated loose;
+  // visuals matter only if one is ever dropped or displayed.
+  'binding-cord': {
+    material: 'paper.salmon', visual: 'fiberTuft', mapColor: '#b5745a',
+  },
+  'soft-pulp': {
+    material: 'paper.bubbles', visual: 'stoneCluster', mapColor: '#cfd9cf',
+  },
+  'stone-aggregate': {
+    material: 'paper.grey', visual: 'stoneCluster', mapColor: '#8a8f91',
+  },
+  'paper-mortar': {
+    material: 'paper.brown.warm', visual: 'stoneCluster', mapColor: '#c29a6c',
+  },
 };
 
 // Built with an explicit loop rather than `Object.fromEntries(...) as

@@ -16,7 +16,8 @@ import { getToolArt } from '../game/toolPresentation';
 import { getResourceArt } from '../game/resourcePresentation';
 import { requestHudLayout } from './hudLayout';
 import { buildDiaryGroups, type DiaryGroup } from './diaryView';
-import { mailAttachment, mailSubject, mailText } from '../sim/mail';
+import { mailArrivesAt, mailAttachment, mailHasArrived, mailSubject, mailText } from '../sim/mail';
+import { setMillPanelOpen } from '../game/millCounter';
 import {
   claimSharedMail,
   getSharedInventory,
@@ -278,16 +279,33 @@ function renderDiaryTab() {
     <div class="scrapbook-diary-results">${renderDiaryResults()}</div>`;
 }
 
+/** "Order from the Wood Mill" — the mailbox is also the mill's catalog. */
+function renderMailOrderButton() {
+  return `
+    <div class="scrapbook-mail-order">
+      <button type="button" data-open-mill-order>Order from the Wood Mill…</button>
+      <small>Chisel refines raw stock by post, for a small delivery fee.</small>
+    </div>`;
+}
+
+/** Whole minutes, never "0": a parcel due in 20 seconds is "under a minute". */
+function arrivalLabel(arrivesAt: number) {
+  const seconds = Math.max(0, Math.ceil((arrivesAt - Date.now()) / 1000));
+  return seconds < 60 ? 'under a minute' : `about ${Math.ceil(seconds / 60)} min`;
+}
+
 function renderMailTab() {
   const state = getGameState();
   if (state.player.mailbox.length === 0) {
-    return '<p class="scrapbook-empty">Your mailbox is empty. Letters and parcels will wait here whenever they arrive.</p>';
+    return `${renderMailOrderButton()}<p class="scrapbook-empty">Your mailbox is empty. Letters and parcels will wait here whenever they arrive.</p>`;
   }
   return `
+    ${renderMailOrderButton()}
     ${mailMessage ? `<p class="scrapbook-mail-message" aria-live="polite">${escapeHtml(mailMessage)}</p>` : ''}
     <ol class="scrapbook-mail-list">${state.player.mailbox.map((mail) => {
     const attachment = mailAttachment(mail);
     const claimed = state.player.claimedMailIds.includes(mail.id);
+    const onItsWay = !mailHasArrived(mail, Date.now());
     const serverParcel = attachment && mail.payload.inventoryAuthority === 'server';
     const sharedClaim = Boolean(serverParcel && getSharedInventory());
     const date = diaryDate(mail.at);
@@ -301,8 +319,8 @@ function renderMailTab() {
         ${attachment ? `
           <footer>
             <span class="scrapbook-mail-attachment">${escapeHtml(attachment.label)}</span>
-            <button type="button" data-collect-mail="${escapeHtml(mail.id)}" ${claimed ? 'disabled' : ''}>
-              ${claimed ? 'Collected' : sharedClaim ? 'Collect to neighborhood pouch' : 'Collect'}
+            <button type="button" data-collect-mail="${escapeHtml(mail.id)}" ${claimed || onItsWay ? 'disabled' : ''}>
+              ${claimed ? 'Collected' : onItsWay ? `On its way · ${arrivalLabel(mailArrivesAt(mail))}` : sharedClaim ? 'Collect to neighborhood pouch' : 'Collect'}
             </button>
           </footer>` : ''}
       </li>`;
@@ -446,6 +464,11 @@ export function initializeScrapbook() {
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
 
+    if (target.closest('[data-open-mill-order]')) {
+      setMillPanelOpen(true, 'mail');
+      return;
+    }
+
     const mailId = target.closest<HTMLButtonElement>('[data-collect-mail]')?.dataset.collectMail;
     if (mailId) {
       const mail = getGameState().player.mailbox.find((entry) => entry.id === mailId);
@@ -527,6 +550,14 @@ export function initializeScrapbook() {
 
   onResourceInventoryChanged(render);
   onGameStateChanged(render);
+  // Parcels in the post: refresh the Mail tab while one is on its way, so its
+  // button turns into "Collect" by itself when it lands.
+  window.setInterval(() => {
+    if (!scrapbookOpen || activeTab !== 'mail') return;
+    const now = Date.now();
+    const waiting = getGameState().player.mailbox.some((mail) => !mailHasArrived(mail, now - 15_000));
+    if (waiting) render();
+  }, 15_000);
   onSharedInventoryChanged(render);
   setScrapbookOpen(false);
 }

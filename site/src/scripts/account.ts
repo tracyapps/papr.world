@@ -207,6 +207,8 @@ if (shell) {
   const wardrobeImportDescription = shell.querySelector<HTMLElement>('[data-wardrobe-import-description]');
   const wardrobeImportButton = shell.querySelector<HTMLButtonElement>('[data-wardrobe-import-button]');
   const wardrobeImportNote = shell.querySelector<HTMLElement>('[data-wardrobe-import-note]');
+  const openStudioButton = shell.querySelector<HTMLButtonElement>('[data-open-studio]');
+  const openStudioNote = shell.querySelector<HTMLElement>('[data-open-studio-note]');
   const migration = shell.querySelector<HTMLElement>('[data-migration]');
   const migrationDescription = shell.querySelector<HTMLElement>('[data-migration-description]');
   const migrationButton = shell.querySelector<HTMLButtonElement>('[data-migration-button]');
@@ -574,7 +576,41 @@ if (shell) {
     };
   };
 
+  /**
+   * The avatar studio lives with the game under /play/, behind the alpha
+   * door. The same account-entry service that opens a world lets a claimed
+   * account through for the studio (no world needed); the studio page then
+   * signs in on its own, so no token is handed across.
+   */
+  const wireStudioButton = (getToken: () => Promise<string | null>) => {
+    if (!openStudioButton) return;
+    openStudioButton.onclick = async () => {
+      openStudioButton.disabled = true;
+      openStudioButton.textContent = 'Opening…';
+      if (openStudioNote) openStudioNote.textContent = '';
+      try {
+        const token = await getToken();
+        if (!token) throw new Error('Your sign-in session could not be refreshed.');
+        const response = await fetch('/api/account-entry/', {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ purpose: 'studio' }),
+        });
+        const result = await response.json().catch(() => ({})) as { ok?: boolean; error?: string };
+        if (!response.ok || !result.ok) throw new Error(result.error || 'The studio could not be opened.');
+        window.location.assign('/play/studio/');
+      } catch (error) {
+        if (openStudioNote) {
+          openStudioNote.textContent = error instanceof Error ? error.message : 'The studio could not be opened.';
+        }
+        openStudioButton.disabled = false;
+        openStudioButton.textContent = 'Open the avatar studio';
+      }
+    };
+  };
+
   const loadWardrobe = async (getToken: () => Promise<string | null>) => {
+    wireStudioButton(getToken);
     try {
       const token = await getToken();
       if (!token) return;

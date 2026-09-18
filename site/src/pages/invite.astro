@@ -19,6 +19,16 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
         Enter the email you want to use for papr.world. This one-use invitation
         will open account setup, your private solo world, and the Shared World.
       </p>
+      <aside class="alpha-note" aria-label="About the alpha">
+        <p class="label">Early alpha</p>
+        <p>
+          You’re one of the first people in. Things will break, some parts are
+          unfinished, and now and then a world or your progress may need to be
+          reset. When something feels off — or delightful — the
+          <strong>Send feedback</strong> button in the game’s Help menu comes
+          straight to me.
+        </p>
+      </aside>
 
       <form data-signup-invite-form>
         <label>
@@ -49,5 +59,8 @@ const apiUrl = (import.meta.env.PUBLIC_PAPR_API_URL
   input { width: 100%; padding: 13px 14px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); font: inherit; }
   .btn { justify-self: start; }
   .result { min-height: 1.6em; margin-top: 16px; color: var(--ink-soft); }
+  .alpha-note { margin-top: 22px; padding: 12px 16px; border-left: 4px solid var(--crayon); background: var(--paper-2); }
+  .alpha-note p { margin: 0; }
+  .alpha-note .label { margin-bottom: 4px; }
   .result[data-kind="error"] { color: #8b2929; }
 </style>

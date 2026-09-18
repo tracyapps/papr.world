@@ -16,6 +16,8 @@ import type {
   RemovedNotice,
 } from '../../shared/src/index';
 import { registerDraggableHudWidget } from './hud';
+import { isHudWidgetCollapsed, registerCollapsibleWidget, toggleHudWidgetCollapsed } from './hudLayout';
+import { onSettingsChanged } from '../game/settings';
 import { getMultiplayerStatusButton } from './multiplayerPanel';
 
 export type SharedChatHandlers = {
@@ -75,6 +77,8 @@ export function initializeSharedChat(
     <div class="shared-chat-header">
       <span class="shared-chat-title">Neighborhood <span data-role="status">connecting…</span></span>
       <span class="shared-chat-status-slot" data-role="status-slot"></span>
+      <span class="shared-chat-unread" data-role="unread" aria-live="polite"></span>
+      <button class="shared-chat-collapse" type="button" data-role="collapse" aria-pressed="false" aria-label="Hide chat"></button>
     </div>
     <ol class="shared-chat-log" data-role="log" role="log" aria-live="polite" aria-relevant="additions" data-hud-widget-interactive></ol>
     <form class="shared-chat-form" data-role="form">
@@ -228,10 +232,42 @@ export function initializeSharedChat(
     input.value = '';
   });
 
+  // Folding the chat away. It used to be always expanded — the one HUD
+  // widget with no way to get out of the way (a collapsed <details> could not
+  // coexist with dragging). Now it folds to its header like the Professor,
+  // joins "hide all HUD", and counts what arrived while folded.
+  const collapseButton = aside.querySelector<HTMLButtonElement>('[data-role="collapse"]')!;
+  const unread = aside.querySelector<HTMLElement>('[data-role="unread"]')!;
+  let unreadCount = 0;
+  registerCollapsibleWidget('chat', aside, 'Neighborhood chat');
+  function renderCollapsed() {
+    const collapsed = isHudWidgetCollapsed('chat');
+    aside.classList.toggle('is-hud-collapsed', collapsed);
+    collapseButton.setAttribute('aria-pressed', String(collapsed));
+    collapseButton.setAttribute('aria-label', collapsed ? 'Show chat' : 'Hide chat');
+    collapseButton.title = collapsed ? 'Show chat' : 'Hide chat';
+    if (!collapsed) unreadCount = 0;
+    unread.textContent = collapsed && unreadCount > 0
+      ? `${unreadCount} new ${unreadCount === 1 ? 'message' : 'messages'}`
+      : '';
+    if (!collapsed) log.scrollTop = log.scrollHeight;
+  }
+  collapseButton.addEventListener('click', () => {
+    toggleHudWidgetCollapsed('chat');
+    renderCollapsed();
+  });
+  // A chat built for an earlier connection may be gone; ignore it then.
+  onSettingsChanged(() => { if (aside.isConnected) renderCollapsed(); });
+  renderCollapsed();
+
   function append(item: HTMLLIElement): void {
     log.append(item);
     while (log.children.length > 60) log.firstElementChild?.remove();
     log.scrollTop = log.scrollHeight;
+    if (isHudWidgetCollapsed('chat')) {
+      unreadCount += 1;
+      renderCollapsed();
+    }
   }
 
   function openActions(line: ChatBroadcast): void {

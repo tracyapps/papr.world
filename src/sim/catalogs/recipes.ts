@@ -200,7 +200,11 @@ export const RECIPE_DEFS = {
     planName: 'Plan: twigs and bark, bound and squared',
     planSource: 'starter',
     description: 'Twigs and bark curls, bundled and pressed flat into a sturdier building material.',
-    status: 'ready',
+    // Refining moved to the Wood Mill (2026-09-18): Chisel trades bound
+    // lumber for raw stock at the counter or by mail — see
+    // catalogs/millRefining.ts. Kept as a hidden plan so saves that learned it
+    // still load; `planned` hides it everywhere a player can see.
+    status: 'planned',
     durationSeconds: 8,
     minimumMakerLevel: 1,
     ingredients: [

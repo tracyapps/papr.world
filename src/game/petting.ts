@@ -83,7 +83,8 @@ function spawnHearts(at: THREE.Vector3, count: number) {
     const mesh = new THREE.Mesh(getHeartGeometry(), material);
     const size = 0.14 + Math.random() * 0.08;
     mesh.scale.set(size, size, size);
-    mesh.rotation.z = Math.PI; // point the heart up
+    mesh.quaternion.copy(camera.quaternion);
+    mesh.rotateZ(Math.PI); // point the heart the right way up (see updatePetEffects)
     mesh.renderOrder = RENDER_ORDER.hearts;
     mesh.position.set(
       at.x + (Math.random() - 0.5) * 0.3,
@@ -199,8 +200,15 @@ export function updatePetEffects(delta: number) {
     heart.mesh.position.y += delta * (0.75 - progress * 0.3);
     heart.mesh.position.x += heart.driftX * delta;
     heart.mesh.position.z += heart.driftZ * delta;
-    heart.mesh.lookAt(camera.position);
-    heart.mesh.rotation.z = Math.PI + Math.sin(heart.age * 5) * 0.15;
+    // Billboard by copying the camera's orientation, then roll in the
+    // heart's OWN plane. The old version called lookAt() and then
+    // overwrote rotation.z — but lookAt writes a full Euler (x, y, z), and
+    // from some camera angles it solves with x ≈ π, so replacing only z
+    // left those hearts upside down.
+    heart.mesh.quaternion.copy(camera.quaternion);
+    // The bezier heart is authored point-up in screen space (y down), so
+    // it needs a half turn to point down in the world, plus a little wobble.
+    heart.mesh.rotateZ(Math.PI + Math.sin(heart.age * 5) * 0.15);
     (heart.mesh.material as THREE.MeshBasicMaterial).opacity = 0.95 * (1 - progress * progress);
   }
 }

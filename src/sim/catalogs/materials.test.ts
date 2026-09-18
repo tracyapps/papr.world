@@ -158,7 +158,8 @@ describe('the recipe graph cannot contradict the material catalog', () => {
 
 /** Routes that hand you the material as the world made it, not as a shop or workshop did. */
 function worldRoutes(resource: ResourceId) {
-  return obtainRoutesFor(resource).filter((route) => route.kind !== 'crafted' && route.kind !== 'bought');
+  // Refining at the mill is working stock up, not the world handing it over.
+  return obtainRoutesFor(resource).filter((route) => route.kind !== 'crafted' && route.kind !== 'bought' && route.kind !== 'refined');
 }
 
 describe('no material exists without a way to get it', () => {

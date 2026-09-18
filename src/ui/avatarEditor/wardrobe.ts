@@ -1,10 +1,10 @@
 // The wardrobe — saved avatar designs on this device.
 //
-// localStorage now; imports into account storage once, explicitly, when
-// designs sync (docs/avatar-and-identity.md Phase D — the same one-way
-// import rule as solo saves). Every load passes through
-// sanitizeAvatarDesign so a hand-edited or corrupt entry degrades to
-// "skipped", never to broken rendering.
+// localStorage is the working copy; when the player is signed in, every
+// change also syncs to the account wardrobe (src/net/accountWardrobe.ts), so a
+// look survives a cleared browser, a dropped world, or a different device.
+// Every load passes through sanitizeAvatarDesign so a hand-edited or corrupt
+// entry degrades to "skipped", never to broken rendering.
 
 import {
   DESIGN_LIMITS,
@@ -40,6 +40,62 @@ function writeAll(designs: AvatarDesign[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(file));
 }
 
+/**
+ * Something in the wardrobe changed on THIS device, by the player's hand.
+ *
+ * The account sync (src/net/accountWardrobe.ts) listens here so every save —
+ * the studio's autosave included — travels to the account without each
+ * caller having to remember to send it. Changes that arrive FROM the account
+ * are written with `applyAccountWardrobe` and deliberately do not emit, or
+ * a pull would echo straight back out as a push.
+ */
+export type WardrobeChange =
+  | { kind: 'saved'; design: AvatarDesign }
+  | { kind: 'deleted'; id: string };
+
+const changeListeners = new Set<(change: WardrobeChange) => void>();
+
+export function onWardrobeChange(listener: (change: WardrobeChange) => void): () => void {
+  changeListeners.add(listener);
+  return () => changeListeners.delete(listener);
+}
+
+function emitChange(change: WardrobeChange): void {
+  for (const listener of changeListeners) {
+    try {
+      listener(change);
+    } catch (error) {
+      console.warn('wardrobe listener failed', error);
+    }
+  }
+}
+
+/**
+ * Write what the account sync decided, quietly: designs pulled down from the
+ * account, and ids removed because they were deleted on another device.
+ * Respects the wardrobe cap — anything that would not fit is skipped and
+ * returned so the caller can say so.
+ */
+export function applyAccountWardrobe(
+  pulled: AvatarDesign[],
+  removeIds: string[] = [],
+): { skipped: AvatarDesign[] } {
+  const remove = new Set(removeIds);
+  const designs = readAll().filter((d) => !remove.has(d.id));
+  const skipped: AvatarDesign[] = [];
+  for (const incoming of pulled) {
+    const design = sanitizeAvatarDesign(incoming);
+    if (!design) continue;
+    const index = designs.findIndex((d) => d.id === design.id);
+    if (index >= 0) designs[index] = design;
+    else if (designs.length < DESIGN_LIMITS.wardrobeMax) designs.push(design);
+    else skipped.push(design);
+  }
+  writeAll(designs);
+  if (remove.has(getWornId() ?? '')) localStorage.removeItem(WORN_KEY);
+  return { skipped };
+}
+
 export function listDesigns(): AvatarDesign[] {
   return readAll().sort((a, b) => b.updatedAt - a.updatedAt);
 }
@@ -62,12 +118,14 @@ export function saveDesign(design: AvatarDesign): boolean {
     designs.push(design);
   }
   writeAll(designs);
+  emitChange({ kind: 'saved', design: structuredClone(design) });
   return true;
 }
 
 export function deleteDesign(id: string): void {
   writeAll(readAll().filter((d) => d.id !== id));
   if (getWornId() === id) localStorage.removeItem(WORN_KEY);
+  emitChange({ kind: 'deleted', id });
 }
 
 /**
@@ -83,6 +141,7 @@ export function renameDesign(id: string, name: string): AvatarDesign | null {
   design.name = normalized.length > 0 ? normalized : 'untitled cutout';
   design.updatedAt = Date.now();
   writeAll(designs);
+  emitChange({ kind: 'saved', design: structuredClone(design) });
   return structuredClone(design);
 }
 
@@ -115,6 +174,7 @@ export function duplicateDesign(id: string): AvatarDesign | null {
   };
   designs.push(copy);
   writeAll(designs);
+  emitChange({ kind: 'saved', design: structuredClone(copy) });
   return structuredClone(copy);
 }
 
@@ -131,6 +191,7 @@ export function setSharedOnCard(id: string, shared: boolean): AvatarDesign | nul
   if (!design) return null;
   design.sharedOnCard = shared;
   writeAll(designs);
+  emitChange({ kind: 'saved', design: structuredClone(design) });
   return structuredClone(design);
 }
 

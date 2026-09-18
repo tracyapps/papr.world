@@ -109,7 +109,7 @@ async function buildCatalog() {
 
 const TIERS = new Set(['favor', 'errand', 'odyssey']);
 const OBJECTIVE_KINDS = new Set([
-  'collect', 'craft', 'craftTool', 'learnTech', 'plant', 'harvest',
+  'collect', 'craft', 'refine', 'craftTool', 'learnTech', 'plant', 'harvest',
   'visitBiome', 'visitPage', 'dig', 'trim', 'talk', 'place', 'deliver',
 ]);
 const DIG_LAYERS = new Set(['1', '2', '3']);
@@ -184,6 +184,7 @@ function validateObjective(body, path, catalog) {
       break;
     }
     case 'craft': check('recipeId', catalog.recipeIds, 'recipe'); break;
+    case 'refine': check('resource', catalog.resourceIds, 'resource'); break;
     case 'craftTool': {
       check('family', catalog.toolFamilies, 'tool family');
       const tier = numericField(body, 'tier');

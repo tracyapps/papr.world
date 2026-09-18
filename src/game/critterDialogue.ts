@@ -12,6 +12,7 @@ import { pickCritterAtScreen } from './critters';
 import { activeQuestDefFor, questProgress } from './quests';
 import { addFriendshipPoints, getFriendshipLevel, getFriendshipPoints } from './friendship';
 import { petCritter, showPetToast } from './petting';
+import { setMillPanelOpen } from './millCounter';
 import { camera } from '../render/context';
 import { setToastStackRaised } from '../ui/hudLayout';
 
@@ -122,6 +123,23 @@ function choose(choice: ConversationChoice) {
   }
   refreshMeta();
   speak(result.reply, true);
+  if (result.action === 'open-mill') {
+    // Hand over to the counter: the conversation closes and the refining
+    // board opens where the seed shop and Thing Maker panels live.
+    closeCritterDialogue();
+    setMillPanelOpen(true, 'counter');
+    return;
+  }
+  if (result.action === 'goodbye') {
+    // Let the farewell be read (and announced) before the card closes. If a
+    // new conversation starts in the meantime, leave that one alone.
+    if (actionsElement) actionsElement.innerHTML = '';
+    const leaving = activeCritter;
+    window.setTimeout(() => {
+      if (activeCritter === leaving) closeCritterDialogue();
+    }, 1400);
+    return;
+  }
   if (result.nextScene) {
     activeScene = result.nextScene;
     refreshArc();
@@ -133,6 +151,11 @@ function choose(choice: ConversationChoice) {
 
 function renderChoices(scene: ConversationScene) {
   if (!actionsElement) return;
+  // Never leave the card without a way forward.
+  if (scene.choices.length === 0) {
+    renderAfterStoryChoice();
+    return;
+  }
   actionsElement.innerHTML = '';
   for (const choice of scene.choices) {
     const button = document.createElement('button');

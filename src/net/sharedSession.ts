@@ -33,7 +33,9 @@ import {
   initializeSharedHomeVisuals,
   removeSharedHome,
 } from './sharedHomeVisuals';
-import { consumeWorldEntryHandoff } from './worldEntry';
+import { consumeWorldEntryHandoff, resumeWorldEntry } from './worldEntry';
+import { getAccountToken } from './accountAuth';
+import { classifyJoinFailure, rejoinDelayMs, shouldRejoinAfterClose } from './rejoin';
 import {
   addSharedPiece,
   initializeSharedPieceVisuals,
@@ -79,6 +81,8 @@ export type SharedSessionStatus = {
 let connection: NetConnection | null = null;
 let enabled = false;
 let connected = false;
+/** Set when the player chose to leave; a lost visit is rejoined, a left one is not. */
+let leftOnPurpose = false;
 let playerName: string | null = null;
 let inviteCode: string | null = null;
 let status: SharedSessionStatus = {
@@ -132,9 +136,14 @@ export async function initializeSharedSession(): Promise<void> {
     return;
   }
   if (!config) return;
-  const managedEntry = config.worldId
+  let managedEntry = config.worldId
     ? consumeWorldEntryHandoff(sessionStorage, config.worldId)
     : null;
+  if (config.worldId && !managedEntry) {
+    // A reload or a return visit: no handoff from My desk, but if this
+    // browser is still signed in, the account can vouch for a fresh entry.
+    managedEntry = await resumeWorldEntry(config.worldId, config.httpEndpoint, getAccountToken);
+  }
   if (config.worldId && !managedEntry) {
     const ui = initializeSharedChat(() => {});
     const message = 'This world entry pass is missing or expired. Return to My desk and open the world again.';
@@ -179,7 +188,7 @@ export async function initializeSharedSession(): Promise<void> {
   // problem was reported as "the neighborhood could not be opened", which
   // named the wrong component and — because the mint is what WRITES the
   // passport — also left localStorage empty for anyone told to read it.
-  let account;
+  let account: Awaited<ReturnType<typeof getOrCreatePassport>> | undefined;
   if (managedEntry) {
     ui.setSelfAccountId(managedEntry.accountId);
   } else {
@@ -214,185 +223,288 @@ export async function initializeSharedSession(): Promise<void> {
   // world entry hands one over already, a legacy join mints its own passport.
   const selfAccountId = managedEntry?.accountId ?? account?.id ?? '';
 
-  try {
-    publishStatus({
-      phase: 'connecting',
-      message: `Opening ${destination}…`,
-      name: config.name,
-      inviteCode: config.inviteCode,
-      intent: config.intent,
-    });
-    // Remote avatars fetch worn designs over HTTP by id (avatar Phase D);
-    // this is the only moment the endpoint is reliably known.
-    configureRemoteDesigns(config.httpEndpoint);
-    liveConnection = await connect(
-      {
-        endpoint: config.endpoint,
-        name: config.name,
-        avatar: avatarRefForDesign(getWornDesign()),
-        room: config.room,
-        inviteCode: config.inviteCode ?? undefined,
-        worldId: config.worldId ?? undefined,
-        sessionToken: managedEntry?.sessionToken,
-        intent: config.intent,
-        account,
-      },
-      {
-        onPlayerJoin: (player) => {
-          addRemoteAvatar(player);
-          ui.addNotice(`${player.name} wandered in.`);
-        },
-        onPlayerLeave: (id) => {
-          removeRemoteAvatar(id);
-          ui.addNotice('A neighbor wandered home.');
-        },
-        onPieceAdd: addSharedPiece,
-        onPieceRemove: removeSharedPiece,
-        onNodeAdd: upsertSharedResourceNode,
-        onNodeUpdate: upsertSharedResourceNode,
-        onNodeRemove: removeSharedResourceNode,
-        onChat: ui.addChat,
-        onChatHistory: (lines) => {
-          ui.setHistory(lines);
-          // Room state has arrived by now, so this is the first moment we can
-          // know whether the server considers us the owner.
-          ui.setOwner(Boolean(liveConnection?.isOwner()));
-        },
-        onBlocks: ui.setBlocks,
-        onReportFiled: (receiptId) =>
-          ui.addNotice(`Report filed. Its reference is ${receiptId.slice(0, 8)}.`),
-        onMailbox: (items) => {
-          // Server list is newest first. Deliver oldest first because the
-          // local merge prepends, preserving the authoritative order while
-          // retaining solo/system mail already in the scrapbook.
-          updateGameState((state) => {
-            mergeMailSnapshot(state, items);
-          });
-        },
-        onClaimedMail: (ids) => {
-          updateGameState((state) => {
-            const retained = new Set(state.player.mailbox.map((item) => item.id));
-            state.player.claimedMailIds = [...new Set([
-              ...state.player.claimedMailIds,
-              ...ids.filter((id) => retained.has(id)),
-            ])].slice(0, 200);
-          });
-        },
-        onInventory: (inventory) => {
-          if (receiveSharedInventory(inventory)) ui.setInventory(inventory);
-        },
-        onMailSent: () => ui.addNotice('Your letter is safely in their mailbox.'),
-        onPlayerCard: handlePlayerCardResponse,
-        onHomeAdd: (home) => {
-          if (home.accountId !== selfAccountId) addSharedHome(home);
-        },
-        onHomeUpdate: (home) => {
-          if (home.accountId !== selfAccountId) addSharedHome(home);
-        },
-        onHomeRemove: (accountId) => {
-          if (accountId !== selfAccountId) removeSharedHome(accountId);
-        },
-        onRemoved: ui.showRemoved,
-        onRejected: (info) => {
-          // A first movement can be clamped while the server catches up to the
-          // real spawn. It is a correction, not a player-facing failure.
-          if (info.action === 'move' && info.reason === 'too-far') return;
-          // Guests cannot publish a worn design — there is no account to hold
-          // it — and saying so on every wear would be noise, not information.
-          if (info.action === 'wear-design' && info.reason === 'guest-not-allowed') return;
-          showPetToast(`The neighborhood could not ${info.action}: ${info.reason}.`);
-        },
-        onDropped: () => {
-          // Deliberately quiet and deliberately not "offline". Nothing has
-          // been lost yet: their avatar is still standing in the room and the
-          // seat is held. Saying "disconnected" here would send someone off to
-          // re-enter a neighbourhood they have not actually left.
-          ui.setStatus('reconnecting…');
-          ui.addNotice('Lost the thread for a moment — finding the neighborhood again.');
-          publishStatus({
-            phase: 'online',
-            message: 'Reconnecting to the neighborhood…',
-            name: config.name,
-            inviteCode: config.inviteCode,
-            intent: config.intent,
-          });
-        },
-        onReconnected: () => {
-          ui.setStatus(`online as ${config.name}`, true);
-          ui.addNotice('Back in the neighborhood.');
-          publishStatus({
-            phase: 'online',
-            message: `Online in ${destination}.`,
-            name: config.name,
-            inviteCode: config.inviteCode,
-            intent: config.intent,
-          });
-        },
-        onLeave: (code) => {
-          // The close code is the only evidence there is about WHY a visit
-          // ended, and it used to be thrown away. Leaving on purpose and
-          // being hung up on by a server that stopped hearing from you are
-          // different events and should not read the same.
-          const reason = describeClose(code);
-          clearRemoteAvatars();
-          clearSharedResourceVisuals();
-          clearSharedInventory();
-          clearSharedHomeVisuals();
-          connected = false;
-          connection = null;
-          ui.setStatus('offline');
-          ui.addNotice(`${reason.notice} (code ${reason.code})`);
-          console.info(`[neighborhood] connection closed — ${reason.detail}`);
-          publishStatus({
-            phase: 'offline',
-            message: `${reason.notice} Your solo world is still safe.`,
-            name: config.name,
-            inviteCode: config.inviteCode,
-            intent: config.intent,
-          });
-        },
-      },
-    );
-    connection = liveConnection;
-    setSharedMailClaimHandler((mailId) => liveConnection?.sendClaimMail({ mailId }));
-    // The join's AvatarRef carries only a design id; publish the design
-    // itself so the server can resolve that key even before any wardrobe
-    // import — and so today's look, not last import's, is what neighbors see.
-    publishWornDesign(getWornDesign());
-    publishHome();
-    connected = true;
-    ui.setStatus(`online as ${config.name}`, true);
-    ui.addNotice(`You are visiting ${destination}.`);
-    publishStatus({
-      phase: 'online',
-      message: `Online in ${destination}.`,
-      name: config.name,
-      inviteCode: config.inviteCode,
-      intent: config.intent,
-    });
-  } catch (error) {
-    clearRemoteAvatars();
-    clearSharedResourceVisuals();
-    clearSharedHomeVisuals();
-    connected = false;
-    connection = null;
+  // ── Joining, and joining again ─────────────────────────────────────────
+  //
+  // The first join and every rejoin after a lost visit go through `join`.
+  // A rejoin asks sign-in for a fresh token (account worlds) or reuses the
+  // paper passport (invite neighborhoods); see rejoin.ts for the rules.
+  let removed = false;
+  let rejoinAttempt = 0;
+  let rejoinTimer: ReturnType<typeof setTimeout> | null = null;
+  let joining = false;
+  let stopped = false;
+
+  const stop = (notice: string) => {
+    stopped = true;
+    if (rejoinTimer) clearTimeout(rejoinTimer);
+    rejoinTimer = null;
     ui.setStatus('offline');
-    // Say which server, because "could not be opened" on its own sends people
-    // to check their invite code when the address is usually the problem.
-    const where = `at ${config.endpoint}`;
-    const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
-    const message = managedEntry
-      ? `${managedEntry.worldName} could not be opened ${where}.${detail}`
-      : config.intent === 'join'
-        ? `Neighborhood ${config.inviteCode} was not found ${where}.${detail}`
-        : `Neighborhood ${config.inviteCode} could not be opened ${where}.${detail}`;
-    ui.addNotice(`${message} Solo play is still available.`);
+    ui.addNotice(notice);
     publishStatus({
-      phase: 'offline', message, name: config.name,
-      inviteCode: config.inviteCode, intent: config.intent,
+      phase: 'offline', message: `${notice} Your solo world is still safe.`,
+      name: config.name, inviteCode: config.inviteCode, intent: config.intent,
     });
-    console.warn('Shared neighborhood connection failed', error);
-  }
+  };
+
+  const scheduleRejoin = () => {
+    if (stopped || removed || leftOnPurpose || rejoinTimer || joining) return;
+    const delay = rejoinDelayMs(rejoinAttempt);
+    rejoinAttempt += 1;
+    const seconds = Math.round(delay / 1000);
+    ui.setStatus('reconnecting…');
+    publishStatus({
+      phase: 'offline',
+      message: `Finding the neighborhood again in ${seconds}s… Your solo world is still safe.`,
+      name: config.name, inviteCode: config.inviteCode, intent: config.intent,
+    });
+    rejoinTimer = setTimeout(() => {
+      rejoinTimer = null;
+      // A hidden tab (or a sleeping laptop) waits; coming back triggers it.
+      if (document.visibilityState === 'hidden') return;
+      void rejoin();
+    }, delay);
+  };
+
+  const rejoin = async () => {
+    if (stopped || removed || leftOnPurpose || joining || connected) return;
+    let token: string | undefined;
+    if (config.worldId) {
+      token = (await getAccountToken()) ?? undefined;
+      if (!token) {
+        stop('Your sign-in has ended. Return to My desk to open this world again.');
+        return;
+      }
+    }
+    const result = await join(token);
+    if (result === 'ok') {
+      rejoinAttempt = 0;
+      ui.addNotice('Back in the neighborhood.');
+    } else if (result === 'retry') {
+      scheduleRejoin();
+    }
+  };
+
+  // Waking up, un-hiding the tab, or getting the network back are all good
+  // moments to try right away instead of waiting out the timer.
+  const tryNow = () => {
+    if (stopped || removed || leftOnPurpose || connected || joining) return;
+    if (!rejoinTimer && rejoinAttempt === 0) return; // nothing was lost
+    if (rejoinTimer) clearTimeout(rejoinTimer);
+    rejoinTimer = null;
+    void rejoin();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tryNow();
+  });
+  window.addEventListener('online', tryNow);
+
+  const join = async (sessionToken: string | undefined): Promise<'ok' | 'retry' | 'fatal'> => {
+    joining = true;
+    try {
+    try {
+      publishStatus({
+        phase: 'connecting',
+        message: `Opening ${destination}…`,
+        name: config.name,
+        inviteCode: config.inviteCode,
+        intent: config.intent,
+      });
+      // Remote avatars fetch worn designs over HTTP by id (avatar Phase D);
+      // this is the only moment the endpoint is reliably known.
+      configureRemoteDesigns(config.httpEndpoint);
+      liveConnection = await connect(
+        {
+          endpoint: config.endpoint,
+          name: config.name,
+          avatar: avatarRefForDesign(getWornDesign()),
+          room: config.room,
+          inviteCode: config.inviteCode ?? undefined,
+          worldId: config.worldId ?? undefined,
+          sessionToken,
+          intent: config.intent,
+          account,
+        },
+        {
+          onPlayerJoin: (player) => {
+            addRemoteAvatar(player);
+            ui.addNotice(`${player.name} wandered in.`);
+          },
+          onPlayerLeave: (id) => {
+            removeRemoteAvatar(id);
+            ui.addNotice('A neighbor wandered home.');
+          },
+          onPieceAdd: addSharedPiece,
+          onPieceRemove: removeSharedPiece,
+          onNodeAdd: upsertSharedResourceNode,
+          onNodeUpdate: upsertSharedResourceNode,
+          onNodeRemove: removeSharedResourceNode,
+          onChat: ui.addChat,
+          onChatHistory: (lines) => {
+            ui.setHistory(lines);
+            // Room state has arrived by now, so this is the first moment we can
+            // know whether the server considers us the owner.
+            ui.setOwner(Boolean(liveConnection?.isOwner()));
+          },
+          onBlocks: ui.setBlocks,
+          onReportFiled: (receiptId) =>
+            ui.addNotice(`Report filed. Its reference is ${receiptId.slice(0, 8)}.`),
+          onMailbox: (items) => {
+            // Server list is newest first. Deliver oldest first because the
+            // local merge prepends, preserving the authoritative order while
+            // retaining solo/system mail already in the scrapbook.
+            updateGameState((state) => {
+              mergeMailSnapshot(state, items);
+            });
+          },
+          onClaimedMail: (ids) => {
+            updateGameState((state) => {
+              const retained = new Set(state.player.mailbox.map((item) => item.id));
+              state.player.claimedMailIds = [...new Set([
+                ...state.player.claimedMailIds,
+                ...ids.filter((id) => retained.has(id)),
+              ])].slice(0, 200);
+            });
+          },
+          onInventory: (inventory) => {
+            if (receiveSharedInventory(inventory)) ui.setInventory(inventory);
+          },
+          onMailSent: () => ui.addNotice('Your letter is safely in their mailbox.'),
+          onPlayerCard: handlePlayerCardResponse,
+          onHomeAdd: (home) => {
+            if (home.accountId !== selfAccountId) addSharedHome(home);
+          },
+          onHomeUpdate: (home) => {
+            if (home.accountId !== selfAccountId) addSharedHome(home);
+          },
+          onHomeRemove: (accountId) => {
+            if (accountId !== selfAccountId) removeSharedHome(accountId);
+          },
+          onRemoved: (notice) => {
+            // Removed or banned by the owner: never find our way back in.
+            removed = true;
+            ui.showRemoved(notice);
+          },
+          onRejected: (info) => {
+            // A first movement can be clamped while the server catches up to the
+            // real spawn. It is a correction, not a player-facing failure.
+            if (info.action === 'move' && info.reason === 'too-far') return;
+            // Guests cannot publish a worn design — there is no account to hold
+            // it — and saying so on every wear would be noise, not information.
+            if (info.action === 'wear-design' && info.reason === 'guest-not-allowed') return;
+            showPetToast(`The neighborhood could not ${info.action}: ${info.reason}.`);
+          },
+          onDropped: () => {
+            // Deliberately quiet and deliberately not "offline". Nothing has
+            // been lost yet: their avatar is still standing in the room and the
+            // seat is held. Saying "disconnected" here would send someone off to
+            // re-enter a neighbourhood they have not actually left.
+            ui.setStatus('reconnecting…');
+            ui.addNotice('Lost the thread for a moment — finding the neighborhood again.');
+            publishStatus({
+              phase: 'online',
+              message: 'Reconnecting to the neighborhood…',
+              name: config.name,
+              inviteCode: config.inviteCode,
+              intent: config.intent,
+            });
+          },
+          onReconnected: () => {
+            ui.setStatus(`online as ${config.name}`, true);
+            ui.addNotice('Back in the neighborhood.');
+            publishStatus({
+              phase: 'online',
+              message: `Online in ${destination}.`,
+              name: config.name,
+              inviteCode: config.inviteCode,
+              intent: config.intent,
+            });
+          },
+          onLeave: (code) => {
+            // The close code is the only evidence there is about WHY a visit
+            // ended, and it used to be thrown away. Leaving on purpose and
+            // being hung up on by a server that stopped hearing from you are
+            // different events and should not read the same.
+            const reason = describeClose(code);
+            clearRemoteAvatars();
+            clearSharedResourceVisuals();
+            clearSharedInventory();
+            clearSharedHomeVisuals();
+            connected = false;
+            connection = null;
+            ui.setStatus('offline');
+            ui.addNotice(`${reason.notice} (code ${reason.code})`);
+            console.info(`[neighborhood] connection closed — ${reason.detail}`);
+            publishStatus({
+              phase: 'offline',
+              message: `${reason.notice} Your solo world is still safe.`,
+              name: config.name,
+              inviteCode: config.inviteCode,
+              intent: config.intent,
+            });
+            if (shouldRejoinAfterClose(code, { removed, leftOnPurpose })) {
+              ui.addNotice('Finding the neighborhood again on its own — no need to reload.');
+              scheduleRejoin();
+            }
+          },
+        },
+      );
+      connection = liveConnection;
+      setSharedMailClaimHandler((mailId) => liveConnection?.sendClaimMail({ mailId }));
+      // The join's AvatarRef carries only a design id; publish the design
+      // itself so the server can resolve that key even before any wardrobe
+      // import — and so today's look, not last import's, is what neighbors see.
+      publishWornDesign(getWornDesign());
+      publishHome();
+      connected = true;
+      ui.setStatus(`online as ${config.name}`, true);
+      if (rejoinAttempt === 0) ui.addNotice(`You are visiting ${destination}.`);
+      publishStatus({
+        phase: 'online',
+        message: `Online in ${destination}.`,
+        name: config.name,
+        inviteCode: config.inviteCode,
+        intent: config.intent,
+      });
+    } catch (error) {
+      clearRemoteAvatars();
+      clearSharedResourceVisuals();
+      clearSharedHomeVisuals();
+      connected = false;
+      connection = null;
+      ui.setStatus('offline');
+      // Say which server, because "could not be opened" on its own sends people
+      // to check their invite code when the address is usually the problem.
+      const where = `at ${config.endpoint}`;
+      const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
+      const message = managedEntry
+        ? `${managedEntry.worldName} could not be opened ${where}.${detail}`
+        : config.intent === 'join'
+          ? `Neighborhood ${config.inviteCode} was not found ${where}.${detail}`
+          : `Neighborhood ${config.inviteCode} could not be opened ${where}.${detail}`;
+      console.warn('Shared neighborhood connection failed', error);
+      const failure = classifyJoinFailure(error instanceof Error ? error.message : String(error));
+      if (failure.kind === 'fatal') {
+        stop(failure.notice);
+        return 'fatal';
+      }
+      // Only the first failure is worth a notice; later retries speak
+      // through the status line so the chat is not a wall of the same line.
+      if (rejoinAttempt === 0) {
+        ui.addNotice(`${message} Solo play is still available — trying again shortly.`);
+        publishStatus({
+          phase: 'offline', message, name: config.name,
+          inviteCode: config.inviteCode, intent: config.intent,
+        });
+      }
+    }
+    } finally {
+      joining = false;
+    }
+    return connected ? 'ok' : 'retry';
+  };
+
+  const firstJoin = await join(managedEntry?.sessionToken);
+  if (firstJoin === 'retry') scheduleRejoin();
 }
 
 /**
@@ -437,6 +549,7 @@ export function requestPlayerCard(accountId: string): void {
 setPlayerCardRequestHandler(requestPlayerCard);
 
 export function disconnectSharedSession(): void {
+  leftOnPurpose = true;
   connection?.disconnect();
   connection = null;
   connected = false;

@@ -83,6 +83,8 @@ export function objectiveMeasure(objective: QuestObjective, state: GameState): n
       return state.player.inventory[objective.resource] ?? 0;
     case 'craft':
       return state.world.thingMaker.completedOutputs.filter((id) => id === objective.recipeId).length;
+    case 'refine':
+      return state.player.refinedCounts[objective.resource] ?? 0;
     case 'craftTool': {
       const target = craftToolTarget(objective);
       return target && (state.player.tools[target] ?? 0) > 0 ? 1 : 0;

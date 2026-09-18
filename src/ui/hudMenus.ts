@@ -15,6 +15,7 @@ import { openFeedbackPanel } from './feedbackPanel';
 import { openMultiplayerPanel } from './multiplayerPanel';
 import { disconnectSharedSession } from '../net/sharedSession';
 import { accountDeskUrl } from '../net/accountDesk';
+import { exportSaveBackup, parseSaveBackup, restoreSaveBackup } from '../sim/state';
 
 // The two top-right icon buttons and the overlays they open.
 //
@@ -223,6 +224,21 @@ function buildSettingsOverlay(): HTMLElement {
         </button>
         <small>Leaves this world cleanly and takes you back to your account — you will not still look present here.</small>
       </div>
+      <h3 class="hud-overlay-subhead">Your save</h3>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-export-save">
+          Download a backup
+        </button>
+        <small>Your scrapbook, gardens, and builds in this browser, saved to a file. Keep one somewhere safe — the alpha may need a reset now and then.</small>
+      </div>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-restore-save">
+          Restore from a backup…
+        </button>
+        <input type="file" id="setting-restore-file" accept=".json,application/json" hidden>
+        <small>Replaces this browser’s save with a backup file. You will see what is in it before anything changes.</small>
+        <div class="save-restore-review" id="setting-restore-review" role="status" aria-live="polite"></div>
+      </div>
       <h3 class="hud-overlay-subhead">Alpha notebook</h3>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="setting-send-feedback">
@@ -342,6 +358,7 @@ function buildSettingsOverlay(): HTMLElement {
       setSetting('showLearningTimer', learningTimer.checked);
     });
   }
+  wireSaveBackup(overlay);
   overlay.querySelector<HTMLButtonElement>('#setting-send-feedback')?.addEventListener('click', () => {
     closeHudMenu();
     openFeedbackPanel();
@@ -358,6 +375,58 @@ function buildSettingsOverlay(): HTMLElement {
     window.location.assign(accountDeskUrl());
   });
   return overlay;
+}
+
+/**
+ * Download / restore a save backup (Settings → Your save). Restoring always
+ * shows what the file holds and asks once more before replacing anything,
+ * then reloads, because pages and panels are all built from the save.
+ */
+function wireSaveBackup(overlay: HTMLElement) {
+  overlay.querySelector<HTMLButtonElement>('#setting-export-save')?.addEventListener('click', () => {
+    const blob = new Blob([exportSaveBackup()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `papr-world-save-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  const pick = overlay.querySelector<HTMLButtonElement>('#setting-restore-save');
+  const file = overlay.querySelector<HTMLInputElement>('#setting-restore-file');
+  const review = overlay.querySelector<HTMLElement>('#setting-restore-review');
+  if (!pick || !file || !review) return;
+  pick.addEventListener('click', () => file.click());
+  file.addEventListener('change', async () => {
+    const chosen = file.files?.[0];
+    file.value = '';
+    if (!chosen) return;
+    const parsed = parseSaveBackup(await chosen.text());
+    if (!parsed.ok) {
+      review.textContent = parsed.reason;
+      return;
+    }
+    const { summary } = parsed;
+    const when = summary.exportedAt ? new Date(summary.exportedAt).toLocaleString() : 'an unknown date';
+    review.innerHTML = `
+      <p>This backup is from <strong>${when}</strong>: ₡${summary.chips}, ${summary.materials} materials,
+      ${summary.tools} tools, ${summary.gardenCells} planted cells, and ${summary.placedPieces} placed pieces.</p>
+      <p>Restoring replaces everything in this browser’s current save.</p>
+      <button class="hud-setting-button" type="button" data-restore-confirm>Replace my save with this backup</button>
+      <button class="hud-setting-button" type="button" data-restore-cancel>Keep my current save</button>`;
+    review.querySelector<HTMLButtonElement>('[data-restore-cancel]')?.addEventListener('click', () => {
+      review.textContent = 'Nothing changed.';
+    });
+    review.querySelector<HTMLButtonElement>('[data-restore-confirm]')?.addEventListener('click', () => {
+      restoreSaveBackup(parsed.state);
+      review.textContent = 'Restored. Reloading…';
+      window.setTimeout(() => window.location.reload(), 600);
+    });
+    review.querySelector<HTMLButtonElement>('[data-restore-confirm]')?.focus();
+  });
 }
 
 function overlayFor(menu: MenuId): HTMLElement {

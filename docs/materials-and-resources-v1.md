@@ -288,6 +288,14 @@ player-facing place. This is non-negotiable for reasons of knighthood.
 
 ## Refinement paths
 
+> **2026-09-18: refining happens at the Wood Mill, not the Thing Maker.**
+> Players trade raw stock to Chisel for refined material, at the counter or
+> by mail order (fee: ₡3 or one extra of each input). Built so far — the
+> stage-1 rung: bound lumber, binding cord, soft pulp, stone aggregate,
+> paper mortar (`src/sim/catalogs/millRefining.ts`). The tables below are
+> still the plan for later stages; when they land, they are rows in that
+> file, not Thing Maker recipes.
+
 Recipes can already output resources and refined resources can already be used
 by later recipes. The missing work is breadth, graph presentation, validation,
 and structural metadata—not a brand-new crafting model.

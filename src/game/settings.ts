@@ -70,6 +70,8 @@ export type Settings = {
   hudScale: number;
   /** Full-height rail or compact floating palette. See `ToolbarStyle`. */
   toolbarStyle: ToolbarStyle;
+  /** The first-run "this is an early alpha" card has been read. */
+  alphaNoticeSeen: boolean;
 };
 
 /** Slider bounds. Wide enough to matter at both ends, never zero. */
@@ -92,6 +94,7 @@ const DEFAULTS: Settings = {
   uiTextScale: 1,
   hudScale: 1,
   toolbarStyle: 'full',
+  alphaNoticeSeen: false,
 };
 
 const STORAGE_KEY = 'pencil-and-paper.settings.v1';
@@ -135,6 +138,7 @@ function load(): Settings {
       if (parsed.toolbarStyle === 'full' || parsed.toolbarStyle === 'compact') {
         settings.toolbarStyle = parsed.toolbarStyle;
       }
+      if (typeof parsed.alphaNoticeSeen === 'boolean') settings.alphaNoticeSeen = parsed.alphaNoticeSeen;
     }
   } catch {
     // Defaults are fine.

@@ -53,7 +53,7 @@ instead of silently falling back to filesystem-only managed accounts.
 | `RESEND_API_KEY` | from resend.com | The contact form accepts notes but never delivers them. |
 | `NOTE_TO` | where notes land | As above. |
 | `NOTE_FROM` | a verified sender on your domain | As above. |
-| `PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key | `/admin` shows a configuration warning instead of sign-in. This key is intentionally public. |
+| `PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key | `/admin` shows a configuration warning instead of sign-in. The **game build reads it too** (vite.config.ts `envPrefix`): without it the game cannot refresh sign-in, so reloads and rejoins in account worlds fail and looks stay in the browser only. This key is intentionally public. |
 | `PUBLIC_PAPR_API_URL` | `https://paprworld-production.up.railway.app` | `/admin` cannot reach its privileged Railway API. |
 
 Set the ordinary site/game variables for **Production and Preview**. Scope
@@ -232,6 +232,43 @@ will look like one person).
       disconnected. With "refuse this code", the same code will not let them
       back in — even after the room empties and reopens.
 - [ ] Send feedback from the in-game Settings menu; check `?review=1`.
+
+### The account-era additions (2026-09-18)
+
+Testers now arrive through Clerk invitations and the desk, not only door
+codes. Run these too, with a **fresh** browser profile playing the tester:
+
+- [ ] From `/admin`, make a one-use invite link. Open it in the fresh
+      browser: `/invite` shows the **Early alpha** note, takes an email, and
+      hands over to Clerk sign-up.
+- [ ] After sign-up the desk (`/account`) shows the **Early alpha** line,
+      the tester's name, and their doors (solo world + Shared World).
+- [ ] Enter the Shared World from the desk. The first time, the **early
+      alpha card** appears once; "Got it" closes it and it never comes back
+      in that browser. "Send feedback now…" opens the feedback sheet.
+- [ ] **Return to desk** from both Settings and the Activity drawer. The
+      avatar disappears for the other player each time.
+- [ ] Settings → **Your save → Download a backup** saves a `.json`; **Restore
+      from a backup…** shows what is in it and changes nothing until you
+      confirm. (This is what the consent note promises testers before any
+      reset.)
+- [ ] Chat's **–** button folds it to its header; messages that arrive while
+      folded show a count; **+** opens it again.
+- [ ] Wood Mill: trade at Chisel's counter, then order by mail from
+      Scrapbook → Mail. The parcel reads "On its way" and becomes
+      collectable about 90 seconds later.
+- [ ] Desk → **Open the avatar studio** opens `/play/studio/` without
+      entering a world. Make a look; the line under the title says it is
+      saved to your account. Back on the desk, **Your looks** lists it.
+- [ ] In the game's studio, change a look and **close the tab without
+      pressing anything**. Reopen: the change is in the wardrobe.
+- [ ] Sign in on a second browser, enter a world: the look from the first
+      browser is worn (not the first-run "make an avatar" prompt).
+- [ ] In a world, **reload the page**. You land back in the same world, not
+      on "entry pass is missing".
+- [ ] Redeploy the Railway server while someone is in a world. Chat says it
+      is finding the neighborhood again, and they are back within about a
+      minute of the server returning — no reload.
 
 ---
 

@@ -64,7 +64,7 @@ import {
 } from './catalog';
 import { designToSvg, silhouettePathFor } from './render';
 import { refreshAllBacking, refreshBacking } from './stampBacking';
-import { saveDesign } from './wardrobe';
+import { deleteDesign, listDesigns, saveDesign } from './wardrobe';
 
 export type AvatarEditorResult = {
   design: AvatarDesign;
@@ -73,9 +73,53 @@ export type AvatarEditorResult = {
 export type AvatarEditorOptions = {
   /** Edit this design (opens on the style step); omit to start at shapes. */
   initial?: AvatarDesign;
+  /** "Save & wear": the explicit finish. */
   onSave: (result: AvatarEditorResult) => void;
-  onCancel?: () => void;
+  /**
+   * Closed without "Save & wear". The work is NOT lost — the studio autosaves
+   * into the wardrobe as you go — so `changed` says whether the latest
+   * `design` differs from what was there when the studio opened, and
+   * `design` is null when the player chose "Undo my changes" on a new look.
+   */
+  onCancel?: (result: { design: AvatarDesign | null; changed: boolean }) => void;
 };
+
+/**
+ * A look that did not fit in a full wardrobe, kept so it is never lost.
+ * (Everything that fits is autosaved straight into the wardrobe instead.)
+ */
+const DRAFT_KEY = 'pp.avatar-draft.v1';
+
+function readDraft(): AvatarDesign | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { design?: AvatarDesign };
+    return parsed.design && typeof parsed.design.id === 'string' ? parsed.design : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDraft(design: AvatarDesign): void {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ design, savedAt: Date.now() }));
+  } catch {
+    // Storage blocked: nothing more this browser can do.
+  }
+}
+
+function clearDraft(id?: string): void {
+  if (id && readDraft()?.id !== id) return;
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/** How often the studio checks for unsaved work (and saves it). */
+const AUTOSAVE_INTERVAL_MS = 1500;
 
 /** A blank sheet: round pal on kraft paper, nothing drawn yet. */
 export function newDesign(): AvatarDesign {
@@ -243,11 +287,88 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
     design.updatedAt = Date.now();
   };
 
+  // ==== Autosave ============================================================
+  //
+  // Fifteen minutes of careful stamping must never depend on remembering to
+  // press a button before the tab closes, the laptop sleeps, or the world
+  // drops. Every change lands in the wardrobe within a couple of seconds;
+  // the wardrobe then syncs to the account when signed in
+  // (src/net/accountWardrobe.ts). "Save & wear" is still the way to finish,
+  // and "Undo my changes" puts everything back the way it was.
+  const original = options.initial ? structuredClone(options.initial) : null;
+  const preexisting = new Set(listDesigns().map((d) => d.id));
+  /** Looks this visit to the studio created (autosaved), for Undo. */
+  const createdIds = new Set<string>();
+  let lastAutosaved = '';
+  let changedSinceOpen = false;
+  let autosaveExplained = false;
+
+  const currentName = (): string => {
+    const input = overlay.querySelector<HTMLInputElement>('.avatar-editor-name');
+    const raw = input ? input.value : design.name;
+    return raw.replace(/\s+/g, ' ').trim().slice(0, DESIGN_LIMITS.nameMaxLength) || 'untitled cutout';
+  };
+
+  const showAutosave = (text: string) => {
+    const note = overlay.querySelector<HTMLElement>('[data-role="autosave"]');
+    if (note) note.textContent = text;
+  };
+
+  const autosave = () => {
+    if (!dirty || step !== 'style') return;
+    const snapshot = structuredClone(design);
+    snapshot.name = currentName();
+    const fingerprint = JSON.stringify({ ...snapshot, updatedAt: 0 });
+    if (fingerprint === lastAutosaved) return;
+    lastAutosaved = fingerprint;
+    snapshot.updatedAt = Date.now();
+    changedSinceOpen = true;
+    if (saveDesign(snapshot)) {
+      if (!preexisting.has(snapshot.id)) createdIds.add(snapshot.id);
+      clearDraft(snapshot.id);
+      const time = new Date(snapshot.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      showAutosave(`Saved to your wardrobe · ${time}`);
+      if (!autosaveExplained) {
+        autosaveExplained = true;
+        announce('Your cutout saves to your wardrobe as you work.');
+      }
+    } else {
+      writeDraft(snapshot);
+      showAutosave('Wardrobe is full — kept as a draft in this browser');
+    }
+  };
+
+  /** Put the wardrobe back the way it was when the studio opened. */
+  const undoThisVisit = () => {
+    for (const id of createdIds) deleteDesign(id);
+    createdIds.clear();
+    if (original) saveDesign(structuredClone(original));
+    clearDraft(design.id);
+    changedSinceOpen = false;
+    lastAutosaved = '';
+  };
+
+  const autosaveTimer = window.setInterval(autosave, AUTOSAVE_INTERVAL_MS);
+  const autosaveOnHide = () => autosave();
+  window.addEventListener('pagehide', autosaveOnHide);
+  const autosaveOnVisibility = () => {
+    if (document.visibilityState === 'hidden') autosave();
+  };
+  document.addEventListener('visibilitychange', autosaveOnVisibility);
+
   // ==== Step 1: choose the cutout shape =====================================
 
   const renderShapeStep = () => {
     step = 'shape';
+    const draft = options.initial ? null : readDraft();
     stepHost.innerHTML = `
+      ${draft ? `<div class="avatar-editor-warning avatar-editor-draft" data-role="draft">
+        <p>You have a cutout that did not fit in your wardrobe. Pick it back up?</p>
+        <div class="avatar-editor-swatches">
+          <button type="button" class="avatar-editor-save" data-action="draft-resume">Pick it back up</button>
+          <button type="button" data-action="draft-drop">Let it go</button>
+        </div>
+      </div>` : ''}
       <p class="avatar-editor-lead">First: what shape gets cut out? Search, browse, or draw your own.</p>
       <label class="avatar-editor-search-row">
         <span>Search shapes</span>
@@ -258,6 +379,21 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
            aria-label="Cutout shapes. First option: draw your own."></div>`;
     const grid = $('[data-role="grid"]', stepHost);
     const search = $<HTMLInputElement>('.avatar-editor-search', stepHost);
+    stepHost.querySelector('[data-action="draft-resume"]')?.addEventListener('click', () => {
+      if (!draft) return;
+      design = structuredClone(draft);
+      dirty = true;
+      undoStack = [];
+      redoStack = [];
+      renderStyleStep();
+      announce(`Picked "${design.name}" back up. Delete a look in your wardrobe to make room for it.`);
+    });
+    stepHost.querySelector('[data-action="draft-drop"]')?.addEventListener('click', () => {
+      clearDraft();
+      stepHost.querySelector('[data-role="draft"]')?.remove();
+      announce('Draft let go.');
+      search.focus();
+    });
 
     const fillGrid = () => {
       const query = search.value.trim();
@@ -440,8 +576,10 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
             <button type="button" data-action="change-shape">Change shape…</button></p>
         </div>
         <div class="studio-bar-right">
-          <button type="button" data-action="cancel">Cancel</button>
-          <button type="button" class="avatar-editor-save" data-action="save">Save</button>
+          <p class="avatar-editor-autosave" data-role="autosave">Saves as you go</p>
+          <button type="button" data-action="revert">Undo my changes</button>
+          <button type="button" data-action="cancel">Close</button>
+          <button type="button" class="avatar-editor-save" data-action="save">Save &amp; wear</button>
         </div>
       </div>
       <div class="avatar-editor-warning" data-role="warning" hidden>
@@ -1475,10 +1613,34 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
         announce(`Saved "${design.name}" to your wardrobe.`);
         renderShapeStep();
       }
-      if (action === 'warn-discard') renderShapeStep();
+      if (action === 'warn-discard') {
+        // "Change without saving" means this cutout should not linger in the
+        // wardrobe just because autosave caught it.
+        if (createdIds.has(design.id)) {
+          deleteDesign(design.id);
+          createdIds.delete(design.id);
+        } else if (original && design.id === original.id) {
+          saveDesign(structuredClone(original));
+        }
+        lastAutosaved = '';
+        renderShapeStep();
+      }
+      if (action === 'revert') {
+        const what = original ? 'put this look back the way it was' : 'remove this new look';
+        if (!changedSinceOpen && !dirty) {
+          announce('Nothing has changed yet.');
+          return;
+        }
+        if (!window.confirm(`Undo everything since you opened the studio? This will ${what}.`)) return;
+        dirty = false;
+        undoThisVisit();
+        close();
+        options.onCancel?.({ design: original ? structuredClone(original) : null, changed: false });
+      }
       if (action === 'save') {
         design.name = nameInput.value.replace(/\s+/g, ' ').trim() || 'untitled cutout';
         design.updatedAt = Date.now();
+        clearDraft(design.id);
         close();
         options.onSave({ design: structuredClone(design) });
       }
@@ -1577,6 +1739,9 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
   // ==== Open/close ==========================================================
 
   const close = () => {
+    window.clearInterval(autosaveTimer);
+    window.removeEventListener('pagehide', autosaveOnHide);
+    document.removeEventListener('visibilitychange', autosaveOnVisibility);
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('keydown', swallowStrayKeys, true);
     window.removeEventListener('keyup', swallowStrayKeys, true);
@@ -1585,10 +1750,11 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
     opener?.focus();
   };
 
+  /** Close keeps the work: it is already in the wardrobe (see Autosave). */
   const cancel = () => {
-    if (dirty && !window.confirm('Discard the changes to this cutout?')) return;
+    autosave();
     close();
-    options.onCancel?.();
+    options.onCancel?.({ design: structuredClone(design), changed: changedSinceOpen });
   };
 
   overlay.addEventListener('click', (event) => {

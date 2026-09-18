@@ -50,7 +50,15 @@ import {
 } from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
-import { mailAttachment } from './mail';
+import { deliverMail, mailAttachment, mailHasArrived } from './mail';
+import {
+  MILL_MAIL,
+  describeMillInputs,
+  getMillRefinement,
+  resolveMillAllocation,
+  scaledMillInputs,
+  type MillPayment,
+} from './catalogs/millRefining';
 
 export type ResourceAllocation = Partial<Record<ResourceId, number>>;
 
@@ -73,6 +81,19 @@ export type GameCommand =
   | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number }
   | { type: 'refillTerrain'; target: TerrainCellAddress; now: number }
   | { type: 'raiseTerrain'; target: TerrainCellAddress; now: number }
+  /**
+   * Trade raw stock for refined material at the Wood Mill. `counter` hands it
+   * over on the spot; `mail` posts it for a fee (chips, or extra stock) and it
+   * arrives in the mailbox a little later.
+   */
+  | {
+      type: 'refineAtMill';
+      refinementId: string;
+      batches: number;
+      delivery: 'counter' | 'mail';
+      payment?: MillPayment;
+      now: number;
+    }
   | { type: 'selectSeed'; seedId: SeedId | null }
   | { type: 'sellResource'; shopId: ShopId; resource: ResourceId; quantity: number }
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
@@ -462,9 +483,72 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       return { ok: true, message: `Picked up the ${recipe.output.label}.` };
     }
 
+    case 'refineAtMill': {
+      const refinement = getMillRefinement(command.refinementId);
+      if (!refinement) return { ok: false, reason: 'Chisel does not know that one.' };
+      const batches = command.batches;
+      if (!Number.isSafeInteger(batches) || batches < 1 || batches > MILL_MAIL.maxBatches) {
+        return { ok: false, reason: `Chisel takes between 1 and ${MILL_MAIL.maxBatches} batches at a time.` };
+      }
+      const byMail = command.delivery === 'mail';
+      const payment: MillPayment = command.payment ?? 'chips';
+      if (byMail && payment === 'chips' && state.player.chips < MILL_MAIL.feeChips) {
+        return { ok: false, reason: `Delivery costs ₡${MILL_MAIL.feeChips}. You could pay in a little extra stock instead.` };
+      }
+      const inputs = scaledMillInputs(refinement, batches, byMail && payment === 'materials');
+      const allocation = resolveMillAllocation(state.player.inventory, inputs);
+      if (!allocation) {
+        return { ok: false, reason: `Chisel needs ${describeMillInputs(inputs)} for that.` };
+      }
+      for (const [resource, amount] of Object.entries(allocation) as Array<[ResourceId, number]>) {
+        state.player.inventory[resource] = (state.player.inventory[resource] ?? 0) - amount;
+      }
+      const quantity = refinement.quantity * batches;
+      const output = refinement.output;
+      const label = RESOURCE_CORE_DEFS[output].label;
+      state.player.refinedCounts[output] = (state.player.refinedCounts[output] ?? 0) + quantity;
+
+      if (!byMail) {
+        state.player.inventory[output] = (state.player.inventory[output] ?? 0) + quantity;
+        return {
+          ok: true,
+          allocation,
+          grants: { [output]: quantity },
+          message: `Chisel works it through the mill and hands you ${quantity} ${label}.`,
+        };
+      }
+
+      if (payment === 'chips') state.player.chips -= MILL_MAIL.feeChips;
+      const arrivesAt = command.now + MILL_MAIL.deliveryMs;
+      deliverMail(state, {
+        // Stable per order: the same command replayed cannot post twice.
+        id: `mill-order:${command.now}:${refinement.id}:${batches}`,
+        fromAccountId: 'world',
+        fromName: 'Chisel',
+        kind: 'parcel',
+        payload: {
+          subject: `Your ${label.toLowerCase()} from the mill`,
+          text: `Fresh off the cutter, ${quantity} ${label.toLowerCase()}, wrapped in yesterday's measurements. — Chisel`,
+          attachmentKind: 'resource',
+          resource: output,
+          quantity,
+          arrivesAt,
+        },
+        at: command.now,
+      });
+      return {
+        ok: true,
+        allocation,
+        message: `Order posted! Chisel will send ${quantity} ${label} to your mailbox shortly.`,
+      };
+    }
+
     case 'collectMail': {
       const mail = state.player.mailbox.find((entry) => entry.id === command.mailId);
       if (!mail) return { ok: false, reason: 'That letter is not in your mailbox.' };
+      if (!mailHasArrived(mail, Date.now())) {
+        return { ok: false, reason: 'That parcel is still on its way.' };
+      }
       if (state.player.claimedMailIds.includes(mail.id)) {
         return { ok: false, reason: 'You already collected that parcel.' };
       }

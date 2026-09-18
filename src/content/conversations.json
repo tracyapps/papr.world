@@ -576,7 +576,7 @@
           "id": "cutter",
           "label": "What will the big cutter do?",
           "replies": [
-            "“Square broad paper timber, trim wall panels, and make clean building pieces. The guard stays down whenever the lever is feeling ambitious.”"
+            "“Square broad paper timber, trim wall panels, and turn raw stock into refined material. Bring me twigs, fibers, stones, or clay and I will trade you lumber, cord, pulp, grit, or mortar. The guard stays down whenever the lever is feeling ambitious.”"
           ],
           "addFlags": [
             "chisel:met"
@@ -2503,16 +2503,16 @@
         "maker:lumber-promised",
         "maker:lumber-done"
       ],
-      "storyArc": "The Thing Maker Job",
+      "storyArc": "The Lumber Job",
       "opening": [
-        "“I have a project,” {{name}} says, and produces a page of plans that is mostly arrows. “To make {{material:bound-lumber}}, I need someone to fetch, and someone to lean on the maker. I have the maker. Are you the someone?”"
+        "“I have a project,” {{name}} says, and produces a page of plans that is mostly arrows. “To make it I need {{material:bound-lumber}}, which means someone to fetch, and someone to carry it to Chisel at the Wood Mill. Are you the someone?”"
       ],
       "choices": [
         {
           "id": "in",
           "label": "I am in. What do you need?",
           "replies": [
-            "“Raw wood, mostly. {{material:kraft-twigs}} and {{material:ribbonwood-sticks}} will do to start. Meet me back here, and we will feed the Thing Maker.”"
+            "“Raw wood, mostly — {{material:kraft-twigs}}, and a bit of long fiber to bind them. Take it all to Chisel at the Wood Mill and he will press it into lumber. Or mail him an order, if your feet object.”"
           ],
           "friendship": 3,
           "addFlags": [
@@ -2545,16 +2545,16 @@
       ],
       "priority": 44,
       "maxPlays": 1,
-      "storyArc": "The Thing Maker Job",
+      "storyArc": "The Lumber Job",
       "opening": [
-        "“You brought materials!” {{name}} eyes the pile. “Feed the Thing Maker gently. It has moods, and the moods are load-bearing.”"
+        "“You brought lumber!” {{name}} eyes the stack. “Chisel does lovely work. It smells faintly of pencil shavings, which is how you know.”"
       ],
       "choices": [
         {
           "id": "feed",
-          "label": "Feed the maker",
+          "label": "Show them the lumber",
           "replies": [
-            "The scraps go in, and the Thing Maker works them over with a sound like a page turning twice. A neat length of {{material:bound-lumber}} comes out the far side. “It did the thing!” {{name}} whispers. “The thing it does!”"
+            "{{name}} runs a paw along the {{material:bound-lumber}}. “Straight. Square. Honest.” They nod, very seriously. “It did the thing. The mill did the thing!”"
           ],
           "friendship": 3,
           "addFlags": [
@@ -2564,9 +2564,9 @@
         },
         {
           "id": "watch",
-          "label": "Ask if the maker needs watching",
+          "label": "Ask how Chisel does it",
           "replies": [
-            "“Always. A maker is a friend with teeth.” {{name}} tracks every handle and lever, narrating softly. The {{material:bound-lumber}} that emerges is straight and proud."
+            "“Twigs in, a twist of fiber, and the big cutter squares it all up. Chisel says the secret is measuring twice. I think the secret is Chisel.”"
           ],
           "friendship": 2,
           "addFlags": [
@@ -2586,7 +2586,7 @@
       ],
       "priority": 44,
       "maxPlays": 1,
-      "storyArc": "The Thing Maker Job",
+      "storyArc": "The Lumber Job",
       "opening": [
         "{{name}} stands over the finished {{material:bound-lumber}} with a plan in one paw and a hammer in the other, looking like a critter about to become a builder. “Last part. I need an extra pair of hands and a very small amount of courage.”"
       ],
@@ -2621,16 +2621,16 @@
       "id": "maker-refining-talk",
       "priority": 26,
       "maxPlays": 3,
-      "storyArc": "At the Thing Maker",
+      "storyArc": "At the Wood Mill",
       "opening": [
-        "“Raw finds go in, refined things come out,” {{name}} says, patting the Thing Maker. “{{material:carbon-copy-shale}} and {{material:ochre-paperclay}} are the plain stock. Work them up, and you have better than you started with.”"
+        "“Raw finds go in, refined things come out,” {{name}} says. “Not at the Thing Maker, mind — that is for making *things*. For stock, you go to Chisel at the Wood Mill.”"
       ],
       "choices": [
         {
           "id": "how",
           "label": "How does refining work?",
           "replies": [
-            "“Patiently. You gather what the ground gave you, arrange it the way the plan says, and the maker does the convincing. Nothing mystical about it. Mostly.”"
+            "“You bring Chisel the raw stuff — twigs, fibers, stones, clay — and he trades you back the worked-up version: {{material:bound-lumber}}, {{material:binding-cord}}, {{material:soft-pulp}}, {{material:stone-aggregate}}, {{material:paper-mortar}}.”"
           ],
           "friendship": 2
         },
@@ -2638,15 +2638,15 @@
           "id": "lumber",
           "label": "And {{material:bound-lumber}}?",
           "replies": [
-            "“The first real refine. Wood pressed until it holds a shape. Everything sturdy starts there.”"
+            "“The first real refine. Twigs pressed until they hold a shape, with a bit of long fiber to bind them. Everything sturdy starts there.”"
           ],
           "friendship": 1
         },
         {
           "id": "needs",
-          "label": "Does it need a tool?",
+          "label": "What if the mill is far away?",
           "replies": [
-            "“Only the maker, and a critter willing to wait for it. It is the waiting that thins the crowd.”"
+            "“Mail him! Order from your mailbox, pay a small delivery fee — a few chips, or a little extra of the raw stock — and the parcel turns up a bit later. Chisel wraps everything in old measurements.”"
           ],
           "friendship": 1,
           "endsScene": true
@@ -3110,6 +3110,83 @@
             "You wander the forest floor until, inevitably, a small neat row of cabbage sprouts waves you over. “See?” {{name}} says. “The seeds wanted to be found. They are show-offs.”"
           ],
           "friendship": 3,
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "tropical-canopy-knowledge",
+      "biomes": [
+        "tropical"
+      ],
+      "priority": 40,
+      "maxPlays": 4,
+      "opening": [
+        "“Two jungles here, really,” {{name}} says. “One down where you are, and one up in the leaves. Most visitors only ever meet the bottom one.”",
+        "{{name}} tips their head back. “Look up sometimes. Half the jungle lives up there, and it is almost certainly looking at you.”"
+      ],
+      "choices": [
+        {
+          "id": "vines",
+          "label": "What about the hanging vines?",
+          "replies": [
+            "“Snip the bottom of a vine and you get {{material:crepe-vine}} — stretchy, twisty, and you need {{tool-for:crepe-vine}}. It only grows off the tall trees here. It grows back, too.”"
+          ]
+        },
+        {
+          "id": "ground",
+          "label": "And down here?",
+          "replies": [
+            "“{{material:jungle-loam}} lies about loose — just walk over it. Dig a bit deeper for {{material:rainfold-pebbles}}; the shovel finds them, nothing else does.”",
+            "“Mushroom clusters on the floor give {{material:blotting-caps}} if you snip them. Shrubs give twigs and fiber. Everything here is generous if you ask it nicely.”"
+          ]
+        },
+        {
+          "id": "who",
+          "label": "Who lives up there?",
+          "replies": [
+            "“Toucans, mostly showing off. Monkeys, mostly showing off harder. And sloths, who are not showing off, because that would take energy.”",
+            "“If something up in the branches looks like it is smiling at you, it is a sloth. Say hello early — the reply takes a while.”"
+          ]
+        },
+        {
+          "id": "thanks",
+          "label": "Thanks — I'll keep looking up",
+          "replies": [
+            "“Good. Mind your feet while you do.”"
+          ],
+          "endsScene": true
+        }
+      ]
+    },
+    {
+      "id": "canopy-first-hello",
+      "species": [
+        "toucan",
+        "monkey",
+        "sloth"
+      ],
+      "maxFriendship": "curious",
+      "priority": 30,
+      "maxPlays": 1,
+      "opening": [
+        "{{name}} peers down at you from a very specific angle, the way you look at something you have been watching for a while. “So. You finally noticed me.”"
+      ],
+      "choices": [
+        {
+          "id": "sorry",
+          "label": "Sorry — I didn't think to look up",
+          "replies": [
+            "“Nobody does. It is our favorite thing about the ground people. You get to be surprised constantly.”"
+          ],
+          "endsScene": true
+        },
+        {
+          "id": "view",
+          "label": "What's the view like up there?",
+          "replies": [
+            "“Leaves, mostly. And you, now. The view improved.”"
+          ],
           "endsScene": true
         }
       ]

@@ -37,3 +37,34 @@ describe('managed world entry handoff', () => {
     )).toBeNull();
   });
 });
+
+describe('resuming a world entry without the desk handoff', () => {
+  const token = 'a-fresh-clerk-session-token';
+  const me = {
+    claimed: true,
+    account: { id: 'account-1', displayName: 'Fern' },
+    worlds: [{ id: worldId, name: 'Moss garden', capabilities: ['enter'] }],
+  };
+  const fetcherFor = (body: unknown, status = 200) =>
+    vi.fn(async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch;
+
+  it('rebuilds the entry from the account with a fresh token', async () => {
+    const { resumeWorldEntry } = await import('./worldEntry');
+    const fetcher = fetcherFor(me);
+    const entry = await resumeWorldEntry(worldId, 'https://rooms.test', async () => token, fetcher, 1_000);
+    expect(entry).toMatchObject({
+      accountId: 'account-1', worldName: 'Moss garden', playerName: 'Fern', sessionToken: token,
+    });
+    expect(fetcher).toHaveBeenCalledWith('https://rooms.test/account/me', {
+      headers: { authorization: `Bearer ${token}` },
+    });
+  });
+
+  it('gives up quietly when signed out or not allowed in', async () => {
+    const { resumeWorldEntry } = await import('./worldEntry');
+    expect(await resumeWorldEntry(worldId, 'https://rooms.test', async () => null, fetcherFor(me))).toBeNull();
+    const elsewhere = { ...me, worlds: [{ id: 'another', name: 'x', capabilities: ['enter'] }] };
+    expect(await resumeWorldEntry(worldId, 'https://rooms.test', async () => token, fetcherFor(elsewhere))).toBeNull();
+    expect(await resumeWorldEntry(worldId, 'https://rooms.test', async () => token, fetcherFor({}, 401))).toBeNull();
+  });
+});

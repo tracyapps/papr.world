@@ -23,6 +23,10 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
         <p class="label">Your place between worlds</p>
         <h1 class="hand desk__title">Your desk</h1>
         <p class="desk__lede">The things that belong to you, even when you leave a neighborhood.</p>
+        <p class="desk__alpha">
+          <strong>Early alpha.</strong> Expect rough edges — and now and then a
+          world or progress reset. Send feedback from the game’s Help menu.
+        </p>
       </div>
       <div data-account-user-button></div>
     </header>
@@ -86,6 +90,11 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
           <p class="label">Avatar</p>
           <h2>Your looks</h2>
           <div data-wardrobe-summary><p class="soft">Opening your wardrobe…</p></div>
+          <p>
+            <button class="btn" type="button" data-open-studio>Open the avatar studio</button>
+          </p>
+          <p class="soft">Make and change looks without going into a world. They save to your account as you go.</p>
+          <p class="migration__note" data-open-studio-note role="status" aria-live="polite"></p>
           <div class="migration wardrobe-import" data-wardrobe-import hidden>
             <h3 class="migration__title">Bring your wardrobe home</h3>
             <p class="soft" data-wardrobe-import-description>Checking this browser for saved looks…</p>
@@ -107,6 +116,7 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
   .desk__head { display: flex; gap: 24px; align-items: start; justify-content: space-between; }
   .desk__title { @include hand(56px, 92px, 9vw); margin: 4px 0 14px; }
   .desk__lede { max-width: 620px; color: var(--ink-soft); font-size: 19px; }
+  .desk__alpha { margin: 10px 0 0; max-width: 60ch; color: var(--ink-soft); }
   .desk__notice { margin: 28px 0; padding: 14px 18px; border-left: 4px solid var(--crayon); background: var(--paper-2); }
   .desk__notice[data-kind="error"] { border-color: #a33; }
   .desk__signin { max-width: 430px; margin: 38px auto; }

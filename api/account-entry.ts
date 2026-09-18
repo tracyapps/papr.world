@@ -38,13 +38,17 @@ export async function handleAccountEntry(
   }
 
   let worldId = '';
+  // The avatar studio (/play/studio/) sits behind the same door as the game
+  // but needs no world: any claimed account may make looks.
+  let forStudio = false;
   try {
-    const input = await request.json() as { worldId?: unknown };
+    const input = await request.json() as { worldId?: unknown; purpose?: unknown };
+    forStudio = input.purpose === 'studio';
     worldId = typeof input.worldId === 'string' ? input.worldId.trim().toLowerCase() : '';
   } catch {
     return json(400, { error: 'choose a valid world' });
   }
-  if (!WORLD_ID_SHAPE.test(worldId)) return json(400, { error: 'choose a valid world' });
+  if (!forStudio && !WORLD_ID_SHAPE.test(worldId)) return json(400, { error: 'choose a valid world' });
 
   const apiUrl = (env.PAPR_API_URL ?? env.PUBLIC_PAPR_API_URL ?? '').replace(/\/$/, '');
   if (!apiUrl) return json(503, { error: 'account entry is not configured' });
@@ -73,11 +77,15 @@ export async function handleAccountEntry(
   } catch {
     return json(502, { error: 'account access could not be checked' });
   }
-  const mayEnter = home.claimed === true && home.worlds?.some((world) =>
+  const mayEnter = home.claimed === true && (forStudio || home.worlds?.some((world) =>
     world.id === worldId
     && Array.isArray(world.capabilities)
-    && world.capabilities.includes('enter'));
-  if (!mayEnter) return json(403, { error: 'this account cannot enter that world' });
+    && world.capabilities.includes('enter')));
+  if (!mayEnter) {
+    return json(403, {
+      error: forStudio ? 'claim your paper passport first' : 'this account cannot enter that world',
+    });
+  }
 
   if (gateIsOpen(env)) return json(200, { ok: true });
   const secret = env.PAPR_ALPHA_SECRET;

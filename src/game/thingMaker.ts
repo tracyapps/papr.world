@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { closeMillPanel } from './millCounter';
 import { createCutout, shadowed } from '../render/builders';
 import { createColorMaterial, getMaterial } from '../render/materials';
 import { registerMapFeature, removeMapFeature } from '../world/mapFeatures';
@@ -421,6 +422,8 @@ export function isMakerPanelOpen() {
 }
 
 export function setMakerPanelOpen(open: boolean) {
+  // Shares the right-hand panel slot with the mill counter.
+  if (open) closeMillPanel();
   makerPanelOpen = open;
   renderThingMakerPanel();
 }

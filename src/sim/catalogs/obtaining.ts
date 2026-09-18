@@ -1,10 +1,11 @@
 import { BIOME_IDS, type Biome } from './biomes';
 import { DIG_TABLES } from './geology';
-import { RECIPE_DEFS, type RecipeId } from './recipes';
+import { RECIPE_DEFS, type RecipeDefinition, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { SEED_STORE, SEED_STORE_BARTER, seedStoreSellPrice, type ShopId } from './shops';
 import { TOOL_DEFS, toolsInFamily, type ToolId } from './tools';
-import { SPECIES_YIELD, type TreeSpecies } from './trees';
+import { SPECIES_NAMES, SPECIES_YIELD, type TreeSpecies } from './trees';
+import { MILL_REFINEMENTS } from './millRefining';
 
 /**
  * How every material in the game can be got — the one table that answers
@@ -30,11 +31,13 @@ export type ObtainRoute =
   /** Turned up by digging. `layer` is the shovel tier that reaches it. */
   | { kind: 'dug'; biomes: Biome[]; layer: 1 | 2 | 3 }
   /** Cut from a living tree. */
-  | { kind: 'trimmed'; species: TreeSpecies; minimumTier: 1 | 2 | 3 }
+  | { kind: 'trimmed'; species: TreeSpecies; minimumTier: 1 | 2 | 3; speciesName: string }
   /** Grown in a garden bed. */
   | { kind: 'grown'; from: ResourceId }
   /** Made at the Thing Maker. `recipe` is the one that produces it. */
   | { kind: 'crafted'; recipe: RecipeId }
+  /** Refined from raw stock by Chisel at the Wood Mill — in person or by mail. */
+  | { kind: 'refined'; refinement: string; place: string; refiner: string }
   /**
    * Bought over a shop counter. `barter` is the equal-value trade a player
    * with an empty pouch can make instead, where the shop offers one.
@@ -131,7 +134,9 @@ export function obtainRoutesFor(resource: ResourceId): ObtainRoute[] {
   for (const species of Object.keys(SPECIES_YIELD) as TreeSpecies[]) {
     const table = SPECIES_YIELD[species];
     const gives = table.primary === resource || table.secondary === resource || table.variety === resource;
-    if (gives) routes.push({ kind: 'trimmed', species, minimumTier: lowestTierFor(species) });
+    if (gives) {
+      routes.push({ kind: 'trimmed', species, minimumTier: lowestTierFor(species), speciesName: SPECIES_NAMES[species].many });
+    }
   }
 
   const grown = GROWN_FROM[resource];
@@ -143,9 +148,20 @@ export function obtainRoutesFor(resource: ResourceId): ObtainRoute[] {
   // as a material with no way to get it, and why the reference page needed a
   // hand-written seed exception to look right. Derived, like the rest.
   for (const recipeId of Object.keys(RECIPE_DEFS) as RecipeId[]) {
-    const output = RECIPE_DEFS[recipeId].output;
+    // A hidden plan is not a route anyone can take.
+    // Widened on purpose: the catalog's literal types would otherwise let
+    // TypeScript "prove" no ready recipe outputs a resource.
+    const recipe: RecipeDefinition = RECIPE_DEFS[recipeId];
+    if (recipe.status !== 'ready') continue;
+    const output = recipe.output;
     if (output.kind === 'resource' && output.resource === resource) {
       routes.push({ kind: 'crafted', recipe: recipeId });
+    }
+  }
+
+  for (const refinement of MILL_REFINEMENTS) {
+    if (refinement.output === resource) {
+      routes.push({ kind: 'refined', refinement: refinement.id, place: 'the Wood Mill', refiner: 'Chisel' });
     }
   }
 
