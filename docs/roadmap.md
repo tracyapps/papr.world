@@ -777,7 +777,13 @@ world work.
   previews, wear, rename, duplicate (copies start private), delete, the
   per-design share toggle, and the full-wardrobe fix: a design that no
   longer fits is handed to the panel as a pending save so the player
-  replaces a slot on purpose instead of silently losing the work. Next up is **Phase C2 — the
+  replaces a slot on purpose instead of silently losing the work. **Phase D
+  shipped 2026-09-17**: designs over the wire — the account wardrobe
+  (`AvatarDesignStore`), join-key resolution with template fallback, a
+  `wear-design` room message so wearing publishes the look to everyone
+  present, remote cutouts fetching and rasterizing the real drawing, and
+  the one-time device → account wardrobe import from the desk (which also
+  lists the account library read-only). Next up is **Phase C2 — the
   closet**: it makes the wardrobe a **buildable closet in
   your house** that displays the looks you chose to share. Tiers are style
   and display only — never capacity (decision 2026-08-15, §2.3).

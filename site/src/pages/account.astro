@@ -82,6 +82,17 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
           <div data-mailbox-summary><p class="soft">Opening your mailbox…</p></div>
           <p class="mailbox__note" data-mailbox-note role="status" aria-live="polite"></p>
         </section>
+        <section class="paper-card">
+          <p class="label">Avatar</p>
+          <h2>Your looks</h2>
+          <div data-wardrobe-summary><p class="soft">Opening your wardrobe…</p></div>
+          <div class="migration wardrobe-import" data-wardrobe-import hidden>
+            <h3 class="migration__title">Bring your wardrobe home</h3>
+            <p class="soft" data-wardrobe-import-description>Checking this browser for saved looks…</p>
+            <button class="btn btn--quiet" type="button" data-wardrobe-import-button hidden>Bring it into your account</button>
+            <p class="migration__note" data-wardrobe-import-note role="status" aria-live="polite"></p>
+          </div>
+        </section>
       </div>
     </div>
   </section>

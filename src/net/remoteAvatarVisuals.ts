@@ -3,9 +3,11 @@ import {
   DESIGN_CUTOUT,
   DESIGN_GROUND_Y,
   DESIGN_SHEET,
+  sanitizeAvatarDesign,
   type PlayerState,
 } from '../../shared/src/index';
 import { camera, scene, textureLoader } from '../render/context';
+import { rasterizeAvatarDesignTexture } from '../game/avatarLook';
 import { bridgeDeckHeightAt } from '../world/water';
 import { sampleTerrainHeight } from '../world/terrain';
 import type { RemoteSample } from './remotePlayers';
@@ -21,6 +23,8 @@ type RemoteVisual = {
   root: THREE.Group;
   cutout: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial>;
   label: THREE.Sprite;
+  /** The design this visual is showing (or fetching) — '' while on fallback. */
+  drawingKey: string;
 };
 
 const root = new THREE.Group();
@@ -29,6 +33,46 @@ const visuals = new Map<string, RemoteVisual>();
 
 const placeholder = textureLoader.load('/assets/runtime/avatars/avatar_placeholder_flat_01.png');
 placeholder.colorSpace = THREE.SRGBColorSpace;
+
+/**
+ * HTTP origin serving `/avatar-designs/:id` — set when a shared session
+ * opens, because that is the only time other players' avatars exist at all.
+ */
+let designEndpoint: string | null = null;
+
+export function configureRemoteDesigns(httpEndpoint: string): void {
+  designEndpoint = httpEndpoint.replace(/\/$/, '');
+}
+
+/**
+ * Fetched-and-rasterized worn designs, keyed by design id. A room of players
+ * sharing a look shares one texture; a failed fetch resolves null and keeps
+ * the tinted placeholder — recognizable at a glance is the floor, not a
+ * promise the network will always cooperate.
+ */
+const designTextures = new Map<string, Promise<THREE.CanvasTexture | null>>();
+
+function fetchDesignTexture(designId: string): Promise<THREE.CanvasTexture | null> {
+  const cached = designTextures.get(designId);
+  if (cached) return cached;
+  const pending = (async () => {
+    try {
+      if (!designEndpoint || !/^[A-Za-z0-9-]{1,64}$/.test(designId)) return null;
+      const response = await fetch(`${designEndpoint}/avatar-designs/${designId}`);
+      if (!response.ok) return null;
+      const body = await response.json() as { design?: unknown };
+      const design = sanitizeAvatarDesign(body.design);
+      // The id on the wire must name the design it claims — anything else is
+      // a confused or hostile response, and the fallback answers it.
+      if (!design || design.id !== designId) return null;
+      return await rasterizeAvatarDesignTexture(design);
+    } catch {
+      return null;
+    }
+  })();
+  designTextures.set(designId, pending);
+  return pending;
+}
 
 export function initializeRemoteAvatarVisuals(): void {
   if (!root.parent) scene.add(root);
@@ -70,7 +114,22 @@ export function addRemoteAvatar(player: PlayerState): void {
   host.add(shadow);
 
   root.add(host);
-  visuals.set(player.id, { root: host, cutout, label });
+  const drawingKey = player.avatar.drawingKey;
+  visuals.set(player.id, { root: host, cutout, label, drawingKey });
+
+  // Phase D: the room already resolved this key against the wearer's account,
+  // so fetch the art and let it land whenever it lands — the tinted cutout
+  // stands in until then, and forever if the fetch fails.
+  if (drawingKey) {
+    void fetchDesignTexture(drawingKey).then((texture) => {
+      const current = visuals.get(player.id);
+      if (!texture || !current || current.drawingKey !== drawingKey) return;
+      current.cutout.material.map = texture;
+      // The map carries the whole look; the tint was only for the placeholder.
+      current.cutout.material.color.set('#ffffff');
+      current.cutout.material.needsUpdate = true;
+    });
+  }
 }
 
 export function removeRemoteAvatar(id: string): void {
@@ -86,6 +145,12 @@ export function removeRemoteAvatar(id: string): void {
 
 export function clearRemoteAvatars(): void {
   for (const id of [...visuals.keys()]) removeRemoteAvatar(id);
+  // Design textures are shared across players; only tearing the session down
+  // ends their audience.
+  for (const pending of designTextures.values()) {
+    void pending.then((texture) => texture?.dispose());
+  }
+  designTextures.clear();
 }
 
 export function updateRemoteAvatar(

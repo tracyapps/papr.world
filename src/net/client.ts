@@ -45,6 +45,7 @@ import {
   type ReportIntent,
   type ResourceNode,
   type SendMailIntent,
+  type WearDesignIntent,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 
@@ -116,6 +117,8 @@ export type NetConnection = {
   sendRemove: (intent: RemoveIntent) => void;
   sendMail: (intent: SendMailIntent) => void;
   sendClaimMail: (intent: ClaimMailIntent) => void;
+  /** Publish the worn design to the account wardrobe and everyone watching. */
+  sendWearDesign: (intent: WearDesignIntent) => void;
   disconnect: () => void;
 };
 
@@ -246,6 +249,7 @@ export async function connect(
     sendRemove: (intent) => room.send(ClientMessage.Remove, intent),
     sendMail: (intent) => room.send(ClientMessage.SendMail, intent),
     sendClaimMail: (intent) => room.send(ClientMessage.ClaimMail, intent),
+    sendWearDesign: (intent) => room.send(ClientMessage.WearDesign, intent),
     disconnect: () => {
       void room.leave();
     },

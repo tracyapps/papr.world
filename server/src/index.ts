@@ -27,9 +27,10 @@ import {
   type ModerationStatus,
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
-import { accounts, feedbackStore, mail, moderation, soloMigrations, accountTech, OWNER_ACCOUNT } from './stores';
+import { accounts, feedbackStore, mail, moderation, soloMigrations, accountTech, avatarDesigns, OWNER_ACCOUNT } from './stores';
 import { createAdminHandlers, readAdminConfig } from './admin';
 import { createAccountIdentityHandlers } from './accountIdentity';
+import { createAvatarDesignHandlers } from './avatarDesignHandlers';
 import { database } from './runtime';
 
 const port = Number(process.env.PORT ?? 2567);
@@ -48,6 +49,9 @@ const admin = createAdminHandlers({
 }, clerkConfig);
 const accountIdentity = createAccountIdentityHandlers({
   accounts, database, mail, migrations: soloMigrations, tech: accountTech, clerk: clerkConfig,
+});
+const avatarDesignApi = createAvatarDesignHandlers({
+  database, designs: avatarDesigns, clerk: clerkConfig,
 });
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
@@ -408,6 +412,21 @@ const gameServer = new Server({
     });
     app.post('/account/claim-mail', (req: Request, res: Response) => {
       void accountIdentity.claimMail(req, res);
+    });
+    app.get('/account/designs', (req: Request, res: Response) => {
+      void avatarDesignApi.list(req, res);
+    });
+    app.put('/account/designs', (req: Request, res: Response) => {
+      void avatarDesignApi.save(req, res);
+    });
+    app.delete('/account/designs/:id', (req: Request, res: Response) => {
+      void avatarDesignApi.remove(req, res);
+    });
+    app.post('/account/import-wardrobe', (req: Request, res: Response) => {
+      void avatarDesignApi.importWardrobe(req, res);
+    });
+    app.get('/avatar-designs/:id', (req: Request, res: Response) => {
+      void avatarDesignApi.fetchById(req, res);
     });
     app.post('/feedback', (req: Request, res: Response) => {
       void handleFeedback(req, res);

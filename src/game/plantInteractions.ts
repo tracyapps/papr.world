@@ -3,7 +3,6 @@ import { camera, scene } from '../render/context';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState } from '../sim/state';
 import { plantHarvest, plantHarvestDurationMs, plantProduce } from '../sim/catalogs/seeds';
-import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
@@ -16,6 +15,8 @@ type PlantEntry = TerrainCellAddress & {
   id: string;
   object: THREE.Group;
   seedPickup: THREE.Group;
+  /** The ready-drop halo built beside the pickup, if the visual made one. */
+  readyGlow: THREE.Mesh | null;
   baseScale: THREE.Vector3;
   activeFor: number;
 };
@@ -31,12 +32,20 @@ const pointer = new THREE.Vector2();
 const projected = new THREE.Vector3();
 let nextSeedUpdate = 0;
 
-export function registerTerrainPlant(options: Omit<PlantEntry, 'seedPickup' | 'baseScale' | 'activeFor'>) {
+/**
+ * The ready-harvest shimmer is deliberately gentle; players who ask the
+ * system for reduced motion get the warm pool of light without the pulse.
+ */
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+export function registerTerrainPlant(options: Omit<PlantEntry, 'seedPickup' | 'readyGlow' | 'baseScale' | 'activeFor'>) {
   const seedPickup = options.object.userData.seedPickup;
   if (!(seedPickup instanceof THREE.Group)) return;
+  const readyGlow = options.object.userData.readyGlow;
   plants.set(options.id, {
     ...options,
     seedPickup,
+    readyGlow: readyGlow instanceof THREE.Mesh ? readyGlow : null,
     baseScale: options.object.scale.clone(),
     activeFor: plants.get(options.id)?.activeFor ?? 0,
   });
@@ -99,6 +108,16 @@ function pickPlantAt(clientX: number, clientY: number): PickedPlant | null {
 
 export function hasPlantInteractionAt(clientX: number, clientY: number) {
   return pickPlantAt(clientX, clientY) !== null;
+}
+
+/**
+ * True when the pointer is over a plant whose drop is ready to take — the
+ * same "gather" state as a loose pile on the ground. The cursor uses this to
+ * say "ready" before the click, rather than making the player find out.
+ */
+export function hasReadyPlantDropAtScreen(clientX: number, clientY: number) {
+  const picked = pickPlantAt(clientX, clientY);
+  return Boolean(picked && picked.target === 'seed');
 }
 
 function collectDrop(entry: PlantEntry) {
@@ -172,17 +191,38 @@ export function updatePlantInteractions(delta: number, elapsed: number) {
     }
     entry.seedPickup.visible = Boolean(edit?.seedDropReady);
 
+    // The ready state breathes: a soft warm pool of light under the drop and
+    // a gentle sway, both slow and small enough to read as "something here"
+    // from across a garden rather than as an alarm. One phase per plant
+    // (keyed on its position) so a field of ripe plants shimmers instead of
+    // marching in lockstep.
+    if (entry.seedPickup.visible) {
+      const phase = elapsed * 2.2 + entry.x * 1.7 + entry.z * 1.3;
+      const wave = reducedMotion ? 0 : Math.sin(phase);
+      entry.seedPickup.scale.setScalar(1 + wave * 0.028);
+      entry.seedPickup.position.y = 0.045 + wave * 0.012;
+      if (entry.readyGlow) {
+        const material = entry.readyGlow.material;
+        if (material instanceof THREE.MeshBasicMaterial) {
+          material.opacity = reducedMotion ? 0.3 : 0.24 + wave * 0.1;
+        }
+      }
+    } else {
+      entry.seedPickup.scale.setScalar(1);
+      entry.seedPickup.position.y = 0.045;
+    }
+
     if (entry.seedPickup.visible) {
       entry.seedPickup.getWorldPosition(projected);
       const isOverlapping = Math.hypot(projected.x - avatar.position.x, projected.z - avatar.position.z) <= WALK_PICKUP_RADIUS;
-      const produced = edit?.plantedSeedId ? plantProduce(edit.plantedSeedId) : null;
-      const isFoodHarvest = produced ? RESOURCE_CORE_DEFS[produced].category === 'food' : false;
-      // Loose flower seeds still behave like walk-over pickups. Food stays on
-      // the plant until the player deliberately performs the harvest action.
+      // Every loose ground pickup behaves the same: walking across it
+      // gathers it. Food baskets used to wait for a deliberate click, which
+      // read beside seed packets and world piles as "some resources don't
+      // work"; the click-and-hold harvest path remains for aiming from a
+      // distance.
       if (
         isOverlapping
         && !seedWalkOverlaps.has(entry.id)
-        && !isFoodHarvest
         && !pendingPlantHarvests.has(entry.id)
       ) collectDrop(entry);
       if (isOverlapping) seedWalkOverlaps.add(entry.id);

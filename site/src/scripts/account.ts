@@ -89,6 +89,29 @@ type MintedPassport = {
   error?: string;
 };
 
+/** One saved avatar look on the account (the fields the desk list needs). */
+type AccountDesign = {
+  id: string;
+  name: string;
+  sharedOnCard: boolean;
+  updatedAt: number;
+};
+
+type WardrobeImportReceipt = { at: number; imported: number; skipped: number };
+
+type WardrobeResponse = {
+  designs?: AccountDesign[];
+  import?: WardrobeImportReceipt | null;
+  ok?: boolean;
+  receipt?: WardrobeImportReceipt;
+  alreadyImported?: boolean;
+  error?: string;
+};
+
+// The game's local wardrobe key. Same hand-synced-by-hand rule as the solo
+// save key above: the game and this desk share an origin in production.
+const WARDROBE_STORAGE_KEY = 'pp.wardrobe.v1';
+
 // The game (`/play/`) and this desk (`/account/`) are the same origin in
 // production (see hosting.md), so localStorage set by the game is directly
 // readable here — no bridge needed. This key and shape must be kept in sync
@@ -179,6 +202,11 @@ if (shell) {
   const techSummary = shell.querySelector<HTMLElement>('[data-tech-summary]');
   const mailboxSummary = shell.querySelector<HTMLElement>('[data-mailbox-summary]');
   const mailboxNote = shell.querySelector<HTMLElement>('[data-mailbox-note]');
+  const wardrobeSummary = shell.querySelector<HTMLElement>('[data-wardrobe-summary]');
+  const wardrobeImport = shell.querySelector<HTMLElement>('[data-wardrobe-import]');
+  const wardrobeImportDescription = shell.querySelector<HTMLElement>('[data-wardrobe-import-description]');
+  const wardrobeImportButton = shell.querySelector<HTMLButtonElement>('[data-wardrobe-import-button]');
+  const wardrobeImportNote = shell.querySelector<HTMLElement>('[data-wardrobe-import-note]');
   const migration = shell.querySelector<HTMLElement>('[data-migration]');
   const migrationDescription = shell.querySelector<HTMLElement>('[data-migration-description]');
   const migrationButton = shell.querySelector<HTMLButtonElement>('[data-migration-button]');
@@ -444,6 +472,126 @@ if (shell) {
   };
 
   /**
+   * The account wardrobe — avatar Phase D's library, read-only here for now
+   * (names and sharing state; drawing previews and the desk editor are later
+   * slices). Below it, the one-time device → account import, the same
+   * explicit review-then-confirm shape as the solo-save migration.
+   */
+  const readLocalWardrobe = (): unknown[] => {
+    try {
+      const raw = localStorage.getItem(WARDROBE_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as { designs?: unknown };
+      return Array.isArray(parsed.designs) ? parsed.designs : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const renderWardrobe = (designs: AccountDesign[] = []) => {
+    if (!wardrobeSummary) return;
+    if (designs.length === 0) {
+      wardrobeSummary.textContent = 'No looks in your account wardrobe yet.';
+      return;
+    }
+    const intro = document.createElement('p');
+    intro.className = 'soft';
+    intro.textContent = `${designs.length} saved look${designs.length === 1 ? '' : 's'} travel with your account.`;
+    const list = document.createElement('ul');
+    list.className = 'tech-list';
+    for (const design of designs) {
+      const item = document.createElement('li');
+      item.textContent = design.sharedOnCard
+        ? `${design.name} · shared`
+        : design.name;
+      list.append(item);
+    }
+    wardrobeSummary.replaceChildren(intro, list);
+  };
+
+  const renderWardrobeImport = (
+    receipt: WardrobeImportReceipt | null | undefined,
+    getToken: () => Promise<string | null>,
+  ) => {
+    if (!wardrobeImport) return;
+    if (receipt) {
+      wardrobeImport.hidden = false;
+      if (wardrobeImportDescription) {
+        wardrobeImportDescription.textContent =
+          `Wardrobe brought home on ${new Date(receipt.at).toLocaleDateString()}: `
+          + `${receipt.imported} look${receipt.imported === 1 ? '' : 's'} imported.`;
+      }
+      if (wardrobeImportButton) wardrobeImportButton.hidden = true;
+      return;
+    }
+    const local = readLocalWardrobe();
+    if (local.length === 0) {
+      wardrobeImport.hidden = true;
+      return;
+    }
+    wardrobeImport.hidden = false;
+    if (wardrobeImportDescription) {
+      wardrobeImportDescription.textContent =
+        `This browser has ${local.length} saved look${local.length === 1 ? '' : 's'}. `
+        + 'Bring them into your account? Wearing one in a shared world then shows your actual drawing. '
+        + 'This can only be done once.';
+    }
+    if (wardrobeImportNote) wardrobeImportNote.textContent = '';
+    if (!wardrobeImportButton) return;
+    wardrobeImportButton.hidden = false;
+    wardrobeImportButton.disabled = false;
+    wardrobeImportButton.textContent = 'Bring it into your account';
+    wardrobeImportButton.onclick = async () => {
+      wardrobeImportButton.disabled = true;
+      wardrobeImportButton.textContent = 'Bringing it in…';
+      if (wardrobeImportNote) wardrobeImportNote.textContent = '';
+      try {
+        const token = await getToken();
+        if (!token) throw new Error('Your sign-in session could not be refreshed.');
+        const response = await fetch(`${apiUrl}/account/import-wardrobe`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ designs: readLocalWardrobe() }),
+        });
+        const result = await response.json() as WardrobeResponse;
+        if (!response.ok || !result.ok || !result.receipt) {
+          throw new Error(result.error || 'That wardrobe could not be brought in.');
+        }
+        renderWardrobe(result.designs);
+        renderWardrobeImport(result.receipt, getToken);
+        if (wardrobeImportNote) {
+          wardrobeImportNote.textContent = result.alreadyImported
+            ? 'This account already had a wardrobe on file, so nothing was imported twice.'
+            : 'Brought in — your looks travel with your account from here on.';
+        }
+      } catch (error) {
+        if (wardrobeImportNote) {
+          wardrobeImportNote.textContent = error instanceof Error ? error.message : 'That wardrobe could not be brought in.';
+        }
+        wardrobeImportButton.disabled = false;
+        wardrobeImportButton.textContent = 'Bring it into your account';
+      }
+    };
+  };
+
+  const loadWardrobe = async (getToken: () => Promise<string | null>) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const response = await fetch(`${apiUrl}/account/designs`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return;
+      const body = await response.json() as WardrobeResponse;
+      renderWardrobe(body.designs ?? []);
+      renderWardrobeImport(body.import ?? null, getToken);
+    } catch {
+      // A quiet failure: the card keeps its "Opening your wardrobe…" state
+      // rather than blocking the rest of the desk.
+    }
+  };
+
+  /**
    * Renders the "Bring your solo save home" card. Three states: already
    * migrated (show the receipt, no button — this account will never accept
    * a second one), a local save this browser can offer (review text + a
@@ -533,6 +681,7 @@ if (shell) {
     renderTech(carry?.tech);
     renderMailbox(carry?.mailbox, carry?.claimedMailIds, getToken);
     renderMigration(carry?.soloMigration, getToken);
+    void loadWardrobe(getToken);
     if (claimed) claimed.hidden = false;
     tell(`Your account is connected. ${worlds.length} world${worlds.length === 1 ? '' : 's'} available.`);
   };

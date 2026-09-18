@@ -1,10 +1,54 @@
 # Next Session
 
-Updated 2026-09-17 after the wardrobe panel (avatar Phase C1) and a
-pre-existing HUD layout fix landed on top of the account tech store.
+Updated 2026-09-17 after avatar Phase D (designs over the wire) landed on
+top of the wardrobe panel, a HUD layout fix, and the gathering feel pass.
 Start here.
 
 ## What landed
+
+- **The account wardrobe — avatar Phase D.** `AvatarDesignStore`
+  (`server/src/avatarDesigns.ts`, `data/avatar-designs.json`) holds each
+  account's designs, every one through `sanitizeAvatarDesign` on write and
+  on load, bounded by `wardrobeMax` (24) and `maxBytes`. Authenticated
+  routes manage it (`GET/PUT/DELETE /account/designs`); `GET
+  /avatar-designs/:id` is the public, unguessable-id fetch that remote
+  renderers use.
+- **Wearing publishes.** A new `wear-design` room message (guests refused)
+  validates the design, stores it on the wearer's account, and broadcasts
+  the resolved key — so a mid-visit look change reaches everyone present,
+  and the account never lags the look neighbors actually see. The client
+  sends it on join and on every wear while connected; solo play stays
+  quiet. Join-time `drawingKey`s are cleared unless the account holds that
+  design (`resolveDrawingKey`), which is the server-side rejection path for
+  borrowed or invented keys.
+- **Remote cutouts wear real art.** `remoteAvatarVisuals` fetches the worn
+  design by id (one cached texture per distinct design per session), and
+  rasterizes it through the same exported path the local avatar uses
+  (`rasterizeAvatarDesignTexture`). The tinted template remains the floor:
+  while loading, on failure, and for guests.
+- **The desk wardrobe card.** "Your looks" lists the account library
+  read-only (names + sharing state) and offers the one-time, review-then-
+  confirm device → account wardrobe import
+  (`POST /account/import-wardrobe` — same explicit shape as the solo-save
+  migration; a second attempt returns the original receipt and stores
+  nothing). Drawing previews and the desk editor remain later slices.
+
+- **Every loose ground pickup now behaves the same.** Food produce baskets
+  used to wait on the plant for a deliberate click while seed packets and
+  world piles collected on walk-over — which read in play as "some
+  resources don't work". `updatePlantInteractions` now gathers any ready
+  drop on walk-over; the click-and-hold harvest path remains for aiming
+  from a distance.
+- **Ready-to-harvest plants say so.** A ready drop breathes: a soft warm
+  pool of additive gold light under it (per-instance material, animated
+  opacity) plus a gentle sway, phase-offset per plant so a field shimmers
+  rather than marches. Both stand still under `prefers-reduced-motion`
+  (light stays, pulse does not).
+- **A gather cursor verb.** Hovering a loose pile or a plant whose drop is
+  ready shows the hand cursor wearing that same warm gold with a small
+  patient bob (`data-cursor="gather"`); a still-growing plant keeps the
+  plain hand. One verb for "there is something here to take", told by
+  light and motion rather than new cursor art.
 
 - **The wardrobe panel — avatar Phase C1.** Settings → "Open your wardrobe…"
   shows every saved look with a rendered preview: wear, rename, duplicate,
@@ -170,10 +214,32 @@ Start here.
   a few looks, then wear/rename/duplicate/delete/share them from Settings →
   "Open your wardrobe…", and stuff the wardrobe past 24 looks once to see
   the pending-save card.
+- Gathering feel pass (previous pass, gates re-run green — 592/592, tsc,
+  styles:check at 785 rules, vite build): verified in a real headless
+  browser against the dev server — the game boots with zero console/page
+  errors, and a pointer sweep over the spawn clearing engages the new
+  `gather` cursor over a loose pile and `hand` over other interactables.
+  Note for future smokes: a fresh profile opens the first-run avatar
+  studio over the world, so seed `pp.avatar.firstRunDone.v1` before
+  sweeping. **By-hand proof owed in play**: grow any food crop to ready
+  (growth is real-time, so this is a patience check), confirm the gold
+  pool + sway and the gather cursor on hover, and walk over the basket to
+  confirm it collects like every other loose pickup.
+- Avatar Phase D (this pass): root suite **600/600 across 63 files** (8 new
+  `avatarDesigns.test.ts` cases — save/update/bounds, ownership-scoped
+  deletes, `resolveDrawingKey` incl. guests and borrowed keys, one-time
+  import receipts, corrupt-entry-skipping reloads), root + server `tsc`
+  clean, server **68/68**, `npx vite build` and `npm run edge:check` clean,
+  site `astro check`/`astro build` clean with the wardrobe card bundled.
+  Against a real running server: `GET /avatar-designs/:id` serves a seeded
+  design, a bogus id 404s, and unauthenticated owner routes are refused.
+  The game boots clean in a headless browser (the new
+  avatarLook → sharedSession import chain has no cycle). **Not yet proven
+  with two live clients** — see "Do this next" item 2.
 
 ## Do this next
 
-1. **Still owed on browser proof.** The solo-save import (inventory and now
+1. **Still owed on browser proof.** The solo-save import (inventory and
    tech) and Return to desk have only been verified against the test/build
    suite, never a real browser or a real solo save. Play solo long enough to
    bank a few resources/tools/a learned plan, sign in at the desk, confirm
@@ -181,18 +247,18 @@ Start here.
    pouch amounts, and the learned-techniques list all match; then click
    Return to desk once from inside a shared room and confirm the avatar
    disappears for the other player.
-2. **Continue the desk in dependency order.** The inventory/tech summary and
-   the inbox (full view, plus desk-side parcel collection via
-   `/account/claim-mail`) are built, and avatar Phase C1 (the wardrobe
-   panel) is live in-game. The desk's avatar library/editor needs designs
-   stored server-side, so the next slice is **avatar Phase D** — the
-   account-side design store (`sanitizeAvatarDesign` is already the wire
-   validator, `DESIGN_LIMITS.maxBytes` the size cap), `drawingKey`
-   resolution, remote rendering with template fallback, and the one-time
-   device-wardrobe → account import (the same explicit, reviewed pattern as
-   the solo-save migration). Settings and the social graph remain later
-   slices.
-3. **Give shared-world learning a server credit route.** The tech store's
+2. **Phase D's by-hand proof — two browsers.** Make a look, wear it, join
+   one neighborhood from both browsers, and confirm the second browser
+   renders the actual drawing (not the tinted cutout) — then change the look
+   mid-visit and confirm it updates for the other player. Also import the
+   device wardrobe from the desk once and confirm the "Your looks" list and
+   one-time receipt behave.
+3. **Continue in dependency order.** Avatar **Phase E — the player card**
+   (card overlay, "made by —" entry points, blocked-player behavior) is the
+   next avatar slice; the desk's drawing previews/editor and settings
+   remain on the accounts side, and C2 (the closet) stays gated on
+   report/hide for displayed drawings (§6.1).
+4. **Give shared-world learning a server credit route.** The tech store's
    `grantPlans` is the seam; nothing calls it in-world yet, so knowledge
    earned in a Shared World still lives only in local saves. Wire server-side
    learning completion (or the first shared crafting slice) to it when that
@@ -210,7 +276,10 @@ Start here.
 - Signup links may expire; accepted account and world memberships do not depend
   on retaining an invitation link.
 - `PROTOCOL_VERSION` is 8. Bump it for wire-shape changes, not for the desk-only
-  navigation control.
+  navigation control. The `wear-design` room message (Phase D) was added
+  without a bump, deliberately: it is purely additive — no existing shape
+  changed, older clients simply never send it, and an older server ignores
+  it — unlike the v4/v8 changes that altered what existing messages mean.
 - Preserve the plain offline/solo sandbox distinction. It must not silently
   overwrite authoritative account inventory or tech progress — the migration
   is explicit, reviewed, and one-time by design (`SoloMigrationStore.reserveOnce`

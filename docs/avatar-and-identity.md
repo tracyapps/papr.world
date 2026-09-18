@@ -455,12 +455,14 @@ papr.world model (all-opt-in decision):
    back to their template silhouette — personal, instant, no adjudication),
    and server-side re-render for review. Vector strokes make all of this
    tractable. *Do not open the world before this exists.*
-2. **`drawingKey` semantics are currently vapor.** The wire field exists but
-   nothing resolves it. Phase D defines resolution (server stores design by
-   id); until then remote fallback rendering (§2.1) must not block on it.
+2. **`drawingKey` semantics — resolved (Phase D, 2026-09-17).** The server
+   stores designs by id and the room resolves the key against the joining
+   account; remote fallback rendering (§2.1) still never blocks on it.
 3. **localStorage wardrobe vs. account wardrobe** is the same split-brain as
-   solo saves (`communal-multiplayer.md` §4.3): when Phase D lands, the
-   device wardrobe imports to the account once, explicitly.
+   solo saves (`communal-multiplayer.md` §4.3): resolved the same way
+   (Phase D) — the device wardrobe imports to the account once, explicitly,
+   and wearing into shared play publishes the worn design, so the account
+   copy never lags the look neighbors actually see.
 4. **Names on cards aren't identity.** Two players can both be "wren"; every
    card action keys off `accountId`. Never build a lookup that assumes name
    uniqueness.
@@ -517,11 +519,25 @@ papr.world model (all-opt-in decision):
   Do **not** ship C2 into visitable houses before report/hide exists (§6.1).
   A displayed drawing is a card's worth of UGC with better discovery and
   worse consent affordances.
-- **D. Designs over the wire** — server stores designs by id (size-capped,
-  validated), `drawingKey` resolves, remote players render real drawings
-  with template fallback. Device wardrobe → account import. ✅ when: a
-  friend sees your actual drawing, and a bad/oversized design is rejected
-  server-side.
+- **D. Designs over the wire: ✅ shipped 2026-09-17.** The server stores
+  designs by id (`AvatarDesignStore`, `data/avatar-designs.json`) — every
+  entry through `sanitizeAvatarDesign` on the way in AND on load, capped at
+  `wardrobeMax` designs and `maxBytes` each. `drawingKey` resolves: a join
+  key the account doesn't hold is cleared to the template fallback, and a
+  new `wear-design` room message makes *wearing* the publishing act — the
+  room validates the design, stores it on the wearer's account, and
+  broadcasts the resolved key, so a mid-visit look change reaches everyone
+  present. Guests keep the fallback (no account to hold what they'd wear).
+  Remote clients fetch the design by id over HTTP (`GET /avatar-designs/:id`
+  — public, unguessable ids, exactly the thing the wearer chose to show) and
+  rasterize it through the same path as the local avatar, one texture per
+  distinct design per session; the tinted template stands in while loading
+  and forever on failure. The device wardrobe imports once, explicitly, from
+  the desk (`POST /account/import-wardrobe`, same review-then-confirm shape
+  as the solo-save migration), and the desk shows the account library
+  read-only (names + sharing state; drawing previews and the desk editor
+  remain later slices). ✅ acceptance held: a friend sees your actual
+  drawing, and a bad/oversized design is rejected server-side.
 - **E. Player card** — card overlay, "made by —" / "house of —" entry
   points, tombstone credit, blocked-player behavior. ✅ when: clicking a
   creation shows its maker's card with only opted-in content.

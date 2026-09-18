@@ -290,6 +290,29 @@ function buildProducePickupMesh(group: THREE.Group, accent?: string) {
   }
 }
 
+/**
+ * The warm pool of light under a ready drop — the plant's "come gather me".
+ *
+ * Additive and depth-write-free so it reads as light falling on paper, not
+ * as another object lying on the ground, and per-instance because its
+ * opacity is animated per plant (see plantInteractions.ts). Gold rather
+ * than the produce's accent colour so one language says "ready" across
+ * every crop.
+ */
+function buildReadyGlowMesh(): THREE.Mesh {
+  const material = new THREE.MeshBasicMaterial({
+    color: 0xE8B94A,
+    transparent: true,
+    opacity: 0.28,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.3, 20), material);
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = 0.012;
+  return glow;
+}
+
 export function buildTerrainPlantVisual(edit: TerrainEditCellState): THREE.Group | null {
   if (!edit.plantedSeedId || edit.state === 'dug') return null;
 
@@ -308,7 +331,8 @@ export function buildTerrainPlantVisual(edit: TerrainEditCellState): THREE.Group
   if (edit.state === 'mending') return group;
 
   // The drop stays attached to the plant runtime so it streams and hides with
-  // its page. Plant interactions toggle it from persistent state.
+  // its page. Plant interactions toggle it from persistent state, and animate
+  // the ready glow recorded below alongside it.
   const pickup = new THREE.Group();
   pickup.name = 'plant-seed-pickup';
   const dropAngle = ((edit.geologySeed >>> 0) % 360) * (Math.PI / 180);
@@ -321,8 +345,11 @@ export function buildTerrainPlantVisual(edit: TerrainEditCellState): THREE.Group
   } else {
     buildSeedPacketPickup(pickup);
   }
+  const readyGlow = buildReadyGlowMesh();
+  pickup.add(readyGlow);
   pickup.visible = Boolean(edit.seedDropReady);
   group.add(pickup);
   group.userData.seedPickup = pickup;
+  group.userData.readyGlow = readyGlow;
   return group;
 }

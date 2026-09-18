@@ -1,4 +1,4 @@
-import type { PlacedPiece } from '../../shared/src/index';
+import type { AvatarDesign, PlacedPiece } from '../../shared/src/index';
 import { avatar } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
@@ -18,6 +18,7 @@ import {
 import {
   addRemoteAvatar,
   clearRemoteAvatars,
+  configureRemoteDesigns,
   initializeRemoteAvatarVisuals,
   remoteAvatarCount,
   removeRemoteAvatar,
@@ -209,6 +210,9 @@ export async function initializeSharedSession(): Promise<void> {
       inviteCode: config.inviteCode,
       intent: config.intent,
     });
+    // Remote avatars fetch worn designs over HTTP by id (avatar Phase D);
+    // this is the only moment the endpoint is reliably known.
+    configureRemoteDesigns(config.httpEndpoint);
     liveConnection = await connect(
       {
         endpoint: config.endpoint,
@@ -271,6 +275,9 @@ export async function initializeSharedSession(): Promise<void> {
           // A first movement can be clamped while the server catches up to the
           // real spawn. It is a correction, not a player-facing failure.
           if (info.action === 'move' && info.reason === 'too-far') return;
+          // Guests cannot publish a worn design — there is no account to hold
+          // it — and saying so on every wear would be noise, not information.
+          if (info.action === 'wear-design' && info.reason === 'guest-not-allowed') return;
           showPetToast(`The neighborhood could not ${info.action}: ${info.reason}.`);
         },
         onDropped: () => {
@@ -325,6 +332,10 @@ export async function initializeSharedSession(): Promise<void> {
     );
     connection = liveConnection;
     setSharedMailClaimHandler((mailId) => liveConnection?.sendClaimMail({ mailId }));
+    // The join's AvatarRef carries only a design id; publish the design
+    // itself so the server can resolve that key even before any wardrobe
+    // import — and so today's look, not last import's, is what neighbors see.
+    publishWornDesign(getWornDesign());
     connected = true;
     ui.setStatus(`online as ${config.name}`, true);
     ui.addNotice(`You are visiting ${destination}.`);
@@ -357,6 +368,20 @@ export async function initializeSharedSession(): Promise<void> {
     });
     console.warn('Shared neighborhood connection failed', error);
   }
+}
+
+/**
+ * Publish a worn design into shared play (avatar Phase D). Wearing is the
+ * explicit act that puts art on the account: the room validates the design,
+ * stores it on the wearer's account wardrobe, and broadcasts the resolved
+ * key so everyone present re-renders the real drawing. Quiet without a live
+ * session — solo play has no audience and no connection to carry it.
+ */
+export function publishWornDesign(design: AvatarDesign | null): void {
+  if (!design) return;
+  const ref = avatarRefForDesign(design);
+  if (!ref.drawingKey) return;
+  connection?.sendWearDesign({ design, edgeColor: ref.edgeColor });
 }
 
 export function disconnectSharedSession(): void {

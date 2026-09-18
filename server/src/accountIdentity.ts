@@ -112,7 +112,8 @@ export class InvalidPassportError extends Error {
   }
 }
 
-async function readBody(req: IncomingMessage, maxBytes = 2048): Promise<string> {
+/** Shared by the account identity routes and the avatar design routes. */
+export async function readBody(req: IncomingMessage, maxBytes = 2048): Promise<string> {
   return new Promise((resolve, reject) => {
     let size = 0;
     const chunks: Buffer[] = [];

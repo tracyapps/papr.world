@@ -10,6 +10,7 @@
 // friendly to isolated-module / erasable-syntax transpilers like the client's.
 
 import type { AccountInventory, AvatarRef, MailItem } from './state';
+import type { AvatarDesign } from './avatarDesign';
 
 /** Credentials for a durable "paper passport" account (see server /account). */
 export type AccountCredentials = {
@@ -60,6 +61,8 @@ export const ClientMessage = {
   SendMail: 'send-mail',
   /** Move one unclaimed parcel into the server-owned account inventory. */
   ClaimMail: 'claim-mail',
+  /** Wear a design into shared play: validate, store on the account, broadcast. */
+  WearDesign: 'wear-design',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -132,6 +135,21 @@ export type MailAttachmentIntent =
 
 export type ClaimMailIntent = { mailId: string };
 
+/**
+ * Wear a design into shared play (avatar Phase D). The server validates and
+ * stores the design on the account, then broadcasts the resolved drawingKey —
+ * wearing is the explicit act that publishes your art.
+ */
+export type WearDesignIntent = {
+  design: AvatarDesign;
+  /**
+   * The fallback tint for remote renderers, in the client's own AvatarRef.
+   * The server cannot derive it (paper catalogs are client art), so the
+   * wearer sends the same hex their local ref carried, validated as one.
+   */
+  edgeColor: string;
+};
+
 export type ClientPayloads = {
   [ClientMessage.Move]: MoveIntent;
   [ClientMessage.Chat]: ChatIntent;
@@ -143,6 +161,7 @@ export type ClientPayloads = {
   [ClientMessage.Remove]: RemoveIntent;
   [ClientMessage.SendMail]: SendMailIntent;
   [ClientMessage.ClaimMail]: ClaimMailIntent;
+  [ClientMessage.WearDesign]: WearDesignIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------

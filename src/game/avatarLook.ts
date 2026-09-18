@@ -20,6 +20,7 @@ import { openAvatarEditor } from '../ui/avatarEditor/editor';
 import { designToDataUrl } from '../ui/avatarEditor/render';
 import { openWardrobePanel } from '../ui/avatarEditor/wardrobePanel';
 import { getWornDesign, saveDesign, setWornId } from '../ui/avatarEditor/wardrobe';
+import { publishWornDesign } from '../net/sharedSession';
 import { DESIGN_SHEET, type AvatarDesign } from '../../shared/src/index';
 
 /**
@@ -46,8 +47,11 @@ let rasterToken = 0;
  * work at all: the browser rasterizes its own SVG, so the cutout, the paper
  * pattern and every crayon stroke land exactly as the editor previewed them —
  * no second renderer to keep in sync.
+ *
+ * Exported because the remote-avatar cutouts rasterize a worn design through
+ * the exact same path (avatar Phase D): one renderer, local and remote alike.
  */
-async function rasterize(design: AvatarDesign): Promise<THREE.CanvasTexture> {
+export async function rasterizeAvatarDesignTexture(design: AvatarDesign): Promise<THREE.CanvasTexture> {
   const image = new Image();
   image.decoding = 'async';
   await new Promise<void>((resolve, reject) => {
@@ -85,13 +89,17 @@ async function rasterize(design: AvatarDesign): Promise<THREE.CanvasTexture> {
 export async function wearDesign(design: AvatarDesign): Promise<void> {
   const token = ++rasterToken;
   try {
-    const texture = await rasterize(design);
+    const texture = await rasterizeAvatarDesignTexture(design);
     if (token !== rasterToken) {
       texture.dispose(); // a newer design won the race
       return;
     }
     currentDesign = design;
     setAvatarTexture(texture);
+    // Wearing publishes (avatar Phase D): a live shared session stores this
+    // design on the account and tells the room, so neighbors' fallback
+    // cutouts become the real drawing. No session, no send — quiet by design.
+    publishWornDesign(design);
   } catch (error) {
     console.warn('avatar look: could not render this design', error);
   }

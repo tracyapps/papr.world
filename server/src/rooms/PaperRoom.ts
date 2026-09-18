@@ -34,6 +34,7 @@ import {
   sanitizeAccountCredentials,
   sanitizeClaimMail,
   sanitizeSendMail,
+  sanitizeAvatarDesign,
   isFiniteNumber,
   type BlockIntent,
   type ChatBroadcast,
@@ -45,13 +46,14 @@ import {
   type PlacePieceIntent,
   type PlacedPiece,
   type RejectionReason,
+  type WearDesignIntent,
   type RemoveIntent,
   type ReportIntent,
   type ResourceNode,
   type RoomSave,
   type SendMailIntent,
 } from '../../../shared/src/index';
-import { accounts, blocks, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { accounts, avatarDesigns, blocks, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
 import { readAdminConfig, verifyClerkSessionToken } from '../admin';
 import { database } from '../runtime';
 import { authorizeManagedWorldEntry } from '../worldAuthorization';
@@ -204,6 +206,9 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.onMessage(ClientMessage.ClaimMail, (client, msg: ClaimMailIntent) =>
       this.handleClaimMail(client, msg),
     );
+    this.onMessage(ClientMessage.WearDesign, (client, msg: WearDesignIntent) =>
+      this.handleWearDesign(client, msg),
+    );
 
     // Mail belongs to accounts, not rooms. Every live room listens so a
     // recipient sees a delivery immediately even when sender and recipient
@@ -229,7 +234,11 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     player.name = sanitizeName(options.name);
     const avatar = sanitizeAvatar(options.avatar);
     player.avatar.preset = avatar.preset;
-    player.avatar.drawingKey = avatar.drawingKey;
+    // A worn drawing key survives only when the joining account actually
+    // holds that design (avatar Phase D): a key from nothing, someone else's
+    // wardrobe, or a guest renders the paper fallback instead. The room
+    // consumes the account's fact; it never sees the art itself.
+    player.avatar.drawingKey = avatarDesigns.resolveDrawingKey(authenticatedAccountId, avatar.drawingKey);
     player.avatar.edgeColor = avatar.edgeColor;
     // Spawn at the clearing until the client sends its first real position.
     player.x = 0;
@@ -651,6 +660,37 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       return;
     }
     this.sendMailbox(client, player.accountId);
+  }
+
+  /**
+   * Wear a design into shared play (avatar Phase D). Wearing is the explicit
+   * act that publishes art: the design is validated, stored on the wearer's
+   * account (bounded like any wardrobe), and the resolved key broadcasts so
+   * everyone in the room re-renders the real drawing. Guests keep the
+   * template fallback — there is no account to hold what they would wear.
+   */
+  private handleWearDesign(client: Client, msg: WearDesignIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || player.accountId.startsWith('guest:')) {
+      this.reject(client, ClientMessage.WearDesign, 'guest-not-allowed');
+      return;
+    }
+    const raw = (msg ?? {}) as Partial<WearDesignIntent>;
+    const design = sanitizeAvatarDesign(raw.design);
+    const edgeColor = typeof raw.edgeColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(raw.edgeColor)
+      ? raw.edgeColor
+      : null;
+    if (!design || !edgeColor) {
+      this.reject(client, ClientMessage.WearDesign, 'invalid');
+      return;
+    }
+    if (!avatarDesigns.saveDesign(player.accountId, design)) {
+      this.reject(client, ClientMessage.WearDesign, 'not-allowed');
+      return;
+    }
+    player.avatar.preset = design.preset;
+    player.avatar.drawingKey = design.id;
+    player.avatar.edgeColor = edgeColor;
   }
 
   // ---- Helpers --------------------------------------------------------------

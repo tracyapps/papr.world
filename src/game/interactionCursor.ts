@@ -5,6 +5,7 @@ import { getDigTargetStatusAtScreen } from './toolActions';
 import { gardenActionAtScreen } from './planting';
 import { assessTrimTarget } from './treeInteractions';
 import { placeTargetStatusAtScreen } from './placement';
+import { hasReadyPlantDropAtScreen } from './plantInteractions';
 
 /**
  * One cursor per *verb*, not per action.
@@ -14,7 +15,7 @@ import { placeTargetStatusAtScreen } from './placement';
  * happen is already shown by the ground overlay and the status chip; the
  * cursor's job is the coarser question of what kind of work you are doing.
  */
-type CursorKind = 'attach' | 'build' | 'chop' | 'default' | 'dig' | 'garden' | 'hand';
+type CursorKind = 'attach' | 'build' | 'chop' | 'default' | 'dig' | 'gather' | 'garden' | 'hand';
 
 const CURSOR_ART: Record<CursorKind, string> = {
   attach: new URL('../../assets/ui-art/cursor-attach.svg', import.meta.url).href,
@@ -22,6 +23,10 @@ const CURSOR_ART: Record<CursorKind, string> = {
   chop: new URL('../../assets/ui-art/cursor-chop.svg', import.meta.url).href,
   default: new URL('../../assets/ui-art/cursor-default.svg', import.meta.url).href,
   dig: new URL('../../assets/ui-art/cursor-dig.svg', import.meta.url).href,
+  // The gather verb keeps the hand's art and hotspot: what changes is the
+  // warm glow and gentle bob (see styles.css), so "this one is ready to
+  // take" is told by light and motion rather than by a different drawing.
+  gather: new URL('../../assets/ui-art/cursor-hand.svg', import.meta.url).href,
   garden: new URL('../../assets/ui-art/cursor-garden.svg', import.meta.url).href,
   hand: new URL('../../assets/ui-art/cursor-hand.svg', import.meta.url).href,
 };
@@ -58,6 +63,13 @@ function refreshCursor() {
     && interaction.id !== 'tree-trim'
     && interaction.id !== 'build-placement'
   ) {
+    // A loose pile on the ground and a plant whose drop is ready are the
+    // same verb — gather — and the cursor says so before the click. A plant
+    // still growing stays `hand` (tend); nothing ready, no glow.
+    if (interaction.id === 'loose-resource' || hasReadyPlantDropAtScreen(hoverX, hoverY)) {
+      setCursor('gather');
+      return;
+    }
     setCursor('hand');
     return;
   }
