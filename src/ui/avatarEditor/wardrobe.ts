@@ -16,28 +16,71 @@ const STORAGE_KEY = 'pp.wardrobe.v1';
 /** Which design is currently worn. */
 const WORN_KEY = 'pp.wardrobe.worn.v1';
 
-type WardrobeFile = { version: 1; designs: unknown[] };
+type WardrobeFile = { version: 1; designs: unknown[]; unreadable?: unknown[] };
 
-function readAll(): AvatarDesign[] {
+/**
+ * Entries this build could not read, kept VERBATIM and never thrown away.
+ *
+ * WHY: a design that failed to load used to be dropped on the very next
+ * save of anything else, because saving rewrites the whole file from what
+ * loaded. That is how a real, finished avatar vanished (2026-09-18): it had
+ * outgrown the size guard, so it did not load, so the next write erased it.
+ * A newer build with a looser guard (or a person with the file) can still
+ * recover what sits here.
+ */
+function readFile(): { designs: AvatarDesign[]; unreadable: unknown[] } {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    if (!raw) return { designs: [], unreadable: [] };
     const parsed = JSON.parse(raw) as Partial<WardrobeFile>;
-    if (!Array.isArray(parsed.designs)) return [];
     const designs: AvatarDesign[] = [];
-    for (const entry of parsed.designs) {
+    const unreadable: unknown[] = Array.isArray(parsed.unreadable) ? [...parsed.unreadable] : [];
+    const candidates = [
+      ...(Array.isArray(parsed.designs) ? parsed.designs : []),
+      // Anything set aside by an older, stricter build gets another chance.
+      ...unreadable.splice(0),
+    ];
+    for (const entry of candidates) {
       const design = sanitizeAvatarDesign(entry);
-      if (design) designs.push(design);
+      if (!design) {
+        unreadable.push(entry);
+        continue;
+      }
+      const index = designs.findIndex((d) => d.id === design.id);
+      if (index < 0) designs.push(design);
+      else if (design.updatedAt > designs[index]!.updatedAt) designs[index] = design;
     }
-    return designs;
+    return { designs: designs.slice(0, DESIGN_LIMITS.wardrobeMax), unreadable: unreadable.slice(-8) };
   } catch {
-    return [];
+    return { designs: [], unreadable: [] };
   }
 }
 
+function readAll(): AvatarDesign[] {
+  return readFile().designs;
+}
+
 function writeAll(designs: AvatarDesign[]): void {
-  const file: WardrobeFile = { version: 1, designs };
+  const { unreadable } = readFile();
+  const file: WardrobeFile = {
+    version: 1,
+    designs,
+    ...(unreadable.length > 0 ? { unreadable } : {}),
+  };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(file));
+}
+
+/**
+ * Would this design survive being saved and loaded again? False means it is
+ * too detailed (or malformed) — callers must say so rather than claim saved.
+ */
+export function designIsStorable(design: AvatarDesign): boolean {
+  return sanitizeAvatarDesign(design) !== null;
+}
+
+/** How much of the size allowance a design uses, 0..1+ (for a gentle meter). */
+export function designSizeFraction(design: AvatarDesign): number {
+  return JSON.stringify(design).length / DESIGN_LIMITS.maxBytes;
 }
 
 /**
@@ -110,9 +153,14 @@ export function getDesign(id: string): AvatarDesign | null {
 
 /**
  * Insert or update. Returns false when the wardrobe is full (caller shows a
- * friendly "your wardrobe is stuffed" rather than silently dropping work).
+ * friendly "your wardrobe is stuffed" rather than silently dropping work) —
+ * or when the design is not storable; check `designIsStorable` first to
+ * tell those apart.
  */
-export function saveDesign(design: AvatarDesign): boolean {
+export function saveDesign(input: AvatarDesign): boolean {
+  // Store exactly what will load back — never a copy that reads differently.
+  const design = sanitizeAvatarDesign(input);
+  if (!design) return false;
   const designs = readAll();
   const index = designs.findIndex((d) => d.id === design.id);
   if (index >= 0) {

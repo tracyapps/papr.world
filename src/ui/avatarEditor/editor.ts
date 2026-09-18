@@ -64,7 +64,13 @@ import {
 } from './catalog';
 import { designToSvg, silhouettePathFor } from './render';
 import { refreshAllBacking, refreshBacking } from './stampBacking';
-import { deleteDesign, listDesigns, saveDesign } from './wardrobe';
+import {
+  deleteDesign,
+  designIsStorable,
+  designSizeFraction,
+  listDesigns,
+  saveDesign,
+} from './wardrobe';
 
 export type AvatarEditorResult = {
   design: AvatarDesign;
@@ -302,6 +308,13 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
   let lastAutosaved = '';
   let changedSinceOpen = false;
   let autosaveExplained = false;
+  let tooBigWarned = false;
+  /** Refuse to finish with a design that would not load back. */
+  const refuseIfTooDetailed = (): boolean => {
+    if (designIsStorable(design)) return false;
+    announce('This cutout has more detail than a look can hold, so it cannot be saved yet. Undo a few strokes, then save.');
+    return true;
+  };
 
   const currentName = (): string => {
     const input = overlay.querySelector<HTMLInputElement>('.avatar-editor-name');
@@ -320,19 +333,33 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
     snapshot.name = currentName();
     const fingerprint = JSON.stringify({ ...snapshot, updatedAt: 0 });
     if (fingerprint === lastAutosaved) return;
-    lastAutosaved = fingerprint;
     snapshot.updatedAt = Date.now();
     changedSinceOpen = true;
+    // Never claim "saved" for something that would not load back.
+    if (!designIsStorable(snapshot)) {
+      showAutosave('Too detailed to save — undo a few strokes to keep it');
+      if (!tooBigWarned) {
+        tooBigWarned = true;
+        announce('This cutout has more detail than a look can hold. Undo a few strokes and it will save again.');
+      }
+      return;
+    }
+    tooBigWarned = false;
     if (saveDesign(snapshot)) {
+      lastAutosaved = fingerprint;
       if (!preexisting.has(snapshot.id)) createdIds.add(snapshot.id);
       clearDraft(snapshot.id);
       const time = new Date(snapshot.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      showAutosave(`Saved to your wardrobe · ${time}`);
+      const fullness = designSizeFraction(snapshot);
+      showAutosave(fullness > 0.7
+        ? `Saved to your wardrobe · ${time} · detail ${Math.round(fullness * 100)}% full`
+        : `Saved to your wardrobe · ${time}`);
       if (!autosaveExplained) {
         autosaveExplained = true;
         announce('Your cutout saves to your wardrobe as you work.');
       }
     } else {
+      lastAutosaved = fingerprint;
       writeDraft(snapshot);
       showAutosave('Wardrobe is full — kept as a draft in this browser');
     }
@@ -1641,6 +1668,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
       if (action === 'save-only') {
         // Keep it, finish, but do not change what you are wearing.
         design.name = nameInput.value.replace(/\s+/g, ' ').trim() || 'untitled cutout';
+        if (refuseIfTooDetailed()) return;
         design.updatedAt = Date.now();
         const saved = structuredClone(design);
         if (!saveDesign(saved)) {
@@ -1654,6 +1682,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
       }
       if (action === 'save') {
         design.name = nameInput.value.replace(/\s+/g, ' ').trim() || 'untitled cutout';
+        if (refuseIfTooDetailed()) return;
         design.updatedAt = Date.now();
         clearDraft(design.id);
         close();

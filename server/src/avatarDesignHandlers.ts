@@ -35,7 +35,7 @@ type DesignDependencies = {
  * raw body allowance is that product plus JSON overhead, so a hostile payload
  * is cut off before it is parsed rather than after.
  */
-const IMPORT_BODY_MAX_BYTES = 1_048_576;
+const IMPORT_BODY_MAX_BYTES = 3 * 1_048_576;
 
 function isDesignId(value: string): boolean {
   return /^[A-Za-z0-9-]{1,64}$/.test(value);
@@ -88,7 +88,7 @@ export function createAvatarDesignHandlers(deps: DesignDependencies) {
           res.status(409).json({ error: 'claim your paper passport before saving a look' });
           return;
         }
-        const design = sanitizeAvatarDesign(JSON.parse(await readBody(req, 64 * 1024)));
+        const design = sanitizeAvatarDesign(JSON.parse(await readBody(req, 256 * 1024)));
         if (!design) {
           res.status(400).json({ error: 'that look could not be read' });
           return;

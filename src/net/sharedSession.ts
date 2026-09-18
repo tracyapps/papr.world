@@ -1,4 +1,4 @@
-import type { AvatarDesign, HomeMarker, PlacedPiece } from '../../shared/src/index';
+import { sanitizeAvatarDesign, type AvatarDesign, type HomeMarker, type PlacedPiece } from '../../shared/src/index';
 import { avatar } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
@@ -233,6 +233,7 @@ export async function initializeSharedSession(): Promise<void> {
   let rejoinTimer: ReturnType<typeof setTimeout> | null = null;
   let joining = false;
   let stopped = false;
+  let missingTokenTries = 0;
 
   const stop = (notice: string) => {
     stopped = true;
@@ -271,9 +272,18 @@ export async function initializeSharedSession(): Promise<void> {
     if (config.worldId) {
       token = (await getAccountToken()) ?? undefined;
       if (!token) {
-        stop('Your sign-in has ended. Return to My desk to open this world again.');
+        // Sign-in can be slow to wake up with the laptop; give it a few
+        // tries before telling anyone they are signed out.
+        missingTokenTries += 1;
+        console.info(`[neighborhood] no sign-in token for rejoin (try ${missingTokenTries})`);
+        if (missingTokenTries >= 4) {
+          stop('Your sign-in has ended. Return to My desk to open this world again.');
+        } else {
+          scheduleRejoin();
+        }
         return;
       }
+      missingTokenTries = 0;
     }
     const result = await join(token);
     if (result === 'ok') {
@@ -484,6 +494,7 @@ export async function initializeSharedSession(): Promise<void> {
       console.warn('Shared neighborhood connection failed', error);
       const failure = classifyJoinFailure(error instanceof Error ? error.message : String(error));
       if (failure.kind === 'fatal') {
+        console.info('[neighborhood] join refused:', error instanceof Error ? error.message : error);
         stop(failure.notice);
         return 'fatal';
       }
@@ -514,7 +525,9 @@ export async function initializeSharedSession(): Promise<void> {
  * key so everyone present re-renders the real drawing. Quiet without a live
  * session — solo play has no audience and no connection to carry it.
  */
-export function publishWornDesign(design: AvatarDesign | null): void {
+export function publishWornDesign(input: AvatarDesign | null): void {
+  // Send the stored (rounded, size-checked) form — never raw editor floats.
+  const design = input ? sanitizeAvatarDesign(input) : null;
   if (!design) return;
   const ref = avatarRefForDesign(design);
   if (!ref.drawingKey) return;

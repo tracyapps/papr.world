@@ -375,7 +375,14 @@ const gameServer = new Server({
   // being generous is only that a genuinely dead connection lingers a little
   // longer in the room; the cost of being strict is people being thrown out
   // of a game they were playing.
-  transport: new WebSocketTransport({ pingInterval: 8000, pingMaxRetries: 5 }),
+  //
+  // maxPayload: the library default is FOUR KILOBYTES per message, and a
+  // message over it makes the socket close on the spot. Wearing an avatar
+  // sends the whole design, which is routinely bigger than that — so putting
+  // on a detailed look silently cut the player off, the reconnect sent it
+  // again, and the visit ended. 512 KB clears the largest design the
+  // sanitizer accepts (DESIGN_LIMITS.maxBytes of JSON, larger as msgpack).
+  transport: new WebSocketTransport({ pingInterval: 8000, pingMaxRetries: 5, maxPayload: 512 * 1024 }),
   express: (app) => {
     app.use((req: Request, res: Response, next: NextFunction) => {
       withCors(req, res);

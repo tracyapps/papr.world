@@ -6,6 +6,26 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **The real reason looks vanished and worlds dropped (2026-09-18, seventh
+  pass).** Two silent limits, found after a finished avatar saved as an early,
+  half-done version twice:
+  - **Colyseus' WebSocket `maxPayload` defaults to 4 KB.** Wearing a look
+    sends the whole design; anything bigger closed the socket instantly (and
+    again on every rejoin). Now 512 KB in `server/src/index.ts`.
+  - **Designs over `DESIGN_LIMITS.maxBytes` (32 KB) were rejected on read,
+    silently.** The editor stored raw pointer floats (17 characters each), so
+    a dozen strokes crossed it; the next write of anything erased the look,
+    and account sync brought back the last version that fit. Now:
+    coordinates are rounded to 0.1 (`roundCoord`, ~3x smaller), the limit is
+    96 KB, `saveDesign` stores the sanitized form, unreadable entries are kept
+    in the file (`unreadable`) instead of erased, and the studio refuses to
+    say "saved" (or finish) for a design that would not load back, with a
+    "detail N% full" note past 70%.
+  - Game Clerk now loads exactly like the desk (UI bundle + `ui` option);
+    rejoin tolerates a few missing tokens before "sign-in has ended", and
+    logs why a join was refused.
+  - **Needs BOTH deploys:** Railway (payload + shared limit) and Vercel.
+
 - **Looks never get lost; worlds find you again (2026-09-18, sixth pass).**
   Fix for "15 minutes of avatar work gone, and the world logged me out":
   - **Studio autosave** (`editor.ts`): every change lands in the wardrobe

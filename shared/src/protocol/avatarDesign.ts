@@ -57,8 +57,16 @@ export const DESIGN_LIMITS = {
   stampScaleMin: 0.25,
   stampScaleMax: 4,
 
-  /** Serialized size guard for the eventual wire/storage path. */
-  maxBytes: 32_768,
+  /**
+   * Serialized size guard for storage and the wire. Raised from 32 KB
+   * (2026-09-18) after a real design silently outgrew it: the editor stored
+   * raw pointer floats ("57.83333587646484" — 17 characters a number), so a
+   * dozen careful strokes crossed the line and every later save was quietly
+   * rejected on read. Coordinates are now rounded to a tenth of a sheet unit
+   * (half a texture pixel), which alone makes designs ~3x smaller, and the
+   * guard has room for genuinely detailed work.
+   */
+  maxBytes: 98_304,
 } as const;
 
 /**
@@ -219,6 +227,15 @@ function sanitizeKey(raw: unknown, fallback: string): string {
  */
 type StrokeBounds = { minX: number; minY: number; maxX: number; maxY: number };
 
+/**
+ * A tenth of a sheet unit — about half a pixel on the in-world texture.
+ * Invisible at any size a cutout is ever drawn, and it is the difference
+ * between 17 characters a coordinate and 4.
+ */
+export function roundCoord(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
 function sanitizeStroke(
   raw: unknown,
   bounds: StrokeBounds = {
@@ -241,7 +258,7 @@ function sanitizeStroke(
     const x = value.points[i];
     const y = value.points[i + 1];
     if (!isFiniteNumber(x) || !isFiniteNumber(y)) return null;
-    points.push(clamp(x, bounds.minX, bounds.maxX), clamp(y, bounds.minY, bounds.maxY));
+    points.push(roundCoord(clamp(x, bounds.minX, bounds.maxX)), roundCoord(clamp(y, bounds.minY, bounds.maxY)));
   }
   if (points.length < 4) return null;
   const medium = MEDIA.includes(value.medium as StrokeMedium)
@@ -268,10 +285,10 @@ function sanitizeStamp(raw: unknown): DesignStamp | null {
 
   return {
     key,
-    x: clamp(value.x, 0, DESIGN_SHEET.width),
-    y: clamp(value.y, 0, DESIGN_SHEET.height),
-    scale,
-    rotation,
+    x: roundCoord(clamp(value.x, 0, DESIGN_SHEET.width)),
+    y: roundCoord(clamp(value.y, 0, DESIGN_SHEET.height)),
+    scale: Math.round(scale * 1000) / 1000,
+    rotation: Math.round(rotation * 10) / 10,
     flip: value.flip === true,
     // Omitted when false/empty: a stamp with no backing and nothing drawn on
     // it serializes exactly as it did before either feature existed.
@@ -308,7 +325,7 @@ export function sanitizeAvatarDesign(raw: unknown): AvatarDesign | null {
         bad = true;
         break;
       }
-      points.push(clamp(x, 0, DESIGN_SHEET.width), clamp(y, 0, DESIGN_SHEET.height));
+      points.push(roundCoord(clamp(x, 0, DESIGN_SHEET.width)), roundCoord(clamp(y, 0, DESIGN_SHEET.height)));
     }
     if (!bad && points.length >= 6) {
       customOutline = points;

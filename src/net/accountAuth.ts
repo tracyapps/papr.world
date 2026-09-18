@@ -22,7 +22,7 @@ type ClerkLike = {
   load: (options?: Record<string, unknown>) => Promise<void>;
 };
 
-type ClerkWindow = Window & { Clerk?: ClerkLike };
+type ClerkWindow = Window & { Clerk?: ClerkLike; __internal_ClerkUICtor?: unknown };
 
 /** Public by design (it is in every page that signs in); see vite.config.ts. */
 function publishableKey(): string {
@@ -49,13 +49,13 @@ let clerkLoad: Promise<ClerkLike | null> | null = null;
 /** Tests can supply their own token source. */
 let tokenOverride: (() => Promise<string | null>) | null = null;
 
-function loadScript(src: string, key: string): Promise<void> {
+function loadScript(src: string, key?: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
     script.async = true;
     script.crossOrigin = 'anonymous';
-    script.dataset.clerkPublishableKey = key;
+    if (key) script.dataset.clerkPublishableKey = key;
     script.addEventListener('load', () => resolve(), { once: true });
     script.addEventListener('error', () => reject(new Error('sign-in could not load')), { once: true });
     document.head.appendChild(script);
@@ -68,12 +68,21 @@ async function loadClerkHeadless(): Promise<ClerkLike | null> {
   if (!host) return null;
   const clerkWindow = window as ClerkWindow;
   try {
+    // Loaded exactly the way My desk loads it (site/src/scripts/clerk.ts):
+    // the UI bundle first, then clerk-js, then load() with the UI handed in.
+    // The game never shows Clerk's UI, but a clerk-js v6 that was loaded
+    // differently from the page that signed you in is not worth the risk of
+    // "signed out in the game, signed in at the desk".
+    if (!clerkWindow.__internal_ClerkUICtor) {
+      await loadScript(`https://${host}/npm/@clerk/ui@1/dist/ui.browser.js`);
+    }
     if (!clerkWindow.Clerk) {
       await loadScript(`https://${host}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, key);
     }
     const clerk = clerkWindow.Clerk;
     if (!clerk) return null;
-    await clerk.load();
+    await clerk.load(clerkWindow.__internal_ClerkUICtor ? { ui: { ClerkUI: clerkWindow.__internal_ClerkUICtor } } : {});
+    if (!clerk.session) console.info('[account] sign-in loaded, but this browser has no active session.');
     return clerk;
   } catch (error) {
     console.info('[account] sign-in is unavailable here:', error instanceof Error ? error.message : error);

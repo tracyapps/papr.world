@@ -149,3 +149,42 @@ describe('wardrobe change events (what the account sync listens to)', () => {
     expect(listDesigns().map((entry) => entry.id)).toEqual(['from-account']);
   });
 });
+
+describe('never losing a look the wardrobe cannot read', () => {
+  it('keeps unreadable entries through later saves, and recovers them once they fit', async () => {
+    const { designIsStorable } = await import('./wardrobe');
+    // A look stored by an older build: raw floats, over the size guard.
+    const huge = design('huge', {
+      updatedAt: 9_000,
+      strokes: Array.from({ length: 400 }, () => ({
+        color: '#224466',
+        width: 2,
+        points: Array.from({ length: 1_200 }, (_, i) => 10 + (i % 90) + 0.123456789012),
+      })),
+    });
+    expect(designIsStorable(huge)).toBe(false);
+    localStorage.setItem('pp.wardrobe.v1', JSON.stringify({ version: 1, designs: [huge] }));
+    expect(listDesigns()).toEqual([]);
+    saveDesign(design('other'));
+    // Still in the file, set aside rather than erased.
+    const file = JSON.parse(localStorage.getItem('pp.wardrobe.v1') ?? '{}') as { unreadable?: unknown[] };
+    expect(file.unreadable).toHaveLength(1);
+    expect(listDesigns().map((entry) => entry.id)).toEqual(['other']);
+  });
+
+  it('rounds coordinates so a detailed look stays well inside the size guard', async () => {
+    const { designIsStorable, designSizeFraction } = await import('./wardrobe');
+    const detailed = design('detailed', {
+      strokes: Array.from({ length: 40 }, () => ({
+        color: '#224466',
+        width: 2,
+        points: Array.from({ length: 300 }, (_, i) => 20 + (i % 80) + 0.83333587646484),
+      })),
+    });
+    expect(designIsStorable(detailed)).toBe(true);
+    expect(saveDesign(detailed)).toBe(true);
+    const stored = listDesigns()[0]!;
+    expect(stored.strokes[0]!.points[0]).toBe(20.8);
+    expect(designSizeFraction(stored)).toBeLessThan(1);
+  });
+});
