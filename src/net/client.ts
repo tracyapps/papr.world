@@ -45,6 +45,10 @@ import {
   type ReportIntent,
   type ResourceNode,
   type SendMailIntent,
+  type HomeMarker,
+  type PlayerCardInfo,
+  type PlayerCardIntent,
+  type SetHomeIntent,
   type WearDesignIntent,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
@@ -91,6 +95,14 @@ export type NetCallbacks = {
   onReconnected?: () => void;
   /** The visit is over, for one of the reasons in closeReason.ts. */
   onLeave?: (code: number) => void;
+  /** Answers a player-card request (avatar-and-identity.md §3). */
+  onPlayerCard?: (info: PlayerCardInfo) => void;
+  /** A neighbor's home marker appeared (self is filtered out by the caller). */
+  onHomeAdd?: (home: HomeMarker) => void;
+  /** A neighbor's home marker moved or was renamed. */
+  onHomeUpdate?: (home: HomeMarker) => void;
+  /** A neighbor's home marker was withdrawn (they left the account entirely). */
+  onHomeRemove?: (accountId: string) => void;
 };
 
 export type NetConnection = {
@@ -119,6 +131,10 @@ export type NetConnection = {
   sendClaimMail: (intent: ClaimMailIntent) => void;
   /** Publish the worn design to the account wardrobe and everyone watching. */
   sendWearDesign: (intent: WearDesignIntent) => void;
+  /** Ask for another player's card (avatar-and-identity.md §3). */
+  sendPlayerCardRequest: (intent: PlayerCardIntent) => void;
+  /** Publish where your own Home marker sits, for neighbors to see. */
+  sendSetHome: (intent: SetHomeIntent) => void;
   disconnect: () => void;
 };
 
@@ -194,6 +210,7 @@ export async function connect(
   wirePlayers(room, stateCallbacks, selfId, buffer, callbacks);
   wirePieces(room, stateCallbacks, callbacks);
   wireNodes(room, stateCallbacks, callbacks);
+  wireHomes(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
   // Three distinct endings, and they used to be one.
   //
@@ -250,6 +267,8 @@ export async function connect(
     sendMail: (intent) => room.send(ClientMessage.SendMail, intent),
     sendClaimMail: (intent) => room.send(ClientMessage.ClaimMail, intent),
     sendWearDesign: (intent) => room.send(ClientMessage.WearDesign, intent),
+    sendPlayerCardRequest: (intent) => room.send(ClientMessage.RequestPlayerCard, intent),
+    sendSetHome: (intent) => room.send(ClientMessage.SetHome, intent),
     disconnect: () => {
       void room.leave();
     },
@@ -348,6 +367,34 @@ function wireNodes(
   $(room.state as any).nodes.onRemove((_raw: any, id: string) => callbacks.onNodeRemove?.(id));
 }
 
+function readHome(accountId: string, raw: any): HomeMarker {
+  return {
+    accountId,
+    name: raw.name,
+    x: raw.x,
+    z: raw.z,
+    page: raw.page,
+  };
+}
+
+/**
+ * Home markers (avatar-and-identity.md / land-and-dwellings.md): keyed by
+ * accountId rather than session id, since a home persists whether or not
+ * that player is currently online.
+ */
+function wireHomes(
+  room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
+  callbacks: NetCallbacks,
+): void {
+  $(room.state as any).homes.onAdd((raw: any, accountId: string) => {
+    callbacks.onHomeAdd?.(readHome(accountId, raw));
+    $(raw).onChange(() => callbacks.onHomeUpdate?.(readHome(accountId, raw)));
+  });
+  $(room.state as any).homes.onRemove((_raw: any, accountId: string) =>
+    callbacks.onHomeRemove?.(accountId));
+}
+
 /**
  * Every server-sent event.
  *
@@ -375,4 +422,5 @@ function wireMessages(room: Room, callbacks: NetCallbacks): void {
   room.onMessage(ServerMessage.Removed, (notice: RemovedNotice) =>
     callbacks.onRemoved?.(notice));
   room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));
+  room.onMessage(ServerMessage.PlayerCard, (info: PlayerCardInfo) => callbacks.onPlayerCard?.(info));
 }

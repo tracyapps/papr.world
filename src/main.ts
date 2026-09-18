@@ -26,6 +26,9 @@ import {
 import { pickCritterAtScreen, updateCritters } from './game/critters';
 import { initializePetting, showPetToast, tryPetAt, updatePetEffects } from './game/petting';
 import { closeCritterDialogue, initializeCritterDialogue, tryStartCritterConversationAt } from './game/critterDialogue';
+import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
+import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
+import { pickSharedHomeAtScreen } from './net/sharedHomeVisuals';
 import { hasCozyInteractionAt, initializeCozyInteractions, tryCozyInteractionAt, updateCozyInteractions } from './game/cozyInteractions';
 import { initializeInteractionCursor } from './game/interactionCursor';
 import { initializeHarvesting, isHarvestableAtScreen, tryHarvestAt, updateHarvestables } from './game/harvesting';
@@ -184,6 +187,33 @@ registerScreenInteraction({
     return true;
   },
 });
+// Between the thing-maker and loose resources: a person standing on
+// something takes precedence over the thing behind them, but not over your
+// own machine.
+registerScreenInteraction({
+  id: 'player-card',
+  priority: 85,
+  hitTest: (x, y) => pickRemoteAvatarAtScreen(x, y, camera) !== null,
+  interact: (x, y) => {
+    const hit = pickRemoteAvatarAtScreen(x, y, camera);
+    if (!hit) return false;
+    openPlayerCardFor(hit);
+    return true;
+  },
+});
+// A neighbor's staked-out home lot opens the same card an avatar does — it's
+// the same account, just not standing there right now.
+registerScreenInteraction({
+  id: 'home-marker',
+  priority: 82,
+  hitTest: (x, y) => pickSharedHomeAtScreen(x, y) !== null,
+  interact: (x, y) => {
+    const hit = pickSharedHomeAtScreen(x, y);
+    if (!hit) return false;
+    openPlayerCardFor({ accountId: hit.accountId, name: hit.name, drawingKey: '' });
+    return true;
+  },
+});
 registerScreenInteraction({
   id: 'loose-resource',
   priority: 80,
@@ -266,6 +296,7 @@ initializeInput({
     if (closeTechTreeView()) return true;
     if (closeHudMenu()) return true;
     if (closeCritterDialogue()) return true;
+    if (closePlayerCard()) return true;
     if (closeSeedStorePanel()) return true;
     if (isMakerPanelOpen()) {
       setMakerPanelOpen(false);

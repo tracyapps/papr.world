@@ -1,10 +1,12 @@
-import type { AvatarDesign, PlacedPiece } from '../../shared/src/index';
+import type { AvatarDesign, HomeMarker, PlacedPiece } from '../../shared/src/index';
 import { avatar } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
 import { getWornDesign } from '../ui/avatarEditor/wardrobe';
 import { initializeSharedChat } from '../ui/sharedChat';
+import { handlePlayerCardResponse, setPlayerCardRequestHandler } from '../ui/playerCard';
 import { getCurrentPageId } from '../world/streaming';
+import { getPlace, HOME_PLACE_ID } from '../world/places';
 import { connect, type NetConnection } from './client';
 import { describeClose } from './closeReason';
 import { getOrCreatePassport } from './passport';
@@ -25,6 +27,12 @@ import {
   updateRemoteAvatar,
 } from './remoteAvatarVisuals';
 import { avatarRefForDesign, readSharedModeConfig } from './sharedConfig';
+import {
+  addSharedHome,
+  clearSharedHomeVisuals,
+  initializeSharedHomeVisuals,
+  removeSharedHome,
+} from './sharedHomeVisuals';
 import { consumeWorldEntryHandoff } from './worldEntry';
 import {
   addSharedPiece,
@@ -164,6 +172,7 @@ export async function initializeSharedSession(): Promise<void> {
   initializeRemoteAvatarVisuals();
   initializeSharedPieceVisuals();
   initializeSharedResourceVisuals((nodeId) => liveConnection?.sendGather(nodeId));
+  initializeSharedHomeVisuals();
 
   // Minting the passport and joining the room are two different things that
   // fail for two different reasons. Wrapping them in one try meant a passport
@@ -201,6 +210,9 @@ export async function initializeSharedSession(): Promise<void> {
       return;
     }
   }
+  // Unifies the two ways a session ends up with an account: a Clerk-managed
+  // world entry hands one over already, a legacy join mints its own passport.
+  const selfAccountId = managedEntry?.accountId ?? account?.id ?? '';
 
   try {
     publishStatus({
@@ -270,6 +282,16 @@ export async function initializeSharedSession(): Promise<void> {
           if (receiveSharedInventory(inventory)) ui.setInventory(inventory);
         },
         onMailSent: () => ui.addNotice('Your letter is safely in their mailbox.'),
+        onPlayerCard: handlePlayerCardResponse,
+        onHomeAdd: (home) => {
+          if (home.accountId !== selfAccountId) addSharedHome(home);
+        },
+        onHomeUpdate: (home) => {
+          if (home.accountId !== selfAccountId) addSharedHome(home);
+        },
+        onHomeRemove: (accountId) => {
+          if (accountId !== selfAccountId) removeSharedHome(accountId);
+        },
         onRemoved: ui.showRemoved,
         onRejected: (info) => {
           // A first movement can be clamped while the server catches up to the
@@ -315,6 +337,7 @@ export async function initializeSharedSession(): Promise<void> {
           clearRemoteAvatars();
           clearSharedResourceVisuals();
           clearSharedInventory();
+          clearSharedHomeVisuals();
           connected = false;
           connection = null;
           ui.setStatus('offline');
@@ -336,6 +359,7 @@ export async function initializeSharedSession(): Promise<void> {
     // itself so the server can resolve that key even before any wardrobe
     // import — and so today's look, not last import's, is what neighbors see.
     publishWornDesign(getWornDesign());
+    publishHome();
     connected = true;
     ui.setStatus(`online as ${config.name}`, true);
     ui.addNotice(`You are visiting ${destination}.`);
@@ -349,6 +373,7 @@ export async function initializeSharedSession(): Promise<void> {
   } catch (error) {
     clearRemoteAvatars();
     clearSharedResourceVisuals();
+    clearSharedHomeVisuals();
     connected = false;
     connection = null;
     ui.setStatus('offline');
@@ -384,6 +409,33 @@ export function publishWornDesign(design: AvatarDesign | null): void {
   connection?.sendWearDesign({ design, edgeColor: ref.edgeColor });
 }
 
+/**
+ * Publish where this account's Home bookmark currently sits, so neighbors
+ * can see a staked-out lot appear there (avatar-and-identity.md,
+ * land-and-dwellings.md "a nice touch: see the 'under construction' house
+ * when someone signs up"). A no-op for guests — the server refuses it, and
+ * there is no durable account behind a guest's Home to show anyone anyway.
+ */
+export function publishHome(): void {
+  const home = getPlace(HOME_PLACE_ID);
+  if (!home) return;
+  connection?.sendSetHome({ x: home.x, z: home.z, page: getCurrentPageId() });
+}
+
+/**
+ * Ask the server for another player's card (avatar-and-identity.md §3). A
+ * no-op in solo play — there is no one else's account to ask about — and the
+ * caller never blocks on this: `handlePlayerCardResponse` patches the answer
+ * into whichever card is open, if any still is by the time it arrives.
+ */
+export function requestPlayerCard(accountId: string): void {
+  connection?.sendPlayerCardRequest({ accountId });
+}
+
+// `connection` is read fresh on every call, so this survives reconnects and
+// leaving/rejoining without needing to be re-registered per session.
+setPlayerCardRequestHandler(requestPlayerCard);
+
 export function disconnectSharedSession(): void {
   connection?.disconnect();
   connection = null;
@@ -391,6 +443,7 @@ export function disconnectSharedSession(): void {
   clearRemoteAvatars();
   clearSharedResourceVisuals();
   clearSharedInventory();
+  clearSharedHomeVisuals();
   publishStatus({
     phase: 'solo', message: 'Returning to your solo world…', name: playerName,
     inviteCode, intent: null,

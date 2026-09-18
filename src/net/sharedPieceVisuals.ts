@@ -40,6 +40,21 @@ export function sharedPieceCount(): number {
   return visuals.size;
 }
 
+/**
+ * How many pieces this account has placed on a given page — the player
+ * card's "made N things on this page" credit (avatar-and-identity.md §3).
+ * "This page" means wherever the card was opened FROM, i.e. the viewer's own
+ * current page, not a stale copy of the maker's — see the card module for
+ * why that's the right page to ask about.
+ */
+export function countMakerPiecesOnPage(accountId: string, page: string): number {
+  let count = 0;
+  for (const { piece } of visuals.values()) {
+    if (piece.makerId === accountId && piece.page === page) count += 1;
+  }
+  return count;
+}
+
 function hasLocalEquivalent(target: PlacedPiece): boolean {
   for (const page of Object.values(getGameState().world.pages)) {
     for (const piece of Object.values(page.placedPieces)) {

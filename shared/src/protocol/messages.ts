@@ -63,6 +63,18 @@ export const ClientMessage = {
   ClaimMail: 'claim-mail',
   /** Wear a design into shared play: validate, store on the account, broadcast. */
   WearDesign: 'wear-design',
+  /**
+   * Ask for another player's card — the account-owned facts a live avatar
+   * can't reveal on its own (papering-since date, any wardrobe designs
+   * they've opted to show). See avatar-and-identity.md §3.
+   */
+  RequestPlayerCard: 'request-player-card',
+  /**
+   * Publish where this account's home is, once per connect — the server
+   * stamps the display name from the live player, never trusting a claimed
+   * one. See `HomeMarker` in state.ts.
+   */
+  SetHome: 'set-home',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -150,6 +162,17 @@ export type WearDesignIntent = {
   edgeColor: string;
 };
 
+/** Durable account id of the player whose card is being opened. */
+export type PlayerCardIntent = {
+  accountId: string;
+};
+
+export type SetHomeIntent = {
+  x: number;
+  z: number;
+  page: string;
+};
+
 export type ClientPayloads = {
   [ClientMessage.Move]: MoveIntent;
   [ClientMessage.Chat]: ChatIntent;
@@ -162,6 +185,8 @@ export type ClientPayloads = {
   [ClientMessage.SendMail]: SendMailIntent;
   [ClientMessage.ClaimMail]: ClaimMailIntent;
   [ClientMessage.WearDesign]: WearDesignIntent;
+  [ClientMessage.RequestPlayerCard]: PlayerCardIntent;
+  [ClientMessage.SetHome]: SetHomeIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------
@@ -193,6 +218,13 @@ export const ServerMessage = {
   MailSent: 'mail-sent',
   /** Complete server-owned transferable balance for this passport. */
   Inventory: 'inventory',
+  /**
+   * Answers a player-card request. `found: false` covers "no such account",
+   * "guest, nothing to show", and "they've blocked you" identically — the
+   * asker must never be able to tell those apart (avatar-and-identity.md §3:
+   * "nothing to show", not "blocked you", which invites testing).
+   */
+  PlayerCard: 'player-card',
 } as const;
 export type ServerMessageType = (typeof ServerMessage)[keyof typeof ServerMessage];
 
@@ -252,6 +284,15 @@ export type Rejected = {
 
 export type MailboxSnapshot = { items: MailItem[]; claimedIds: string[] };
 
+export type PlayerCardInfo = {
+  accountId: string;
+  found: boolean;
+  /** Server epoch ms the account was created — rendered as "papering since". */
+  papersSince?: number;
+  /** Design ids this account has opted (`sharedOnCard`) to show, newest first. */
+  sharedDesignIds?: string[];
+};
+
 export type MailSent = {
   mailId: string;
   toAccountId: string;
@@ -267,4 +308,5 @@ export type ServerPayloads = {
   [ServerMessage.Mailbox]: MailboxSnapshot;
   [ServerMessage.MailSent]: MailSent;
   [ServerMessage.Inventory]: AccountInventory;
+  [ServerMessage.PlayerCard]: PlayerCardInfo;
 };

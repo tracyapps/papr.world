@@ -1,11 +1,56 @@
 # Next Session
 
-Updated 2026-09-17 after avatar Phase D (designs over the wire) landed on
-top of the wardrobe panel, a HUD layout fix, and the gathering feel pass.
+Updated 2026-09-17 after home markers (a neighbor's Home is now visible to
+everyone, staked out like a building lot) landed on top of the "leave the
+world" fix, avatar Phase E1 (the player card + click-a-player entry point),
+Phase D, the wardrobe panel, a HUD layout fix, and the gathering feel pass.
 Start here.
 
 ## What landed
 
+- **"Return to your desk" is now where players actually look for it.** The
+  owner reported checking the Activity drawer for a way out and not finding
+  one — it only lived in Settings → Leaving. `src/ui/activityLog.ts`'s
+  drawer now opens with the same "Return to your desk" action at the top,
+  above the entries, wired identically (`disconnectSharedSession()` then
+  `window.location.assign(accountDeskUrl())`). One new `.activity-log-leave`
+  CSS rule for the separator; everything else reuses the existing
+  `hud-setting`/`hud-setting-action`/`hud-setting-button` classes Settings
+  already uses, so the two buttons look and behave like the same feature
+  shown twice, not two different ones.
+- **Avatar Phase E1 — the player card overlay + click-a-player entry
+  point.** See `avatar-and-identity.md` §7E for the full account. Short
+  version: clicking a live neighbor in-world now opens a card (name,
+  avatar, "made N things on this page," papering-since date, any wardrobe
+  designs they've opted to show). Name/avatar/creations render instantly
+  from state every client already has synced; papering-since and shared
+  designs are a new `request-player-card`/`player-card` room-message round
+  trip, thin glue over the existing accounts and avatar-designs stores. A
+  target who doesn't exist, is a guest, or has blocked the asker all answer
+  identically ("Nothing to show here.") — the feature can't be used to test
+  who has blocked whom. "Made by —"/"house of —" entry points and a
+  chat-name entry point are explicitly left for a later slice (see
+  avatar-and-identity.md for why); this pass only touches currently-online
+  players.
+- **Home markers — a neighbor's "house of —" entry point, shipped.** Every
+  signed-in player's Home bookmark (`src/world/places.ts`) now publishes to
+  a new `homes` MapSchema on the room, keyed by account id so it persists
+  whether or not that player is online, and every other client renders it
+  as a staked-out building lot: four corner stakes, a dashed lot outline,
+  and a hazard-striped sign reading "BUILDING A HOME" plus the owner's
+  name — the owner's own choice
+  ("I think it would be a nice touch to almost 'see' the under-construction
+  house when someone signs up, so players can actually see their neighbors
+  popping up around"). Clicking the marker opens the same player card E1
+  shipped. Server-authoritative like everything else here: the client sends
+  `SetHomeIntent {x, z, page}`, the room stamps the account id and name from
+  the live connection and upserts `HomeSchema`, guests are refused
+  (`guest-not-allowed`). `PROTOCOL_VERSION` bumped 8→9. See
+  avatar-and-identity.md §7E and `papr-world-land-and-dwellings` for how
+  this relates to the still-open decisions (old-house disposition,
+  neighborhood capacity, critter friendship binding) — none of them block a
+  marker-only feature like this one; moving Home later is just overwriting
+  the one record, per that doc's own design.
 - **The account wardrobe — avatar Phase D.** `AvatarDesignStore`
   (`server/src/avatarDesigns.ts`, `data/avatar-designs.json`) holds each
   account's designs, every one through `sanitizeAvatarDesign` on write and
@@ -150,6 +195,49 @@ Start here.
 
 ## Verification at closeout
 
+- Home markers (this pass): root suite **595/596 pass across 62 files**
+  (the one failure is the same pre-existing Playwright-download gap noted
+  throughout this doc — `chromium_headless_shell` isn't installed in this
+  sandbox copy, unrelated to this change), root `npx tsc --noEmit` clean,
+  `npm run styles:check` clean and unchanged at **792 rules** (no CSS
+  touched this pass), root `npx vite build` completes, `npx tsc -p
+  tsconfig.edge.json` clean. Server package checked on its own (fresh
+  `server/` copy, its own `npm install`): `npx tsc --noEmit` clean, `npx
+  vitest run` **68/68 pass across 12 files** (`handleSetHome` is thin glue
+  over the same pattern `handlePlayerCardRequest` already uses — no
+  dedicated test added, matching how that method's own untested-glue
+  precedent was justified in the E1 entry below). Site package untouched,
+  not re-checked. **Not exercised in a real browser or with a live second
+  player**, same sandbox limitation as every entry below. **By-hand proof
+  owed:** open the game, confirm your own Home marker is NOT drawn for you;
+  from a second account/browser, confirm their Home marker appears as a
+  staked lot with the right name and that clicking it opens their player
+  card; move Home to a new spot (once there's a way to do that from the
+  places panel) and confirm the marker relocates rather than duplicating.
+- Activity-log fix + Phase E1 (this pass): root `npx tsc --noEmit` clean,
+  root suite **503/503 pass across 47 files** (no Playwright-download
+  failure this run — see `pencil-and-paper-sandbox-build` notes on why that
+  one comes and goes), `npm run styles:check` clean at **792 rules, no
+  shadowed declarations** (was 785 at the top of this session), root
+  `npx vite build` completes, `npx tsc -p tsconfig.edge.json` clean. Server
+  package checked on its own (fresh `server/` copy, its own `npm install`):
+  `npx tsc --noEmit` clean, `npx vitest run` **68/68 pass across 12 files**
+  (`handlePlayerCardRequest` is thin glue over `accounts.getForClaim`,
+  `avatarDesigns.listFor`, and `blocks.isBlocked`, all already covered by
+  their own suites — matching how the desk inbox and claim-mail glue went
+  untested directly in an earlier pass). Site package untouched this pass,
+  not re-checked. **Not exercised in a real browser or with a live second
+  player** — this sandbox has no path from the Linux VM `device_bash` runs
+  in to a browser on the actual host, so the "run `npm run dev` and view it
+  in Chrome" verification `pencil-and-paper-sandbox-build` describes was not
+  actually reachable this pass despite having browser tools available; flag
+  that gap for whoever tries it next, not just "no browser available."
+  **By-hand proof owed:** click "Return to your desk" from the Activity
+  drawer and confirm it behaves like the Settings one; click a neighbor
+  in-world and confirm the card opens with the right name/avatar/count,
+  fills in papering-since once the account round trip lands, and shows any
+  shared wardrobe looks; block someone (or have them block you) and confirm
+  their card reads "Nothing to show here." with no other tell.
 - Root suite: **565 tests pass** across 58 files.
 - `npm run edge:check` passes.
 - `npm run build:web` completes for the game and nine-page Astro site.
@@ -239,25 +327,38 @@ Start here.
 
 ## Do this next
 
-1. **Still owed on browser proof.** The solo-save import (inventory and
-   tech) and Return to desk have only been verified against the test/build
-   suite, never a real browser or a real solo save. Play solo long enough to
-   bank a few resources/tools/a learned plan, sign in at the desk, confirm
-   the review counts match, accept, reload, and confirm the receipt, the
-   pouch amounts, and the learned-techniques list all match; then click
-   Return to desk once from inside a shared room and confirm the avatar
-   disappears for the other player.
+1. **Still owed on browser proof — now including the two newest features.**
+   The solo-save import (inventory and tech), Return to desk (both entry
+   points now), and the player card have only been verified against the
+   test/build suite, never a real browser or a real second player. Play
+   solo long enough to bank a few resources/tools/a learned plan, sign in at
+   the desk, confirm the review counts match, accept, reload, and confirm
+   the receipt, the pouch amounts, and the learned-techniques list all
+   match; click Return to desk from both the Activity drawer and Settings,
+   from inside a shared room, and confirm the avatar disappears for the
+   other player each time; and open a neighbor's player card to confirm it
+   renders correctly and that a blocked pairing reads "Nothing to show
+   here."; and, with a second account online, confirm
+   their Home marker appears as a staked-out lot (and yours doesn't, to
+   you), and that clicking either the marker or the avatar opens the same
+   card.
 2. **Phase D's by-hand proof — two browsers.** Make a look, wear it, join
    one neighborhood from both browsers, and confirm the second browser
    renders the actual drawing (not the tinted cutout) — then change the look
    mid-visit and confirm it updates for the other player. Also import the
    device wardrobe from the desk once and confirm the "Your looks" list and
    one-time receipt behave.
-3. **Continue in dependency order.** Avatar **Phase E — the player card**
-   (card overlay, "made by —" entry points, blocked-player behavior) is the
-   next avatar slice; the desk's drawing previews/editor and settings
-   remain on the accounts side, and C2 (the closet) stays gated on
-   report/hide for displayed drawings (§6.1).
+3. **Continue in dependency order.** Avatar **Phase E's remaining
+   entry points** — "made by —" on a piece and a chat-name entry point,
+   both opening the same card E1 already shipped ("house of —" shipped this
+   pass as the home-marker feature) — are the next avatar slice; see
+   avatar-and-identity.md §7E for why each was left rather than rushed (no
+   maker-credit click behavior exists at all yet). Also worth a look: a way
+   to actually move Home from the places panel now that a home marker is
+   something neighbors see move — `src/world/places.ts` fixes Home at
+   spawn today with no relocate function. Past that: the desk's drawing
+   previews/editor and settings remain on the accounts side, and C2 (the
+   closet) stays gated on report/hide for displayed drawings (§6.1).
 4. **Give shared-world learning a server credit route.** The tech store's
    `grantPlans` is the seam; nothing calls it in-world yet, so knowledge
    earned in a Shared World still lives only in local saves. Wire server-side

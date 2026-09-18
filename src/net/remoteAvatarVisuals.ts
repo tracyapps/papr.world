@@ -4,6 +4,7 @@ import {
   DESIGN_GROUND_Y,
   DESIGN_SHEET,
   sanitizeAvatarDesign,
+  type AvatarDesign,
   type PlayerState,
 } from '../../shared/src/index';
 import { camera, scene, textureLoader } from '../render/context';
@@ -25,6 +26,9 @@ type RemoteVisual = {
   label: THREE.Sprite;
   /** The design this visual is showing (or fetching) — '' while on fallback. */
   drawingKey: string;
+  /** Durable account id — the player card asks about this, not the session id. */
+  accountId: string;
+  name: string;
 };
 
 const root = new THREE.Group();
@@ -52,24 +56,34 @@ export function configureRemoteDesigns(httpEndpoint: string): void {
  */
 const designTextures = new Map<string, Promise<THREE.CanvasTexture | null>>();
 
+/**
+ * The one place that fetches `/avatar-designs/:id` and validates the answer.
+ * Public because the player card wants the same raw design (to draw a flat
+ * SVG preview) without paying for a texture it will never put in the scene —
+ * see docs/avatar-and-identity.md §6.8, "only the worn design is ever a live
+ * texture per player".
+ */
+export async function fetchDesignJson(designId: string): Promise<AvatarDesign | null> {
+  try {
+    if (!designEndpoint || !/^[A-Za-z0-9-]{1,64}$/.test(designId)) return null;
+    const response = await fetch(`${designEndpoint}/avatar-designs/${designId}`);
+    if (!response.ok) return null;
+    const body = await response.json() as { design?: unknown };
+    const design = sanitizeAvatarDesign(body.design);
+    // The id on the wire must name the design it claims — anything else is a
+    // confused or hostile response, and the fallback answers it.
+    return design && design.id === designId ? design : null;
+  } catch {
+    return null;
+  }
+}
+
 function fetchDesignTexture(designId: string): Promise<THREE.CanvasTexture | null> {
   const cached = designTextures.get(designId);
   if (cached) return cached;
-  const pending = (async () => {
-    try {
-      if (!designEndpoint || !/^[A-Za-z0-9-]{1,64}$/.test(designId)) return null;
-      const response = await fetch(`${designEndpoint}/avatar-designs/${designId}`);
-      if (!response.ok) return null;
-      const body = await response.json() as { design?: unknown };
-      const design = sanitizeAvatarDesign(body.design);
-      // The id on the wire must name the design it claims — anything else is
-      // a confused or hostile response, and the fallback answers it.
-      if (!design || design.id !== designId) return null;
-      return await rasterizeAvatarDesignTexture(design);
-    } catch {
-      return null;
-    }
-  })();
+  const pending = fetchDesignJson(designId).then((design) => (
+    design ? rasterizeAvatarDesignTexture(design) : null
+  ));
   designTextures.set(designId, pending);
   return pending;
 }
@@ -115,7 +129,9 @@ export function addRemoteAvatar(player: PlayerState): void {
 
   root.add(host);
   const drawingKey = player.avatar.drawingKey;
-  visuals.set(player.id, { root: host, cutout, label, drawingKey });
+  visuals.set(player.id, {
+    root: host, cutout, label, drawingKey, accountId: player.accountId, name: player.name,
+  });
 
   // Phase D: the room already resolved this key against the wearer's account,
   // so fetch the art and let it land whenever it lands — the tinted cutout
@@ -171,6 +187,52 @@ export function updateRemoteAvatar(
 
 export function remoteAvatarCount(): number {
   return visuals.size;
+}
+
+export type RemoteAvatarHit = { accountId: string; name: string; drawingKey: string };
+
+const pickRaycaster = new THREE.Raycaster();
+const pickNdc = new THREE.Vector2();
+
+/**
+ * The remote player under a screen point, for the player-card entry point
+ * (avatar-and-identity.md §3, "clicking a player in-world"). Exact raycast
+ * only — cutouts are person-sized and easy to hit, unlike a wandering
+ * critter, so no near-miss slop is needed.
+ */
+export function pickRemoteAvatarAtScreen(
+  clientX: number,
+  clientY: number,
+  camera: THREE.Camera,
+): RemoteAvatarHit | null {
+  pickNdc.set(
+    (clientX / window.innerWidth) * 2 - 1,
+    -(clientY / window.innerHeight) * 2 + 1,
+  );
+  pickRaycaster.setFromCamera(pickNdc, camera);
+
+  const visibleHosts = [...visuals.values()].filter((visual) => visual.root.visible);
+  const hits = pickRaycaster.intersectObjects(visibleHosts.map((visual) => visual.root), true);
+  if (hits.length === 0) return null;
+
+  let node: THREE.Object3D | null = hits[0].object;
+  while (node) {
+    const owner = visibleHosts.find((visual) => visual.root === node);
+    if (owner) return { accountId: owner.accountId, name: owner.name, drawingKey: owner.drawingKey };
+    node = node.parent;
+  }
+  return null;
+}
+
+/** Look up a currently-visible remote player by account id — the chat-name
+ *  entry point knows only the account id, not which session it belongs to. */
+export function findRemoteAvatarByAccountId(accountId: string): RemoteAvatarHit | null {
+  for (const visual of visuals.values()) {
+    if (visual.accountId === accountId) {
+      return { accountId: visual.accountId, name: visual.name, drawingKey: visual.drawingKey };
+    }
+  }
+  return null;
 }
 
 function makeNameLabel(name: string): THREE.Sprite {

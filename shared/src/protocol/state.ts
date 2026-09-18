@@ -83,6 +83,24 @@ export type PlacedPiece = {
 };
 
 /**
+ * Where an account's home is, for neighbors to see (avatar-and-identity.md's
+ * "house of —" entry point, land-and-dwellings.md's "planting your mailbox").
+ * One marker per account, keyed by `accountId` server-side — moving is a
+ * write to the one record, never a second marker left behind. No physical
+ * house exists yet, so this renders as a small under-construction plot: the
+ * visible promise of a home, not the building itself.
+ */
+export type HomeMarker = {
+  accountId: string;
+  /** Display name at the moment the marker was (re)published — a snapshot,
+   *  like ChatBroadcast's, so the sign still reads right if they're offline. */
+  name: string;
+  x: number;
+  z: number;
+  page: string;
+};
+
+/**
  * One item waiting in an account's mailbox — the offline half of gifting and
  * mailed garden harvests. The local inbox and collection rules use this shape;
  * authoritative account delivery lands in Phase F
@@ -187,6 +205,8 @@ export type RoomSave = {
   savedAt: number;
   pieces: PlacedPiece[];
   nodes: ResourceNode[];
+  /** Absent on saves written before home markers existed - read it with `?? []`. */
+  homes?: HomeMarker[];
   /**
    * Accounts refused entry to THIS neighborhood.
    *

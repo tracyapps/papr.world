@@ -55,6 +55,14 @@ export class PieceSchema extends Schema {
   @type('string') page = '0,0';
 }
 
+export class HomeSchema extends Schema {
+  @type('string') accountId = '';
+  @type('string') name = 'paper friend';
+  @type('number') x = 0;
+  @type('number') z = 0;
+  @type('string') page = '0,0';
+}
+
 export class NodeSchema extends Schema {
   @type('string') id = '';
   @type('string') kind = '';
@@ -70,4 +78,6 @@ export class PaperRoomState extends Schema {
   @type({ map: PlayerSchema }) players = new MapSchema<PlayerSchema>();
   @type({ map: PieceSchema }) pieces = new MapSchema<PieceSchema>();
   @type({ map: NodeSchema }) nodes = new MapSchema<NodeSchema>();
+  /** Keyed by accountId — one home per account, moving is overwriting the one entry. */
+  @type({ map: HomeSchema }) homes = new MapSchema<HomeSchema>();
 }

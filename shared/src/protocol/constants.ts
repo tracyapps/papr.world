@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 8; // v8: durable neighborhoods reopen from join links
+export const PROTOCOL_VERSION = 9; // v9: home markers — a friend's home is now visible to neighbors
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;

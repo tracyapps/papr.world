@@ -384,7 +384,9 @@ nothing has to be un-built later.
 
 The one place another player learns about you. Reached only through things
 that are already visible: clicking a player in-world, a chat name, "made by
-—" on a piece, "house of —" on a dwelling, or a directory hit (opt-in, §4).
+—" on a piece, "house of —" on their Home marker (a staked-out lot, shipped
+2026-09-17 — see §7E; there is no dwelling structure yet, just the marker),
+or a directory hit (opt-in, §4).
 
 Card contents, v1: current avatar (large, with its paper texture), display
 name, "papering since ‹month year›", and creations-nearby credit ("made 4
@@ -541,6 +543,47 @@ papr.world model (all-opt-in decision):
 - **E. Player card** — card overlay, "made by —" / "house of —" entry
   points, tombstone credit, blocked-player behavior. ✅ when: clicking a
   creation shows its maker's card with only opted-in content.
+  - **E1, the overlay + click-a-player entry point: shipped 2026-09-17.**
+    `src/ui/playerCard.ts` (a settings-family overlay, built fresh on open
+    like the wardrobe panel) opens from clicking a live remote avatar
+    in-world (`pickRemoteAvatarAtScreen` in `remoteAvatarVisuals.ts`, wired
+    through the same `registerScreenInteraction` seam critters/harvestables
+    use). What renders immediately needs no round trip — a live avatar
+    already tells every nearby client the name and current look, and "made N
+    things on this page" is counted locally from the pieces list every
+    client already has synced (`countMakerPiecesOnPage`, keyed to the
+    *viewer's* current page, not a possibly-stale copy of the subject's).
+    Papering-since and any `sharedOnCard` wardrobe designs are account-owned,
+    so those wait on a new room round trip (`request-player-card` /
+    `player-card` in `shared/src/protocol/messages.ts`,
+    `handlePlayerCardRequest` in `PaperRoom.ts`) — thin glue over
+    `accounts.getForClaim` and `avatarDesigns.listFor`, no new store. A
+    `found: false` answer covers "no such account", "a guest", and "blocked
+    you" identically (`blocks.isBlocked(target, viewer)`), collapsing the
+    account-owned half of the card to one quiet line — never a reason, so
+    the feature can't be used to test a block list. Guests are never
+    clickable for a card (there's no account to show).
+  - **E2, "house of —" via home markers: shipped 2026-09-17.** A
+    signed-in player's Home (`src/world/places.ts`) now publishes to the
+    room as a `HomeSchema` (keyed by account id, so it outlives the
+    session) and every other client renders it as a staked-out building
+    lot — corner stakes, a dashed lot outline, a hazard-striped sign with
+    the owner's name (`src/net/sharedHomeVisuals.ts`) — so a passerby can
+    watch new neighbors' lots appear over time, not just avatars that
+    happen to be online. Clicking the marker opens the same card E1
+    shipped (`pickSharedHomeAtScreen`, same `registerScreenInteraction`
+    seam). Server-authoritative: `SetHomeIntent {x, z, page}` in, the room
+    stamps the account id and name from the live connection, guests
+    refused. This did NOT wait on `papr-world-land-and-dwellings`'s three
+    open decisions (old-house disposition, neighborhood capacity, critter
+    friendship binding) — none apply to a marker with no structure behind
+    it, and moving Home later is just overwriting the one record, per that
+    doc's own design.
+  - **Left for a later slice, not forgotten:** the "made by —" (on a piece)
+    entry point and a chat-name entry point. Maker-credit UI on pieces is
+    unclaimed territory — no click behavior exists there yet at all, owner
+    or not. Tombstone credit for a departed maker's pieces is unaffected
+    either way: this slice only handles currently-connected players.
 - **F. Directory & permissions** — friend codes end-to-end, opt-in name
   lookup, master hide switch, settings UI for all of it, server-enforced.
   ✅ when: a fresh account is findable by nothing except its friend code.

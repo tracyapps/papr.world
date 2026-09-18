@@ -12,6 +12,7 @@ import type {
   MailAttachmentIntent,
   PlacePieceIntent,
   SendMailIntent,
+  SetHomeIntent,
 } from './messages';
 
 const AVATAR_PRESETS: AvatarRef['preset'][] = [
@@ -303,6 +304,18 @@ export function sanitizePlacePiece(raw: unknown): PlacePieceIntent | null {
 /** True when a finite number came through. Guards against NaN/Infinity spoofs. */
 export function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+/** Same shape and bar as `sanitizePlacePiece` — a home marker is just a
+ *  position and a page, no template or material to check. */
+export function sanitizeSetHome(raw: unknown): SetHomeIntent | null {
+  const value = (raw ?? {}) as Partial<SetHomeIntent>;
+  if (!isFiniteNumber(value.x) || !isFiniteNumber(value.z)) return null;
+  return {
+    x: value.x,
+    z: value.z,
+    page: typeof value.page === 'string' ? value.page.slice(0, 32) : '',
+  };
 }
 
 export type MovePoint = { x: number; z: number };

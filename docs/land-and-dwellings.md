@@ -4,7 +4,13 @@ Captured 2026-08-06, deliberately **before** multiplayer work starts, because
 every decision here is expensive to retrofit once two people share a
 neighbourhood and one of them has built a house.
 
-Design intent only. Nothing here is built.
+Design intent only. As of 2026-09-17, one small piece IS built: a "home
+marker" (avatar-and-identity.md §7E, "house of —"). It is deliberately
+*not* the house this document plans for — it is a staked-out lot with a
+sign, published from a player's existing Home bookmark, so a neighbor's
+lot appears the moment they sign up, before there is anything to zone
+around. Nothing below about spacing, moving, or the decisions owed was
+touched or resolved by it.
 
 ## The problem this document is arranged around
 
@@ -347,3 +353,9 @@ and the document's own advice is to settle those before wiring the socket:
 
 *Neighbourhood capacity is no longer open: the next neighbourhood opens
 adjacent.*
+
+*None of the three block the home marker shipped 2026-09-17
+(avatar-and-identity.md §7E) — it has no structure to dispose of, no
+zoning to enforce, and no friendship binding to worry about. It is just a
+point and a name. Moving Home later is a write to that one record, exactly
+as "Moving" above describes for the eventual real house.*

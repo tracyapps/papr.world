@@ -2041,6 +2041,14 @@ body {
   margin: 0;
 }
 
+/* Separates the always-there "way out" from the entries below it — same
+   border language the header uses to separate itself from the drawer body. */
+.activity-log-leave {
+  border-bottom: 1px solid rgb(72 54 36 / 0.18);
+  flex: none;
+  padding-bottom: 10px;
+}
+
 .activity-log-list {
   flex: 1 1 auto;
   margin: 0;
@@ -4429,6 +4437,46 @@ body.is-feedback-reviewing { overflow: hidden; }
    so the card stays usable on a narrow window. */
 .avatar-wardrobe-card {
   max-width: 640px;
+}
+
+/* The player card (avatar-and-identity.md §3) — a small, centered profile
+   sheet, deliberately narrower than the wardrobe list it borrows previews
+   from: this is a single person, not a catalog. */
+.player-card-sheet {
+  max-width: 360px;
+  text-align: center;
+}
+
+.player-card-avatar {
+  background: #f4eddc;
+  border-radius: 10px;
+  height: 168px;
+  margin: 4px 0 10px;
+  object-fit: contain;
+  width: 168px;
+}
+
+.player-card-sheet h2 { margin: 0 0 8px; }
+
+.player-card-meta {
+  color: #6d5947;
+  font: 0.8125rem/1.5 system-ui, sans-serif;
+  margin: 0;
+  min-height: 1.5em;
+}
+
+.player-card-shared {
+  border-top: 1px solid rgb(72 54 36 / 0.18);
+  margin-top: 14px;
+  padding-top: 12px;
+  text-align: left;
+}
+
+.player-card-shared-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
 }
 
 .avatar-wardrobe-status {

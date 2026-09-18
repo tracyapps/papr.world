@@ -35,6 +35,7 @@ import {
   sanitizeClaimMail,
   sanitizeSendMail,
   sanitizeAvatarDesign,
+  sanitizeSetHome,
   isFiniteNumber,
   type BlockIntent,
   type ChatBroadcast,
@@ -47,6 +48,10 @@ import {
   type PlacedPiece,
   type RejectionReason,
   type WearDesignIntent,
+  type PlayerCardIntent,
+  type PlayerCardInfo,
+  type SetHomeIntent,
+  type HomeMarker,
   type RemoveIntent,
   type ReportIntent,
   type ResourceNode,
@@ -58,6 +63,7 @@ import { readAdminConfig, verifyClerkSessionToken } from '../admin';
 import { database } from '../runtime';
 import { authorizeManagedWorldEntry } from '../worldAuthorization';
 import {
+  HomeSchema,
   NodeSchema,
   PaperRoomState,
   PieceSchema,
@@ -208,6 +214,12 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     );
     this.onMessage(ClientMessage.WearDesign, (client, msg: WearDesignIntent) =>
       this.handleWearDesign(client, msg),
+    );
+    this.onMessage(ClientMessage.RequestPlayerCard, (client, msg: PlayerCardIntent) =>
+      this.handlePlayerCardRequest(client, msg),
+    );
+    this.onMessage(ClientMessage.SetHome, (client, msg: SetHomeIntent) =>
+      this.handleSetHome(client, msg),
     );
 
     // Mail belongs to accounts, not rooms. Every live room listens so a
@@ -693,6 +705,81 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     player.avatar.edgeColor = edgeColor;
   }
 
+  /**
+   * The player card (avatar-and-identity.md §3). A live avatar already tells
+   * a viewer someone's name and current look through room state; this fills
+   * in what only the account itself holds: the papering-since date and any
+   * wardrobe designs opted into `sharedOnCard`.
+   *
+   * `found: false` is the one answer for every reason to say no — no such
+   * account, a guest with nothing account-owned to show, or the target has
+   * blocked the asker — so opening cards can never be used to probe a block
+   * list, the same posture `handleSendMail` already holds for mail.
+   */
+  private handlePlayerCardRequest(client: Client, msg: PlayerCardIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const accountId = typeof msg?.accountId === 'string' ? msg.accountId.trim() : '';
+    const notFound: PlayerCardInfo = { accountId, found: false };
+
+    if (
+      !accountId
+      || accountId.startsWith('guest:')
+      || (accountId !== player.accountId && blocks.isBlocked(accountId, player.accountId))
+    ) {
+      client.send(ServerMessage.PlayerCard, notFound);
+      return;
+    }
+
+    const account = accounts.getForClaim(accountId);
+    if (!account) {
+      client.send(ServerMessage.PlayerCard, notFound);
+      return;
+    }
+
+    const sharedDesignIds = avatarDesigns.listFor(accountId)
+      .filter((design) => design.sharedOnCard)
+      .map((design) => design.id);
+
+    client.send(ServerMessage.PlayerCard, {
+      accountId,
+      found: true,
+      papersSince: account.createdAt,
+      sharedDesignIds,
+    } satisfies PlayerCardInfo);
+  }
+
+  /**
+   * A home marker (avatar-and-identity.md / land-and-dwellings.md): the one
+   * spot a signed-in player's neighbors can see, wherever that player's own
+   * "Home" bookmark currently sits. Moving home is just overwriting this one
+   * record - there is no old marker to clean up separately.
+   */
+  private handleSetHome(client: Client, msg: SetHomeIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    if (player.accountId.startsWith('guest:')) {
+      this.reject(client, ClientMessage.SetHome, 'guest-not-allowed');
+      return;
+    }
+    const intent = sanitizeSetHome(msg);
+    if (!intent) {
+      this.reject(client, ClientMessage.SetHome, 'invalid');
+      return;
+    }
+    let home = this.state.homes.get(player.accountId);
+    if (!home) {
+      home = new HomeSchema();
+      home.accountId = player.accountId;
+      this.state.homes.set(player.accountId, home);
+    }
+    home.name = player.name;
+    home.x = intent.x;
+    home.z = intent.z;
+    home.page = intent.page;
+    this.persist();
+  }
+
   // ---- Helpers --------------------------------------------------------------
 
   private reject(client: Client, action: string, reason: RejectionReason): void {
@@ -801,7 +888,17 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         respawnAt: n.respawnAt === 0 ? null : n.respawnAt,
       });
     });
-    return { pieces, nodes, bannedAccountIds };
+    const homes: HomeMarker[] = [];
+    this.state.homes.forEach((h) => {
+      homes.push({
+        accountId: h.accountId,
+        name: h.name,
+        x: h.x,
+        z: h.z,
+        page: h.page,
+      });
+    });
+    return { pieces, nodes, bannedAccountIds, homes };
   }
 
   private hydrate(save: RoomSave): void {
@@ -831,6 +928,16 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       node.remaining = n.remaining;
       node.respawnAt = n.respawnAt ?? 0;
       this.state.nodes.set(node.id, node);
+    }
+    // Absent on saves written before home markers existed.
+    for (const h of save.homes ?? []) {
+      const home = new HomeSchema();
+      home.accountId = h.accountId;
+      home.name = h.name;
+      home.x = h.x;
+      home.z = h.z;
+      home.page = h.page;
+      this.state.homes.set(home.accountId, home);
     }
   }
 }

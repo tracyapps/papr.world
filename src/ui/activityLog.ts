@@ -1,4 +1,6 @@
 import { getGameState, onGameStateChanged } from '../sim/state';
+import { accountDeskUrl } from '../net/accountDesk';
+import { disconnectSharedSession } from '../net/sharedSession';
 
 // The activity log used to be a scrapbook tab, pressed into a strip that
 // only had room for a line and a half and never scrolled — quiet updates
@@ -83,12 +85,26 @@ export function initializeActivityLog() {
       <button type="button" class="hud-overlay-close" data-close-activity-log aria-label="Close activity log">×</button>
     </header>
     <p class="activity-log-note">Things that happened without needing to interrupt you.</p>
+    <div class="hud-setting hud-setting-action activity-log-leave">
+      <button class="hud-setting-button" type="button" id="activity-log-return-to-desk">
+        Return to your desk
+      </button>
+      <small>Leaves this world cleanly and takes you back to your account.</small>
+    </div>
     <ol class="activity-log-list scrapbook-activity-list"></ol>
   `;
   document.body.append(drawer);
   listElement = drawer.querySelector('.activity-log-list');
 
   drawer.querySelector('[data-close-activity-log]')?.addEventListener('click', () => setActivityLogOpen(false));
+  // Same cleanup path Settings' own "Return to your desk" button uses —
+  // leave the room for real before navigating so no stale presence lingers
+  // for anyone still inside. This is the copy people actually check first
+  // when they're looking for the way out, not the settings cog.
+  drawer.querySelector<HTMLButtonElement>('#activity-log-return-to-desk')?.addEventListener('click', () => {
+    disconnectSharedSession();
+    window.location.assign(accountDeskUrl());
+  });
   for (const eventName of ['pointerdown', 'pointerup', 'wheel'] as const) {
     drawer.addEventListener(eventName, (event) => event.stopPropagation());
   }
