@@ -131,6 +131,42 @@
         "I learned a new word today. I will use it whether it fits or not.",
         "Finally, someone new to talk at. The other parrots have heard all my material.",
         "I saw you from three trees away and flew zero of them. Efficiency."
+      ],
+      "toucan": [
+        "Oh! Hello. Sorry — I have to turn my whole head to see you. The bill gets in the way of everything.",
+        "Yes, it is real. Yes, it is mine. No, it is not heavy. It is mostly air and confidence.",
+        "I was up in the leaves pretending to be a fruit. You found me anyway. Impressive.",
+        "A visitor! Hold on, let me point my beak at you properly. There. Now we are talking.",
+        "Everyone says hello to the parrots first. I have made my peace with it. Mostly.",
+        "I flew down specially. Well — I was coming down anyway. But also specially.",
+        "Do you have a berry? You do not have to give it to me. I just like to know where they are.",
+        "The canopy is loud today. I came down here for the quiet, and then you arrived. The good kind of loud.",
+        "Toucan. Two words, one bird, and one extremely large idea on the front.",
+        "I like your shoes. I do not wear shoes. I have thought about it."
+      ],
+      "sloth": [
+        "…oh. Hello. I… saw you… a little while ago. I have been… getting ready… to say that.",
+        "Hi. Don't mind me. I'm just… hanging. It's what I'm best at.",
+        "You came all this way… to see me? That is… very kind. Take your time. I always do.",
+        "I was… going to wave. I've started. It should arrive… shortly.",
+        "Everything… looks nicer… upside down. You should… try it. Slowly.",
+        "Hello, friend. The branch and I… were just resting. We are… very good at it.",
+        "Oh, a visitor. How… exciting. Give me… a minute… to feel excited.",
+        "I've been… on this branch… since this morning. It's been… a big day.",
+        "You move… so fast. Doesn't it… make you… dizzy?",
+        "Hi… hello… I'm smiling. It… doesn't show much… but it's there."
+      ],
+      "monkey": [
+        "HELLO! Hello hello hello. Sorry. Hi. I came down fast. Is that a pocket? What's in it?",
+        "Saw you from up there! Thought, that one looks fun. Was I right? I'm usually right.",
+        "Quick question, don't think too hard: can you do a backflip? No? I'll teach you. Later. Maybe now.",
+        "You walk on the ground ALL the time? On purpose? Wow. Brave.",
+        "I was swinging, and then I was leaping, and then I was here. That's pretty much my whole day, honestly.",
+        "Hi! I've been watching you. In a nice way. In a curious way. In a 'what are you carrying' way.",
+        "Oh good, someone new. The sloths are lovely but they take forty minutes to say 'hi'.",
+        "You look like you need a tour guide. I'm very qualified. I've fallen out of every tree here.",
+        "Can I hold your scissors? I won't cut anything. I'll cut one thing. A small thing.",
+        "Welcome to the canopy! Technically this is the ground. Welcome to underneath the canopy!"
       ]
     },
     "placeFacts": {
@@ -210,7 +246,11 @@
         "Somewhere in the canopy a parrot is repeating everything you just said, but with flair.",
         "The vines hang where a tree once held a branch out and never took it back.",
         "Even the shade is green here. It soaks through the canopy on the way down.",
-        "The jungle floor is a layered letter that someone is always in the middle of writing."
+        "The jungle floor is a layered letter that someone is always in the middle of writing.",
+        "Look up now and then. Half of the jungle's neighbours live in the canopy, and they are almost certainly looking at you already.",
+        "The long vines on the tallest trees are good for more than hanging off — trim one and you get crepe-paper vine, stretchy and twisty.",
+        "If a branch high up seems to be smiling at you, that is a sloth. Say hello early. The reply takes a while.",
+        "Monkeys come down to visit anyone who looks interesting, which in their opinion is everyone."
       ]
     },
     "selfReplies": {
@@ -323,6 +363,36 @@
         "I once flew a whole river without landing. Then I landed and talked about it for a week.",
         "My tail is long enough to have opinions of its own.",
         "Whistling is just talking with the windows open."
+      ],
+      "toucan": [
+        "My bill is longer than my body is wide, and I still manage not to bump into things. Usually.",
+        "I sleep with my bill tucked under my wing, like folding a letter that is much too long for its envelope.",
+        "I can toss a berry, catch it, and swallow it without using my feet. It is my one party trick and I am proud of it.",
+        "I fly in little bursts — flap flap flap, glide. It saves energy and looks very deliberate.",
+        "My bill is a different paper from the rest of me. I think it came from a much fancier stationery shop.",
+        "Up top I can see three trees over. Down here I can see your feet. Both views have their merits.",
+        "I am not as loud as a parrot. I am just as dramatic, I simply say it with my face.",
+        "Palm trees are good for perching. Jungle trees are good for hiding. I use both, depending on my mood."
+      ],
+      "sloth": [
+        "Some of the moss… on my fur… is actually growing there. I carry… a tiny garden. It's… very relaxing.",
+        "I come down… from the tree… about once a week. It's… a whole outing. I plan… for days.",
+        "People think… I'm lazy. I'm not lazy. I'm… energy efficient.",
+        "My claws… are shaped like hooks… so hanging costs me… nothing at all. It's… easier than standing.",
+        "I can turn my head… almost all the way around. It's… how I keep an eye… on everything… without moving.",
+        "I once… had a race… with a leaf. It fell. I won… on a technicality.",
+        "My smile… is just… my face. But I choose… to mean it.",
+        "Vines… are the best… for hanging. They sway… a little. Like being… rocked to sleep."
+      ],
+      "monkey": [
+        "My tail curls on its own. I don't tell it to. I think it just likes being a spiral.",
+        "I can get from that tree to that tree without touching the ground. I can also do it touching the ground a lot, which is funnier.",
+        "Swinging is easy: grab, let go, grab. The trick is remembering the second grab.",
+        "I've been up every tree on this page. The tall ones twice, because the view.",
+        "Sometimes I borrow things. I always give them back. I usually give them back. I give most things back.",
+        "I do a backflip when I'm happy. I'm happy a lot. It's very good exercise.",
+        "Palm trees are for sitting. Jungle trees are for swinging. Vines are for showing off.",
+        "The toucans think they're the fanciest ones here. They're right. Don't tell them I said so."
       ]
     },
     "traitReplies": {

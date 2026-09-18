@@ -40,8 +40,25 @@ export type CritterParts = {
   };
 };
 
+/**
+ * How a tree-dwelling critter is holding on (see game/critterCanopy.ts).
+ * - ground: standing/walking like any other critter
+ * - sit: sitting on a branch
+ * - hang: upside down under a branch, all four feet hooked on (sloth)
+ * - swing: hanging from one or both arms (monkey)
+ * - climb: clinging to a trunk or vine, head up
+ * - fly: in the air — flying, leaping, or dropping
+ */
+export type CanopyPose = 'ground' | 'sit' | 'hang' | 'swing' | 'climb' | 'fly';
+
 export type CritterRig = {
   group: THREE.Group;
+  /**
+   * Tree-dwellers only: switch the limb pose. The canopy layer orients the
+   * whole group (rolled over to hang, pitched up to climb); the rig just
+   * arranges arms, legs, tail, and neck to match.
+   */
+  setPose?: (pose: CanopyPose) => void;
   flying: boolean;
   hopper: boolean;
   /** Rest height of the group origin above the terrain. */
@@ -1232,6 +1249,517 @@ function buildFox(params: CritterParams): CritterRig {
   };
 }
 
+// --- Jungle critters: toucan, sloth, monkey ---------------------------------
+//
+// All three spend most of their lives in the canopy (see critterCanopy.ts),
+// which orients the whole group — upside down to hang, pitched up to climb.
+// The rigs only pose their own limbs for each `CanopyPose`; the pose is set
+// by the behavior layer through `setPose`, and `animate` reads it every
+// frame, so a pose is never half-applied.
+
+/** A limb that swings from its shoulder or hip rather than its middle. */
+function limb(
+  pivot: [number, number, number],
+  radius: number,
+  length: number,
+  material: THREE.Material,
+): { pivot: THREE.Group; end: number } {
+  const group = new THREE.Group();
+  group.position.set(...pivot);
+  const bone = capsule(radius, length, material, 5, 10);
+  bone.position.y = -(length / 2 + radius);
+  group.add(bone);
+  return { pivot: group, end: -(length + radius * 2) };
+}
+
+/** Three small curved claws at the end of a limb. */
+function claws(parent: THREE.Group, y: number, material: THREE.Material) {
+  for (const x of [-0.018, 0, 0.018]) {
+    const claw = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.009, 0.05, 5), material));
+    claw.position.set(x, y - 0.012, -0.012);
+    claw.rotation.x = -Math.PI / 2 + 0.55;
+    parent.add(claw);
+  }
+}
+
+/**
+ * Toucan. The parrot's skeleton with the one cue that matters: an enormous
+ * banana beak, plus the black body, sunny bib, and blue eye ring.
+ *
+ * Coat convention for this species only: `bodyColor` is the (mostly black)
+ * body, `accentColor` is the beak, and a coat's paper texture — when there is
+ * one — goes on the *beak* rather than the body. A keel-billed toucan's
+ * rainbow bill is the whole point of the animal.
+ */
+function buildToucan(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = createColorMaterial(params.bodyColor, 0.88);
+  const dark = createColorMaterial('#141110', 0.85);
+  const bib = createColorMaterial('#f6d64a', 0.9);
+  const eyeRing = createColorMaterial('#57b7de', 0.8);
+  const beakMaterial = params.bodyTextureUrl
+    ? getPaperMaterialByUrl(params.bodyTextureUrl, [0.8, 0.8])
+    : createColorMaterial(params.accentColor, 0.7);
+  const beakTip = createColorMaterial('#1a1411', 0.8);
+  const berryMaterial = createColorMaterial('#e0463c', 0.75);
+  const feet = createColorMaterial('#5d7fa3', 0.85);
+
+  const body = sphere(0.17, coat, 20, 14);
+  body.scale.set(0.92, 1, 1.2);
+  body.position.y = 0.2;
+
+  const chest = sphere(0.1, bib, 16, 10);
+  chest.scale.set(0.95, 0.9, 0.45);
+  chest.position.set(0, 0.27, -0.13);
+
+  const undertail = sphere(0.05, createColorMaterial('#d8413a', 0.85), 10, 8);
+  undertail.position.set(0, 0.11, 0.17);
+
+  const head = sphere(0.11, coat, 18, 12);
+  head.position.set(0, 0.37, -0.08);
+
+  // Cylinder axis is +Y; tipping it forward points the narrow end at -Z,
+  // then a slight droop gives the bill its downward curve.
+  // Scaled thin side-to-side and deep top-to-bottom (local Z becomes world
+  // up once tipped forward) — a toucan bill is a tall, narrow blade, not a
+  // round cone.
+  const beakUpper = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.075, 0.36, 14), beakMaterial));
+  beakUpper.rotation.x = -Math.PI / 2 + 0.18;
+  beakUpper.position.set(0, 0.37, -0.27);
+  beakUpper.scale.set(0.7, 1, 1.45);
+  const beakLower = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.05, 0.32, 12), beakMaterial));
+  beakLower.rotation.x = -Math.PI / 2 + 0.26;
+  beakLower.position.set(0, 0.315, -0.255);
+  beakLower.scale.set(0.68, 1, 1.2);
+  const tip = shadowed(new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.07, 10), beakTip));
+  tip.rotation.x = -Math.PI / 2 + 0.3;
+  tip.scale.set(0.7, 1, 1.4);
+  tip.position.set(0, 0.325, -0.47);
+
+  const eyes: THREE.Mesh[] = [];
+  const rings: THREE.Mesh[] = [];
+  for (const x of [-0.068, 0.068]) {
+    const ring = sphere(0.032, eyeRing, 10, 8);
+    ring.scale.set(0.45, 1, 1);
+    ring.position.set(x, 0.39, -0.12);
+    const eye = sphere(0.016, dark, 8, 6);
+    eye.position.set(x * 1.12, 0.39, -0.125);
+    rings.push(ring);
+    eyes.push(eye);
+  }
+
+  const wings: THREE.Mesh[] = [];
+  for (const side of [-1, 1] as const) {
+    const wing = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.15), coat));
+    wing.position.set(side * 0.155, 0.22, 0.02);
+    wing.rotation.z = side * 0.5;
+    wing.rotation.y = side * 0.25;
+    wings.push(wing);
+  }
+
+  const tail = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.26), coat));
+  tail.position.set(0, 0.16, 0.28);
+  tail.rotation.x = 0.7;
+
+  const legs: THREE.Mesh[] = [];
+  for (const x of [-0.05, 0.05]) {
+    const leg = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.1, 6), feet));
+    leg.position.set(x, 0.05, 0);
+    legs.push(leg);
+  }
+
+  // The flourish berry lives outside the head group, so tossing it can never
+  // move a face part (critterRigs.test enforces that).
+  const berry = sphere(0.032, berryMaterial, 10, 8);
+  berry.visible = false;
+
+  group.add(body, chest, undertail, ...wings, tail, ...legs, berry);
+  const headGroup = makeHead(group, [0, 0.32, -0.05], [head, beakUpper, beakLower, tip, ...rings, ...eyes]);
+  const headRest = headGroup.position.clone();
+
+  let pose: CanopyPose = 'ground';
+  const o = params.animOffset;
+  return {
+    group,
+    flying: false,
+    hopper: true,
+    groundOffset: 0.02,
+    hopHeight: 0.1,
+    parts: partsOf({ head: headGroup, body, tail }),
+    setPose: (next) => { pose = next; },
+    animate: (t, _dt, moving, speedRatio, curious) => {
+      const flying = pose === 'fly';
+      if (flying || moving) {
+        // Toucans flap in short bursts and glide; a hop on the ground is a
+        // quick wing-flick rather than full flight.
+        const burst = flying ? (Math.sin(t * 2.4 + o) > -0.2 ? 1 : 0.15) : 0.5;
+        wings.forEach((wing, index) => {
+          const side = index === 0 ? -1 : 1;
+          const spread = flying ? 1.05 : 0.5;
+          wing.rotation.z = side * (spread + Math.sin(t * 13 + o) * 0.55 * burst * Math.max(0.4, speedRatio));
+        });
+        legs.forEach((leg) => { leg.rotation.x = flying ? 0.9 : 0; });
+        headGroup.position.copy(headRest);
+        headGroup.rotation.x = 0;
+        headGroup.rotation.y = 0;
+      } else {
+        wings.forEach((wing, index) => { wing.rotation.z = (index === 0 ? -1 : 1) * 0.5; });
+        legs.forEach((leg) => { leg.rotation.x = 0; });
+        // The toucan idle: a slow side-to-side bill swing, like it is
+        // aiming that enormous thing at something only it can see.
+        headGroup.position.copy(headRest);
+        headGroup.rotation.y = Math.sin(t * 0.9 + o) * 0.35;
+      }
+      if (curious) headGroup.rotation.z = Math.sin(t * 1.4 + o) > 0 ? 0.38 : -0.38;
+      tail.rotation.x = 0.7 + Math.sin(t * 2.1 + o) * 0.12;
+    },
+    flourish: (progress, t) => {
+      // The berry toss: a flick of the bill, the berry arcs up, and is
+      // caught again on the way down.
+      const toss = Math.sin(Math.min(1, progress * 1.6) * Math.PI);
+      headGroup.rotation.x = -0.7 * toss;
+      berry.visible = progress > 0.08 && progress < 0.9;
+      const flight = THREE.MathUtils.clamp((progress - 0.08) / 0.82, 0, 1);
+      berry.position.set(Math.sin(t * 3) * 0.01, 0.4 + Math.sin(flight * Math.PI) * 0.55, -0.42 + flight * 0.2);
+      wings.forEach((wing, index) => {
+        const side = index === 0 ? -1 : 1;
+        wing.rotation.z = side * (0.5 + 0.35 * Math.sin(progress * Math.PI));
+      });
+      if (progress >= 1) {
+        headGroup.rotation.x = 0;
+        berry.visible = false;
+      }
+    },
+  };
+}
+
+/**
+ * Sloth. Round, shaggy, long-armed, with the famous face: a pale mask, dark
+ * stripes sloping away from the eyes, and a small permanent smile.
+ *
+ * Built as a low quadruped facing -Z with its feet at the origin, like
+ * everyone else — so hanging is simply the canopy layer rolling the whole
+ * animal upside down, which puts all four hooked feet on the branch and the
+ * body underneath. The neck then turns the face back the right way up.
+ */
+function buildSloth(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = bodyMaterial(params, [1.3, 1.3]);
+  const face = createColorMaterial(params.accentColor, 0.92);
+  const dark = createColorMaterial('#2b211a', 0.85);
+  const clawMaterial = createColorMaterial('#efe6cf', 0.8);
+
+  const torso = new THREE.Group();
+  torso.position.set(0, 0.2, 0.02);
+  const body = capsule(0.15, 0.2, coat, 6, 14);
+  body.rotation.x = Math.PI / 2;
+  body.scale.set(1.08, 0.94, 1);
+  torso.add(body);
+  // A shaggy fringe along the back: a few overlapping flattened spheres.
+  for (const [index, z] of [-0.1, 0.02, 0.14].entries()) {
+    const tuft = sphere(0.09, coat, 10, 8);
+    tuft.scale.set(1.25, 0.45, 0.8);
+    tuft.position.set(0, 0.12 - index * 0.005, z);
+    torso.add(tuft);
+  }
+
+  // Everything on the face is authored in group space, then re-expressed
+  // relative to the neck, which is the thing that flips when hanging.
+  const neckPosition = new THREE.Vector3(0, 0.28, -0.17);
+  const neck = new THREE.Group();
+  neck.position.copy(neckPosition);
+
+  const skull = sphere(0.13, coat, 18, 12);
+  skull.position.set(0, 0.3, -0.28);
+  const mask = sphere(0.105, face, 16, 12);
+  mask.scale.set(1.05, 0.88, 0.42);
+  mask.position.set(0, 0.29, -0.37);
+  const stripes: THREE.Mesh[] = [];
+  const eyes: THREE.Mesh[] = [];
+  for (const side of [-1, 1] as const) {
+    const stripe = sphere(0.03, dark, 10, 8);
+    stripe.scale.set(1.7, 0.72, 0.5);
+    stripe.rotation.z = side * -0.5;
+    stripe.position.set(side * 0.05, 0.3, -0.408);
+    stripes.push(stripe);
+    const eye = sphere(0.011, createColorMaterial('#0c0a09', 0.7), 8, 6);
+    eye.position.set(side * 0.04, 0.308, -0.425);
+    eyes.push(eye);
+  }
+  const nose = sphere(0.022, dark, 8, 6);
+  nose.scale.set(1.3, 0.85, 0.8);
+  nose.position.set(0, 0.272, -0.43);
+  // The smile: the lower half of a thin torus.
+  const smile = shadowed(new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.005, 6, 14, Math.PI), dark));
+  smile.rotation.z = Math.PI;
+  smile.position.set(0, 0.258, -0.418);
+
+  const faceParts = [skull, mask, ...stripes, ...eyes, nose, smile];
+  for (const part of faceParts) part.position.sub(neckPosition);
+  group.add(neck);
+  const headGroup = makeHead(neck, [0, 0, 0], faceParts);
+
+  // Long, hooked limbs — the arms noticeably longer than the legs.
+  const limbs = [
+    { pivot: [-0.13, 0.26, -0.12], length: 0.2, front: true, side: -1 },
+    { pivot: [0.13, 0.26, -0.12], length: 0.2, front: true, side: 1 },
+    { pivot: [-0.12, 0.24, 0.15], length: 0.16, front: false, side: -1 },
+    { pivot: [0.12, 0.24, 0.15], length: 0.16, front: false, side: 1 },
+  ].map((spec, index) => {
+    const { pivot, end } = limb(spec.pivot as [number, number, number], 0.036, spec.length, coat);
+    claws(pivot, end, clawMaterial);
+    return { ...spec, pivot, phase: index * (Math.PI / 2) };
+  });
+
+  const tail = sphere(0.045, coat, 8, 6);
+  tail.position.set(0, 0.2, 0.24);
+
+  group.add(torso, ...limbs.map((entry) => entry.pivot), tail);
+
+  let pose: CanopyPose = 'ground';
+  const o = params.animOffset;
+  return {
+    group,
+    flying: false,
+    hopper: false,
+    groundOffset: 0.03,
+    hopHeight: 0,
+    parts: partsOf({ head: headGroup, body: torso, tail }),
+    setPose: (next) => { pose = next; },
+    animate: (t, _dt, moving, speedRatio) => {
+      // Everything a sloth does, it does at about a fifth of the speed.
+      const beat = t * (pose === 'climb' ? 2.2 : 1.7) + o;
+      limbs.forEach((entry) => {
+        const reach = moving ? Math.sin(beat + entry.phase) * speedRatio : 0;
+        if (pose === 'hang') {
+          // Feet up on the branch, arms pulling hand over hand.
+          entry.pivot.rotation.x = reach * 0.45;
+          entry.pivot.rotation.z = entry.side * 0.12;
+        } else if (pose === 'climb') {
+          // Hugging the trunk: limbs splayed wide, reaching up in turn.
+          entry.pivot.rotation.x = 0.35 + reach * 0.55;
+          entry.pivot.rotation.z = entry.side * 0.62;
+        } else {
+          // A slow, sprawling crawl on the ground.
+          entry.pivot.rotation.x = reach * 0.35;
+          entry.pivot.rotation.z = entry.side * 0.3;
+        }
+      });
+      // Hanging upside down, the neck turns the face back upright — the
+      // unmistakable upside-down sloth gaze.
+      const targetFlip = pose === 'hang' ? Math.PI : 0;
+      neck.rotation.z += (targetFlip - neck.rotation.z) * 0.08;
+      neck.rotation.x = pose === 'climb' ? -0.5 : 0;
+      torso.rotation.z = moving ? Math.sin(beat) * 0.04 : 0;
+      // Slow, heavy blinks.
+      const blink = Math.sin(t * 0.7 + o) > 0.93 ? 0.25 : 1;
+      eyes.forEach((eye) => { eye.scale.y = blink; });
+    },
+    flourish: (progress, t) => {
+      // A very slow wave with one long arm — and a little extra smile.
+      const wave = Math.sin(progress * Math.PI);
+      const arm = limbs[1].pivot;
+      arm.rotation.x = 2.1 * wave;
+      arm.rotation.z = 0.3 + Math.sin(t * 2.2) * 0.35 * wave;
+      smile.scale.set(1 + wave * 0.35, 1 + wave * 0.35, 1);
+      if (progress >= 1) {
+        arm.rotation.set(0, 0, 0);
+        smile.scale.set(1, 1, 1);
+      }
+    },
+  };
+}
+
+/**
+ * Monkey. Big round ears, a pale face and belly, long arms, and a curly tail.
+ * Sits on branches, swings from them one-handed, knuckle-walks on the
+ * ground, and its flourish is a backflip.
+ */
+function buildMonkey(params: CritterParams): CritterRig {
+  const group = new THREE.Group();
+  const coat = bodyMaterial(params, [1.2, 1.2]);
+  const face = createColorMaterial(params.accentColor, 0.9);
+  const dark = createColorMaterial('#221a15', 0.85);
+
+  // Flips spin around the middle of the body, not the feet: `spin` sits at
+  // body height and `content` hangs everything back down to the origin.
+  const spin = new THREE.Group();
+  spin.position.set(0, 0.3, 0);
+  const content = new THREE.Group();
+  content.position.set(0, -0.3, 0);
+  spin.add(content);
+  group.add(spin);
+
+  const torso = new THREE.Group();
+  torso.position.set(0, 0.24, 0);
+  const body = capsule(0.11, 0.13, coat, 6, 14);
+  body.scale.set(1, 1, 0.9);
+  body.position.y = 0.08;
+  const belly = sphere(0.085, face, 14, 10);
+  belly.scale.set(0.85, 1.1, 0.42);
+  belly.position.set(0, 0.07, -0.075);
+  torso.add(body, belly);
+
+  const skull = sphere(0.12, coat, 18, 12);
+  skull.position.set(0, 0.5, -0.06);
+  const faceDisc = sphere(0.088, face, 16, 12);
+  faceDisc.scale.set(1.1, 0.95, 0.5);
+  faceDisc.position.set(0, 0.49, -0.14);
+  const muzzle = sphere(0.052, face, 12, 10);
+  muzzle.scale.set(1.25, 0.8, 0.85);
+  muzzle.position.set(0, 0.45, -0.18);
+  const nostrils: THREE.Mesh[] = [];
+  const eyes: THREE.Mesh[] = [];
+  const ears: THREE.Object3D[] = [];
+  for (const side of [-1, 1] as const) {
+    const nostril = sphere(0.009, dark, 6, 5);
+    nostril.position.set(side * 0.015, 0.458, -0.225);
+    nostrils.push(nostril);
+    const eye = sphere(0.018, dark, 8, 6);
+    eye.position.set(side * 0.036, 0.51, -0.19);
+    eyes.push(eye);
+    // Round cupped ears: a coat disc with a pale inner disc.
+    const ear = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.018, 14), coat));
+    ear.rotation.z = Math.PI / 2;
+    ear.rotation.y = side * 0.35;
+    ear.position.set(side * 0.125, 0.51, -0.05);
+    const inner = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.02, 12), face));
+    inner.rotation.copy(ear.rotation);
+    inner.position.set(side * 0.13, 0.51, -0.056);
+    ears.push(ear, inner);
+  }
+  const mouth = shadowed(new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.004, 5, 10, Math.PI), dark));
+  mouth.rotation.z = Math.PI;
+  mouth.position.set(0, 0.432, -0.215);
+
+  content.add(torso);
+  const headGroup = makeHead(content, [0, 0.42, -0.05], [skull, faceDisc, muzzle, mouth, ...nostrils, ...eyes, ...ears]);
+
+  const arms = [-1, 1].map((side) => {
+    const { pivot, end } = limb([side * 0.115, 0.37, -0.03], 0.028, 0.25, coat);
+    const hand = sphere(0.034, face, 10, 8);
+    hand.position.y = end;
+    pivot.add(hand);
+    content.add(pivot);
+    return { pivot, side };
+  });
+  const legs = [-1, 1].map((side) => {
+    const { pivot, end } = limb([side * 0.07, 0.22, 0.04], 0.03, 0.13, coat);
+    const foot = sphere(0.034, face, 10, 8);
+    foot.scale.set(1, 0.6, 1.4);
+    foot.position.set(0, end + 0.01, -0.02);
+    pivot.add(foot);
+    content.add(pivot);
+    return { pivot, side };
+  });
+
+  // The curly tail, as one tube along a spiral.
+  const tailCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, -0.02, 0.16),
+    new THREE.Vector3(0, 0.08, 0.3),
+    new THREE.Vector3(0, 0.24, 0.32),
+    new THREE.Vector3(0, 0.3, 0.22),
+    new THREE.Vector3(0, 0.24, 0.16),
+    new THREE.Vector3(0, 0.18, 0.21),
+  ]);
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.24, 0.08);
+  tail.add(shadowed(new THREE.Mesh(new THREE.TubeGeometry(tailCurve, 40, 0.017, 6, false), coat)));
+  content.add(tail);
+
+  let pose: CanopyPose = 'ground';
+  const o = params.animOffset;
+  return {
+    group,
+    flying: false,
+    hopper: false,
+    groundOffset: 0.03,
+    hopHeight: 0,
+    parts: partsOf({ head: headGroup, body: torso, tail, ears }),
+    setPose: (next) => { pose = next; },
+    animate: (t, _dt, moving, speedRatio, curious) => {
+      const beat = t * 11 + o;
+      const swing = moving ? speedRatio : 0;
+      switch (pose) {
+        case 'sit': {
+          // On a branch: legs dangling over the front, tail hanging down.
+          torso.rotation.x = 0;
+          legs.forEach((leg, index) => {
+            leg.pivot.rotation.x = 1.35 + Math.sin(t * 1.7 + o + index * 1.9) * 0.18;
+          });
+          arms.forEach((arm) => { arm.pivot.rotation.x = 0.45; arm.pivot.rotation.z = arm.side * 0.12; });
+          tail.rotation.x = 1.4 + Math.sin(t * 1.3 + o) * 0.15;
+          break;
+        }
+        case 'swing':
+        case 'hang': {
+          // Hanging one-handed; travelling, the arms go hand over hand.
+          torso.rotation.x = 0;
+          arms.forEach((arm, index) => {
+            const lead = moving ? Math.max(0, Math.sin(t * 6 + o + index * Math.PI)) : index === 1 ? 1 : 0.1;
+            arm.pivot.rotation.x = Math.PI * (0.35 + 0.65 * lead);
+            arm.pivot.rotation.z = arm.side * 0.1;
+          });
+          legs.forEach((leg, index) => { leg.pivot.rotation.x = 0.4 + Math.sin(t * 3 + index) * 0.2; });
+          tail.rotation.x = 0.9 + Math.sin(t * 2 + o) * 0.2;
+          break;
+        }
+        case 'climb': {
+          torso.rotation.x = 0;
+          arms.forEach((arm, index) => {
+            arm.pivot.rotation.x = 2.2 + Math.sin(t * 9 + o + index * Math.PI) * 0.6 * swing;
+            arm.pivot.rotation.z = arm.side * 0.35;
+          });
+          legs.forEach((leg, index) => {
+            leg.pivot.rotation.x = 0.9 + Math.sin(t * 9 + o + index * Math.PI + 1) * 0.5 * swing;
+          });
+          tail.rotation.x = 0.8;
+          break;
+        }
+        case 'fly': {
+          // Mid-leap: arms flung forward to grab, legs trailing.
+          torso.rotation.x = -0.2;
+          arms.forEach((arm) => { arm.pivot.rotation.x = 2.5; arm.pivot.rotation.z = arm.side * 0.4; });
+          legs.forEach((leg) => { leg.pivot.rotation.x = -0.6; });
+          tail.rotation.x = -0.2;
+          break;
+        }
+        default: {
+          // Knuckle-walking: leaning forward, long arms reaching the ground.
+          torso.rotation.x = -0.35;
+          arms.forEach((arm, index) => {
+            arm.pivot.rotation.x = 0.25 + Math.sin(beat + index * Math.PI) * 0.5 * swing;
+            arm.pivot.rotation.z = arm.side * 0.08;
+          });
+          legs.forEach((leg, index) => {
+            leg.pivot.rotation.x = Math.sin(beat + index * Math.PI + Math.PI / 2) * 0.55 * swing;
+          });
+          tail.rotation.x = 0;
+        }
+      }
+      tail.rotation.z = Math.sin(t * 2.3 + o) * 0.18;
+      if (curious && pose !== 'fly') {
+        // A quick, nosy bob.
+        headGroup.rotation.z = Math.sin(t * 3.1 + o) * 0.18;
+      }
+      const blink = Math.sin(t * 2.1 + o) > 0.96 ? 0.2 : 1;
+      eyes.forEach((eye) => { eye.scale.y = blink; });
+    },
+    flourish: (progress) => {
+      // A backflip, spun round the middle of the body, with a little hop.
+      const eased = progress < 0.5 ? 2 * progress * progress : 1 - (-2 * progress + 2) ** 2 / 2;
+      spin.rotation.x = -Math.PI * 2 * eased;
+      spin.position.y = 0.3 + Math.sin(progress * Math.PI) * 0.45;
+      arms.forEach((arm) => { arm.pivot.rotation.x = 2.6 * Math.sin(progress * Math.PI); });
+      if (progress >= 1) {
+        spin.rotation.x = 0;
+        spin.position.y = 0.3;
+      }
+    },
+  };
+}
+
 const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = {
   squirrel: buildSquirrel,
   butterfly: buildButterfly,
@@ -1243,6 +1771,9 @@ const BUILDERS: Record<CritterSpecies, (params: CritterParams) => CritterRig> = 
   meerkat: buildMeerkat,
   fox: buildFox,
   parrot: buildParrot,
+  toucan: buildToucan,
+  sloth: buildSloth,
+  monkey: buildMonkey,
 };
 
 export function buildCritterRig(species: CritterSpecies, params: CritterParams): CritterRig {

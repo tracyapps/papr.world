@@ -3,6 +3,8 @@ import {
   CAMERA_SENSITIVITY_MIN,
   UI_TEXT_SCALE_MAX,
   UI_TEXT_SCALE_MIN,
+  HUD_SCALE_MAX,
+  HUD_SCALE_MIN,
   getSetting,
   onSettingsChanged,
   setSetting,
@@ -104,8 +106,37 @@ function buildSettingsOverlay(): HTMLElement {
       <h2 id="hud-settings-title">Settings</h2>
       <h3 class="hud-overlay-subhead">Display</h3>
       <div class="hud-setting hud-setting-slider">
+        <label for="setting-hud-scale">
+          <strong>Interface size</strong>
+          <small id="setting-hud-scale-hint">
+            Shrinks or grows the tool bar and the scrapbook, to give small screens
+            more room for the world
+          </small>
+        </label>
+        <div class="hud-slider-row">
+          <span class="hud-slider-end" aria-hidden="true">Smaller</span>
+          <input
+            type="range"
+            id="setting-hud-scale"
+            min="${HUD_SCALE_MIN}"
+            max="${HUD_SCALE_MAX}"
+            step="0.05"
+            aria-describedby="setting-hud-scale-hint"
+          >
+          <span class="hud-slider-end" aria-hidden="true">Larger</span>
+          <output for="setting-hud-scale" id="setting-hud-scale-value"></output>
+        </div>
+      </div>
+      <label class="hud-setting">
+        <input type="checkbox" id="setting-compact-toolbar">
+        <span>
+          <strong>Compact tool bar</strong>
+          <small>A small floating tool palette instead of the full-height rail — the « button on the tool bar does the same</small>
+        </span>
+      </label>
+      <div class="hud-setting hud-setting-slider">
         <label for="setting-ui-text-scale">
-          <strong>UI size</strong>
+          <strong>Text size</strong>
           <small id="setting-ui-text-scale-hint">
             Resizes text in the map, chat, and menus — the browser's own text-size or zoom
             setting works alongside this
@@ -259,6 +290,34 @@ function buildSettingsOverlay(): HTMLElement {
     textScale.addEventListener('keydown', (event) => event.stopPropagation());
   }
 
+  const hudScaleInput = overlay.querySelector<HTMLInputElement>('#setting-hud-scale');
+  const hudScaleValue = overlay.querySelector<HTMLOutputElement>('#setting-hud-scale-value');
+  if (hudScaleInput) {
+    const describe = (value: number) => `${Math.round(value * 100)}% interface size`;
+    const reflect = (value: number) => {
+      hudScaleInput.setAttribute('aria-valuetext', describe(value));
+      if (hudScaleValue) hudScaleValue.textContent = `${Math.round(value * 100)}%`;
+    };
+    hudScaleInput.value = String(getSetting('hudScale'));
+    reflect(getSetting('hudScale'));
+    hudScaleInput.addEventListener('input', () => {
+      const value = Number(hudScaleInput.value);
+      setSetting('hudScale', value);
+      reflect(value);
+    });
+    hudScaleInput.addEventListener('keydown', (event) => event.stopPropagation());
+  }
+
+  const compactToolbar = overlay.querySelector<HTMLInputElement>('#setting-compact-toolbar');
+  if (compactToolbar) {
+    compactToolbar.checked = getSetting('toolbarStyle') === 'compact';
+    compactToolbar.addEventListener('change', () => {
+      setSetting('toolbarStyle', compactToolbar.checked ? 'compact' : 'full');
+    });
+    // The overlay is rebuilt on every open, so the tool bar's own « button
+    // (which changes the same setting) is always reflected here on next open.
+  }
+
   const changeLook = overlay.querySelector<HTMLButtonElement>('#setting-change-look');
   changeLook?.addEventListener('click', () => {
     // The editor is its own modal; leaving settings open behind it would give
@@ -357,7 +416,7 @@ export function openHudMenu(menu: MenuId) {
 }
 
 /**
- * Applies the "UI size" setting to the whole document via one custom
+ * Applies the "Text size" setting to the whole document via one custom
  * property, rather than each panel reading the setting itself. Only rules
  * written in `rem` respond — see the rollout note on `Settings.uiTextScale`.
  */

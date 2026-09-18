@@ -11,6 +11,7 @@ import {
   type SeedId,
 } from '../sim/catalogs/seeds';
 import { requestHudLayout } from './hudLayout';
+import { getSetting, onSettingsChanged, setSetting } from '../game/settings';
 
 // assets/ui-art, not designs/. The designs/ folder is gitignored working
 // material, so anything the GAME loads at runtime cannot live there — it
@@ -227,6 +228,19 @@ function renderToolbar() {
   renderSeedSelector();
 }
 
+/**
+ * The minimize/expand toggle. A pressed toggle ("Compact tool bar: on")
+ * rather than a label that flips between two verbs, so a screen reader
+ * announces one stable name and a state. The title is the sighted hint.
+ */
+function renderToolbarSize() {
+  const button = toolbar?.querySelector<HTMLButtonElement>('[data-toolbar-size]');
+  if (!button) return;
+  const compact = getSetting('toolbarStyle') === 'compact';
+  button.setAttribute('aria-pressed', String(compact));
+  button.title = compact ? 'Show the full tool bar' : 'Shrink the tool bar';
+}
+
 function renderSeedSelector() {
   if (!seedSelector) return;
   const active = previewSlot ? previewSlot === 3 : getActionMode() === 'plant';
@@ -281,7 +295,11 @@ export function initializeToolToolbar() {
     : ''}
           <span class="tool-shortcut" aria-hidden="true">${slot.slot}</span>
         </button>`).join('')}
-    </div>`;
+    </div>
+    <button class="tool-toolbar-size" type="button" data-toolbar-size aria-pressed="false">
+      <span class="tool-toolbar-size-icon" aria-hidden="true"></span>
+      <span class="sr-only">Compact tool bar</span>
+    </button>`;
 
   app.appendChild(toolbar);
   seedSelector = document.createElement('section');
@@ -294,7 +312,12 @@ export function initializeToolToolbar() {
   toolbar.addEventListener('pointerup', (event) => event.stopPropagation());
   toolbar.addEventListener('wheel', (event) => event.stopPropagation());
   toolbar.addEventListener('click', (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-tool-slot]');
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-toolbar-size]')) {
+      setSetting('toolbarStyle', getSetting('toolbarStyle') === 'compact' ? 'full' : 'compact');
+      return;
+    }
+    const button = target.closest<HTMLButtonElement>('[data-tool-slot]');
     if (button) selectToolSlot(Number(button.dataset.toolSlot));
   });
   for (const eventName of ['pointerdown', 'pointerup', 'wheel'] as const) {
@@ -312,7 +335,9 @@ export function initializeToolToolbar() {
 
   onActionModeChanged(renderToolbar);
   onGameStateChanged(renderToolbar);
+  onSettingsChanged(renderToolbarSize);
   renderToolbar();
+  renderToolbarSize();
   // The rail now has five slots; let the layout pass re-measure and rescale
   // it so the lowest one still clears the scrapbook dock.
   requestHudLayout();

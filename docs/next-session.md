@@ -6,6 +6,43 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Jungle animals: toucan, sloth, monkey — the canopy crowd (2026-09-18,
+  third pass).** The first critters that live *in* trees. New
+  `src/game/critterCanopy.ts` turns each page's jungle trees and palms into
+  branch lines, crowns, trunks, and vines, and moves critters between them as
+  queues of posed legs: sloths hang upside down and shuffle along branches
+  (and down vines), monkeys sit, swing, and leap tree to tree, toucans fly
+  perch to perch. All three come down to the ground sometimes and climb/fly
+  back up. Click one overhead to ask it down (monkeys/toucans come at once, a
+  sloth… sets off). Talk reach uses ground distance while they're up a tree.
+  Rigs checked visually in a headless render (all poses × 3 species); **not
+  yet seen in the running game**. Four new quests (crepe vine, say hi to a
+  sloth, a vine for the sloth's hammock, blotting caps), greetings and
+  self-replies for all three, four new tropical place facts. Tropical critter
+  count 3–5 → 4–6. Details: `critter-design.md` → "Canopy Behavior".
+
+- **Jungle canopy, hanging vines, trimmable undergrowth (2026-09-18, second
+  pass).** Jungle trees now come in understory / canopy / emergent layers (up
+  to 22 units, still under redwood height). Vines hang from tall jungle trees
+  and can be trimmed for **crepe vine**, a new tropical-only material.
+  Mushrooms (→ new **blotting caps**) and shrubs (→ twigs/fiber) are
+  trimmable everywhere they grow. Details and the yield table are at the
+  bottom of `tropical-biome-plan.md`.
+- **Interface size + compact tool bar.** Settings → Display now has
+  **Interface size** (60–120%, `hudScale`), which scales the tool bar and the
+  whole scrapbook dock (cover, strip, and cards — via CSS `zoom` on
+  `.scrapbook-dock`), and a **Compact tool bar** toggle (`toolbarStyle`). The
+  old "UI size" slider was renamed **Text size**, because that is all it
+  ever did. Compact mode is a small floating palette: the same slots, art,
+  and shortcut badges, each drawn at `--hud-compact-slot-scale` (0.34 ×
+  interface size), only as tall as its tools. A « / » toggle on the tool bar
+  itself switches modes (`aria-pressed`, one stable name). `hudLayout.ts`
+  owns all of it: `--hud-rail-width` follows the mode and scale, so the
+  status chips, scrapbook cover, and minimap default all slide left with it.
+  Rendered and checked in a headless harness (full/compact × 100/70%); **not
+  yet checked in the running game** — run `npm run dev` and `npm run
+  hud:check`.
+
 - **The tropical biome is real — the sixth biome, built end to end.** The
   owner's art drop (35 new prop cutouts, 15 new material papers, all compiled
   through the ordinary `assets:compile`) was the unblock; the build followed

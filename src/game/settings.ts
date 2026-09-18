@@ -12,6 +12,14 @@
 
 export type CameraDragMode = 'grab-world' | 'move-camera';
 
+/**
+ * How the left tool bar is drawn:
+ * - 'full': the tall dark rail running the whole left edge (the original).
+ * - 'compact': a small floating palette — same tool art and shortcut badges,
+ *   much smaller, only as tall as its tools (think Photoshop's tool bar).
+ */
+export type ToolbarStyle = 'full' | 'compact';
+
 export type Settings = {
   /**
    * What a camera drag means:
@@ -52,6 +60,16 @@ export type Settings = {
    * every panel in the game.
    */
   uiTextScale: number;
+  /**
+   * Multiplier on the size of the big HUD furniture — the tool bar and the
+   * scrapbook dock (cover and open strip) — so small screens can give more
+   * of themselves to the world. Separate from `uiTextScale`, which is text
+   * only; this scales whole boxes, art and all. Published as
+   * `--hud-ui-scale` by `hudLayout.ts`.
+   */
+  hudScale: number;
+  /** Full-height rail or compact floating palette. See `ToolbarStyle`. */
+  toolbarStyle: ToolbarStyle;
 };
 
 /** Slider bounds. Wide enough to matter at both ends, never zero. */
@@ -62,12 +80,18 @@ export const CAMERA_SENSITIVITY_MAX = 2;
 export const UI_TEXT_SCALE_MIN = 0.85;
 export const UI_TEXT_SCALE_MAX = 1.4;
 
+/** Interface-size slider bounds. Below ~0.6 the tool art stops reading. */
+export const HUD_SCALE_MIN = 0.6;
+export const HUD_SCALE_MAX = 1.2;
+
 const DEFAULTS: Settings = {
   cameraDragMode: 'grab-world',
   cameraSensitivity: 1,
   collapsedHudWidgets: [],
   showLearningTimer: true,
   uiTextScale: 1,
+  hudScale: 1,
+  toolbarStyle: 'full',
 };
 
 const STORAGE_KEY = 'pencil-and-paper.settings.v1';
@@ -104,6 +128,12 @@ function load(): Settings {
           UI_TEXT_SCALE_MAX,
           Math.max(UI_TEXT_SCALE_MIN, parsed.uiTextScale),
         );
+      }
+      if (typeof parsed.hudScale === 'number' && Number.isFinite(parsed.hudScale)) {
+        settings.hudScale = Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, parsed.hudScale));
+      }
+      if (parsed.toolbarStyle === 'full' || parsed.toolbarStyle === 'compact') {
+        settings.toolbarStyle = parsed.toolbarStyle;
       }
     }
   } catch {

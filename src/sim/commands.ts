@@ -31,12 +31,13 @@ import {
   type ShopId,
 } from './catalogs/shops';
 import {
-  TRIM_STAGE_RESPONSES,
+  SPECIES_NAMES,
   describeTrimYield,
   resolveTrimYield,
   treeGrowthAt,
   treeStageFor,
   trimProfileForTier,
+  trimStageResponse,
   type TreeAddress,
 } from './catalogs/trees';
 import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, planterBoxAt, type BuildPieceKey } from '../world/buildPieces';
@@ -932,7 +933,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       const equippedTool = state.player.equippedTool;
       const tool = equippedTool ? TOOL_DEFS[equippedTool] : null;
       if (!tool || tool.verb !== 'trim' || (state.player.tools[equippedTool!] ?? 0) <= 0) {
-        return { ok: false, reason: 'Hold a pair of scissors to trim a tree.' };
+        return { ok: false, reason: 'Hold a pair of scissors to trim something.' };
       }
       const { target } = command;
       if (!target.pageId || !target.treeKey || !Number.isFinite(target.x) || !Number.isFinite(target.z)) {
@@ -950,7 +951,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       const record = page.treeGrowth[target.treeKey];
       const stage = treeStageFor(treeGrowthAt(record, command.now));
       if (stage === 'resting') {
-        return { ok: false, reason: TRIM_STAGE_RESPONSES.resting };
+        return { ok: false, reason: trimStageResponse(target.species, 'resting') };
       }
 
       const trims = (record?.trims ?? 0) + 1;
@@ -983,7 +984,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       return {
         ok: true,
         drops,
-        message: `${describeTrimYield(yields)} fell beside the tree. ${TRIM_STAGE_RESPONSES[treeStageFor(remaining)]}`,
+        message: `${describeTrimYield(yields)} fell beside the ${SPECIES_NAMES[target.species].one}. ${trimStageResponse(target.species, treeStageFor(remaining))}`,
       };
     }
 

@@ -3,6 +3,8 @@ import { camera, scene } from '../render/context';
 import { RENDER_ORDER } from '../render/renderOrder';
 import { avatar } from './avatar';
 import { triggerFlourish } from './critterBehavior';
+import { isAloft, requestCanopyVisit } from './critterCanopy';
+import { sampleTerrainHeight } from '../world/terrain';
 import { pickCritterAtScreen } from './critters';
 import type { Critter } from './critterBehavior';
 import { addFriendshipPoints } from './friendship';
@@ -32,7 +34,14 @@ const PET_VERBS: Record<string, string> = {
   woodchuck: 'chatters its teeth and beams',
   meerkat: 'stands up tall on its toes to get a better look at you',
   fox: 'flicks its tail and gives a sly little yip',
+  parrot: 'fluffs up and says "pretty!" about itself',
+  toucan: 'tosses a berry and catches it, showing off',
+  sloth: 'waves… very… slowly…',
+  monkey: 'does a backflip, then another, just in case you missed it',
 };
+
+/** Talking-reach for someone standing under a tree (matches TALK_REACH). */
+const UNDER_TREE_REACH = 5.2;
 
 // --- Paper hearts -----------------------------------------------------
 
@@ -141,6 +150,23 @@ export function initializePetting() {
 export function tryPetAt(clientX: number, clientY: number) {
   const critter = pickCritterAtScreen(clientX, clientY, camera);
   if (!critter) return;
+
+  // Up in a tree and out of arm's reach: ask it down instead. Monkeys and
+  // toucans come straight away; a sloth sets off, eventually.
+  if (isAloft(critter)) {
+    const group = critter.rig.group;
+    const ground = Math.hypot(group.position.x - avatar.position.x, group.position.z - avatar.position.z);
+    if (ground <= UNDER_TREE_REACH && group.position.distanceTo(avatar.position) > PET_REACH) {
+      const answer = requestCanopyVisit(critter, avatar.position, sampleTerrainHeight);
+      const name = critter.params.name;
+      showPetToast(
+        answer === 'coming' ? `${name} spots you and comes down to say hi`
+          : answer === 'slow' ? `${name} notices you and begins the long climb down. Give it a minute. Or several.`
+          : `${name} is busy up in the trees — try talking instead`,
+      );
+      return;
+    }
+  }
 
   const distance = critter.rig.group.position.distanceTo(avatar.position);
   if (distance > PET_REACH) {

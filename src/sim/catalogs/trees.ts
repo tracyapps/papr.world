@@ -49,7 +49,44 @@ export type TreeStage = 'flourishing' | 'trimmed' | 'cropped' | 'resting';
  * would mean every new drawing needed a yield entry, and would drag
  * renderer-side identities into the simulation.
  */
-export type TreeSpecies = 'pine' | 'leafy' | 'redwood' | 'palm' | 'banana';
+// vine, mushroom, and shrub are not trees, but use the same renewable
+// snip-it-and-it-grows-back model (see SPECIES_FORM). Vines hang from the
+// tall jungle canopy, and mushrooms and shrubs are undergrowth cutouts that
+// joined the economy on 2026-09-18. Comments stay outside the union because
+// tools/validate-quests.mjs reads it as text.
+export type TreeSpecies =
+  | 'pine' | 'leafy' | 'redwood' | 'palm' | 'banana'
+  | 'vine' | 'mushroom' | 'shrub';
+
+/**
+ * What kind of living thing a species is, for wording and for how a cut
+ * looks. Trees lose outer branches; plants get a haircut all over; vines get
+ * shorter from the bottom while staying hooked to the branch above.
+ */
+export type GrowthForm = 'tree' | 'plant' | 'vine';
+
+export const SPECIES_FORM: Record<TreeSpecies, GrowthForm> = {
+  pine: 'tree',
+  leafy: 'tree',
+  redwood: 'tree',
+  palm: 'tree',
+  banana: 'tree',
+  vine: 'vine',
+  mushroom: 'plant',
+  shrub: 'plant',
+};
+
+/** How a species is named in toasts, quests, and critter tips. */
+export const SPECIES_NAMES: Record<TreeSpecies, { one: string; many: string }> = {
+  pine: { one: 'pine tree', many: 'pine trees' },
+  leafy: { one: 'leafy tree', many: 'leafy trees' },
+  redwood: { one: 'redwood', many: 'redwoods' },
+  palm: { one: 'palm tree', many: 'palm trees' },
+  banana: { one: 'banana tree', many: 'banana trees' },
+  vine: { one: 'hanging vine', many: 'hanging vines' },
+  mushroom: { one: 'mushroom cluster', many: 'mushroom clusters' },
+  shrub: { one: 'shrub', many: 'shrubs' },
+};
 
 /** Where a trimmable tree lives, in terms a server could validate. */
 export type TreeAddress = {
@@ -204,6 +241,29 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     secondary: 'palm-fiber',
     variety: 'sunbaked-cardboard',
   },
+  vine: {
+    // The jungle's own material: long twisted strands, like crepe-paper
+    // streamers, that only come off a vine hanging from the canopy. Nothing
+    // crepe lies loose anywhere, so it is tropical-exclusive by construction
+    // (`SPECIES_BIOMES.vine` is the only biome list that names it).
+    primary: 'crepe-vine',
+    secondary: 'mossy-paper-fiber',
+    variety: 'palm-fiber',
+  },
+  mushroom: {
+    // Soft, spongy caps — blotting paper, which drinks up the damp. Forest
+    // floors and the jungle both grow them.
+    primary: 'blotting-caps',
+    secondary: 'mossy-paper-fiber',
+    variety: 'blotting-caps',
+  },
+  shrub: {
+    // A bush is a small tree as far as the paper is concerned: twigs and
+    // leaves, and now and then a springy ribbonwood shoot.
+    primary: 'kraft-twigs',
+    secondary: 'mossy-paper-fiber',
+    variety: 'ribbonwood-sticks',
+  },
 };
 
 /**
@@ -273,3 +333,24 @@ export const TRIM_STAGE_RESPONSES: Record<TreeStage, string> = {
   cropped: 'Small new buds are already showing along the cut.',
   resting: 'This one is resting — give it a little while to put out new growth.',
 };
+
+const FORM_STAGE_RESPONSES: Record<GrowthForm, Record<TreeStage, string>> = {
+  tree: TRIM_STAGE_RESPONSES,
+  plant: {
+    flourishing: 'It fluffs right back up where you snipped.',
+    trimmed: 'It looks neater — a tidy little haircut.',
+    cropped: 'Fresh new growth is already curling up from the middle.',
+    resting: 'This one is resting — give it a little while to fill back in.',
+  },
+  vine: {
+    flourishing: 'The vine sways and hardly seems shorter.',
+    trimmed: 'The vine swings up a little shorter, still hooked on tight.',
+    cropped: 'A new green tip is already reaching down again.',
+    resting: 'This vine is resting — give it a little while to grow back down.',
+  },
+};
+
+/** The kind reply for one species at one stage. */
+export function trimStageResponse(species: TreeSpecies, stage: TreeStage): string {
+  return FORM_STAGE_RESPONSES[SPECIES_FORM[species]][stage];
+}

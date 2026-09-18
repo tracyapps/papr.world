@@ -1,6 +1,6 @@
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
-import { setEngagedCritter, type Critter } from './critterBehavior';
+import { critterReachDistance, setEngagedCritter, type Critter } from './critterBehavior';
 import {
   beginCritterConversation,
   everydayConversation,
@@ -29,6 +29,9 @@ const SPECIES_LABELS: Record<Critter['species'], string> = {
   meerkat: 'paper meerkat',
   fox: 'paper fox',
   parrot: 'paper parrot',
+  toucan: 'paper toucan',
+  sloth: 'paper sloth',
+  monkey: 'paper monkey',
 };
 
 let panel: HTMLElement | null = null;
@@ -216,7 +219,8 @@ export function initializeCritterDialogue() {
 export function tryStartCritterConversationAt(clientX: number, clientY: number): boolean {
   const critter = pickCritterAtScreen(clientX, clientY, camera);
   if (!critter) return false;
-  if (critter.rig.group.position.distanceTo(avatar.position) > TALK_REACH) {
+  // Ground distance when it is up a tree — you can talk to a sloth overhead.
+  if (critterReachDistance(critter, avatar.position) > TALK_REACH) {
     showPetToast(`${critter.params.name} is over there — walk closer to talk`);
     return true;
   }

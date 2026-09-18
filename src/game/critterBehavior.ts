@@ -13,6 +13,7 @@ import {
   type IdleActionId,
 } from './critterIdle';
 import { getBoldnessBoost } from './friendship';
+import { isAloft, updateCanopyCritter, type CanopyState } from './critterCanopy';
 
 // Shared critter behavior: home-range wandering with player curiosity.
 // Defaults follow the cozy-game convention (Animal Crossing / Stardew):
@@ -83,6 +84,12 @@ export type Critter = {
   /** Cached result of the last direct-path check, and time until the next. */
   pathBlocked: boolean;
   pathCooldown: number;
+  /**
+   * Tree-dwellers only (sloth, monkey, toucan): where in the canopy they are
+   * and how they are getting about. Absent for everyone else, and for a
+   * tree-dweller whose page has no suitable trees.
+   */
+  canopy?: CanopyState;
 };
 
 const ARRIVE = 0.35;
@@ -686,8 +693,26 @@ export function triggerFlourish(critter: Critter, facePosition?: THREE.Vector3):
   return true;
 }
 
+/**
+ * How far away a critter counts as, for talking to it.
+ *
+ * Up in a tree, only the ground distance counts: you can chat with a sloth
+ * hanging over your head. Everywhere else it is the plain 3D distance.
+ */
+export function critterReachDistance(critter: Critter, position: THREE.Vector3) {
+  const group = critter.rig.group;
+  if (isAloft(critter)) return Math.hypot(group.position.x - position.x, group.position.z - position.z);
+  return group.position.distanceTo(position);
+}
+
 export function updateCritter(critter: Critter, delta: number, elapsed: number, avatarPosition: THREE.Vector3) {
-  if (critter.rig.flying) {
+  if (critter.canopy) {
+    updateCanopyCritter(critter, delta, elapsed, avatarPosition, {
+      engaged: engagedCritterId === critter.id,
+      heightAt: sampleTerrainHeight,
+      groundUpdate: updateGroundCritter,
+    });
+  } else if (critter.rig.flying) {
     updateFlyingCritter(critter, delta, elapsed, avatarPosition);
   } else {
     updateGroundCritter(critter, delta, elapsed, avatarPosition);

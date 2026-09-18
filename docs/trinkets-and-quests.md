@@ -172,10 +172,12 @@ tiers — the owner's own ladder:
   tool/plan ladder. An odyssey is not even *considered* until the player has
   finished at least five quests (`ODYSSEY_COMPLETED_REQUESTS`).
 
-The catalog holds **45 quests**: 16 in `src/sim/catalogs/quests.ts`
-(`AUTHORED_QUESTS`) and 29 in `src/sim/catalogs/questCatalog.expansion.ts`
-(`QUEST_EXPANSION_DEFS`); `allQuestDefs()` merges the two by id. By tier: 18
-favor, 15 errand, 12 odyssey.
+The catalog holds **49 quests**: 16 in `src/sim/catalogs/quests.ts`
+(`AUTHORED_QUESTS`) and 33 in `src/sim/catalogs/questCatalog.expansion.ts`
+(`QUEST_EXPANSION_DEFS`); `allQuestDefs()` merges the two by id. By tier: 21
+favor, 16 errand, 12 odyssey. (The last four, 2026-09-18, are the canopy
+crowd's: crepe vine, saying hi to a sloth, a vine for a sloth's hammock, and
+blotting caps.)
 
 ### "Never out of reach — it is the next step"
 

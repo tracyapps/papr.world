@@ -289,6 +289,32 @@ const SPECIES_IDLE: Record<CritterSpecies, WeightedAction[]> = {
     { id: 'sniff-ground', weight: 2 },
     { id: 'shake-off', weight: 1 },
   ],
+  // The bill does the looking: lots of slow head turns, a little preening.
+  toucan: [
+    { id: 'look-around', weight: 6 },
+    { id: 'perk-up', weight: 3 },
+    { id: 'groom', weight: 3 },
+    { id: 'settle', weight: 3 },
+    { id: 'shake-off', weight: 1 },
+  ],
+  // Mostly settling. The canopy layer also runs every sloth action ~2.6x
+  // slower (`idleSlowdown`), so even a glance is an unhurried event.
+  sloth: [
+    { id: 'settle', weight: 8 },
+    { id: 'look-around', weight: 3 },
+    { id: 'stretch', weight: 1 },
+    { id: 'groom', weight: 1 },
+  ],
+  // Busy, nosy, and scratching.
+  monkey: [
+    { id: 'look-around', weight: 5 },
+    { id: 'groom', weight: 4 },
+    { id: 'perk-up', weight: 4 },
+    { id: 'shake-off', weight: 2 },
+    { id: 'sniff-ground', weight: 2 },
+    { id: 'ear-swivel', weight: 1 },
+    { id: 'settle', weight: 1 },
+  ],
 };
 
 /**

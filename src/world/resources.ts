@@ -56,6 +56,14 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'palm-fiber': {
     material: 'paper.hill', visual: 'fiberTuft', mapColor: '#7ca24c',
   },
+  // Neither lies loose anywhere; both come off living things with scissors.
+  // Salmon ribbon-weave reads as twisted crepe until a tile is drawn.
+  'crepe-vine': {
+    material: 'paper.salmon', visual: 'fiberTuft', mapColor: '#5f9a3e',
+  },
+  'blotting-caps': {
+    material: 'paper.brown.warm', visual: 'stoneCluster', mapColor: '#b98a6a',
+  },
   'mossy-paper-fiber': {
     material: 'paper.monstera', visual: 'fiberTuft', mapColor: '#4f823f',
   },

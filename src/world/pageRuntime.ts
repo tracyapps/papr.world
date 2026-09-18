@@ -40,6 +40,7 @@ import { buildPlacedPieceVisual } from './buildPieceVisuals';
 import { registerTerrainPlant } from '../game/plantInteractions';
 import { registerPlacedPieceVisual } from '../game/placedPieceInteractions';
 import { treeSpeciesOf } from './treeRuntime';
+import { decorTrimSpecies } from './trimmableDecor';
 import { registerTrimmableTree } from '../game/treeInteractions';
 import { buildResourceDropVisual } from './resourceDropVisual';
 
@@ -107,6 +108,10 @@ export const DECOR_DEFS: Record<DecorKind, { url: string; aspectRatio: number; m
   'bird-of-paradise-1': { url: '/assets/runtime/props/flower-bird-of-paradise-01.png', aspectRatio: aspect(460, 600), mapColor: '#d9963e' },
   'bamboo-1': { url: '/assets/runtime/props/bamboo-cluster-01.png', aspectRatio: aspect(520, 760), mapColor: '#5a9440' },
   'mangrove-1': { url: '/assets/runtime/props/mangrove-sapling-01.png', aspectRatio: aspect(480, 520), mapColor: '#5c8a48' },
+  // Hanging vines — only ever placed through a tree's `vines` list.
+  'hanging-vine-1': { url: '/assets/runtime/props/hanging-vine-01.png', aspectRatio: aspect(360, 620), mapColor: '#4f8a3a' },
+  'hanging-vine-2': { url: '/assets/runtime/props/hanging-vine-02.png', aspectRatio: aspect(360, 620), mapColor: '#4f8a3a' },
+  'hanging-vine-flowering-1': { url: '/assets/runtime/props/hanging-vine-flowering-01.png', aspectRatio: aspect(360, 620), mapColor: '#6f8a3a' },
 };
 
 const GROUND_MAP_COLORS: Record<string, string> = {
@@ -268,6 +273,36 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         height,
         baseY,
       });
+      // Vines ride on their tree: same plane, hooked under the canopy, a
+      // hair in front of it. Built here rather than as their own props so a
+      // tree culled for standing in water takes its vines with it.
+      prop.vines?.forEach((vine, vineIndex) => {
+        const vineDef = DECOR_DEFS[vine.art];
+        const rotY = prop.rotY ?? 0;
+        const topY = baseY + vine.topY;
+        const vx = prop.x + Math.cos(rotY) * vine.offset + Math.sin(rotY) * vine.depth;
+        const vz = prop.z - Math.sin(rotY) * vine.offset + Math.cos(rotY) * vine.depth;
+        const mesh = createCutout({
+          aspectRatio: vineDef.aspectRatio,
+          height: vine.height,
+          position: [vx, topY - vine.height / 2, vz],
+          rotationY: rotY,
+          textureUrl: vineDef.url,
+        });
+        group.add(mesh);
+        registerTrimmableTree({
+          id: `${featureId}:vine:${vineIndex}`,
+          object: mesh,
+          pageId: page.id,
+          treeKey: `${prop.id ?? positionalId}:vine:${vineIndex}`,
+          species: 'vine',
+          x: vx,
+          z: vz,
+          height: vine.height,
+          baseY: topY - vine.height,
+          hangTopY: topY,
+        });
+      });
       registerMapFeature({
         color: prop.mapColor ?? def.mapColor,
         id: featureId,
@@ -282,9 +317,9 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
     }
 
     case 'decor': {
-      // Same cutout treatment as a tree, but intentionally skips
-      // `registerTrimmableTree` — desert scenery like cactus isn't part of
-      // the tree-growth/harvest economy.
+      // Same cutout treatment as a tree. Most decor (cactus, ferns, flowers)
+      // stays out of the growth economy; mushrooms and shrubs join it and
+      // register exactly like a tree does, keyed by position.
       const def = DECOR_DEFS[prop.art];
       const height = prop.height ?? 2.4;
       const baseY = sampleTerrainHeight(prop.x, prop.z);
@@ -296,6 +331,20 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
         textureUrl: def.url,
       });
       group.add(decor);
+      const trimSpecies = decorTrimSpecies(prop.art);
+      if (trimSpecies) {
+        registerTrimmableTree({
+          id: featureId,
+          object: decor,
+          pageId: page.id,
+          treeKey: prop.id ?? positionalId,
+          species: trimSpecies,
+          x: prop.x,
+          z: prop.z,
+          height,
+          baseY,
+        });
+      }
       registerMapFeature({
         color: prop.mapColor ?? def.mapColor,
         id: featureId,

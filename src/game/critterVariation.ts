@@ -5,7 +5,11 @@ import { createRng } from '../core/math';
 // agree without syncing). Variation comes from swapping paper textures,
 // colors, scale, speed, shyness, and a name.
 
-export type CritterSpecies = 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck' | 'meerkat' | 'fox' | 'parrot';
+// toucan, sloth, and monkey live up in the jungle canopy (critterCanopy.ts).
+// (Comments stay outside the union: tools/validate-quests.mjs reads it as text.)
+export type CritterSpecies =
+  | 'squirrel' | 'butterfly' | 'raccoon' | 'bunny' | 'bird' | 'cat' | 'woodchuck' | 'meerkat' | 'fox' | 'parrot'
+  | 'toucan' | 'sloth' | 'monkey';
 
 export type PersonalityTrait =
   | 'bold'
@@ -114,6 +118,32 @@ const COATS: Record<CritterSpecies, Coat[]> = {
     { url: null, color: '#3fae5a', accent: '#f2c14e' }, // plain bright green
     { url: null, color: '#2f8ac4', accent: '#e8a03c' }, // a blue one, every flock has one
   ],
+  // Toucans break the coat convention on purpose: the body is always dark,
+  // `accent` is the beak, and a paper texture goes on the BEAK (see
+  // buildToucan). The bill is the animal.
+  toucan: [
+    { url: null, color: '#1d1a19', accent: '#f28c28' }, // toco: the classic orange bill
+    { url: `${M}/curving-deeper-rainbow.png`, color: '#1d1a19', accent: '#9bd14b' }, // keel-billed rainbow
+    { url: `${M}/folded-stripes-yellow-pink-purple.png`, color: '#1d1a19', accent: '#f2c14e' }, // striped bill
+    { url: null, color: '#26382d', accent: '#e8b23c' }, // green-black, golden bill
+    { url: `${M}/3d-squares-orange.png`, color: '#1d1a19', accent: '#f28c28' }, // chequered bill
+  ],
+  // Real sloths grow algae in their fur, so a green sloth is not a fantasy —
+  // it is the most accurate coat here.
+  sloth: [
+    { url: `${M}/moss-speckle.png`, color: '#ffffff', accent: '#efe2c4' }, // algae-green
+    { url: `${M}/construction-paper-brown-1.png`, color: '#ffffff', accent: '#f0e3c6' }, // warm brown
+    { url: `${M}/camouflage-blobs-desert.png`, color: '#ffffff', accent: '#f2e6cc' }, // dappled tan
+    { url: `${M}/bark-striations.png`, color: '#ffffff', accent: '#ede0c2' }, // bark-streaked
+    { url: null, color: '#9c8466', accent: '#efe3c8' }, // plain sandy
+  ],
+  monkey: [
+    { url: `${M}/construction-paper-brown-2.png`, color: '#ffffff', accent: '#e9c9a0' }, // brown paper
+    { url: null, color: '#7a5134', accent: '#edd2ad' }, // chestnut
+    { url: `${M}/building-blocks-brown.png`, color: '#ffffff', accent: '#e7c49b' }, // blocky brown
+    { url: null, color: '#4a3a33', accent: '#e8c7a8' }, // dark, pale-faced
+    { url: `${M}/camouflage-blobs-desert.png`, color: '#ffffff', accent: '#f0d6b0' }, // golden
+  ],
 };
 
 /** Cozy craft-table names. Seeded pick; duplicates across the world are fine. */
@@ -142,6 +172,14 @@ const BASE: Record<CritterSpecies, { speed: number; wander: number }> = {
   // Flies like a bird, but a parrot ranges further and lands more often —
   // a flagship should be all over its biome, not a glimpse.
   parrot: { speed: 1.45, wander: 11 },
+  // On the ground a toucan hops like a smaller parrot; the speed that
+  // matters is its flight between trees (critterCanopy.ts multiplies this).
+  toucan: { speed: 1.25, wander: 7 },
+  // About a fifth of everyone else's pace, on purpose. Climbing and hanging
+  // use this too, so a trip down a trunk takes a good half-minute.
+  sloth: { speed: 0.24, wander: 3 },
+  // Quick on the ground, quicker in the trees.
+  monkey: { speed: 2.1, wander: 8 },
 };
 
 const SECONDARY_TRAITS: PersonalityTrait[] = [
@@ -170,6 +208,10 @@ export function generateCritterParams(species: CritterSpecies, seed: number): Cr
   if (secondary === primary) {
     secondary = SECONDARY_TRAITS[(SECONDARY_TRAITS.indexOf(secondary) + 1) % SECONDARY_TRAITS.length];
   }
+  // Two species come with their temperament built in. No extra rng draws, so
+  // nothing about any other critter's identity shifts.
+  if (species === 'sloth') secondary = 'sleepy';
+  if (species === 'monkey') secondary = 'mischievous';
 
   return {
     name,
@@ -197,4 +239,7 @@ export const SPECIES_MAP_COLORS: Record<CritterSpecies, string> = {
   meerkat: '#c9a06a',
   fox: '#c1531f',
   parrot: '#3fae5a',
+  toucan: '#f28c28',
+  sloth: '#9c8466',
+  monkey: '#7a5134',
 };

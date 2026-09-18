@@ -1,6 +1,6 @@
 import type * as THREE from 'three';
 import { groundedCutoutY } from '../render/builders';
-import { treeStageProgress, type TreeGrowthState, type TreeSpecies, type TreeStage } from '../sim/catalogs/trees';
+import { SPECIES_FORM, treeStageProgress, type GrowthForm, type TreeGrowthState, type TreeSpecies, type TreeStage } from '../sim/catalogs/trees';
 import type { TreeKind } from './types';
 
 /**
@@ -22,12 +22,33 @@ import type { TreeKind } from './types';
  * `applyTreeStageVisual` — nothing outside this file knows how the look is
  * achieved.
  */
-const STAGE_SCALE: Record<TreeStage, { height: number; width: number }> = {
-  flourishing: { height: 1, width: 1 },
-  trimmed: { height: 0.96, width: 0.9 },
-  cropped: { height: 0.91, width: 0.78 },
-  resting: { height: 0.87, width: 0.68 },
+const STAGE_SCALE: Record<GrowthForm, Record<TreeStage, { height: number; width: number }>> = {
+  tree: {
+    flourishing: { height: 1, width: 1 },
+    trimmed: { height: 0.96, width: 0.9 },
+    cropped: { height: 0.91, width: 0.78 },
+    resting: { height: 0.87, width: 0.68 },
+  },
+  // A mushroom or a bush has no trunk to protect, so a snip reads as a
+  // haircut all over — shorter and narrower together, but never so small it
+  // stops reading as the same plant.
+  plant: {
+    flourishing: { height: 1, width: 1 },
+    trimmed: { height: 0.9, width: 0.9 },
+    cropped: { height: 0.8, width: 0.8 },
+    resting: { height: 0.7, width: 0.72 },
+  },
+  // A vine is cut from the bottom: it gets visibly *shorter* while its top
+  // stays hooked on the branch (see `hangTopY` below), and barely narrower.
+  vine: {
+    flourishing: { height: 1, width: 1 },
+    trimmed: { height: 0.78, width: 0.96 },
+    cropped: { height: 0.58, width: 0.92 },
+    resting: { height: 0.42, width: 0.88 },
+  },
 };
+
+
 
 /** Share of the height reduction a redwood actually takes. */
 const REDWOOD_HEIGHT_DAMPING = 0.25;
@@ -61,10 +82,16 @@ export function applyTreeStageVisual(options: {
   height: number;
   baseY: number;
   now: number;
+  /**
+   * For hanging things: the world Y the top edge is hooked to. When set, the
+   * cutout shrinks upward toward it instead of settling onto the ground.
+   */
+  hangTopY?: number;
 }) {
-  const { mesh, stage, species, record, height, baseY, now } = options;
-  const from = STAGE_SCALE[stage];
-  const to = STAGE_SCALE[nextStageUp(stage)];
+  const { mesh, stage, species, record, height, baseY, now, hangTopY } = options;
+  const table = STAGE_SCALE[SPECIES_FORM[species]];
+  const from = table[stage];
+  const to = table[nextStageUp(stage)];
   const progress = treeStageProgress(record, now);
 
   const width = from.width + (to.width - from.width) * progress;
@@ -74,7 +101,9 @@ export function applyTreeStageVisual(options: {
     : rawHeight;
 
   mesh.scale.set(width, heightScale, 1);
-  mesh.position.y = groundedCutoutY(baseY, height) - (height * (1 - heightScale)) / 2;
+  mesh.position.y = hangTopY !== undefined
+    ? hangTopY - (height * heightScale) / 2
+    : groundedCutoutY(baseY, height) - (height * (1 - heightScale)) / 2;
 }
 
 /** The stage a tree grows into next. Flourishing is the top; it stays. */

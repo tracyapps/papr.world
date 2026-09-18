@@ -72,7 +72,9 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
       // Roots claim the ground; the trunk claims far less of it. The solid
       // radius is matched to the trunk the player can actually see — the map
       // feature registers the same 0.28 in `pageRuntime.ts`.
-      const redwood = prop.tree.startsWith('redwood');
+      // Emergent jungle trees (14+ units) have redwood-scale trunks in their
+      // art, so they claim a redwood-scale footprint too.
+      const redwood = prop.tree.startsWith('redwood') || (prop.height ?? 0) >= 14;
       const radius = redwood ? 0.8 : 0.52;
       const trunk = redwood ? 0.46 : 0.28;
       return {

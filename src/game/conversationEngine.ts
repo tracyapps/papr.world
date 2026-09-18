@@ -21,6 +21,7 @@ import {
   type TechNodeId,
 } from '../sim/catalogs/techTree';
 import { describeObjective, getQuestDef, type QuestDef } from '../sim/catalogs/quests';
+import { SPECIES_FORM, SPECIES_NAMES } from '../sim/catalogs/trees';
 import { getGameState } from '../sim/state';
 import { createRng } from '../core/math';
 import {
@@ -288,8 +289,9 @@ function localMaterialReplies(biome: Biome): string[] {
     } else if (trimmed) {
       const toolId = toolsInFamily('scissors')
         .find((candidate) => TOOL_DEFS[candidate].tier >= trimmed.minimumTier);
-      const treeName = trimmed.species === 'redwood' ? 'a living redwood' : `${trimmed.species} trees`;
-      replies.push(`“To gather ${resource.label} from ${treeName} here, use ${toolId ? TOOL_DEFS[toolId].name : 'scissors'}. It takes new growth without hurting the tree.”`);
+      const treeName = trimmed.species === 'redwood' ? 'a living redwood' : SPECIES_NAMES[trimmed.species].many;
+      const hurtNoun = SPECIES_FORM[trimmed.species] === 'tree' ? 'the tree' : 'it one bit';
+      replies.push(`“To gather ${resource.label} from ${treeName} here, use ${toolId ? TOOL_DEFS[toolId].name : 'scissors'}. It takes new growth without hurting ${hurtNoun}.”`);
     } else if (dug) {
       const toolId = toolsInFamily('shovel')
         .find((candidate) => TOOL_DEFS[candidate].tier >= dug.layer);

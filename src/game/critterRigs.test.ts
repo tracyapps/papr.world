@@ -30,6 +30,7 @@ type CritterSpecies = import('./critterVariation').CritterSpecies;
 
 const SPECIES: CritterSpecies[] = [
   'squirrel', 'butterfly', 'raccoon', 'bunny', 'bird', 'cat', 'woodchuck', 'meerkat', 'fox',
+  'parrot', 'toucan', 'sloth', 'monkey',
 ];
 
 function snapshotLocalPositions(root: THREE.Object3D) {
@@ -42,6 +43,13 @@ function snapshotLocalPositions(root: THREE.Object3D) {
 
 /** Drive a rig through every animation path it has. */
 function exercise(rig: ReturnType<typeof buildCritterRig>) {
+  // Tree-dwellers run every animation path in every canopy pose too.
+  for (const pose of ['sit', 'hang', 'swing', 'climb', 'fly', 'ground'] as const) {
+    rig.setPose?.(pose);
+    for (let step = 0; step <= 6; step += 1) {
+      rig.animate(step * 0.41, 1 / 60, step % 2 === 0, 1, step % 3 === 0);
+    }
+  }
   for (let step = 0; step <= 20; step += 1) {
     const t = step * 0.37;
     rig.animate(t, 1 / 60, false, 0, false);

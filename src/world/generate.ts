@@ -1,5 +1,5 @@
 import { createRng, hashCoords } from '../core/math';
-import { PAGE_SIZE, pageId, type Biome, type DecorKind, type PageData, type PropData, type TerrainPatchData, type TreeKind } from './types';
+import { PAGE_SIZE, pageId, type Biome, type DecorKind, type HangingVineData, type PageData, type PropData, type TerrainPatchData, type TreeKind } from './types';
 import { BIOME_RESOURCES, RESOURCE_DEFS } from './resources';
 import { BIOME_GROUND_MATERIALS, biomeConfidenceAt, dominantBiomeAt, elevationBandAt } from './fields';
 import {
@@ -54,7 +54,7 @@ const UNDERGROWTH: Partial<Record<Biome, DecorKind[]>> = {
   tropical: [
     'broadleaf-plant-1', 'broadleaf-plant-2', 'shrub-tropical-1', 'shrub-tropical-2',
     'shrub-tropical-3', 'hibiscus-1', 'anthurium-1', 'bird-of-paradise-1', 'bamboo-1',
-    'mangrove-1', 'fern-1', 'fern-2',
+    'mangrove-1', 'fern-1', 'fern-2', 'mushroom-1', 'mushroom-2',
   ],
 };
 
@@ -70,6 +70,71 @@ const UNDERGROWTH_SIZES: Partial<Record<DecorKind, [number, number]>> = {
   'hibiscus-1': [0.9, 1.25], 'anthurium-1': [0.8, 1.05], 'bird-of-paradise-1': [1.0, 1.35],
   'bamboo-1': [2.3, 3.4], 'mangrove-1': [1.2, 1.7],
 };
+
+/**
+ * Jungle broadleaf heights, in layers — the "canopy" feel is mostly a
+ * variety-of-heights feel. A few emergents push up toward (never to) redwood
+ * height; most trees make the canopy; a handful stay low as understory.
+ * Redwoods run 18–30, so emergents top out at 22 on purpose.
+ */
+const JUNGLE_LAYERS: Array<{ share: number; min: number; max: number }> = [
+  { share: 0.18, min: 5, max: 8 }, // understory
+  { share: 0.6, min: 8.5, max: 13.5 }, // canopy
+  { share: 0.22, min: 14, max: 22 }, // emergent
+];
+
+/** Vines only hang from trees tall enough to have room beneath the canopy. */
+const VINE_MIN_TREE_HEIGHT = 9;
+/** Width-to-height of the broadleaf cutouts (900×1220). */
+const JUNGLE_TREE_ASPECT = 900 / 1220;
+/** Width-to-height of the vine cutouts (360×620). */
+const VINE_ASPECT = 360 / 620;
+const VINE_ART: DecorKind[] = ['hanging-vine-1', 'hanging-vine-2', 'hanging-vine-1', 'hanging-vine-2', 'hanging-vine-flowering-1'];
+
+function jungleTreeHeight(rng: () => number): number {
+  const roll = rng();
+  let cursor = 0;
+  for (const layer of JUNGLE_LAYERS) {
+    cursor += layer.share;
+    if (roll <= cursor) return layer.min + rng() * (layer.max - layer.min);
+  }
+  const last = JUNGLE_LAYERS[JUNGLE_LAYERS.length - 1];
+  return last.min + rng() * (last.max - last.min);
+}
+
+/**
+ * Vines hooked under a tall jungle tree's canopy.
+ *
+ * The broadleaf art's canopy underside sits a little under half-way up the
+ * cutout, so vines hook just above that line (inside the leaves, which is
+ * what makes them read as attached) and hang toward — never onto — the
+ * ground, low enough that a player standing underneath can reach them.
+ */
+function jungleVines(rng: () => number, treeHeight: number): HangingVineData[] {
+  if (treeHeight < VINE_MIN_TREE_HEIGHT) return [];
+  const count = treeHeight >= 14
+    ? 1 + Math.floor(rng() * 3)
+    : rng() < 0.6 ? 1 + Math.floor(rng() * 2) : 0;
+  const halfWidth = (treeHeight * JUNGLE_TREE_ASPECT) / 2;
+  const vines: HangingVineData[] = [];
+  for (let index = 0; index < count; index += 1) {
+    const topY = treeHeight * (0.45 + rng() * 0.07);
+    // Keep clear of the trunk, spread across the canopy.
+    const side = rng() < 0.5 ? -1 : 1;
+    const offset = side * halfWidth * (0.18 + rng() * 0.5);
+    const wanted = treeHeight * (0.24 + rng() * 0.18);
+    const height = Math.max(2.2, Math.min(wanted, topY - 0.9));
+    vines.push({
+      art: VINE_ART[Math.floor(rng() * VINE_ART.length)],
+      offset,
+      topY,
+      height,
+      depth: 0.14 + index * 0.05,
+    });
+  }
+  // Never wider than the canopy they hang from.
+  return vines.filter((vine) => vine.height * VINE_ASPECT < halfWidth * 1.4);
+}
 
 function pickWeightedKind(entries: Array<{ kind: TreeKind; weight: number }>, roll: number): TreeKind {
   const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
@@ -175,18 +240,24 @@ export function generatePage(px: number, pz: number): PageData {
 
     if (biome === 'tropical') {
       const tree = pickWeightedKind(TROPICAL_CANOPY, rng());
-      // Palms keep their dunes proportions; jungle broadleafs are the
-      // canopy; bananas sit under it with their own sprawl.
-      const height = tree.startsWith('palm') ? 4.2 + rng() * 3.4
-        : tree.startsWith('jungle') ? 5.4 + rng() * 3.6
+      // Layered heights are what make it read as a canopy: jungle
+      // broadleafs run understory → canopy → emergent (see JUNGLE_LAYERS);
+      // palms sometimes shoot up tall and skinny through the gaps; bananas
+      // stay low with their own sprawl.
+      const height = tree.startsWith('palm')
+        ? (rng() < 0.3 ? 8 + rng() * 4 : 4.2 + rng() * 3.4)
+        : tree.startsWith('jungle') ? jungleTreeHeight(rng)
         : 3.2 + rng() * 1.8;
+      const rotY = rng() * 0.9 - 0.45;
+      const vines = tree.startsWith('jungle') ? jungleVines(rng, height) : [];
       props.push({
         kind: 'tree',
         tree,
         x,
         z,
-        rotY: rng() * 0.9 - 0.45,
+        rotY,
         height,
+        ...(vines.length > 0 ? { vines } : {}),
       });
       continue;
     }

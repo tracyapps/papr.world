@@ -11,6 +11,7 @@ import { getBoldnessBoost } from './friendship';
 import { isInWater } from '../world/water';
 import { isSolidAt } from '../world/footprints';
 import { nudgeToFreeSpot } from '../core/placement';
+import { attachCanopy, canopyTreesFromPage, isAloft, isCanopySpecies, type CanopyTree } from './critterCanopy';
 import { createColorMaterial } from '../render/materials';
 import type { CritterParams } from './critterVariation';
 import type { CritterRig } from './critterRigs';
@@ -39,7 +40,14 @@ const BIOME_SPECIES: Record<Biome, WeightedSpecies> = {
   // Parrots are the tropics' flagship, one per the biome plan ("do not add
   // three"), at the same flagship density meerkats get on the dunes. The
   // commons are reweighted around them, not thinned out of recognition.
-  tropical: [['parrot', 0.28], ['bird', 0.17], ['butterfly', 0.17], ['bunny', 0.14], ['raccoon', 0.12], ['squirrel', 0.07], ['cat', 0.05]],
+  //
+  // The canopy crowd (2026-09-18): toucans, monkeys, and the occasional
+  // sloth live up in the trees (critterCanopy.ts), so the jungle is busy at
+  // two heights now. Parrots stay the most common single species.
+  tropical: [
+    ['parrot', 0.22], ['toucan', 0.14], ['monkey', 0.13], ['sloth', 0.1],
+    ['butterfly', 0.12], ['bird', 0.1], ['bunny', 0.08], ['raccoon', 0.06], ['squirrel', 0.03], ['cat', 0.02],
+  ],
 };
 
 const BIOME_COUNTS: Record<Biome, [number, number]> = {
@@ -49,7 +57,7 @@ const BIOME_COUNTS: Record<Biome, [number, number]> = {
   dunes: [1, 2],
   scrapflats: [2, 3],
   // Lush and noisy — a jungle page should feel inhabited.
-  tropical: [3, 5],
+  tropical: [4, 6],
 };
 
 function pickSpecies(table: WeightedSpecies, roll: number): CritterSpecies {
@@ -211,6 +219,8 @@ export function populatePageCritters(page: PageData, group: THREE.Group) {
   const half = PAGE_SIZE / 2 - 3;
   const cx = page.px * PAGE_SIZE;
   const cz = page.pz * PAGE_SIZE;
+  // Only worked out when a tree-dweller actually spawns here.
+  let canopyTrees: CanopyTree[] | null = null;
 
   for (let index = 0; index < count + (bonus ? 1 : 0); index += 1) {
     const species = index === count && bonus
@@ -218,7 +228,7 @@ export function populatePageCritters(page: PageData, group: THREE.Group) {
       : pickSpecies(BIOME_SPECIES[page.biome], rng());
     const x = cx + (rng() * 2 - 1) * half;
     const z = cz + (rng() * 2 - 1) * half;
-    spawnCritter(
+    const critter = spawnCritter(
       group,
       `${page.id}#${index}`,
       species,
@@ -226,6 +236,10 @@ export function populatePageCritters(page: PageData, group: THREE.Group) {
       x,
       z,
     );
+    if (isCanopySpecies(species)) {
+      canopyTrees ??= canopyTreesFromPage(page, sampleTerrainHeight, isInWater);
+      attachCanopy(critter, canopyTrees);
+    }
   }
 }
 
@@ -311,6 +325,8 @@ export function getNearestCritter(position: THREE.Vector3, maxDistance = 2): Cri
 export function getCritterNearGroundPoint(x: number, z: number, radius = 0.75): Critter | null {
   for (const critter of critters) {
     if (critter.rig.group.parent?.visible === false) continue;
+    // Up in a tree is not in the way of anything on the ground.
+    if (isAloft(critter)) continue;
     const dx = critter.rig.group.position.x - x;
     const dz = critter.rig.group.position.z - z;
     if (dx * dx + dz * dz < radius * radius) return critter;

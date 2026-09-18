@@ -197,6 +197,13 @@ export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
   // Bananas are tropical-only; jungle broadleafs are `leafy` and grow in
   // forest and meadow too, which is correct — they are big leafy trees.
   banana: ['tropical'],
+  // Vines hang only from the tall jungle canopy (see `generate.ts`), which
+  // is what makes crepe vine a tropical-exclusive material.
+  vine: ['tropical'],
+  // Undergrowth — these follow `UNDERGROWTH` in `generate.ts`, which is
+  // where they are actually scattered.
+  mushroom: ['forest', 'tropical'],
+  shrub: ['dunes', 'forest', 'tropical'],
 };
 
 /**

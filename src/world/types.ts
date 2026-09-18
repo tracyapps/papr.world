@@ -109,7 +109,29 @@ export type DecorKind =
   | 'anthurium-1'
   | 'bird-of-paradise-1'
   | 'bamboo-1'
-  | 'mangrove-1';
+  | 'mangrove-1'
+  // Hanging vines. Never placed on the ground: they only appear in a tall
+  // jungle tree's `vines` list, hooked under its canopy.
+  | 'hanging-vine-1'
+  | 'hanging-vine-2'
+  | 'hanging-vine-flowering-1';
+
+/**
+ * A vine hanging from a tree's canopy, positioned relative to its tree so it
+ * can never drift away from it (or be left floating when the tree is culled
+ * for standing in water). Offsets are in the tree's own plane.
+ */
+export type HangingVineData = {
+  art: DecorKind;
+  /** Sideways offset along the tree cutout's width, in world units. */
+  offset: number;
+  /** Height above the tree's base where the vine's top is hooked. */
+  topY: number;
+  /** Length of the vine cutout. */
+  height: number;
+  /** Nudged toward the viewer so the vine reads in front of the canopy. */
+  depth: number;
+};
 
 export type HarvestVisual =
   | 'fiberTuft'
@@ -186,9 +208,14 @@ export type PropData = { id?: string } & (
       rotY?: number;
       height?: number;
       mapColor?: string;
+      /** Vines hooked under this tree's canopy — tall jungle trees only. */
+      vines?: HangingVineData[];
     }
   | {
-      /** Decorative cutout scenery (e.g. desert cactus): no trim/growth. */
+      /**
+       * Cutout scenery. Most decor is pure garnish; mushrooms and shrubs are
+       * trimmable (see `decorTrimSpecies` in treeRuntime.ts).
+       */
       kind: 'decor';
       art: DecorKind;
       x: number;

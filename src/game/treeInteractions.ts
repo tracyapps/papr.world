@@ -3,11 +3,12 @@ import { camera, scene } from '../render/context';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState } from '../sim/state';
 import {
-  TRIM_STAGE_RESPONSES,
+  SPECIES_NAMES,
   treeGrowthAt,
   treeStageAt,
   treeStageFor,
   trimProfileForTier,
+  trimStageResponse,
   type TreeSpecies,
   type TreeStage,
 } from '../sim/catalogs/trees';
@@ -50,6 +51,8 @@ type TreeEntry = {
   z: number;
   height: number;
   baseY: number;
+  /** Set for hanging things (vines): the Y their top edge is hooked to. */
+  hangTopY?: number;
   /** Last stage this mesh was posed for, so recovery only rebuilds on change. */
   posedStage: TreeStage | null;
 };
@@ -99,6 +102,7 @@ function restage(entry: TreeEntry, now: number) {
     height: entry.height,
     baseY: entry.baseY,
     now,
+    hangTopY: entry.hangTopY,
   });
   entry.posedStage = stage;
   // A tree that has grown all the way back leaves the recovery set, and its
@@ -221,7 +225,7 @@ export function tryTrimAt(clientX: number, clientY: number): boolean {
   if (assessment.status === 'no-tool' || assessment.status === 'no-tree') return false;
 
   if (assessment.status === 'out-of-reach') {
-    showPetToast('That tree is over there — walk closer to reach the branches');
+    showPetToast(`That ${SPECIES_NAMES[assessment.entry!.species].one} is over there — walk closer to reach it`);
     return true;
   }
   if (assessment.status === 'too-tough') {
@@ -230,7 +234,7 @@ export function tryTrimAt(clientX: number, clientY: number): boolean {
     return true;
   }
   if (assessment.status === 'resting') {
-    showPetToast(TRIM_STAGE_RESPONSES.resting);
+    showPetToast(trimStageResponse(assessment.entry!.species, 'resting'));
     return true;
   }
 

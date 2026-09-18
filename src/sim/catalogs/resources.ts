@@ -50,6 +50,12 @@ export const RESOURCE_CORE_DEFS = {
   'redwood-bark-curls': { id: 'redwood-bark-curls', label: 'Redwood bark curls', shortLabel: 'Bark curls', category: 'sticks', iconKey: 'resource.redwood-bark-curls', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood', 'long-fiber'] },
   'palm-clippings': { id: 'palm-clippings', label: 'Palm clippings', shortLabel: 'Palm clippings', category: 'sticks', iconKey: 'resource.palm-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
   'palm-fiber': { id: 'palm-fiber', label: 'Palm fiber', shortLabel: 'Palm fiber', category: 'fiber', iconKey: 'resource.palm-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber', 'long-fiber'] },
+  // Trimmed from the hanging vines on tall jungle trees — nowhere else. Long,
+  // twisted, stretchy strands: the tropics' binding and weaving fiber.
+  'crepe-vine': { id: 'crepe-vine', label: 'Crepe-paper vine', shortLabel: 'Crepe vine', category: 'fiber', iconKey: 'resource.crepe-vine', processStage: 0, structuralClass: 0, tags: ['long-fiber'] },
+  // Snipped from mushroom clusters on forest and jungle floors. Spongy and
+  // soft, like blotting paper — stuffing, not structure.
+  'blotting-caps': { id: 'blotting-caps', label: 'Blotting-paper caps', shortLabel: 'Blotting caps', category: 'fiber', iconKey: 'resource.blotting-caps', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
   'mossy-paper-fiber': { id: 'mossy-paper-fiber', label: 'Mossy paper fiber', shortLabel: 'Paper fiber', category: 'fiber', iconKey: 'resource.mossy-paper-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
   'confetti-stones': { id: 'confetti-stones', label: 'Confetti stones', shortLabel: 'Confetti stone', category: 'stones', iconKey: 'resource.confetti-stones', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'graphite-cardstone': { id: 'graphite-cardstone', label: 'Graphite cardstone', shortLabel: 'Cardstone', category: 'stones', iconKey: 'resource.graphite-cardstone', processStage: 0, structuralClass: 1, tags: ['stone'] },

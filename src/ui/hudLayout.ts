@@ -38,7 +38,7 @@
 // to go at once. `settings.ts` only remembers *which* ids are collapsed —
 // this module is what makes that mean something.
 
-import { getSetting, setSetting } from '../game/settings';
+import { getSetting, onSettingsChanged, setSetting } from '../game/settings';
 
 /** Screen margin shared by every edge-anchored element. */
 const EDGE = 16;
@@ -57,8 +57,30 @@ const DOCK_RESERVE_OPEN = 296;
 
 function dockReserve() {
   const open = document.querySelector('#scrapbook-dock')?.classList.contains('is-open');
-  return open ? DOCK_RESERVE_OPEN : DOCK_RESERVE_CLOSED;
+  // The dock is drawn at `--hud-ui-scale` (CSS `zoom`), so the band it owns
+  // shrinks and grows with it.
+  return Math.round((open ? DOCK_RESERVE_OPEN : DOCK_RESERVE_CLOSED) * hudScale());
 }
+
+/** The player's "Interface size" setting — tool bar and scrapbook dock. */
+function hudScale() {
+  return getSetting('hudScale');
+}
+
+function compactToolbar() {
+  return getSetting('toolbarStyle') === 'compact';
+}
+
+/**
+ * Compact palette metrics. A slot keeps its full 184×140 hand-composed
+ * layout and is drawn at this zoom, so the art/badge composition is exactly
+ * the full rail's, just small — the same reason the full rail scales rather
+ * than re-lays-out.
+ */
+const COMPACT_SLOT_SCALE = 0.34;
+const COMPACT_SLOT_WIDTH = 184;
+/** Horizontal padding inside the palette, plus its gap from the screen edge. */
+const COMPACT_CHROME = 26;
 /**
  * Never shrink the tool rail past the point where the art reads clearly.
  *
@@ -109,8 +131,20 @@ function applyHudMetrics() {
   root.setProperty('--hud-top', `${EDGE}px`);
   root.setProperty('--hud-rail-gap', `${RAIL_GAP}px`);
   root.setProperty('--hud-dock-reserve', `${dockReserve()}px`);
-  root.setProperty('--hud-rail-width', smallViewport() ? RAIL_WIDTH_SMALL_CSS : RAIL_WIDTH_CSS);
-  root.setProperty('--hud-rail-scale', String(measureRailScale()));
+  const scale = hudScale();
+  const compact = compactToolbar();
+  root.setProperty('--hud-ui-scale', String(scale));
+  document.querySelector('.tool-toolbar')?.classList.toggle('is-compact', compact);
+  if (compact) {
+    const slotScale = COMPACT_SLOT_SCALE * scale;
+    root.setProperty('--hud-compact-slot-scale', String(Number(slotScale.toFixed(4))));
+    root.setProperty('--hud-rail-width', `${Math.round(COMPACT_SLOT_WIDTH * slotScale + COMPACT_CHROME * scale)}px`);
+    root.setProperty('--hud-rail-scale', '1');
+  } else {
+    const width = smallViewport() ? RAIL_WIDTH_SMALL_CSS : RAIL_WIDTH_CSS;
+    root.setProperty('--hud-rail-width', scale === 1 ? width : `calc(${width} * ${scale})`);
+    root.setProperty('--hud-rail-scale', String(measureRailScale()));
+  }
 }
 
 /**
@@ -131,11 +165,14 @@ function measureRailScale(): number {
   const naturalHeight = slots.offsetHeight;
   if (naturalHeight <= 0) return 1;
 
+  // The player's interface size is the ceiling; fitting above the dock can
+  // only shrink it further, never grow it past what they chose.
+  const wanted = hudScale();
   const top = slots.offsetTop;
   const available = window.innerHeight - top - dockReserve();
-  if (available >= naturalHeight) return 1;
+  if (available >= naturalHeight * wanted) return wanted;
 
-  return Math.max(MIN_RAIL_SCALE, Number((available / naturalHeight).toFixed(4)));
+  return Math.max(Math.min(MIN_RAIL_SCALE, wanted), Number((available / naturalHeight).toFixed(4)));
 }
 
 /**
@@ -327,5 +364,7 @@ export function initializeHudLayout() {
 
   window.addEventListener('resize', requestHudLayout);
   window.matchMedia(SMALL_VIEWPORT_QUERY).addEventListener('change', requestHudLayout);
+  // Interface size and tool bar style are layout inputs like the viewport.
+  onSettingsChanged(requestHudLayout);
   requestHudLayout();
 }

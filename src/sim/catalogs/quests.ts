@@ -6,7 +6,7 @@ import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { SEED_DEFS, type SeedId } from './seeds';
 import { TOOL_DEFS, toolsInFamily, type ToolFamilyId, type ToolId } from './tools';
 import { techNodeGrantingRecipe, techNodeStatus, type TechNodeId } from './techTree';
-import { SPECIES_YIELD, type TreeSpecies } from './trees';
+import { SPECIES_NAMES, SPECIES_YIELD, type TreeSpecies } from './trees';
 import type { TrinketFamilyId, TrinketShapeId } from './trinkets';
 import { QUEST_EXPANSION_DEFS } from './questCatalog.expansion';
 import type { BuildPieceKey } from '../../world/buildPieces';
@@ -640,7 +640,7 @@ export function describeObjective(objective: QuestObjective): string {
     case 'dig':
       return `dig to layer ${objective.layer}`;
     case 'trim':
-      return `trim a ${objective.species} tree`;
+      return `trim a ${SPECIES_NAMES[objective.species].one}`;
     case 'talk':
       return 'pass a message to another critter';
     case 'place':

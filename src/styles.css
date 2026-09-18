@@ -20,6 +20,12 @@
      rollout note on that setting for which surfaces that is so far. */
   --ui-text-scale: 1;
   font-size: calc(16px * var(--ui-text-scale));
+  /* "Interface size" setting (game/settings.ts's `hudScale`), published by
+     hudLayout.ts. Scales the tool bar and the scrapbook dock as whole boxes,
+     art and all — the scrapbook via CSS `zoom`, the rail via its own
+     measured scale. */
+  --hud-ui-scale: 1;
+  --hud-compact-slot-scale: 0.34;
 }
 
 * {
@@ -776,7 +782,7 @@ body {
 .tool-toolbar-paper {
   display: block;
   filter: grayscale(1) brightness(0.08) contrast(1.3);
-  height: clamp(142px, 11vw, 160px);
+  height: var(--hud-rail-width);
   left: 0;
   object-fit: fill;
   opacity: 0.9;
@@ -799,10 +805,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 30px;
-  left: 16px;
+  left: calc(16px * var(--hud-ui-scale, 1));
   pointer-events: auto;
   position: absolute;
-  top: 75px;
+  top: calc(75px * var(--hud-ui-scale, 1));
   transform: scale(var(--hud-rail-scale, 1));
   transform-origin: left top;
   transition: transform 160ms ease;
@@ -913,6 +919,118 @@ body {
 .tool-slot:focus-visible .tool-shortcut {
   outline: 3px solid #fffbea;
   outline-offset: 3px;
+}
+
+/* Minimize / expand toggle. On the full rail it sits in the empty band above
+   the first slot; on the compact palette it closes the column. */
+.tool-toolbar-size {
+  align-items: center;
+  background: rgb(4 4 5 / 0.83);
+  border: 2px solid rgb(255 255 255 / 0.22);
+  border-radius: 8px;
+  color: rgb(255 255 255 / 0.85);
+  cursor: pointer;
+  display: flex;
+  height: calc(30px * var(--hud-ui-scale, 1));
+  justify-content: center;
+  left: calc(16px * var(--hud-ui-scale, 1));
+  padding: 0;
+  pointer-events: auto;
+  position: absolute;
+  top: calc(22px * var(--hud-ui-scale, 1));
+  transition: background 150ms ease, border-color 150ms ease;
+  width: calc(38px * var(--hud-ui-scale, 1));
+  z-index: 3;
+}
+
+.tool-toolbar-size:hover {
+  background: rgb(21 21 22 / 0.95);
+  border-color: rgb(255 255 255 / 0.5);
+}
+
+.tool-toolbar-size:focus-visible {
+  outline: 3px solid #fffbea;
+  outline-offset: 2px;
+}
+
+/* Two chevrons drawn with borders: « when full (shrink), » when compact. */
+.tool-toolbar-size-icon {
+  display: block;
+  height: 10px;
+  position: relative;
+  width: 16px;
+}
+
+.tool-toolbar-size-icon::before,
+.tool-toolbar-size-icon::after {
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  content: "";
+  height: 7px;
+  position: absolute;
+  top: 1px;
+  transform: rotate(45deg);
+  width: 7px;
+}
+
+.tool-toolbar-size-icon::before { left: 2px; }
+.tool-toolbar-size-icon::after { left: 8px; }
+
+.tool-toolbar-size[aria-pressed="true"] .tool-toolbar-size-icon {
+  transform: scaleX(-1);
+}
+
+/* ---- Compact palette ------------------------------------------------
+   Same slots, same art, same shortcut badges — each slot keeps its full
+   184×140 composition and is drawn at --hud-compact-slot-scale via `zoom`,
+   so nothing hand-placed needs re-tuning. The bar is only as tall as its
+   tools and floats off the top-left corner instead of running the whole
+   edge. --hud-rail-width follows (hudLayout.ts), so everything inset past
+   the rail (status chips, scrapbook cover, minimap default) slides left
+   and hands that space back to the world. */
+.tool-toolbar.is-compact {
+  align-items: stretch;
+  bottom: auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--hud-ui-scale, 1));
+  left: calc(8px * var(--hud-ui-scale, 1));
+  padding: calc(8px * var(--hud-ui-scale, 1)) calc(5px * var(--hud-ui-scale, 1));
+  top: var(--hud-top, 16px);
+  width: calc(var(--hud-rail-width) - 8px * var(--hud-ui-scale, 1));
+}
+
+.tool-toolbar.is-compact::before {
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.28);
+  pointer-events: auto;
+}
+
+.tool-toolbar.is-compact .tool-toolbar-paper {
+  display: none;
+}
+
+.tool-toolbar.is-compact .tool-toolbar-slots {
+  gap: calc(4px * var(--hud-ui-scale, 1));
+  left: auto;
+  position: relative;
+  top: auto;
+  transform: none;
+}
+
+.tool-toolbar.is-compact .tool-slot {
+  zoom: var(--hud-compact-slot-scale, 0.34);
+}
+
+/* The hover/active slide-out needs no override: it is authored in px inside
+   the zoomed slot, so it shrinks with the slot (18px → ~6px) and stays
+   inside the palette's padding. */
+
+.tool-toolbar.is-compact .tool-toolbar-size {
+  align-self: center;
+  position: relative;
+  left: auto;
+  top: auto;
 }
 
 /* Hoe-mode seed pouch. It lives along the top rather than inside the hoe's
@@ -1603,6 +1721,12 @@ body {
   position: fixed;
   right: 0;
   z-index: 9;
+  /* Interface size. `zoom` (not transform) so the strip's height, the
+     cover, and every card inside shrink together AND take up less layout —
+     which is what actually hands screen back to the world. Lengths inside
+     are zoomed too, so anything that reads the already-scaled
+     --hud-rail-width divides by the scale to avoid scaling it twice. */
+  zoom: var(--hud-ui-scale, 1);
 }
 
 .scrapbook-strip {
@@ -1615,7 +1739,7 @@ body {
   gap: 6px;
   grid-template-rows: auto 1fr;
   height: var(--scrapbook-strip-height, 188px);
-  padding: 26px 20px 14px calc(var(--hud-rail-width) + 210px);
+  padding: 26px 20px 14px calc(var(--hud-rail-width) / var(--hud-ui-scale, 1) + 210px);
   pointer-events: auto;
   transform: translateY(100%);
   transition: transform 260ms cubic-bezier(0.2, 0.75, 0.25, 1);
@@ -2109,7 +2233,7 @@ body {
   bottom: -88px;
   cursor: pointer;
   height: 216px;
-  left: calc(var(--hud-rail-width) + 28px);
+  left: calc(var(--hud-rail-width) / var(--hud-ui-scale, 1) + 28px);
   pointer-events: auto;
   position: absolute;
   transform: rotate(-4deg);

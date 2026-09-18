@@ -234,13 +234,45 @@ join the calm-reach scatter.
 
 **Deliberately left for later:**
 
-- **Hanging vines** (`hanging-vine-01/02`, flowering) are compiled but not
-  placed — a ground-plane cutout cannot hang. They want canopy anchor points,
-  which is vertical-space work (the plan's "every biome so far is read
-  entirely at ground level" critique still stands).
+- ~~**Hanging vines**~~ — **done 2026-09-18, second pass** (see below).
 - **Wild fruit.** The banana tree's food drop is not modeled; food still
   comes only from plants a player grew. The first wild source deserves its
   own slice, not a tag-along.
 - **Beach borders.** The plan said "sequence tropical after the lake-border
   work" — tropical landed first anyway because the art was ready, so palms
   on beaches remain free when mixed lake borders (`roadmap.md` 4.6) land.
+
+## Second pass (2026-09-18) — canopy heights, vines, trimmable undergrowth
+
+**Canopy.** Jungle broadleafs now generate in three layers
+(`JUNGLE_LAYERS` in `generate.ts`): understory 5–8 (18%), canopy 8.5–13.5
+(60%), emergent 14–22 (22%). Redwoods are 18–30, so emergents reach *toward*
+redwood height without matching it. About 30% of tropical palms also shoot up
+tall and skinny (8–12). Trees 14+ get a redwood-sized trunk footprint.
+
+**Hanging vines.** A tree prop can now carry `vines: HangingVineData[]`
+(`types.ts`). Only jungle trees ≥ 9 units get them (1–3 on emergents, 0–2 on
+canopy trees), hooked just under the canopy line (45–52% up the cutout) and
+hanging to 0.9+ units off the ground so they stay reachable. They are built
+*inside the tree's own case* in `pageRuntime.ts`, in the tree's plane and a
+hair in front of it — so a tree culled for standing in water takes its vines
+with it, and no vine can drift off its tree.
+
+**Trimming.** `TreeSpecies` gained `vine`, `mushroom`, and `shrub`, with a
+`SPECIES_FORM` (tree / plant / vine) that drives both the wording and the cut
+visuals: plants get a haircut all over, vines get *shorter from the bottom*
+while their top stays hooked (`hangTopY` in `applyTreeStageVisual`).
+Mushroom and shrub cutouts stay `decor` props; `world/trimmableDecor.ts`
+(renderer-free) says which decor kinds are trimmable. Growth is saved in the
+same `treeGrowth` map, keyed by position (vines: `<treeKey>:vine:<n>`).
+
+| Species | Primary | Secondary | Variety | Grows in |
+| --- | --- | --- | --- | --- |
+| vine | **crepe-vine** (new) | mossy paper fiber | palm fiber | tropical only |
+| mushroom | **blotting-caps** (new) | mossy paper fiber | blotting caps | forest, tropical |
+| shrub | kraft twigs | mossy paper fiber | ribbonwood | dunes, forest, tropical |
+
+Crepe vine is tropical-exclusive by construction. Mushrooms were added to the
+tropical undergrowth pool. Both new materials show under TO DRAW in
+`npm run art:check`, and use stand-in paper until tiles exist.
+Tests: `src/world/jungleCanopy.test.ts`.
