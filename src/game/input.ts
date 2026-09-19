@@ -22,6 +22,8 @@ export type InputCallbacks = {
   /** Open or close the nearby place interaction (machine, shop counter). */
   onToggleNearby: () => void;
   onMarkPlace: () => void;
+  /** Open or fold away the treasure map. */
+  onToggleMap?: () => void;
   onEscape: () => boolean;
   /** Left-click activates a world interaction when it remains a click. */
   onPrimaryAction: (event: PointerEvent) => void;
@@ -224,6 +226,13 @@ export function initializeInput(callbacks: InputCallbacks) {
     if (event.code === 'KeyM') {
       event.preventDefault();
       callbacks.onMarkPlace();
+      return;
+    }
+
+    // N for north: the treasure map. (M was already "mark this spot".)
+    if (event.code === 'KeyN') {
+      event.preventDefault();
+      callbacks.onToggleMap?.();
       return;
     }
 

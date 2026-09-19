@@ -1547,6 +1547,28 @@ body {
   transform: translate(-50%, -100%) rotate(270deg);
 }
 
+/* Which way to the other lands: one inked dot per nearby biome, on a ring
+   just outside the rose. They live INSIDE the rose, so they turn with it. */
+.compass-biome-ticks {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  --tick-ring: 36px;
+}
+
+.compass-biome-tick {
+  background: var(--tick-color);
+  border: 1.5px solid #2d261e;
+  border-radius: 50%;
+  height: 9px;
+  left: 50%;
+  opacity: var(--tick-strength, 1);
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(var(--bearing)) translateY(calc(var(--tick-ring) * -1));
+  width: 9px;
+}
+
 .compass-heading {
   align-items: center;
   background: rgb(255 252 239 / 0.88);
@@ -4510,6 +4532,8 @@ body.is-feedback-reviewing { overflow: hidden; }
     width: 15px;
   }
 
+  .compass-biome-ticks { --tick-ring: 29px; }
+
   /* The strip is full-width at every size; only the cover shrinks. It stays
      inset past the tool rail so the two never share the bottom-left corner. */
   .scrapbook-cover {
@@ -6042,4 +6066,115 @@ body.studio-page {
 
 @media (prefers-reduced-motion: reduce) {
   body.studio-page .hud-overlay { transition: none; }
+}
+
+/* ── The treasure map (N) ─────────────────────────────────────────────────
+   A rough inked sheet with its directions written out beside it. The map is
+   a picture; the list is the same knowledge as words, for everyone. */
+.treasure-map-card {
+  max-height: min(94vh, 900px);
+  width: min(1040px, 100%);
+}
+
+.treasure-map-lead {
+  font-size: 14px;
+  margin: 0 0 10px;
+  max-width: 62ch;
+}
+
+.treasure-map-scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.treasure-map-scale button {
+  background: rgb(255 252 239 / 0.9);
+  border: 1px solid rgb(59 42 26 / 0.45);
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  min-height: 36px;
+  padding: 4px 14px;
+}
+
+.treasure-map-scale button[aria-pressed="true"] {
+  background: #3b2a1a;
+  color: #fff8e2;
+}
+
+.treasure-map-scale button:focus-visible {
+  outline: 3px solid #3b2a1a;
+  outline-offset: 2px;
+}
+
+.treasure-map-body {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+}
+
+/* Square, as big as fits, with torn and frayed corners. */
+.treasure-map-canvas {
+  aspect-ratio: 1;
+  display: block;
+  filter: drop-shadow(0 6px 10px rgb(43 30 21 / 0.35));
+  width: min(100%, 68vh);
+  clip-path: polygon(
+    1% 2%, 8% 0, 17% 1.5%, 28% 0.3%, 41% 1.8%, 55% 0.2%, 68% 1.4%, 79% 0, 91% 1.6%, 99% 0.5%,
+    100% 9%, 98.6% 21%, 100% 34%, 98.8% 47%, 100% 60%, 98.7% 73%, 100% 86%, 99% 99%,
+    88% 100%, 76% 98.6%, 63% 100%, 50% 98.8%, 37% 100%, 24% 98.7%, 12% 100%, 1% 98.5%,
+    0 87%, 1.4% 74%, 0 61%, 1.2% 48%, 0 35%, 1.5% 22%, 0 10%
+  );
+}
+
+.treasure-map-notes h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.treasure-map-list,
+.scrapbook-map-hints {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.treasure-map-list li,
+.scrapbook-map-hints li {
+  align-items: baseline;
+  display: flex;
+  font-size: 14px;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.treasure-map-swatch {
+  background: var(--swatch);
+  border: 1.5px solid #3b2a1a;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 10px;
+  width: 10px;
+}
+
+.treasure-map-explored {
+  font-size: 13px;
+  margin: 12px 0 0;
+  opacity: 0.8;
+}
+
+@media (max-width: 760px) {
+  .treasure-map-body { grid-template-columns: minmax(0, 1fr); }
+  .treasure-map-canvas { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treasure-map .hud-overlay-card { transition: none; }
 }

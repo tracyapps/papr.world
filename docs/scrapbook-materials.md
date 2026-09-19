@@ -67,7 +67,7 @@ name into `RESOURCE_DEFS` when its landscape and harvestable artwork are ready.
 - Bubbletree Sticks
 - Plaidpine Splinters
 - Crinkleleaf Stems
-- Tinselneedle Twigs
+- Tinselneedle Twigsç
 - Newspaper Birch Curls
 - Washi Willow Switches
 - Candystripe Kindling

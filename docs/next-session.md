@@ -6,6 +6,15 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Treasure map + sense of direction (2026-09-18, eighth pass).** See the
+  "Landed early" note under Phase 5 in `roadmap.md`. New files:
+  `src/world/explored.ts`, `src/world/biomeCompass.ts`,
+  `src/ui/directionHints.ts`, `src/ui/treasureMap.ts` (overlay),
+  `src/ui/treasureMapModel.ts`, `src/ui/treasureMapDraw.ts` (renderer-free).
+  Key **N** opens it (M stays "mark spot"); the help sheet also said **B**
+  for the scrapbook when the key is actually **I** — fixed. Explored areas
+  are not yet in the save backup file.
+
 - **The real reason looks vanished and worlds dropped (2026-09-18, seventh
   pass).** Two silent limits, found after a finished avatar saved as an early,
   half-done version twice:

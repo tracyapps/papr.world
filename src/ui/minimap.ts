@@ -4,6 +4,7 @@ import { sampleTerrainHeight } from '../world/terrain';
 import { getPage } from '../world/pages';
 import { getGroundMapColor } from '../world/pageRuntime';
 import { PAGE_SIZE, pageOfPosition } from '../world/types';
+import { isExploredCoarse, markExplored } from '../world/explored';
 
 // Fog-of-war minimap. Exploration is stored per world-grid cell in a Set,
 // so it follows the avatar across any number of pages.
@@ -30,8 +31,15 @@ function worldToCell(x: number, z: number) {
   };
 }
 
+/**
+ * Fine cells lifted this visit, or — after a reload — the coarse record of
+ * everywhere you have ever been (src/world/explored.ts). The coarse check
+ * only runs for cells the fine set does not know, so the common case costs
+ * what it always did.
+ */
 function isCellExplored(column: number, row: number) {
-  return exploredCells.has(cellKey(column, row));
+  if (exploredCells.has(cellKey(column, row))) return true;
+  return isExploredCoarse((column + 0.5) * CELL_SIZE, (row + 0.5) * CELL_SIZE);
 }
 
 export function isWorldPointExplored(x: number, z: number) {
@@ -39,7 +47,16 @@ export function isWorldPointExplored(x: number, z: number) {
   return isCellExplored(column, row);
 }
 
+let lastCoarseX = Number.NaN;
+let lastCoarseZ = Number.NaN;
+
 export function revealMiniMapAround(x: number, z: number) {
+  // The saved record only needs refreshing every step or so, not every frame.
+  if (!(Math.hypot(x - lastCoarseX, z - lastCoarseZ) < 0.75)) {
+    markExplored(x, z, REVEAL_RADIUS);
+    lastCoarseX = x;
+    lastCoarseZ = z;
+  }
   const center = worldToCell(x, z);
   const radiusInCells = Math.ceil(REVEAL_RADIUS / CELL_SIZE);
 

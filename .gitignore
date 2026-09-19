@@ -26,3 +26,4 @@ site/src/data/roadmap.json
 # Staged from docs-site/ by tools/stage-reference.mjs on every dev start
 # and every build. Generated, like docs-site itself.
 site/public/reference/
+_to_delete/

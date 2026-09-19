@@ -33,6 +33,10 @@ import { getTrinketDef, TRINKET_FAMILIES } from '../sim/catalogs/trinkets';
 import { avatar } from '../game/avatar';
 import { getCurrentPageId } from '../world/streaming';
 import { openMyPlayerCard } from './playerCard';
+import { getDirectionHints, onDirectionHintsChanged } from './directionHints';
+import { openTreasureMap } from './treasureMap';
+import { BIOME_MAP_NAMES, compassArrow, compassPoint, distanceWords } from '../world/biomeCompass';
+import { getGroundMapColor } from '../world/pageRuntime';
 
 // The scrapbook is a strip of torn paper along the bottom of the screen, not
 // a pop-up book. Rationale:
@@ -52,7 +56,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'plans' | 'trinkets' | 'diary' | 'mail' | 'pouch';
+type TabId = ResourceCategoryId | 'tools' | 'plans' | 'trinkets' | 'map' | 'diary' | 'mail' | 'pouch';
 
 type TabDefinition = {
   id: TabId;
@@ -96,6 +100,7 @@ const TABS: TabDefinition[] = [
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
   { id: 'trinkets', label: 'Trinkets', summary: () => String(trinketCount()) },
   { id: 'plans', label: 'Plans', summary: () => null },
+  { id: 'map', label: 'Map', summary: () => null },
   { id: 'diary', label: 'Diary', summary: () => String(getGameState().player.diaryEntries.length) },
   { id: 'mail', label: 'Mail', summary: () => String(getGameState().player.mailbox.length) },
   {
@@ -391,12 +396,30 @@ function renderTrinketsTab() {
     <ul class="scrapbook-items">${trinkets.map(row).join('')}</ul>`;
 }
 
+/**
+ * The Map tab: the treasure map's directions as words, and the way to unfold
+ * it. The strip is too short for the map itself; it opens as its own sheet.
+ */
+function renderMapTab() {
+  const hints = getDirectionHints();
+  const lands = hints.length === 0
+    ? '<p class="scrapbook-empty">Take a few steps and the map will start to guess where the other lands are.</p>'
+    : `<ul class="scrapbook-map-hints">${hints.map((hint) => `
+        <li><span class="treasure-map-swatch" style="--swatch:${getGroundMapColor(hint.biome)}" aria-hidden="true"></span>
+          The ${escapeHtml(BIOME_MAP_NAMES[hint.biome])} — ${compassPoint(hint.bearing)} ${compassArrow(hint.bearing)}, ${distanceWords(hint.distance)}</li>`).join('')}</ul>`;
+  return `
+    <p class="scrapbook-panel-note">A rough treasure map: inked where you have been, guessed everywhere else.
+      <button type="button" class="scrapbook-inline-button" data-open-treasure-map>Unfold the map (N)</button></p>
+    ${lands}`;
+}
+
 function renderPanel() {
   if (!panelElement) return;
 
   if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'trinkets') panelElement.innerHTML = renderTrinketsTab();
   else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
+  else if (activeTab === 'map') panelElement.innerHTML = renderMapTab();
   else if (activeTab === 'diary') panelElement.innerHTML = renderDiaryTab();
   else if (activeTab === 'mail') panelElement.innerHTML = renderMailTab();
   else if (activeTab === 'pouch') panelElement.innerHTML = renderPouchTab();
@@ -460,6 +483,10 @@ export function initializeScrapbook() {
     if (button) setActiveTab(button.dataset.scrapbookTab as TabId);
   });
   tabsElement?.addEventListener('keydown', handleTabKeydown);
+  // The Map tab's directions follow you from page to page.
+  onDirectionHintsChanged(() => {
+    if (activeTab === 'map') render();
+  });
 
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
@@ -483,6 +510,11 @@ export function initializeScrapbook() {
       const result = dispatchGameCommand({ type: 'collectMail', mailId });
       mailMessage = result.ok ? result.message : result.reason;
       render();
+      return;
+    }
+
+    if (target.closest('[data-open-treasure-map]')) {
+      openTreasureMap();
       return;
     }
 

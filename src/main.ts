@@ -45,6 +45,9 @@ import {
   updateCompass,
 } from './ui/hud';
 import { renderMiniMap, resizeMiniMapCanvas, revealMiniMapAround } from './ui/minimap';
+import { initializeExplored } from './world/explored';
+import { updateDirectionHints } from './ui/directionHints';
+import { closeTreasureMap, installTreasureMapButton, toggleTreasureMap } from './ui/treasureMap';
 import { initializeScrapbook, isScrapbookOpen, setScrapbookOpen } from './ui/scrapbook';
 import { buildPlacesControls, markCurrentSpot, updatePlacesPanel } from './ui/placesPanel';
 import { closeHudMenu, initializeHudMenus } from './ui/hudMenus';
@@ -131,6 +134,7 @@ buildBackdrop();
 buildClouds();
 spawnAvatar(SPAWN_X, SPAWN_Z);
 updateStreaming(avatar.position);
+initializeExplored();
 initializePlaces(SPAWN_X, SPAWN_Z);
 initializeGuidance();
 
@@ -163,6 +167,7 @@ initializeActivityLog();
 // tucked in a scrapbook tab — built once here rather than by the minimap's
 // own module, since placesPanel.ts already owns their stateful behaviour.
 document.querySelector('#mini-map-goto')?.append(buildPlacesControls());
+installTreasureMapButton();
 // Wear the saved cutout (or, for a brand-new player, offer the editor once).
 // After the HUD so the world is already there behind the overlay.
 initializeAvatarLook();
@@ -322,6 +327,7 @@ initializeInput({
     }
   },
   onMarkPlace: markCurrentSpot,
+  onToggleMap: toggleTreasureMap,
   onSelectToolSlot: selectToolSlot,
   onRotateBuild: rotateSelectedBuildPiece,
   onPrimaryAction: (event) => {
@@ -337,6 +343,7 @@ initializeInput({
   ),
   onEscape: () => {
     if (closeAlphaNotice()) return true;
+    if (closeTreasureMap()) return true;
     if (cancelCarryingPiece()) return true;
     if (cancelTimedAction('escape')) return true;
     if (closeTechTreeView()) return true;
@@ -447,6 +454,7 @@ function animate(animationTime = 0) {
     lastMiniMapRevealX = avatar.position.x;
     lastMiniMapRevealZ = avatar.position.z;
   }
+  updateDirectionHints(avatar.position.x, avatar.position.z);
 
   const clearingActive = isPageActive(CLEARING_PAGE);
   updateThingMaker(delta, elapsed, avatar.position, clearingActive);

@@ -766,6 +766,26 @@ rediscovered later.
 Nothing underground can start before the map, because the underground is only
 worth having if you can find your way around it.
 
+**Landed early, on purpose rough (2026-09-18): the treasure map.** A sense of
+direction that does not wait on the map design, because it cannot go stale —
+biomes come from deterministic fields, so "which way is the jungle" is
+answerable anywhere and retunes itself with the world.
+- **Remembered exploration** (`src/world/explored.ts`): coarse 2-unit cells,
+  saved (`pp.explored.v1`), read by the minimap after a reload. This is step
+  3's storage in its surface-only form; add `layer` to the key when caves
+  arrive.
+- **Compass ticks** (`src/ui/directionHints.ts`): a dot per nearby land around
+  the compass rose, plus a screen-reader sentence. Nearest *real stretch*, not
+  a one-page fleck (`isSubstantial` in `src/world/biomeCompass.ts`).
+- **Treasure map** (`N`, "Map" by the minimap, scrapbook Map tab): inked and
+  hatched where walked, smoothed watercolour hearsay elsewhere, one "land?"
+  guess per land, the red X for home, edge arrows for lands off the sheet,
+  and the same content written out as a list. Model and drawing are split
+  (`treasureMapModel.ts` / `treasureMapDraw.ts`) so the real map can reuse
+  the model.
+Still waiting on the design: accurate rendering, pan/zoom, search/filter,
+pins, and layers.
+
 1. **Full-page map view**, surface only, in the scrapbook Map tab. Useful on its
    own, independent of caves. — **L**
 2. **`layer` threaded** through page addressing, streaming, terrain sampling,
