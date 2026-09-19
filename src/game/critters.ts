@@ -12,6 +12,7 @@ import { isInWater } from '../world/water';
 import { isSolidAt } from '../world/footprints';
 import { nudgeToFreeSpot } from '../core/placement';
 import { attachCanopy, canopyTreesFromPage, isAloft, isCanopySpecies, type CanopyTree } from './critterCanopy';
+import { locomotionOf } from './critterLocomotion';
 import { createColorMaterial } from '../render/materials';
 import type { CritterParams } from './critterVariation';
 import type { CritterRig } from './critterRigs';
@@ -96,8 +97,9 @@ function spawnCritter(
   // know nothing about ponds or the Thing Maker; nudging afterwards keeps the
   // seed — and therefore multiplayer agreement — intact while still landing
   // somewhere sensible. Flyers are exempt: hovering over a pond is exactly
-  // where a butterfly belongs, and nothing blocks a butterfly.
-  const spawn = rig.flying
+  // where a butterfly belongs, and nothing blocks a butterfly. So are
+  // swimmers: a fish nudged out of its pond is a dead fish.
+  const spawn = rig.flying || locomotionOf(species).water === 'swim'
     ? { x, z }
     : nudgeToFreeSpot(x, z, (px, pz) => isInWater(px, pz) || isSolidAt(px, pz, 0.16));
   rig.group.position.set(

@@ -29,7 +29,7 @@ vi.mock('../world/footprints', () => ({
 const { buildCritterRig } = await import('./critterRigs');
 const { generateCritterParams } = await import('./critterVariation');
 const { updateCritter, critterReachDistance } = await import('./critterBehavior');
-const { attachCanopy, canopyTreesFromPage, isAloft, requestCanopyVisit } = await import('./critterCanopy');
+const { attachCanopy, canopyTreesFromPage, isAloft, requestCanopyVisit, CANOPY_PROFILES, posePitch, poseRoll } = await import('./critterCanopy');
 type Critter = import('./critterBehavior').Critter;
 type CritterSpecies = import('./critterVariation').CritterSpecies;
 type PageData = import('../world/types').PageData;
@@ -183,5 +183,83 @@ describe('coming down to say hello', () => {
     const below = critter.rig.group.position.clone().setY(0);
     expect(critter.rig.group.position.distanceTo(below)).toBeGreaterThan(3);
     expect(critterReachDistance(critter, below)).toBeLessThan(0.01);
+  });
+});
+
+describe('climbing like the animal it is', () => {
+  // The bug these pin: every climber used to share one 90° climb pitch.
+  // Fine for the horizontally-built sloth; for the upright monkey it meant
+  // being laid on its back, body clear of the trunk, gliding upward —
+  // reported as "the monkey just levitates up the trees."
+
+  it('orients each climb style the way its body plan needs', () => {
+    const sloth = CANOPY_PROFILES.sloth!;
+    const monkey = CANOPY_PROFILES.monkey!;
+    // Sprawl: nose straight up the trunk, and rolled nose-first going down.
+    expect(posePitch(sloth, 'climb')).toBeCloseTo(Math.PI / 2);
+    expect(poseRoll(sloth, 'climb', false)).toBe(0);
+    expect(poseRoll(sloth, 'climb', true)).toBeCloseTo(Math.PI);
+    expect(poseRoll(sloth, 'hang', false)).toBeCloseTo(Math.PI);
+    // Upright: a lean in, never a flip — a monkey that rolls π descends
+    // upside-down with its back to the bark (a live visual-pass catch).
+    expect(posePitch(monkey, 'climb')).toBeCloseTo(-0.32);
+    expect(poseRoll(monkey, 'climb', true)).toBe(0);
+    expect(poseRoll(monkey, 'climb', false)).toBe(0);
+    // Everything else is level.
+    expect(posePitch(monkey, 'sit')).toBe(0);
+    expect(posePitch(sloth, 'hang')).toBe(0);
+  });
+
+  it('a monkey climbs upright against the trunk, never pitched onto its back', () => {
+    const critter = makeCritter('monkey');
+    // Bring it down, then let its ground budget run out so it walks back
+    // and climbs — the exact flow a player watches.
+    const player = critter.rig.group.position.clone().setY(0).add(new THREE.Vector3(1.2, 0, 1.2));
+    expect(requestCanopyVisit(critter, player, () => 0)).toBe('coming');
+    let climbFrames = 0;
+    run(critter, 45, player, () => {
+      const state = critter.canopy!;
+      if (state.mode !== 'aloft' || state.pose !== 'climb') return;
+      if (critter.rig.group.position.y < 0.5) return; // still settling at the base
+      climbFrames += 1;
+      expect(Math.abs(critter.rig.group.rotation.x + 0.32)).toBeLessThan(0.75);
+      // And never rolled over: an upright climber that rolls π descends a
+      // trunk upside-down with its back to the bark (a live visual-pass
+      // catch, not a hypothetical).
+      expect(Math.abs(critter.rig.group.rotation.z)).toBeLessThan(0.5);
+    });
+    expect(climbFrames, 'monkey should have climbed a trunk during the visit').toBeGreaterThan(0);
+  });
+
+  it('a sloth sprawls belly-to-trunk going up, and turns nose-first coming down', () => {
+    const critter = makeCritter('sloth');
+    const player = critter.rig.group.position.clone().setY(0);
+    expect(requestCanopyVisit(critter, player, () => 0)).toBe('slow');
+    let climbFrames = 0;
+    run(critter, 40, player, () => {
+      const state = critter.canopy!;
+      if (state.pose !== 'climb') return;
+      climbFrames += 1;
+      // Sprawl pitch: nose up the trunk while climbing out of the canopy…
+      expect(critter.rig.group.rotation.x).toBeGreaterThan(0.9);
+      // …and on the trunk leg proper, rolled over: nose-first, belly to bark.
+      if (critter.rig.group.position.y < 3) {
+        expect(critter.rig.group.rotation.z).toBeGreaterThan(2.4);
+      }
+    });
+    expect(climbFrames, 'sloth should be working its way down a trunk').toBeGreaterThan(0);
+  });
+
+  it('a monkey sitting on a branch puts its weight on it, not a body-length above', () => {
+    const critter = makeCritter('monkey');
+    const torso = critter.rig.parts.body!;
+    critter.rig.group.updateMatrixWorld(true);
+    const tree = critter.canopy!.trees[critter.canopy!.tree];
+    const anchor = critter.canopy!.spot.kind === 'crown' ? tree.crownY : tree.lineY;
+    const torsoY = torso.getWorldPosition(new THREE.Vector3()).y;
+    // Old behaviour rested the group origin +0.02 over the line, putting
+    // the torso a full 0.26 scale units above it — a hovering monkey.
+    expect(torsoY - anchor).toBeLessThan(0.14 * critter.params.scale);
+    expect(torsoY - anchor).toBeGreaterThan(-0.1 * critter.params.scale);
   });
 });

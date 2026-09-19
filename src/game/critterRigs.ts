@@ -60,12 +60,15 @@ export type CritterRig = {
    */
   setPose?: (pose: CanopyPose) => void;
   flying: boolean;
-  hopper: boolean;
   /** Rest height of the group origin above the terrain. */
   groundOffset: number;
-  /** Hop arc height for hoppers. */
-  hopHeight: number;
-  /** Poseable handles for shared idle actions (see game/critterIdle.ts). */
+  /**
+   * Poseable handles for shared idle actions (see game/critterIdle.ts).
+   *
+   * Hop locomotion is *not* a rig property: how a species moves lives in
+   * `critterLocomotion.ts`, so a new hopper (a frog) is one table entry
+   * rather than a rig contract change.
+   */
   parts: CritterParts;
   animate: (t: number, dt: number, moving: boolean, speedRatio: number, curious: boolean) => void;
   /** Species party trick, progress 0..1 (raccoons rub their little hands). */
@@ -157,6 +160,35 @@ function capsule(radius: number, length: number, material: THREE.Material, capSe
   );
 }
 
+/**
+ * One tail feather: a paper plane hanging from a rib pivot, swept back below
+ * horizontal (`sweep`, negative radians), fanned sideways (`fan`), and
+ * optionally twisted to face outward (`twist`) so outer feathers stay visible
+ * from the side instead of going edge-on.
+ *
+ * The rib pivot is meant to sit *inside* the body. A plane centered behind
+ * the body touches it at a single tangent point and reads as detached from
+ * every angle but dead-behind — the bird tail bug. Rooting the quills under
+ * the body's skin keeps every feather overlapping real bird no matter which
+ * way you look at it.
+ */
+function feather(
+  length: number,
+  width: number,
+  material: THREE.Material,
+  sweep: number,
+  fan: number,
+  twist = 0,
+): THREE.Group {
+  const rib = new THREE.Group();
+  rib.rotation.set(sweep, 0, fan);
+  const quill = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(width, length), material));
+  quill.position.y = -length / 2;
+  quill.rotation.y = twist;
+  rib.add(quill);
+  return rib;
+}
+
 function buildSquirrel(params: CritterParams): CritterRig {
   const group = new THREE.Group();
   const coat = bodyMaterial(params);
@@ -227,9 +259,7 @@ function buildSquirrel(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: false,
     groundOffset: 0.03,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body, tail, ears }),
     animate: (t, _dt, moving, speedRatio, _curious) => {
       tail.rotation.z = Math.sin(t * (moving ? 7 : 2.4) + o) * (moving ? 0.2 : 0.1);
@@ -302,9 +332,7 @@ function buildButterfly(params: CritterParams): CritterRig {
   return {
     group,
     flying: true,
-    hopper: false,
     groundOffset: 1.46,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body }),
     animate: (t, _dt, _moving, _speedRatio, curious) => {
       const flap = 0.48 + Math.sin(t * (curious ? 15 : 11) + o) * 0.62;
@@ -419,9 +447,7 @@ function buildRaccoon(params: CritterParams): CritterRig {
     group,
     parts: partsOf({ head: headGroup, body: torso, tail, ears }),
     flying: false,
-    hopper: false,
     groundOffset: 0.03,
-    hopHeight: 0,
     animate: (t, _dt, moving, speedRatio, curious) => {
       // Trundling waddle.
       torso.rotation.z = moving ? Math.sin(t * 8 + o) * 0.07 * speedRatio : 0;
@@ -514,7 +540,36 @@ function buildMeerkat(params: CritterParams): CritterRig {
     const ear = sphere(0.032, coat, 12, 8);
     ear.scale.set(0.85, 1, 0.55);
     ear.position.set(x, 0.37, -0.24);
+    // Black-tipped ears — the one marking every meerkat gets. A child of the
+    // ear so ear-swivel idles carry the tip along.
+    const tipCap = sphere(0.02, dark, 8, 6);
+    tipCap.scale.set(0.8, 0.85, 0.5);
+    tipCap.position.set(x * 0.03, 0.023, 0);
+    ear.add(tipCap);
     ears.push(ear);
+  }
+
+  // Faint bars across the back, the way real meerkats' guard hair grows.
+  // Seeded per individual via `params.markings`: some backs stay plain, most
+  // are faintly barred, a few wear it boldly. Thin translucent strips sunk
+  // into the spine so only the crest shows — tissue-paper barring laid over
+  // whatever coat paper the individual rolled.
+  const markings = params.markings ?? 1;
+  const barMaterial = markings > 0.75
+    ? createColorMaterial(params.accentColor, 0.55)
+    : createColorMaterial(params.accentColor, 0.4);
+  // [spine y, z] spots along the arched two-capsule back, front lifted.
+  const barSpots: Array<[number, number]> = [
+    [0.135, -0.16], [0.126, -0.08], [0.112, 0.0], [0.098, 0.08], [0.09, 0.15],
+  ];
+  if (markings > 0.3) {
+    const bars = markings > 0.75 ? barSpots : barSpots.filter((_, index) => index % 2 === 0);
+    for (const [y, z] of bars) {
+      const bar = sphere(0.09, barMaterial, 10, 8);
+      bar.scale.set(1.12, 0.15, 0.16);
+      bar.position.set(0, y - 0.004, z);
+      torso.add(bar);
+    }
   }
 
   torso.add(haunches, ribcage, chest);
@@ -554,9 +609,7 @@ function buildMeerkat(params: CritterParams): CritterRig {
     group,
     parts: partsOf({ head: headGroup, body: torso, tail, ears }),
     flying: false,
-    hopper: false,
     groundOffset: 0.155,
-    hopHeight: 0,
     animate: (t, _dt, moving, speedRatio, curious) => {
       torso.rotation.z = moving ? Math.sin(t * 9 + o) * 0.05 * speedRatio : 0;
       tail.rotation.x = Math.sin(t * (moving ? 7 : 2.4) + o) * (moving ? 0.1 : 0.04);
@@ -658,9 +711,7 @@ function buildBunny(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: true,
     groundOffset: 0.02,
-    hopHeight: 0.2,
     parts: partsOf({ head: headGroup, body, tail, ears }),
     animate: (t, _dt, moving, speedRatio, curious) => {
       // Ear pose is owned by the idle action system (ear-swivel, perk-up) so
@@ -721,9 +772,18 @@ function buildBird(params: CritterParams): CritterRig {
     wings.push(wing);
   }
 
-  const tailFan = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.16), coat));
-  tailFan.position.set(0, 0.2, 0.22);
-  tailFan.rotation.x = 0.6;
+  // Rooted tail fan: three quills swept back below the horizontal, the outer
+  // two fanned and twisted outward. Continuing the body's back line down and
+  // back is what a perched songbird's tail actually does — the old single
+  // plane tilted up and floated clear of the body.
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.26, 0.09);
+  const TAIL_SWEEP = -1.24;
+  tail.add(
+    feather(0.21, 0.075, coat, TAIL_SWEEP, -0.46, -0.6),
+    feather(0.22, 0.08, coat, TAIL_SWEEP, 0),
+    feather(0.21, 0.075, coat, TAIL_SWEEP, 0.46, 0.6),
+  );
 
   const legs: THREE.Mesh[] = [];
   for (const x of [-0.05, 0.05]) {
@@ -732,7 +792,7 @@ function buildBird(params: CritterParams): CritterRig {
     legs.push(leg);
   }
 
-  group.add(body, ...wings, tailFan, ...legs);
+  group.add(body, ...wings, tail, ...legs);
   const headGroup = makeHead(group, [0, 0.28, -0.06], [head, beak, ...eyes]);
   const headRest = headGroup.position.clone();
 
@@ -740,10 +800,8 @@ function buildBird(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: true,
     groundOffset: 0.02,
-    hopHeight: 0.12,
-    parts: partsOf({ head: headGroup, body, tail: tailFan }),
+    parts: partsOf({ head: headGroup, body, tail }),
     animate: (t, _dt, moving, speedRatio, curious) => {
       if (moving) {
         wings.forEach((wing, index) => {
@@ -769,7 +827,7 @@ function buildBird(params: CritterParams): CritterRig {
       }
       // The signature bird head-cock, applied to the whole head.
       headGroup.rotation.z = curious ? (Math.sin(t * 1.6 + o) > 0 ? 0.42 : -0.42) : 0;
-      tailFan.rotation.x = 0.6 + Math.sin(t * 3.2 + o) * 0.1;
+      tail.rotation.x = Math.sin(t * 3.2 + o) * 0.1;
     },
     flourish: (progress, t) => {
       // Big wing stretch and a shimmy.
@@ -831,13 +889,18 @@ function buildParrot(params: CritterParams): CritterRig {
     wings.push(wing);
   }
 
-  // A long two-panel tail that drags behind, the second parrot cue.
-  const tailLong = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.42), coat));
-  tailLong.position.set(0, 0.16, 0.4);
-  tailLong.rotation.x = 0.5;
-  const tailTip = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.2), beakMaterial));
-  tailTip.position.set(0, 0.1, 0.58);
-  tailTip.rotation.x = 0.62;
+  // A long two-panel tail that streams behind and drags, the second parrot
+  // cue. Both quills root inside the body (see `feather`); the accent panel
+  // rides slightly proud of the coat one so the pair read as layered paper
+  // rather than one thick sheet.
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.27, 0.08);
+  const TAIL_SWEEP = -1.38;
+  tail.add(
+    feather(0.5, 0.16, coat, TAIL_SWEEP, 0),
+    feather(0.34, 0.1, beakMaterial, TAIL_SWEEP + 0.08, 0),
+  );
+  tail.children[1].position.set(0, 0.05, 0.012);
 
   const legs: THREE.Mesh[] = [];
   for (const x of [-0.055, 0.055]) {
@@ -846,7 +909,7 @@ function buildParrot(params: CritterParams): CritterRig {
     legs.push(leg);
   }
 
-  group.add(body, ...wings, tailLong, tailTip, ...legs);
+  group.add(body, ...wings, tail, ...legs);
   const headGroup = makeHead(group, [0, 0.32, -0.06], [head, beakUpper, beakLower, ...eyes]);
   const headRest = headGroup.position.clone();
 
@@ -854,10 +917,8 @@ function buildParrot(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: true,
     groundOffset: 0.02,
-    hopHeight: 0.12,
-    parts: partsOf({ head: headGroup, body, tail: tailLong }),
+    parts: partsOf({ head: headGroup, body, tail }),
     animate: (t, _dt, moving, speedRatio, curious) => {
       if (moving) {
         // Slow and deliberate: half the songbird's flap rate, more travel.
@@ -882,8 +943,7 @@ function buildParrot(params: CritterParams): CritterRig {
       }
       // The same curious head-cock the bird has — a parrot just commits.
       if (curious) headGroup.rotation.z = Math.sin(t * 1.6 + o) > 0 ? 0.42 : -0.42;
-      tailLong.rotation.x = 0.5 + Math.sin(t * 2.4 + o) * 0.08;
-      tailTip.rotation.x = 0.62 + Math.sin(t * 2.4 + o + 0.3) * 0.08;
+      tail.rotation.x = Math.sin(t * 2.4 + o) * 0.08;
     },
     flourish: (progress, t) => {
       // Big wing stretch, tail lift, and an indignant little shimmy.
@@ -892,13 +952,12 @@ function buildParrot(params: CritterParams): CritterRig {
         const side = index === 0 ? -1 : 1;
         wing.rotation.z = side * (0.5 + 0.95 * stretch);
       });
-      tailLong.rotation.x = 0.5 - 0.35 * stretch;
-      tailTip.rotation.x = 0.62 - 0.4 * stretch;
+      // Sweeping toward level raises the drag into a fan.
+      tail.rotation.x = 0.4 * stretch;
       body.rotation.y = Math.sin(t * 14) * 0.08 * stretch;
       if (progress >= 1) {
         body.rotation.y = 0;
-        tailLong.rotation.x = 0.5;
-        tailTip.rotation.x = 0.62;
+        tail.rotation.x = 0;
       }
     },
   };
@@ -985,9 +1044,7 @@ function buildCat(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: false,
     groundOffset: 0.03,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body, tail, ears }),
     animate: (t, dt, moving, speedRatio, curious) => {
       // The tail is always talking.
@@ -1090,9 +1147,7 @@ function buildWoodchuck(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: false,
     groundOffset: 0.035,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body, tail, ears }),
     animate: (t, _dt, moving, speedRatio, _curious) => {
       body.rotation.z = moving ? Math.sin(t * 7 + o) * 0.08 * speedRatio : 0;
@@ -1214,9 +1269,7 @@ function buildFox(params: CritterParams): CritterRig {
     group,
     parts: partsOf({ head: headGroup, body: torso, tail, ears }),
     flying: false,
-    hopper: false,
     groundOffset: 0.032,
-    hopHeight: 0,
     animate: (t, _dt, moving, speedRatio, curious) => {
       // A quick, low trot — legs sweep faster than the raccoon's waddle.
       torso.rotation.z = moving ? Math.sin(t * 9 + o) * 0.05 * speedRatio : 0;
@@ -1357,9 +1410,16 @@ function buildToucan(params: CritterParams): CritterRig {
     wings.push(wing);
   }
 
-  const tail = shadowed(new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.26), coat));
-  tail.position.set(0, 0.16, 0.28);
-  tail.rotation.x = 0.7;
+  // Folded tail, rooted inside the body like the other birds' — a toucan
+  // perched on a branch lets its tail hang down and back under the bench.
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.26, 0.1);
+  const TAIL_SWEEP = -1.05;
+  tail.add(
+    feather(0.3, 0.13, coat, TAIL_SWEEP, -0.25, -0.4),
+    feather(0.28, 0.12, coat, TAIL_SWEEP, 0),
+    feather(0.3, 0.13, coat, TAIL_SWEEP, 0.25, 0.4),
+  );
 
   const legs: THREE.Mesh[] = [];
   for (const x of [-0.05, 0.05]) {
@@ -1382,9 +1442,7 @@ function buildToucan(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: true,
     groundOffset: 0.02,
-    hopHeight: 0.1,
     parts: partsOf({ head: headGroup, body, tail }),
     setPose: (next) => { pose = next; },
     animate: (t, _dt, moving, speedRatio, curious) => {
@@ -1411,7 +1469,7 @@ function buildToucan(params: CritterParams): CritterRig {
         headGroup.rotation.y = Math.sin(t * 0.9 + o) * 0.35;
       }
       if (curious) headGroup.rotation.z = Math.sin(t * 1.4 + o) > 0 ? 0.38 : -0.38;
-      tail.rotation.x = 0.7 + Math.sin(t * 2.1 + o) * 0.12;
+      tail.rotation.x = Math.sin(t * 2.1 + o) * 0.12;
     },
     flourish: (progress, t) => {
       // The berry toss: a flick of the bill, the berry arcs up, and is
@@ -1521,9 +1579,7 @@ function buildSloth(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: false,
     groundOffset: 0.03,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body: torso, tail }),
     setPose: (next) => { pose = next; },
     animate: (t, _dt, moving, speedRatio) => {
@@ -1673,9 +1729,7 @@ function buildMonkey(params: CritterParams): CritterRig {
   return {
     group,
     flying: false,
-    hopper: false,
     groundOffset: 0.03,
-    hopHeight: 0,
     parts: partsOf({ head: headGroup, body: torso, tail, ears }),
     setPose: (next) => { pose = next; },
     animate: (t, _dt, moving, speedRatio, curious) => {

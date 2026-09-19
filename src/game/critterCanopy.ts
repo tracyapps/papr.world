@@ -70,6 +70,12 @@ type Leg = {
   flutter: number;
   /** The last leg of a trip down: arriving hands over to the ground walker. */
   landsOnGround: boolean;
+  /**
+   * A deliberate climb *down* the trunk. Only planDescend sets this: it
+   * flips a sprawler nose-first (see poseRoll) and inverts the climb bob.
+   * Merely moving to a lower spot is not a descent.
+   */
+  descend: boolean;
 };
 
 export type CanopyState = {
@@ -109,6 +115,31 @@ export type CanopyProfile = {
   usesCrowns: boolean;
   aloftSpeed: number;
   climbSpeed: number;
+  /**
+   * How the body is held against the trunk while climbing.
+   *
+   * - `sprawl` (sloth): a horizontal quadruped pitched 90° nose-up, belly to
+   *   the bark — and nose-down, rolled, on the way back down.
+   * - `upright` (monkey): stays on its feet against the trunk and reaches
+   *   with its arms. Pitching an upright climber the sprawler's 90° lays it
+   *   on its back, sliding up the tree — the "levitating monkey" bug.
+   */
+  climbStyle: ClimbStyle;
+  /** Climb pulls per second; each one is a visible surge of the body. */
+  climbPulls: number;
+  /** Height gained (or dropped) per pull, in scaled body units. */
+  climbBob: number;
+  /** Sideways yaw sway while climbing, radians. */
+  climbSway: number;
+  /**
+   * How far the route pulls the group origin *into* the tree from the
+   * standard climb depth, in scaled units. Sprawlers pitch around their
+   * feet, which throws the body away from the trunk; insetting the route
+   * is what puts the belly back against the bark.
+   */
+  climbInset: number;
+  /** Group-origin height offset for the sitting rest pose (scaled units). */
+  sitOffset: number;
   /** Furthest another tree may be for a direct aloft transfer. */
   treeHopRange: number;
   weights: { stay: number; shuffle: number; hopTree: number; descend: number };
@@ -120,6 +151,8 @@ export type CanopyProfile = {
   /** Will it come down to a player who is nearby, all by itself? */
   comesToPlayer: number;
 };
+
+export type ClimbStyle = 'sprawl' | 'upright';
 
 export const CANOPY_PROFILES: Partial<Record<CritterSpecies, CanopyProfile>> = {
   // Slow, upside down, and mostly staying exactly where it is. Comes down to
@@ -134,7 +167,17 @@ export const CANOPY_PROFILES: Partial<Record<CritterSpecies, CanopyProfile>> = {
     usesCrowns: false,
     aloftSpeed: 0.85,
     climbSpeed: 0.75,
-    treeHopRange: 6.5,
+    climbStyle: 'sprawl',
+    // One unhurried reach at a time — the climb visibly advances per reach
+    // rather than gliding, at sloth tempo.
+    climbPulls: 0.24,
+    climbBob: 0.05,
+    climbSway: 0.03,
+    climbInset: 0.24,
+    sitOffset: 0,
+    // Sloths transfer where canopies actually meet; any further is a leap it
+    // would never take.
+    treeHopRange: 4.75,
     weights: { stay: 6, shuffle: 3, hopTree: 1.2, descend: 0.8 },
     groundTime: [22, 42],
     idleSlowdown: 2.6,
@@ -153,6 +196,16 @@ export const CANOPY_PROFILES: Partial<Record<CritterSpecies, CanopyProfile>> = {
     usesCrowns: true,
     aloftSpeed: 1.45,
     climbSpeed: 1.2,
+    // Climbs upright against the trunk, arms doing the work — see
+    // ClimbStyle for why this is not the sloth's pitch.
+    climbStyle: 'upright',
+    climbPulls: 1.5,
+    climbBob: 0.07,
+    climbSway: 0.07,
+    climbInset: 0.02,
+    // Sits with its weight on the branch, not hovering a body-height above
+    // it: the rig's seat sits ~0.17 above the group origin.
+    sitOffset: -0.17,
     treeHopRange: 9.5,
     weights: { stay: 3, shuffle: 1.6, hopTree: 4, descend: 2 },
     groundTime: [8, 20],
@@ -172,6 +225,12 @@ export const CANOPY_PROFILES: Partial<Record<CritterSpecies, CanopyProfile>> = {
     usesCrowns: true,
     aloftSpeed: 2.4,
     climbSpeed: 0,
+    climbStyle: 'upright',
+    climbPulls: 0,
+    climbBob: 0,
+    climbSway: 0,
+    climbInset: 0,
+    sitOffset: 0.02,
     treeHopRange: 16,
     weights: { stay: 4, shuffle: 0.7, hopTree: 3.5, descend: 1.4 },
     groundTime: [5, 12],
@@ -288,7 +347,13 @@ function scaleOf(critter: Critter) {
 /** Group-origin position for resting at a spot in a given pose. */
 function spotOrigin(critter: Critter, tree: CanopyTree, spot: Spot, out = new THREE.Vector3()) {
   const profile = critter.canopy!.profile;
-  if (spot.kind === 'crown') return treePoint(tree, spot.offset, tree.crownY, CROWN_DEPTH, out);
+  if (spot.kind === 'crown') {
+    const point = treePoint(tree, spot.offset, tree.crownY, CROWN_DEPTH, out);
+    // Crowns rest in the leaves, but a sitter still puts its weight in
+    // them rather than hovering a body-height above.
+    if (profile.linePose === 'sit') point.y += profile.sitOffset * scaleOf(critter);
+    return point;
+  }
   if (spot.kind === 'vine') {
     const vine = tree.vines[spot.vine];
     const gripY = vine.bottomY + (vine.topY - vine.bottomY) * 0.38;
@@ -297,8 +362,20 @@ function spotOrigin(critter: Critter, tree: CanopyTree, spot: Spot, out = new TH
     return point;
   }
   const point = treePoint(tree, spot.offset, tree.lineY, LINE_DEPTH, out);
-  if (profile.linePose === 'sit') point.y += 0.02;
+  if (profile.linePose === 'sit') point.y += profile.sitOffset * scaleOf(critter);
   return point;
+}
+
+/**
+ * A point on the trunk to climb through. The raw trunk depth suits an
+ * upright climber's feet; a sprawler's route is inset so the pitched-over
+ * body ends up against the bark instead of floating a body-length clear of
+ * it (see `climbInset`).
+ */
+function climbPoint(critter: Critter, tree: CanopyTree, up: number, out = new THREE.Vector3()) {
+  const { climbStyle, climbInset } = critter.canopy!.profile;
+  const inset = (climbStyle === 'sprawl' ? climbInset : climbInset * 0.5) * scaleOf(critter);
+  return treePoint(tree, 0, up, TRUNK_DEPTH - inset, out);
 }
 
 function spotPose(profile: CanopyProfile, spot: Spot): CanopyPose {
@@ -327,10 +404,11 @@ function pushLeg(
   to: THREE.Vector3,
   pose: CanopyPose,
   speed: number,
-  options: { arc?: number; heading?: number | null; flutter?: number; landsOnGround?: boolean } = {},
+  options: { arc?: number; heading?: number | null; flutter?: number; landsOnGround?: boolean; descend?: boolean } = {},
 ) {
   state.legs.push({
     landsOnGround: options.landsOnGround ?? false,
+    descend: options.descend ?? false,
     from: from.clone(),
     to: to.clone(),
     pose,
@@ -413,10 +491,11 @@ function planTreeHop(critter: Critter, state: CanopyState, next: number, target:
     // A monkey leaps from wherever it is, arms out, and grabs on.
     pushLeg(state, from, to, 'fly', speed * 1.25, { arc: 0.5 + from.distanceTo(to) * 0.05 });
   } else {
-    // A sloth reaches across where the two canopies meet, hanging the whole way.
+    // A sloth reaches across where the two canopies meet, hanging the whole
+    // way and sagging slightly as it stretches the gap.
     const onLine = legsToLine(critter, state, fromTree, from);
     const targetAccess = lineAccess(critter, toTree, target);
-    pushLeg(state, onLine, targetAccess, 'hang', speed);
+    pushLeg(state, onLine, targetAccess, 'hang', speed, { arc: -0.22 });
     if (target.kind === 'vine') {
       pushLeg(state, targetAccess, to, 'climb', critter.params.speed * profile.climbSpeed, { heading: faceTree(toTree) });
     }
@@ -487,18 +566,20 @@ function planDescend(
     const ground = freeGroundNear(bottom.x, bottom.z, rng, 0.8);
     if (!ground) return false;
     ground.y = heightAt(ground.x, ground.z) + critter.rig.groundOffset * scaleOf(critter);
-    pushLeg(state, from, bottom, 'climb', climbSpeed, { heading: faceTree(tree) });
+    pushLeg(state, from, bottom, 'climb', climbSpeed, { heading: faceTree(tree), descend: true });
     pushLeg(state, bottom, ground, 'fly', Math.max(speed, 1.2), { arc: 0.1, landsOnGround: true });
     return true;
   }
 
   const onLine = legsToLine(critter, state, tree, from);
-  const trunkTop = treePoint(tree, 0, tree.lineY, TRUNK_DEPTH);
-  const trunkBase = treePoint(tree, 0, 0.05, TRUNK_DEPTH);
+  const trunkTop = climbPoint(critter, tree, tree.lineY);
+  const trunkBase = climbPoint(critter, tree, 0.05);
   const lineStart = onLine.clone();
   if (profile.travel === 'swing') lineStart.y -= profile.gripReach * scaleOf(critter);
   pushLeg(state, lineStart, trunkTop, profile.travel === 'hang' ? 'hang' : 'swing', speed * profile.aloftSpeed);
-  pushLeg(state, trunkTop, trunkBase, 'climb', climbSpeed, { heading: faceTree(tree) });
+  // Down the trunk: a sprawler turns nose-first for this leg (poseRoll) and
+  // each reach surges it downward instead of up.
+  pushLeg(state, trunkTop, trunkBase, 'climb', climbSpeed, { heading: faceTree(tree), descend: true });
   stepOff.y = heightAt(stepOff.x, stepOff.z) + critter.rig.groundOffset * scaleOf(critter);
   pushLeg(state, trunkBase, stepOff, 'ground', Math.max(speed, 0.3), { landsOnGround: true });
   return true;
@@ -527,6 +608,7 @@ function finalizeRoute(critter: Critter, state: CanopyState) {
         heading: leg.heading,
         flutter: 0,
         landsOnGround: false,
+        descend: false,
       });
     }
     connected.push(leg);
@@ -547,8 +629,8 @@ function planAscend(critter: Critter, state: CanopyState, treeIndex: number) {
     const to = spotOrigin(critter, tree, target);
     pushLeg(state, from, to, 'fly', speed * profile.aloftSpeed, { arc: 0.8, flutter: 0.1 });
   } else {
-    const trunkBase = treePoint(tree, 0, 0.05, TRUNK_DEPTH);
-    const trunkTop = treePoint(tree, 0, tree.lineY, TRUNK_DEPTH);
+    const trunkBase = climbPoint(critter, tree, 0.05);
+    const trunkTop = climbPoint(critter, tree, tree.lineY);
     const climbSpeed = speed * profile.climbSpeed;
     pushLeg(state, from, trunkBase, 'ground', Math.max(speed, 0.3));
     pushLeg(state, trunkBase, trunkTop, 'climb', climbSpeed, { heading: faceTree(tree) });
@@ -638,21 +720,42 @@ function restHeading(state: CanopyState) {
 
 // --- Per-frame --------------------------------------------------------------
 
-const POSE_PITCH: Record<CanopyPose, number> = {
-  ground: 0, sit: 0, fly: 0, swing: 0, hang: 0, climb: Math.PI / 2,
-};
-const POSE_ROLL: Record<CanopyPose, number> = {
-  ground: 0, sit: 0, fly: 0, swing: 0, climb: 0, hang: Math.PI,
-};
+/**
+ * Body pitch for a pose. Climbing is the interesting one, and it is
+ * per-species because rig body plans differ: a sprawler is a horizontal
+ * quadruped that must be pitched nose-up to hug the trunk; an upright
+ * climber is built standing and only leans in. One shared 90° used to be
+ * applied to both, which laid the monkey on its back and slid it up the
+ * tree — reported as "the monkey just levitates."
+ */
+export function posePitch(profile: CanopyProfile, pose: CanopyPose): number {
+  if (pose !== 'climb') return 0;
+  return profile.climbStyle === 'sprawl' ? Math.PI / 2 : -0.32;
+}
+
+/**
+ * Body roll for a pose. Hanging is upside down. A *sprawling* climber
+ * descends a trunk nose-first — the roll is what keeps its belly against
+ * the bark while the pitch sends the nose down instead of up. An upright
+ * climber must not roll: π on a standing body plan means an upside-down
+ * monkey backing down a tree with its back to the bark (caught in a live
+ * visual pass — the screenshot showed precisely that).
+ */
+export function poseRoll(profile: CanopyProfile, pose: CanopyPose, descend: boolean): number {
+  if (pose === 'hang') return Math.PI;
+  if (pose === 'climb' && descend && profile.climbStyle === 'sprawl') return Math.PI;
+  return 0;
+}
 
 /** Ease the group's orientation toward what the pose needs. */
-function orient(critter: Critter, pose: CanopyPose, heading: number, blend: number) {
+function orient(critter: Critter, pose: CanopyPose, heading: number, blend: number, descend = false) {
   const group = critter.rig.group;
+  const profile = critter.canopy!.profile;
   const k = Math.min(1, blend);
   critter.heading += wrapAngle(heading - critter.heading) * k;
   group.rotation.y = critter.heading;
-  group.rotation.x += (POSE_PITCH[pose] - group.rotation.x) * k;
-  group.rotation.z += (POSE_ROLL[pose] - group.rotation.z) * k;
+  group.rotation.x += (posePitch(profile, pose) - group.rotation.x) * k;
+  group.rotation.z += (poseRoll(profile, pose, descend) - group.rotation.z) * k;
 }
 
 function setPose(critter: Critter, pose: CanopyPose) {
@@ -925,13 +1028,36 @@ export function updateCanopyCritter(
     scratch.copy(leg.from).lerp(leg.to, eased);
     scratch.y += Math.sin(progress * Math.PI) * leg.arc;
     if (leg.flutter) scratch.y += Math.sin(elapsed * 9 + params.animOffset) * leg.flutter;
+
+    // A climb is reaches, not a glide: the body surges with each pull and
+    // sways a little as the arms trade places. Derived from progress alone
+    // — no time, no rng — so every client simulating this critter sees the
+    // same climb from the same seeds.
+    const climb = leg.pose === 'climb' ? state.profile : null;
+    let climbSwayPhase = 0;
+    if (climb && climb.climbBob > 0) {
+      const pulls = Math.max(1, Math.round(leg.duration * Math.max(0.01, climb.climbPulls)));
+      climbSwayPhase = Math.sin(progress * Math.PI * pulls);
+      const direction = leg.descend ? -1 : 1;
+      scratch.y += Math.abs(climbSwayPhase) * climb.climbBob * direction * scaleOf(critter);
+    }
+
     group.position.copy(scratch);
 
     setPose(critter, leg.pose);
     const horizontal = Math.hypot(leg.to.x - leg.from.x, leg.to.z - leg.from.z);
-    const heading = leg.heading
+    let heading = leg.heading
       ?? (horizontal > 0.05 ? headingToward(leg.from.x, leg.from.z, leg.to.x, leg.to.z) : critter.heading);
-    orient(critter, leg.pose, heading, delta * 7);
+    if (climb) heading += climbSwayPhase * climb.climbSway;
+    orient(critter, leg.pose, heading, delta * 7, leg.descend);
+
+    // Hanging and swinging travel hand over hand: a slow roll from side to
+    // side, one lean per hand, sells the reach without a single extra query.
+    if (leg.pose === 'hang' || leg.pose === 'swing') {
+      const hands = Math.max(1, Math.round(leg.duration * 1.1 / state.profile.idleSlowdown));
+      group.rotation.z += Math.sin(progress * Math.PI * hands) * 0.06;
+    }
+
     rig.animate(elapsed, delta, true, 1, false);
     relaxToRest(rig.parts, Math.min(1, delta * 8));
 

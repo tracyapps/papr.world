@@ -111,4 +111,68 @@ describe.each(SPECIES)('%s rig', (species) => {
     expect(rig.parts).toBeDefined();
     expect(rig.parts.rest.body.scaleY).toBeGreaterThan(0);
   });
+
+  // Only meaningful for the birds; their tails are separate paper planes and
+  // therefore the one part that can float free of the body.
+  if (species === 'bird' || species === 'parrot' || species === 'toucan') {
+    it('roots its tail inside the body, not tangent to it', () => {
+      // The bug this pins: a tail plane *centered* behind the body touches it
+      // at a single tangent point and reads as detached feathers from every
+      // angle but dead-behind. The tail pivot must live under the skin.
+      const rig = buildCritterRig(species, params);
+      const body = rig.parts.body as THREE.Mesh;
+      const tail = rig.parts.tail;
+      if (!tail) return;
+
+      rig.group.updateMatrixWorld(true);
+      const geometry = body.geometry as THREE.BufferGeometry;
+      geometry.computeBoundingSphere();
+      const radius = (geometry.boundingSphere?.radius ?? 0)
+        * Math.max(body.scale.x, body.scale.y, body.scale.z);
+      const center = body.getWorldPosition(new THREE.Vector3());
+      const root = tail.getWorldPosition(new THREE.Vector3());
+      expect(
+        center.distanceTo(root),
+        'tail root should sit inside the body sphere',
+      ).toBeLessThan(radius - 0.01);
+    });
+  }
+});
+
+describe('meerkat variation', () => {
+  it('bars its back for bold markings rolls and stays plain for low ones', () => {
+    const plain = buildCritterRig('meerkat', { ...generateCritterParams('meerkat', 1), markings: 0.1 });
+    const barred = buildCritterRig('meerkat', { ...generateCritterParams('meerkat', 2), markings: 0.9 });
+    const meshesUnder = (rig: ReturnType<typeof buildCritterRig>) => {
+      const torso = rig.parts.body;
+      if (!torso) return -1;
+      // Direct children only: the head group also lives under the torso.
+      return torso.children.filter((child) => (child as THREE.Mesh).isMesh).length;
+    };
+    // Torso without bars: haunches + ribcage + chest. Barred: those, plus
+    // three or five strips.
+    expect(meshesUnder(plain)).toBe(3);
+    expect(meshesUnder(barred)).toBeGreaterThanOrEqual(6);
+  });
+
+  it('caps every ear with a dark tip parented to the ear itself', () => {
+    const rig = buildCritterRig('meerkat', generateCritterParams('meerkat', 3));
+    const tipped = rig.parts.ears.filter((ear) => ear.children.length > 0);
+    expect(tipped.length).toBe(rig.parts.ears.length);
+  });
+});
+
+describe('idle sentry-scan', () => {
+  it('raises the torso partway, scans, and settles back by the end', async () => {
+    const { applyIdleAction } = await import('./critterIdle');
+    const rig = buildCritterRig('meerkat', generateCritterParams('meerkat', 4));
+    const parts = rig.parts;
+    const restPitch = parts.rest.body.rotationX;
+
+    applyIdleAction('sentry-scan', parts, 0.5, 2.5, 0, 0);
+    expect(parts.body!.rotation.x).toBeLessThan(restPitch - 0.5);
+
+    applyIdleAction('sentry-scan', parts, 1, 3, 0, 0);
+    expect(Math.abs(parts.body!.rotation.x - restPitch)).toBeLessThan(1e-6);
+  });
 });

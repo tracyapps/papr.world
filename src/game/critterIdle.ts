@@ -28,7 +28,8 @@ export type IdleActionId =
   | 'groom'
   | 'stretch'
   | 'perk-up'
-  | 'shake-off';
+  | 'shake-off'
+  | 'sentry-scan';
 
 type IdleActionDefinition = {
   /** Seconds; an actual duration is drawn from this range. */
@@ -198,6 +199,36 @@ export const IDLE_ACTIONS: Record<IdleActionId, IdleActionDefinition> = {
       setEars(parts, (index) => ({ z: Math.sin(t * 36 + index) * 0.3 * shake }));
     },
   },
+
+  /**
+   * Rises partway up and scans the horizon — a sentry's working posture,
+   * short of the full tripod flourish. Written through the generic body
+   * handle, so any rig with a pivoting torso can run it; only the meerkat
+   * draws it from its pool today.
+   *
+   * The envelope rises quickly, *holds* while the head sweeps through two
+   * deliberate sectors with a pause between, and settles at the end — a
+   * sentry that bobbed up and down like `arc()` would read as a piston.
+   */
+  'sentry-scan': {
+    duration: [3.4, 5.6],
+    apply: (parts, progress, t, offset) => {
+      const env = Math.min(1, Math.sin(progress * Math.PI) * 1.8);
+      if (parts.body) {
+        const rest = parts.rest.body;
+        parts.body.rotation.x = rest.rotationX - 0.95 * env;
+        parts.body.scale.y = rest.scaleY * (1 + 0.02 * env);
+      }
+      // Two watch sectors: one long look each way, a beat of stillness
+      // between them — the stillness is what makes it read as watching
+      // rather than sweeping.
+      const sector = Math.sin(progress * Math.PI * 2 - Math.PI / 2);
+      const sweep = THREE.MathUtils.clamp(sector * 1.6, -1, 1) * 0.6;
+      setHead(parts, -0.08 * env + Math.sin(t * 1.1 + offset) * 0.02, sweep * env, 0);
+      setEars(parts, () => ({ x: -0.14 * env }));
+      breathe(parts, Math.sin(t * 1.5 + offset) * 0.012);
+    },
+  },
 };
 
 type WeightedAction = { id: IdleActionId; weight: number };
@@ -258,11 +289,14 @@ const SPECIES_IDLE: Record<CritterSpecies, WeightedAction[]> = {
     { id: 'groom', weight: 2 },
   ],
   butterfly: [{ id: 'settle', weight: 1 }],
-  // Heavy on perk-up on purpose: a meerkat checking things out is not a
-  // special occasion, it is the species' entire personality.
+  // Heavy on perk-up and sentry-scan on purpose: a meerkat checking things
+  // out is not a special occasion, it is the species' entire personality.
+  // Sentry-scan is the middle tier — up on its haunches and properly
+  // scanning, short of the full tripod flourish.
   meerkat: [
     { id: 'perk-up', weight: 6 },
-    { id: 'look-around', weight: 4 },
+    { id: 'sentry-scan', weight: 5 },
+    { id: 'look-around', weight: 3 },
     { id: 'sniff-ground', weight: 4 },
     { id: 'ear-swivel', weight: 3 },
     { id: 'settle', weight: 2 },

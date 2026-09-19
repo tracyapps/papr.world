@@ -194,7 +194,7 @@ Bird: hops with wing flicks, pecks idly (tipping forward beak-first, never throu
 
 Cat: long, low, and self-satisfied. Almond eyes, whiskers, pink triangle nose and ear linings, tail with a dark curled tip that never stops talking. Coats include orange tabby (striped wrapping paper), calico (desert camo blobs), gray, black, cream, and one houseplant-print wildcard. Cats have a higher shyness floor than other species — most watch from a distance, but the bold ones are VERY bold. Their curious tell is the slow blink (a compliment), and their flourish is sitting up tall, wrapping their tail around their front, and closing their eyes. The clearing has a resident cat near the gift-wrap patch.
 
-Meerkat (added 2026-09-01): sandy tan coat, small dark eye patches (sun-shielding, not a bandit mask — a raccoon's mask is a full band, a meerkat's is two localized patches), long tapering tail with a dark tip, small rounded ears. Dune country's signature species. Its curious tell is rising partway onto its haunches before anyone earns the full flourish — checking things out is the whole personality, not a special occasion — and its flourish is the real reason it exists: rising fully upright onto a tripod of hind legs and tail, paws clasped at the chest, scanning. First of a planned desert roster (dingo, gazelle, zebra, ostrich, red kangaroo, red fox and similar — see the parking-lot note in `docs/roadmap.md`'s companion memory); snakes and spiders are deliberately excluded from every biome's roster, cute renditions included, since they're a common trigger even in friendly art styles.
+Meerkat (added 2026-09-01): sandy tan coat, small dark eye patches (sun-shielding, not a bandit mask — a raccoon's mask is a full band, a meerkat's is two localized patches), long tapering tail with a dark tip, small black-tipped rounded ears, and seeded back barring — plain, faint, or bold per individual (2026-09-19). Dune country's signature species. Its curious tell is rising partway onto its haunches before anyone earns the full flourish — checking things out is the whole personality, not a special occasion — with a `sentry-scan` idle (rise, hold, two watch sectors with a still beat between) between the head-only perk-up and the full sentry posture. Its flourish is the real reason it exists: rising fully upright onto a tripod of hind legs and tail, paws clasped at the chest, scanning. First of a planned desert roster (dingo, gazelle, zebra, ostrich, red kangaroo, red fox and similar — see the parking-lot note in `docs/roadmap.md`'s companion memory); snakes and spiders are deliberately excluded from every biome's roster, cute renditions included, since they're a common trigger even in friendly art styles.
 
 Fox (added 2026-09-14): rusty red-orange paper coat (clay grain, geometric orange, patterned redpink, or a plain classic red), cream chest patch and muzzle-tip, black-socked legs, a long pointed snout, and tall sharply-pointed ears — the silhouette that reads "fox" before any color does. Sleeker and lower than the raccoon: its body is a straight-sided capsule rather than a stretched sphere, on purpose, so it doesn't read as another round mammal. Ears and nose lead its idle behavior (heavy on ear-swivel and sniff-ground) rather than the meerkat's constant perking-up. Its flourish is a whole-body curl — tucking its head down while its long tail sweeps forward over its back to rest against its own nose, the classic fox sleeping pose — deliberately built as the opposite gesture from the cat's tail-wrap-and-blink. Second of the planned desert roster the meerkat started; dingo, gazelle, zebra, ostrich, and red kangaroo remain unbuilt.
 
@@ -211,7 +211,7 @@ Toucan, sloth, monkey (added 2026-09-18): the jungle's **canopy crowd** — the 
 
 - **Canopy trees are data**, derived per page from tree props (`canopyTreesFromPage`): jungle broadleafs ≥ 7 units and palms ≥ 5.5, not standing in water. Each tree gets a *branch line* just under its leaves (44% up a jungle tree, 76% up a palm), a crown spot in the leaves, its trunk, and its hanging vines. Nothing to author.
 - **Movement is a queue of legs** — straight moves with an optional arc (a hop or flight bump, or a swing's dip) and a `CanopyPose` (ground, sit, hang, swing, climb, fly). `finalizeRoute` makes every route continuous, so pose changes are short moves rather than pops.
-- **The rig only poses limbs** (`setPose` on `CritterRig`); the canopy layer orients the whole group with Euler order `YXZ` — roll π to hang, pitch π/2 to climb — easing between poses.
+- **The rig only poses limbs** (`setPose` on `CritterRig`); the canopy layer orients the whole group with Euler order `YXZ` — roll π to hang, easing between poses. Climb pitch is per-species (`climbStyle`, see the 2026-09-19 section below).
 - **Profiles per species** (`CANOPY_PROFILES`): which trees, whether it climbs, how it travels aloft (hang / swing / fly), resting poses, speeds, how far it will hop between trees, how often it stays / shuffles / changes tree / comes down, how long it stays on the ground.
 - **Ground time hands over to the ordinary walker** (`updateGroundCritter`). When its ground budget runs out, a climber walks back to a trunk's step-off point (just outside the trunk's solid footprint), then climbs; a flyer just flies up.
 - **Asking one down.** Clicking a critter up in a tree from underneath (`tryPetAt`) calls `requestCanopyVisit`: monkeys and toucans come straight down near you and stay close for ~14 s; a sloth sets off down the trunk at sloth speed. Monkeys (55%) and toucans (35%), when not shy, sometimes do this on their own when you arrive.
@@ -219,6 +219,46 @@ Toucan, sloth, monkey (added 2026-09-18): the jungle's **canopy crowd** — the 
 - **Frame budget:** zero `isSolidAt` calls per frame while aloft (tested); world queries happen only when deciding to come down.
 
 Tests: `critterCanopy.test.ts` (10 simulated minutes per species with no NaNs, never underground, never far from its trees; the monkey visit; the slow sloth; talking from below; zero queries while perched). `critterRigs.test.ts` now also runs every rig through every canopy pose.
+
+## Movement Refinement Pass (2026-09-19)
+
+### Rooted tails (the detached bird tail bug)
+
+The songbird, parrot, and toucan tails were single paper planes *centered* behind the body. A plane centered past a sphere's surface touches it at one tangent point, so from every angle but dead-behind the tail read as feathers floating loose. All three are now **fans of quills rooted inside the body** (`feather()` in `critterRigs.ts`): each feather hangs from a rib pivot sunk under the skin, swept back below horizontal, fanned sideways, and the outer ones twisted to face outward so they stay visible from the side instead of going edge-on. `critterRigs.test.ts` pins the rule for all three species: the tail pivot must sit inside the body's scaled bounding sphere.
+
+A corollary of the same rule the head groups already follow: **anything that can detach gets a pivot inside what it attaches to.** Wings were already fine — their inner edge tucks under the body's widest point.
+
+### Locomotion profiles (the frog/fish on-ramp)
+
+How a species moves is now data in `src/game/critterLocomotion.ts`, separate from what it looks like (rigs) and where it lives (canopy):
+
+- **Water policy** — `avoid` (default: never targets water, won't cross deep water), `wade` (may target and cross shallow water; a frog), `swim` (targets only water, settles submerged, never nudged out of its pond at spawn; a fish). The walker (`critterBehavior.ts`) honors the policy in target picking, path blocking, and wading sink; `critterLocomotion.test.ts` pins all three.
+- **Hop** — `bunny`, `bird`, `parrot`, `toucan` carry `{ height, rate }`; everyone else walks. Hop arcs moved off the rig contract (`hopper`/`hopHeight` are gone), so a frog is a rig plus one table entry.
+
+The movement stack splits by question: rigs answer *what it looks like*, locomotion answers *how it gets about on the ground*, canopy profiles answer *how it climbs and lives in trees*, and the behavior state machine drives them all. Adding a species means answering only the questions that are new about it.
+
+### Climb styles (the levitating monkey)
+
+Every climber used to share one 90° climb pitch. That is correct for the sloth — a horizontal quadruped pitched nose-up, belly to bark — but the monkey is built *standing*, and pitching it 90° laid it on its back, body a full body-length clear of the trunk, gliding upward. That was the reported "monkey just levitates up the trees."
+
+`climbStyle` per canopy profile fixes it:
+
+- **`sprawl` (sloth)** — pitch π/2, and the route is *inset* into the tree (`climbInset`) so the pitched-over body ends up against the bark instead of floating clear of it. Descending a trunk, it rolls π and goes down nose-first — belly still to bark, which is exactly the orientation a sloth's joints allow.
+- **`upright` (monkey)** — stays on its feet against the trunk and leans in (pitch −0.32), arms doing the reaching. It now also *sits on* branches (`sitOffset` −0.17) instead of hovering a body-height above them.
+
+Climbing is reaches, not a glide: climb legs surge once per pull (`climbPulls`, `climbBob`) and sway a little (`climbSway`), and hang/swing travel rolls gently side to side, one lean per hand. All of it derives from leg progress alone — no time, no rng — so multiplayer clients re-simulating the same critter from the same seeds see the identical climb.
+
+A first live visual pass (teleport + screenshot through `window.__paperWorld`) caught one more before it shipped: the nose-first descend roll was first applied to *every* climber, which sent the upright monkey down the trunk upside-down with its back to the bark. `poseRoll` now gates the flip on `climbStyle` — sprawlers turn nose-first, upright climbers back down face-to-trunk — and `critterCanopy.test.ts` unit-pins both orientations. The same pass confirmed the fixes read right on screen: the songbird's tail fan attached at all angles, the monkey sitting with its weight *on* the palm crown, and the sloth hanging upside-down with its feet hooked over the branch.
+
+### Meerkat variation
+
+- **Design:** black-tipped ears on every individual (parented to the ear so ear-swivel carries them), plus seeded back barring via the new `markings` DNA roll (drawn *last* in the sequence, so no established resident's name/size/coat shifted): ~30% plain backs, ~45% faintly barred, ~25% bold. Bars are thin translucent strips sunk into the spine — tissue-paper barring over whatever coat paper the individual rolled.
+- **Movement:** a `sentry-scan` idle action — rises partway up onto its haunches, holds, and sweeps two deliberate watch sectors with a beat of stillness between them — written through the generic body/head parts so any rig with a pivoting torso could run it. It sits between `perk-up` (head only) and the full tripod flourish in the meerkat's idle pool.
+
+### Small fixes found along the way
+
+- A critter standing exactly on its roam centre with six unlucky water probes used to fall into a fallback whose "away from centre" was a zero vector — targeting the wet spot it already occupied. The fallback now probes from the critter's *actual position* first (which is also how an animal standing in a pond finds the shore), and only then walks away from the centre.
+- Sloths transfer between trees only where canopies plausibly meet (`treeHopRange` 6.5 → 4.75) and sag slightly as they stretch the gap, rather than gliding 6.5 units in a straight hanging line.
 
 ## Variation System ("critter DNA")
 

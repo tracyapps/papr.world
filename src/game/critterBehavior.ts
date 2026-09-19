@@ -5,6 +5,7 @@ import { isSolidAt } from '../world/footprints';
 import { slideMove } from '../core/placement';
 import type { CritterRig } from './critterRigs';
 import type { CritterParams, CritterSpecies } from './critterVariation';
+import { locomotionOf, type LocomotionProfile } from './critterLocomotion';
 import {
   applyIdleAction,
   idleActionDuration,
@@ -108,9 +109,14 @@ const FRIENDSHIP_REFRESH_SECONDS = 4;
 /**
  * How much of the water's depth a critter sinks. Less than the player's full
  * sink because critters are small and mostly legs — a fully sunk squirrel
- * would disappear into a puddle.
+ * would disappear into a puddle. Swimmers sink most of the way: a fish
+ * stands in a pond, not on it.
  */
-const WADE_SINK_RATIO = 0.55;
+const WADE_SINK_RATIOS: Record<LocomotionProfile['water'], number> = {
+  avoid: 0.55,
+  wade: 0.55,
+  swim: 0.85,
+};
 /**
  * How much room a critter keeps around a wall or tree trunk.
  *
@@ -185,20 +191,25 @@ function enterIdle(critter: Critter, playerNearby = false) {
 
 function pickWanderTarget(critter: Critter, avatarPosition: THREE.Vector3) {
   const center = roamCenter(critter, avatarPosition, scratchCenter);
+  const { water } = locomotionOf(critter.species);
 
-  // Try a few directions and take the first dry one. Land animals do not
-  // wade for fun, and a critter strolling through a pond is the tell that
-  // nothing in the world knows the water is there.
+  // Try a few directions and take the first acceptable one. What counts as
+  // acceptable is the species' water policy: land animals do not wade for
+  // fun (a critter strolling through a pond is the tell that nothing in the
+  // world knows the water is there), waders may cross it, and a swimmer is
+  // only ever choosing somewhere wet to be.
   //
-  // Bounded attempts rather than a loop until dry: a critter whose whole
-  // range is underwater must still pick *something*, and the fallback below
-  // walks it toward the nearest shore instead of freezing.
+  // Bounded attempts rather than a loop until success: a critter whose whole
+  // range is unacceptable must still pick *something*, and the fallback below
+  // walks it away from the middle of its range instead of freezing.
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const angle = critter.rng() * Math.PI * 2;
     const distance = (0.3 + critter.rng() * 0.7) * critter.params.wanderRadius;
     const x = center.x + Math.sin(angle) * distance;
     const z = center.z + Math.cos(angle) * distance;
-    if (!isInWater(x, z) && !isSolidAt(x, z, CRITTER_BODY_RADIUS)) {
+    const wet = isInWater(x, z);
+    const acceptable = water === 'swim' ? wet : water === 'avoid' ? !wet : true;
+    if (acceptable && !isSolidAt(x, z, CRITTER_BODY_RADIUS)) {
       critter.target.set(x, 0, z);
       critter.detour = null;
       critter.state = 'wander';
@@ -207,11 +218,33 @@ function pickWanderTarget(critter: Critter, avatarPosition: THREE.Vector3) {
     }
   }
 
-  // Everything nearby is wet. Head away from where we are, which climbs out
-  // of a pond rather than milling about in the middle of it.
+  // Nothing acceptable around the roam centre. Try around where we actually
+  // are, too — a critter standing in a pond probes from the pond, which is
+  // how it finds the shore. (It also covers the degenerate case of sitting
+  // exactly on the centre with six bad draws: the old fallback's "away from
+  // centre" was a zero vector, i.e. target the wet spot you're in.)
   const group = critter.rig.group;
-  const awayX = group.position.x - center.x;
-  const awayZ = group.position.z - center.z;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const angle = critter.rng() * Math.PI * 2;
+    const distance = (0.5 + critter.rng() * 0.5) * critter.params.wanderRadius;
+    const x = group.position.x + Math.sin(angle) * distance;
+    const z = group.position.z + Math.cos(angle) * distance;
+    const wet = isInWater(x, z);
+    const acceptable = water === 'swim' ? wet : water === 'avoid' ? !wet : true;
+    if (acceptable && !isSolidAt(x, z, CRITTER_BODY_RADIUS)) {
+      critter.target.set(x, 0, z);
+      critter.detour = null;
+      critter.state = 'wander';
+      critter.stateTime = 0;
+      return;
+    }
+  }
+
+  // Everything near both is unacceptable. Head away from the roam centre —
+  // for a land animal that climbs out of a pond, for a swimmer back toward
+  // open water — and re-roll on arrival.
+  const awayX = group.position.x - center.x || 0.001;
+  const awayZ = group.position.z - center.z || 0.001;
   const length = Math.hypot(awayX, awayZ) || 1;
   critter.target.set(
     group.position.x + (awayX / length) * critter.params.wanderRadius,
@@ -276,30 +309,40 @@ const SIGHT_STRIDE = 0.5;
  * choice tolerates a little imprecision, and these probes are the expensive
  * part of navigation.
  */
-function clearRunFrom(x: number, z: number, heading: number, distance: number, stride = 0.25): number {
+function clearRunFrom(
+  critter: Critter,
+  x: number,
+  z: number,
+  heading: number,
+  distance: number,
+  stride = 0.25,
+): number {
   const dx = -Math.sin(heading);
   const dz = -Math.cos(heading);
   for (let reach = stride; reach <= distance; reach += stride) {
-    if (isCritterBlocked(x + dx * reach, z + dz * reach)) return reach - stride;
+    if (isCritterBlocked(critter, x + dx * reach, z + dz * reach)) return reach - stride;
   }
   return distance;
 }
 
-function isCritterBlocked(x: number, z: number): boolean {
-  return isSolidAt(x, z, CRITTER_BODY_RADIUS) || isDeepWater(x, z);
+function isCritterBlocked(critter: Critter, x: number, z: number): boolean {
+  if (isSolidAt(x, z, CRITTER_BODY_RADIUS)) return true;
+  // Walls and trees block everyone; deep water blocks everyone but a
+  // swimmer, for whom it is the intended medium.
+  return locomotionOf(critter.species).water !== 'swim' && isDeepWater(x, z);
 }
 
 function clearRun(critter: Critter, heading: number, distance: number): number {
   const { x, z } = critter.rig.group.position;
-  return clearRunFrom(x, z, heading, distance);
+  return clearRunFrom(critter, x, z, heading, distance);
 }
 
 /** Can the goal be walked to from (x, z) in a straight line? */
-function canSee(x: number, z: number, goalX: number, goalZ: number): boolean {
+function canSee(critter: Critter, x: number, z: number, goalX: number, goalZ: number): boolean {
   const distance = Math.hypot(goalX - x, goalZ - z);
   if (distance < 0.01) return true;
   const reach = Math.min(distance, 12);
-  return clearRunFrom(x, z, headingToward(x, z, goalX, goalZ), reach, SIGHT_STRIDE) >= reach - SIGHT_STRIDE;
+  return clearRunFrom(critter, x, z, headingToward(x, z, goalX, goalZ), reach, SIGHT_STRIDE) >= reach - SIGHT_STRIDE;
 }
 
 /**
@@ -340,7 +383,7 @@ function pickDetour(
 
   for (const sign of [first, -first]) {
     const heading = direct + sign * (Math.PI / 2);
-    const room = clearRunFrom(x, z, heading, SIGHT_LEG, SIGHT_STRIDE);
+    const room = clearRunFrom(critter, x, z, heading, SIGHT_LEG, SIGHT_STRIDE);
     if (room < MIN_DETOUR_LEG) continue;
 
     const dx = -Math.sin(heading);
@@ -348,7 +391,7 @@ function pickDetour(
     let sees = false;
     let reach = room;
     for (let probe = stride; probe <= room; probe += stride) {
-      if (canSee(x + dx * probe, z + dz * probe, goalX, goalZ)) {
+      if (canSee(critter, x + dx * probe, z + dz * probe, goalX, goalZ)) {
         sees = true;
         reach = probe;
         break;
@@ -454,7 +497,7 @@ function tryStep(critter: Critter, dx: number, dz: number): boolean {
     group.position.z,
     dx,
     dz,
-    isCritterBlocked,
+    (x, z) => isCritterBlocked(critter, x, z),
   );
   const stayedPut = moved.x === group.position.x && moved.z === group.position.z;
   group.position.x = moved.x;
@@ -475,7 +518,9 @@ function settleOnGround(critter: Critter, hopBoost = 0) {
   // water when choosing where to go (see pickWanderTarget), but a pond can
   // appear under a critter that was already there, and standing on the
   // surface reads as a bug rather than as a very confident squirrel.
-  const wading = waterDepthAt(group.position.x, group.position.z) * WADE_SINK_RATIO;
+  // Swimmers, per their policy, settle most of the way under.
+  const sinkRatio = WADE_SINK_RATIOS[locomotionOf(critter.species).water];
+  const wading = waterDepthAt(group.position.x, group.position.z) * sinkRatio;
   const standingHeight = bridgeDeckHeightAt(group.position.x, group.position.z)
     ?? sampleTerrainHeight(group.position.x, group.position.z);
   group.position.y = standingHeight
@@ -607,9 +652,17 @@ function updateGroundCritter(critter: Critter, delta: number, elapsed: number, a
         break;
       }
 
-      critter.walkPhase += delta * params.speed * (rig.hopper ? 5.2 : 6.5);
-      const hop = rig.hopper ? Math.abs(Math.sin(critter.walkPhase)) * rig.hopHeight * params.scale : 0;
-      settleOnGround(critter, hop);
+      // Hopping is locomotion, not rig business: the profile says whether
+      // this species arcs as it travels (and how bouncy its legs are).
+      const { hop } = locomotionOf(critter.species);
+      if (hop) {
+        critter.walkPhase += delta * params.speed * hop.rate;
+        const hopArc = Math.abs(Math.sin(critter.walkPhase)) * hop.height * params.scale;
+        settleOnGround(critter, hopArc);
+      } else {
+        critter.walkPhase += delta * params.speed * 6.5;
+        settleOnGround(critter);
+      }
       rig.animate(elapsed, delta, true, 1, false);
       // Walking owns the body; unwind any pose the last idle action left.
       relaxToRest(rig.parts, Math.min(1, delta * 8));

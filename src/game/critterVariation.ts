@@ -38,6 +38,13 @@ export type CritterParams = {
   accentColor: string;
   /** Two seeded writing/behavior tags used by the conversation engine. */
   personality: [PersonalityTrait, PersonalityTrait];
+  /**
+   * Seeded 0..1 design-variation roll (back barring, ear tips, whatever a
+   * species' rig keys off its coat). Drawn *last* so adding it did not shift
+   * any pre-existing DNA field — familiar residents keep their names, sizes
+   * and coats. Defaults to 1 when a spawn path builds params by hand.
+   */
+  markings?: number;
 };
 
 type Coat = { url: string | null; color: string; accent: string };
@@ -224,6 +231,9 @@ export function generateCritterParams(species: CritterSpecies, seed: number): Cr
     bodyColor: coat.color,
     accentColor: coat.accent,
     personality: [primary, secondary],
+    // The last draw in the sequence, so rigs can vary markings without
+    // disturbing any critter's established identity above.
+    markings: rng(),
   };
 }
 
