@@ -74,7 +74,13 @@ const STATUS_LABEL: Record<TechNodeStatus, string> = {
   owned: 'Learned',
   available: 'Ready to start',
   locked: 'Locked',
-  'not-built': 'Not yet in the game',
+  // Short on the card; the full sentence is said to screen readers (see
+  // STATUS_SPOKEN_EXTRA) so "Soon" never stands alone as the only clue.
+  'not-built': 'Soon',
+};
+
+const STATUS_SPOKEN_EXTRA: Partial<Record<TechNodeStatus, string>> = {
+  'not-built': ', not in the game yet',
 };
 
 function nodeRequirementText(nodeId: TechNodeId, status: TechNodeStatus): string {
@@ -307,7 +313,7 @@ function renderNode(nodeId: TechNodeId, column: number, row: number): string {
               <span class="tech-node-select-state" aria-hidden="true">${isSelected ? 'In focus' : 'View'}</span>
             </button>
           </h4>
-          <span class="tech-node-status-badge tech-node-status-badge-${isLearning ? 'learning' : status}">${isLearning ? 'Learning now' : STATUS_LABEL[status]}</span>
+          <span class="tech-node-status-badge tech-node-status-badge-${isLearning ? 'learning' : status}">${isLearning ? 'Learning now' : STATUS_LABEL[status]}${!isLearning && STATUS_SPOKEN_EXTRA[status] ? `<span class="sr-only">${STATUS_SPOKEN_EXTRA[status]}</span>` : ''}</span>
         </div>
         <p class="tech-node-summary" id="${summaryId}">${node.summary}</p>
         <p class="tech-node-path tech-node-path-${status}" aria-hidden="true">

@@ -256,8 +256,8 @@ risk, so they go first.
 - Whether players can sell *to each other* for chips, or only barter and give.
   Parked until multiplayer is real; costs nothing to defer.
 - ~~What a trinket display looks like, given trinkets are keep-only.~~ Answered
-  2026-09-20: a display case in **Show** mode (look, do not take); see
-  `house-and-home.md`, which also restates the price rule for a priced case (the
+  2026-09-20: a display case in **Show** mode (look, do not take), now built;
+  see `house-and-home.md`, which also restates the price rule for a priced case (the
   shop's own price, never owner-set).
 
 ## Blocked on

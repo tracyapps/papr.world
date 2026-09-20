@@ -912,8 +912,8 @@ needs no schema change to carry a scene.
    `house-and-home.md`, which can begin before scenes or multiplayer. — **L**
    *Built 2026-09-20, not yet played:* Maker look by level, the tent, the
    dwelling record and projects, refunds (100% / 95% / 90%) and five house
-   know-how nodes. Still to do here: entering the tent (step 3), display cases,
-   guests, parties.
+   know-how nodes. Entering the tent, guests and **display cases (Show and Free)**
+   are built too, later the same day. Still to do here: parties.
 2. **The scene seam:** address type and serializer, surface as the only scene,
    no behaviour change. — **S**
    *Built 2026-09-20* (`world/scenes.ts`, `player.scene` in the save).

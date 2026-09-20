@@ -105,6 +105,15 @@ export type ResourceDropState = {
   createdAt: number;
 };
 
+/** A display case in the solo save: a label and the keepsakes set out on it. */
+export type LocalCaseState = {
+  label: string;
+  trinkets: Array<{ defId: string; seed: number }>;
+};
+
+/** Most keepsakes one solo case shows; matches the shared case's slots. */
+export const LOCAL_CASE_SLOTS = 8;
+
 export type BuildSiteState = {
   id: string;
   templateKey: string;
@@ -311,6 +320,12 @@ export type GameState = {
     pages: Record<string, PageModificationState>;
     /** The player's home: what is built, and what is being paid for. */
     dwelling: DwellingState;
+    /**
+     * What this device's own display cases show, by piece id. Solo cases are
+     * Show cases only (keepsakes to look at): stock and taking need a shared
+     * neighborhood, where the server keeps them.
+     */
+    localCases: Record<string, LocalCaseState>;
     thingMaker: {
       level: number;
       activeCraft: ActiveCraftState | null;
@@ -386,6 +401,7 @@ export function createDefaultGameState(): GameState {
       harvestRespawns: {},
       pages: {},
       dwelling: createDwelling(),
+      localCases: {},
       thingMaker: { level: 1, activeCraft: null, completedOutputs: [], trayOutputs: [] },
     },
   };
@@ -589,6 +605,30 @@ function normalizeBuildSites(value: unknown): Record<string, BuildSiteState> {
       completedStepIds,
       startedAt: typeof site.startedAt === 'number' && Number.isFinite(site.startedAt) ? site.startedAt : 0,
       changedAt: typeof site.changedAt === 'number' && Number.isFinite(site.changedAt) ? site.changedAt : 0,
+    };
+  }
+  return result;
+}
+
+/** Solo display cases: bounded text and a bounded list of keepsake looks. Bad entries drop. */
+function normalizeLocalCases(value: unknown): Record<string, LocalCaseState> {
+  const result: Record<string, LocalCaseState> = {};
+  for (const [id, raw] of Object.entries(safeObject(value)).slice(0, 200)) {
+    if (id.length === 0 || id.length > 80) continue;
+    const entry = safeObject(raw);
+    const trinkets: LocalCaseState['trinkets'] = [];
+    if (Array.isArray(entry.trinkets)) {
+      for (const rawTrinket of entry.trinkets) {
+        const trinket = safeObject(rawTrinket);
+        if (typeof trinket.defId !== 'string' || trinket.defId.length === 0 || trinket.defId.length > 80) continue;
+        const seed = typeof trinket.seed === 'number' && Number.isFinite(trinket.seed) ? Math.floor(trinket.seed) : 0;
+        trinkets.push({ defId: trinket.defId, seed });
+        if (trinkets.length >= LOCAL_CASE_SLOTS) break;
+      }
+    }
+    result[id] = {
+      label: typeof entry.label === 'string' ? entry.label.replace(/\s+/g, ' ').trim().slice(0, 60) : '',
+      trinkets,
     };
   }
   return result;
@@ -897,6 +937,7 @@ function normalizeState(value: unknown): GameState | null {
   state.world.harvestRespawns = finiteCounts(world.harvestRespawns);
   state.world.pages = normalizePageModifications(world.pages);
   state.world.dwelling = sanitizeDwelling(world.dwelling);
+  state.world.localCases = normalizeLocalCases(world.localCases);
   state.world.thingMaker.level = typeof maker.level === 'number'
     ? Math.max(1, Math.min(4, Math.floor(maker.level))) : 1;
   state.world.thingMaker.completedOutputs = Array.isArray(maker.completedOutputs)

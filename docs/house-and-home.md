@@ -33,7 +33,7 @@ thing with different numbers.
 | Real-time party chat | Fits | Chat stays inside the house (decision made 2026-09-20). A party is just a well-attended house. |
 | Snacks and smoothies | Later, needs a food system | Harvested food exists; there is no cooking or serving yet. A **free display case is a snack table**, which is the cheap first version. |
 | Costume parties | Free | Avatars are already fully designable and wearable. The host sets a theme label; no new rules. |
-| Display cases, sell or free, auto price | Fits, but **free first** | Player-to-player chip sales are parked (`economy.md`). See the display-case section. |
+| Display cases, sell or free, auto price | Fits, but **free first** | **Show and Free are built** (slice 7). Priced cases stay parked with player-to-player chip sales (`economy.md`). See the display-case section. |
 | Outdoor market instead of a tower | Fits | Cases work outdoors on your own lot. A shared market green is optional later. |
 | Tower-style floors: pay in parts, then a long build | Fits, and is the growth model | See dwelling projects. |
 | Guide auto-off near the destination | Done | `guideArrival.ts`, 2026-09-20. |
@@ -205,7 +205,7 @@ A party is an open house with a name, a time, and a guest list.
 
 ## Display cases
 
-A build piece that holds items, placeable inside or outside your own home. It
+A build piece that holds items, placeable outside first and inside once player-built interiors exist. It
 is a **mailbox for strangers**: the machinery for held parcels already exists
 (authoritative parcels, 2026-09-14), so a case should reuse it rather than
 invent a second store.
@@ -264,7 +264,7 @@ Each slice ships alone.
 5. **Tech nodes** for walls, floors, roofing, stairs, rooms. *S*
 6. **Scenes steps 2 and 3**, so the tent and then the house can be entered
    (`scenes-and-interiors.md`). *M*
-7. **Display cases: Show and Free.** *M*
+7. **Display cases: Show and Free.** **Built 2026-09-20** (see below). *M*
 8. **Guests:** presence by scene, the entry settings, knock, block checks at the
    door, and friendships. **Built 2026-09-20** (see below). *L*
 9. **Open house and parties.** Open house **on/off is built** with step 8;
@@ -329,10 +329,12 @@ with the Leave button or E at the door. Solo, seen working in the game. Details 
 ### Built 2026-09-20 (slice 8: guests, friends, visiting)
 
 The server side is proven by real-socket tests (`guests.room.test.ts`) and the
-client state by unit tests. In the browser so far only the drawn neighbor homes
-and their signs have been seen (injected homes); the panels, the knock card and
-the visit itself still need a look, and two real browsers in one room have not
-been tried. **Protocol v10.**
+client state by unit tests. In the browser, with injected fake neighbors, these
+were seen working: drawn homes and signs, the neighbor's-door panel, knocking, an
+invitation from a "Let in", walking into a visited interior with the host's avatar
+inside, leaving to the host's doorstep, the knock card, the friends panel (with
+Accept) and the home's "Who can come in" settings. Not yet tried: two real browsers
+in one room (so the presence jump over the wire is unwatched). **Protocol v10.**
 
 - **Friendships.** Request, accept, not now, remove, take back. Account-wide, kept
   in a JSON store on the server (`friends.ts`); a block ends a friendship. Guests
@@ -368,9 +370,51 @@ been tried. **Protocol v10.**
   their doorstep, as before.
 - **Not built:** parties, invites and reminders; scheduled open house; the mailbox
   balloons; "directions" to an open house; showing a house's interior to someone
-  outside it; furniture or pieces inside shared houses (waits for display cases).
+  outside it; furniture or pieces inside shared houses (waits for player-built interiors; cases are outdoors only for now).
   The inbox line for a knock is only for owners who are away; online owners get
   the card.
+
+### Built 2026-09-20 (slice 7: display cases)
+
+Server and shared logic are proven by unit tests and real-socket room tests
+(`cases.room.test.ts`, 12 tests); the client state by unit tests. In the browser,
+seen working: placing a case, opening it with E and by clicking it, the solo Show
+flow (label saved, a keepsake set out and still on the shelf, "Take off"), and, with
+an injected fake server, a Free case seen by a visitor (the rule in words, "You can
+take 1 more", Take one, the answer as a sentence, buttons dimmed after the limit,
+focus kept). **Protocol v11.** Not yet tried: two real browsers in one room.
+
+- **The piece.** `display-case`: a small glass-fronted cupboard, outdoors only for
+  now (indoor placement waits for player-built interiors). Taught by the
+  `display-cases` tech node (needs `outdoor-furniture`), built from a binding cord.
+  At most 6 per player, 8 slots each.
+- **Where it lives.** The server keeps a case record per placed case inside the
+  mail store (`mail.json`, new optional `cases`), so a stock or a take is one
+  flush, undone if it fails, like a parcel. Rules are pure (`server/src/cases.ts`);
+  the room syncs a public `cases` map. Rooms loaded from before this get an empty
+  record for any case piece that lacks one.
+- **Show.** Holds keepsake looks. Nothing can be taken. The keepsake stays on the
+  owner's shelf too (a copy of how it looks), so a case can never eat a trinket.
+  Solo cases (no neighborhood) are Show only, kept in the save (`world.localCases`).
+- **Free.** Holds stacks moved out of the owner's Neighborhood Pouch (resources,
+  tools, items; never chips). A visitor takes one at a time into their pouch, up to
+  the owner's limit: `N per visitor per window` (1 to 20 items; 10 minutes to a
+  week) or none. Default 1 per day. Allowance returns one item at a time as takes
+  age out. The owner can take a stack back.
+- **Changing a case's mode** only when it is empty.
+- **Silence.** A blocked visitor hears exactly what an empty case says ("nothing
+  to take right now") and sees "0 left". A guest (no passport) can look, never take.
+- **Owner log.** Owner only: who took what and when, newest first, last 40 lines,
+  with Refresh. Not public.
+- **Reach.** The client opens a case within 2.6; the server allows 5 (slack for
+  lag), on the same page, outdoors.
+- **Words first.** Everything the case shows is also text: the rule, your
+  allowance, what is inside, the answer to your last action (a polite live
+  region). No reflex asked of anyone; the panel is docked and takes focus to its
+  title on open.
+- **Not built:** priced cases (parked with player-to-player chips); cases indoors;
+  the case mesh does not show what it holds (contents are in the panel text);
+  market-green stalls; a per-case "who may take" (friends only).
 
 Still to build: the mail line for a finished build waits on the mailbox. Faced masonry has no art yet, so the
 upstairs cost shows as text only.

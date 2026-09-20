@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
 import { critterReachDistance, setEngagedCritter, type Critter } from './critterBehavior';
@@ -14,6 +15,7 @@ import { addFriendshipPoints, getFriendshipLevel, getFriendshipPoints } from './
 import { petCritter, showPetToast } from './petting';
 import { setMillPanelOpen } from './millCounter';
 import { camera } from '../render/context';
+import { easeShift, framingShift, type Box } from './dialogueFraming';
 import { setToastStackRaised } from '../ui/hudLayout';
 
 // A little more generous than literal arm's reach: tiny moving paper animals
@@ -187,6 +189,82 @@ function openConversation(critter: Critter) {
   speak(activeScene.opening);
   renderChoices(activeScene);
   keepToastsClearOfDialogue();
+}
+
+// ---- Keeping the animal in view ---------------------------------------------------
+//
+// The card is docked at the bottom. If the animal is behind it, the camera's view
+// slides up (a screen-space shift, not a camera move) until the animal is in the
+// clear band above the card; it eases back when the conversation ends.
+
+/** Below the HUD button row along the top of the screen. */
+const CLEAR_TOP = 84;
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+const framingBox = new THREE.Box3();
+const framingCorner = new THREE.Vector3();
+let viewShift = 0;
+
+/** The animal's box on screen right now, or null when it is behind the camera. */
+function animalScreenBox(critter: Critter): Box | null {
+  framingBox.setFromObject(critter.rig.group);
+  if (framingBox.isEmpty()) return null;
+  const box: Box = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+  for (let index = 0; index < 8; index++) {
+    framingCorner.set(
+      index & 1 ? framingBox.max.x : framingBox.min.x,
+      index & 2 ? framingBox.max.y : framingBox.min.y,
+      index & 4 ? framingBox.max.z : framingBox.min.z,
+    ).project(camera);
+    if (framingCorner.z > 1) return null;
+    const x = ((framingCorner.x + 1) / 2) * window.innerWidth;
+    const y = ((1 - framingCorner.y) / 2) * window.innerHeight;
+    box.left = Math.min(box.left, x);
+    box.right = Math.max(box.right, x);
+    box.top = Math.min(box.top, y);
+    box.bottom = Math.max(box.bottom, y);
+  }
+  return box;
+}
+
+function applyViewShift(pixels: number) {
+  if (pixels <= 0) {
+    camera.clearViewOffset();
+    return;
+  }
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  camera.setViewOffset(width, height, 0, pixels, width, height);
+}
+
+/** Where the shift should be right now, from the animal's place on screen. */
+function targetViewShift(): number {
+  if (!activeCritter || !panel?.classList.contains('is-open')) return 0;
+  const measured = animalScreenBox(activeCritter);
+  if (!measured) return 0;
+  // Measured under the current shift; undo it to compare like with like.
+  const animal: Box = {
+    left: measured.left,
+    right: measured.right,
+    top: measured.top + viewShift,
+    bottom: measured.bottom + viewShift,
+  };
+  const rect = panel.getBoundingClientRect();
+  return framingShift({
+    animal,
+    card: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+    viewportHeight: window.innerHeight,
+    clearTop: CLEAR_TOP,
+  });
+}
+
+/** Once a frame, after the camera has been placed and before it draws. */
+export function updateCritterDialogueFraming(deltaSeconds: number) {
+  if (viewShift === 0 && !activeCritter) return;
+  camera.updateMatrixWorld();
+  const next = easeShift(viewShift, targetViewShift(), deltaSeconds, reducedMotion);
+  if (next === viewShift) return;
+  viewShift = next;
+  applyViewShift(viewShift);
 }
 
 export function closeCritterDialogue(): boolean {

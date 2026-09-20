@@ -4,6 +4,13 @@ import { avatar } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
 import {
+  receiveCase,
+  receiveCaseDetail,
+  receiveCaseResult,
+  removeCase,
+  setCaseTransport,
+} from '../game/cases';
+import {
   getServerInside,
   presenceHeld,
   receiveEntryResult,
@@ -369,6 +376,10 @@ export async function initializeSharedSession(): Promise<void> {
           onKnockNotice: (notice) => receiveKnock(notice),
           onKnockCleared: receiveKnockCleared,
           onHomeExit: receiveHomeExit,
+          onCaseChange: receiveCase,
+          onCaseRemove: removeCase,
+          onCaseResult: (result) => receiveCaseResult(result),
+          onCaseDetail: receiveCaseDetail,
           onPieceAdd: addSharedPiece,
           onPieceRemove: removeSharedPiece,
           onNodeAdd: upsertSharedResourceNode,
@@ -466,6 +477,7 @@ export async function initializeSharedSession(): Promise<void> {
             clearSharedInventory();
             clearSharedHomeVisuals();
             setGuestTransport(null);
+            setCaseTransport(null);
             connected = false;
             connection = null;
             ui.setStatus('offline');
@@ -505,6 +517,14 @@ export async function initializeSharedSession(): Promise<void> {
         answerKnock: (visitor, admit) => room.sendKnockAnswer(visitor, admit),
         askToLeave: (accountId) => room.sendAskToLeave(accountId),
       });
+      setCaseTransport({
+        set: (intent) => room.sendCaseSet(intent),
+        stock: (intent) => room.sendCaseStock(intent),
+        show: (intent) => room.sendCaseShow(intent),
+        remove: (intent) => room.sendCaseRemove(intent),
+        take: (intent) => room.sendCaseTake(intent),
+        request: (id) => room.sendCaseRequest(id),
+      });
       connected = true;
       ui.setStatus(`online as ${config.name}`, true);
       if (rejoinAttempt === 0) ui.addNotice(`You are visiting ${destination}.`);
@@ -520,6 +540,7 @@ export async function initializeSharedSession(): Promise<void> {
       clearSharedResourceVisuals();
       clearSharedHomeVisuals();
       setGuestTransport(null);
+      setCaseTransport(null);
       connected = false;
       connection = null;
       ui.setStatus('offline');
@@ -639,6 +660,7 @@ export function disconnectSharedSession(): void {
   clearSharedInventory();
   clearSharedHomeVisuals();
   setGuestTransport(null);
+  setCaseTransport(null);
   publishStatus({
     phase: 'solo', message: 'Returning to your solo world…', name: playerName,
     inviteCode, intent: null,

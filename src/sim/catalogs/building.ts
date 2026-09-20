@@ -74,6 +74,14 @@ export const BUILD_ASSEMBLY_DEFS = {
       { id: 'assemble', label: 'Assembling the picnic table', verb: 'assemble', durationSeconds: 4, materials: [{ kind: 'exact', resource: 'binding-cord', quantity: 1 }], materialUnits: 2, requiresParts: ['tabletop', 'benches'], join: 'fastener' },
     ],
   },
+  'display-case': {
+    templateKey: 'display-case', minimumToolTier: 2,
+    steps: [
+      { id: 'frame', label: 'Building the case frame', verb: 'build', durationSeconds: 3.4, materials: [], materialUnits: 5, producesPart: 'case-frame' },
+      { id: 'front', label: 'Folding the clear front', verb: 'build', durationSeconds: 3, materials: [], materialUnits: 3, producesPart: 'case-front' },
+      { id: 'assemble', label: 'Fitting the display case', verb: 'assemble', durationSeconds: 3.8, materials: [{ kind: 'exact', resource: 'binding-cord', quantity: 1 }], materialUnits: 2, requiresParts: ['case-frame', 'case-front'], join: 'fastener' },
+    ],
+  },
   'footbridge': {
     templateKey: 'footbridge', minimumToolTier: 2,
     steps: [
@@ -184,6 +192,7 @@ export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, LegacyBuildMaterial> 
   'paper-lamp': 'paper.brown',
   'garden-arbor': 'paper.green',
   'picnic-table': 'paper.brown.warm',
+  'display-case': 'paper.brown.warm',
   'footbridge': 'paper.cork',
 };
 

@@ -27,7 +27,12 @@ import {
 } from './game/thingMaker';
 import { pickCritterAtScreen, updateCritters } from './game/critters';
 import { initializePetting, showPetToast, tryPetAt, updatePetEffects } from './game/petting';
-import { closeCritterDialogue, initializeCritterDialogue, tryStartCritterConversationAt } from './game/critterDialogue';
+import {
+  closeCritterDialogue,
+  initializeCritterDialogue,
+  tryStartCritterConversationAt,
+  updateCritterDialogueFraming,
+} from './game/critterDialogue';
 import { pickUpTrinket as pickUpPlacedTrinket } from './game/trinkets';
 import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from './game/trinketVisuals';
 import { noteVisitedPage } from './game/quests';
@@ -145,6 +150,15 @@ import {
   toggleVisitPanelNear,
   updateVisitPrompt,
 } from './game/visitPanel';
+import {
+  initializeCasePanel,
+  isNearCase,
+  openCaseFromClick,
+  pickCaseAtScreen,
+  toggleCasePanelNear,
+  updateCasePrompt,
+} from './game/casePanel';
+import { setCaseHandlers } from './game/cases';
 import { initializeFriendsPanel } from './game/friendsPanel';
 import { initializeKnockNotices } from './game/knockNotices';
 import { interiorScene } from './game/interiorScene';
@@ -191,6 +205,8 @@ initializeHomePanel();
 initializeVisitPanel();
 initializeFriendsPanel();
 initializeKnockNotices();
+initializeCasePanel();
+setCaseHandlers({ say: showPetToast });
 // Opening a neighbor's-door or friends panel clears the older panels from the slot.
 setClassicPanelsCloser(() => {
   closeSeedStorePanel();
@@ -326,6 +342,17 @@ registerScreenInteraction({
     return true;
   },
 });
+// A display case opens its panel: what is in it, and what you may do with it.
+registerScreenInteraction({
+  id: 'display-case',
+  priority: 81,
+  hitTest: (x, y) => pickCaseAtScreen(x, y) !== null,
+  interact: (x, y) => {
+    const hit = pickCaseAtScreen(x, y);
+    if (!hit) return false;
+    return openCaseFromClick(hit, avatar.position, showPetToast);
+  },
+});
 registerScreenInteraction({
   id: 'loose-resource',
   priority: 80,
@@ -431,6 +458,7 @@ initializeInput({
       setHomePanelOpen(!isHomePanelOpen());
       return;
     }
+    if (toggleCasePanelNear(avatar.position, getCurrentPageId())) return;
     toggleVisitPanelNear(avatar.position);
   },
   // Saved places and the map are of the outdoors; there is nothing to mark or
@@ -550,8 +578,10 @@ function animateIndoors(delta: number) {
   updateSharedSession({ position: new THREE.Vector3(step.x, 0, step.z), page: pageId(at.px, at.pz) });
   updateHomePrompt(avatar.position);
   updateVisitPrompt(avatar.position, true);
+  updateCasePrompt(avatar.position, getCurrentPageId(), true);
   updateHome();
   updateCamera(avatar.position);
+  updateCritterDialogueFraming(delta);
   renderer.render(interiorScene, camera);
 }
 
@@ -615,11 +645,11 @@ function animate(animationTime = 0) {
   updateSeedStorePrompt(avatar.position);
   updateMillPrompt(avatar.position);
   updateHomePrompt(avatar.position, isNearThingMaker(avatar.position) && !homeNearer);
-  updateVisitPrompt(
-    avatar.position,
-    isNearSeedStore(avatar.position) || isNearMill(avatar.position)
-      || isNearThingMaker(avatar.position) || isNearHomePanel(avatar.position),
-  );
+  const nearOtherPrompt = isNearSeedStore(avatar.position) || isNearMill(avatar.position)
+    || isNearThingMaker(avatar.position) || isNearHomePanel(avatar.position);
+  const nearCase = isNearCase(avatar.position, getCurrentPageId());
+  updateCasePrompt(avatar.position, getCurrentPageId(), nearOtherPrompt);
+  updateVisitPrompt(avatar.position, nearOtherPrompt || nearCase);
   updateHome();
 
   updateGuidance(avatar.position, elapsed);
@@ -654,6 +684,7 @@ function animate(animationTime = 0) {
   updateClouds(avatar.position, elapsed);
   updateWaterSurfaces(elapsed);
   updateCamera(avatar.position);
+  updateCritterDialogueFraming(delta);
   updateCompass(getYaw());
 
   renderer.render(scene, camera);

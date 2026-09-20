@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 10; // v10: guests — homes carry parts and an open sign, players carry `inside`, friends/entry/knock messages
+export const PROTOCOL_VERSION = 11; // v11: display cases — a synced `cases` map and the case messages. (v10: guests — homes carry parts and an open sign, players carry `inside`, friends/entry/knock messages)
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -113,6 +113,19 @@ export const LIMITS = {
   knockNoteIntervalMs: 6 * 60 * 60 * 1000,
   /** Finished parts a home marker may list (there are six today). */
   homePartsMax: 12,
+
+  // ---- Display cases (docs/house-and-home.md, "Display cases") ----
+
+  /** Display cases one account may have standing in a room. */
+  casesPerPlayer: 6,
+  /** Things one case holds: stacks in a free case, trinkets in a show case. */
+  caseSlots: 8,
+  /** A case's label, in characters. */
+  caseLabelMax: 60,
+  /** Who-took-what lines kept per case; the oldest fall off. */
+  caseLogMax: 40,
+  /** How close you must stand to a case to use it, in world units. */
+  caseReach: 4,
 } as const;
 
 /**

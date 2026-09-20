@@ -46,6 +46,16 @@ import {
   INTERIOR_SPACE,
   HOME_EXIT_RADIUS,
   isFiniteNumber,
+  DISPLAY_CASE_TEMPLATE,
+  encodeCaseItems,
+  sanitizeCaseRequest,
+  sanitizeCaseSet,
+  sanitizeCaseShow,
+  sanitizeCaseSlot,
+  sanitizeCaseStock,
+  type CaseAction,
+  type CaseOutcome,
+  type CaseResult,
   type BlockIntent,
   type ChatBroadcast,
   type ChatIntent,
@@ -82,7 +92,9 @@ import { KnockBook, decideAccess } from '../homeAccess';
 import { readAdminConfig, verifyClerkSessionToken } from '../admin';
 import { database } from '../runtime';
 import { authorizeManagedWorldEntry } from '../worldAuthorization';
+import { publicCase, visitorAllowance, type CaseEdit, type CaseRecord } from '../cases';
 import {
+  CaseSchema,
   HomeSchema,
   NodeSchema,
   PaperRoomState,
@@ -283,6 +295,12 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.onMessage(ClientMessage.AskToLeave, (client, msg: AskToLeaveIntent) =>
       this.handleAskToLeave(client, msg),
     );
+    this.onMessage(ClientMessage.CaseSet, (client, msg: unknown) => this.handleCaseSet(client, msg));
+    this.onMessage(ClientMessage.CaseStock, (client, msg: unknown) => this.handleCaseStock(client, msg));
+    this.onMessage(ClientMessage.CaseShow, (client, msg: unknown) => this.handleCaseShow(client, msg));
+    this.onMessage(ClientMessage.CaseRemove, (client, msg: unknown) => this.handleCaseRemove(client, msg));
+    this.onMessage(ClientMessage.CaseTake, (client, msg: unknown) => this.handleCaseTake(client, msg));
+    this.onMessage(ClientMessage.CaseRequest, (client, msg: unknown) => this.handleCaseRequest(client, msg));
 
     // Mail belongs to accounts, not rooms. Every live room listens so a
     // recipient sees a delivery immediately even when sender and recipient
@@ -540,6 +558,17 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       this.reject(client, ClientMessage.PlacePiece, 'invalid');
       return;
     }
+    const isCase = intent.templateKey === DISPLAY_CASE_TEMPLATE && !isGuestAccount(player.accountId);
+    if (isCase) {
+      let cases = 0;
+      this.state.pieces.forEach((p) => {
+        if (p.makerId === player.accountId && p.templateKey === DISPLAY_CASE_TEMPLATE) cases += 1;
+      });
+      if (cases >= LIMITS.casesPerPlayer) {
+        this.reject(client, ClientMessage.PlacePiece, 'not-allowed');
+        return;
+      }
+    }
 
     const piece = new PieceSchema();
     piece.id = randomUUID();
@@ -552,7 +581,172 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     piece.page = intent.page || player.page;
 
     this.state.pieces.set(piece.id, piece);
+    // A display case is a piece with a held stock; its record is made with it.
+    // (A guest's case stays a plain decoration: a guest has no pouch to stock it from.)
+    if (isCase) this.syncCase(mail.createCase(piece.id, player.accountId));
     this.persist();
+  }
+
+  // ---- Display cases -----------------------------------------------------------
+  //
+  // The client asks; every rule is here or in ../cases.ts. Results go back as
+  // `CaseResult` (quiet, never an error), and the case itself flows to
+  // everyone through synced state.
+
+  /** Mirror a case record into synced state, where the whole room can read it. */
+  private syncCase(record: CaseRecord): void {
+    const shown = publicCase(record);
+    let schema = this.state.cases.get(shown.id);
+    if (!schema) {
+      schema = new CaseSchema();
+      schema.id = shown.id;
+      this.state.cases.set(shown.id, schema);
+    }
+    schema.owner = shown.owner;
+    schema.mode = shown.mode;
+    schema.label = shown.label;
+    schema.items = encodeCaseItems(shown.items);
+    schema.limitCount = shown.limit?.count ?? 0;
+    schema.limitWindow = shown.limit?.windowMinutes ?? 0;
+  }
+
+  /**
+   * Who is asking, and which case, and are they close enough. `null` means a
+   * reply has already gone out.
+   */
+  private caseContext(client: Client, id: string | undefined, action: CaseAction) {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !id) return null;
+    const now = Date.now();
+    const piece = this.state.pieces.get(id);
+    if (!piece || piece.templateKey !== DISPLAY_CASE_TEMPLATE) {
+      this.reject(client, `case-${action}`, 'invalid');
+      return null;
+    }
+    const record = mail.caseRecord(id);
+    if (!record) {
+      this.reject(client, `case-${action}`, 'invalid');
+      return null;
+    }
+    if (player.inside !== '' || piece.page !== player.page
+      || Math.hypot(piece.x - player.x, piece.z - player.z) > LIMITS.caseReach + 1) {
+      this.answerCase(client, id, action, 'too-far');
+      return null;
+    }
+    return { player, record, now };
+  }
+
+  private answerCase(
+    client: Client,
+    id: string,
+    action: CaseAction,
+    outcome: CaseOutcome,
+    extra: Partial<CaseResult> = {},
+  ): void {
+    client.send(ServerMessage.CaseResult, { id, action, outcome, ...extra } satisfies CaseResult);
+  }
+
+  /** What this asker personally needs: their own allowance, and the log if it is their case. */
+  private sendCaseDetail(client: Client, player: { accountId: string }, record: CaseRecord, now: number): void {
+    const mine = record.owner === player.accountId;
+    // A blocked visitor is told what an empty case says: nothing for them right now.
+    const blocked = !mine && blocks.isBlocked(record.owner, player.accountId);
+    const allowance = blocked ? { remaining: 0, resetsAt: null } : visitorAllowance(record, player.accountId, now);
+    client.send(ServerMessage.CaseDetail, {
+      id: record.id,
+      remaining: record.mode === 'free' ? allowance.remaining : null,
+      resetsAt: allowance.resetsAt,
+      ...(mine ? { log: record.log.map((entry) => ({ ...entry })) } : {}),
+    });
+  }
+
+  private handleCaseSet(client: Client, raw: unknown): void {
+    const intent = sanitizeCaseSet(raw);
+    if (!intent) return this.reject(client, 'case-set', 'invalid');
+    const context = this.caseContext(client, intent.id, 'set');
+    if (!context) return;
+    if (isGuestAccount(context.player.accountId)) return this.answerCase(client, intent.id, 'set', 'guest');
+    const result = mail.caseSet(intent.id, context.player.accountId, intent);
+    if (!result) return this.reject(client, 'case-set', 'invalid');
+    this.finishCaseChange(client, context.player, 'set', intent.id, result, context.now);
+  }
+
+  private handleCaseStock(client: Client, raw: unknown): void {
+    const intent = sanitizeCaseStock(raw);
+    if (!intent) return this.reject(client, 'case-stock', 'invalid');
+    const context = this.caseContext(client, intent.id, 'stock');
+    if (!context) return;
+    if (isGuestAccount(context.player.accountId)) return this.answerCase(client, intent.id, 'stock', 'guest');
+    const result = mail.caseStock(intent.id, context.player.accountId, intent);
+    if (!result) return this.reject(client, 'case-stock', 'invalid');
+    this.finishCaseChange(client, context.player, 'stock', intent.id, result, context.now);
+  }
+
+  private handleCaseShow(client: Client, raw: unknown): void {
+    const intent = sanitizeCaseShow(raw);
+    if (!intent) return this.reject(client, 'case-show', 'invalid');
+    const context = this.caseContext(client, intent.id, 'show');
+    if (!context) return;
+    if (isGuestAccount(context.player.accountId)) return this.answerCase(client, intent.id, 'show', 'guest');
+    const result = mail.caseShow(intent.id, context.player.accountId, intent);
+    if (!result) return this.reject(client, 'case-show', 'invalid');
+    this.finishCaseChange(client, context.player, 'show', intent.id, result, context.now);
+  }
+
+  private handleCaseRemove(client: Client, raw: unknown): void {
+    const slot = sanitizeCaseSlot(raw);
+    if (!slot) return this.reject(client, 'case-remove', 'invalid');
+    const context = this.caseContext(client, slot.id, 'remove');
+    if (!context) return;
+    if (isGuestAccount(context.player.accountId)) return this.answerCase(client, slot.id, 'remove', 'guest');
+    const result = mail.caseRemove(slot.id, context.player.accountId, slot.index);
+    if (!result) return this.reject(client, 'case-remove', 'invalid');
+    this.finishCaseChange(client, context.player, 'remove', slot.id, result, context.now);
+  }
+
+  private handleCaseTake(client: Client, raw: unknown): void {
+    const slot = sanitizeCaseSlot(raw);
+    if (!slot) return this.reject(client, 'case-take', 'invalid');
+    const context = this.caseContext(client, slot.id, 'take');
+    if (!context) return;
+    const { player, record, now } = context;
+    if (isGuestAccount(player.accountId)) return this.answerCase(client, slot.id, 'take', 'guest');
+    // Silent: a block reads exactly like an empty case.
+    if (record.owner !== player.accountId && blocks.isBlocked(record.owner, player.accountId)) {
+      return this.answerCase(client, slot.id, 'take', 'empty');
+    }
+    const result = mail.caseTake(slot.id, { accountId: player.accountId, name: player.name }, slot.index, now);
+    if (!result) return this.reject(client, 'case-take', 'invalid');
+    this.finishCaseChange(client, player, 'take', slot.id, result, now);
+  }
+
+  private handleCaseRequest(client: Client, raw: unknown): void {
+    const intent = sanitizeCaseRequest(raw);
+    if (!intent) return this.reject(client, 'case-request', 'invalid');
+    const player = this.state.players.get(client.sessionId);
+    const record = mail.caseRecord(intent.id);
+    if (!player || !record || !this.state.pieces.has(intent.id)) return this.reject(client, 'case-request', 'invalid');
+    this.sendCaseDetail(client, player, record, Date.now());
+  }
+
+  private finishCaseChange(
+    client: Client,
+    player: { accountId: string },
+    action: CaseAction,
+    id: string,
+    result: CaseEdit,
+    now: number,
+  ): void {
+    const { change, record } = result;
+    if (!change.ok) {
+      this.answerCase(client, id, action, change.outcome, change.resetsAt === undefined ? {} : { resetsAt: change.resetsAt });
+      // A refused take still teaches the visitor their own allowance.
+      if (action === 'take') this.sendCaseDetail(client, player, record, now);
+      return;
+    }
+    this.syncCase(record);
+    this.answerCase(client, id, action, 'ok', change.taken ? { taken: change.taken } : {});
+    this.sendCaseDetail(client, player, record, now);
   }
 
   private handleGather(client: Client, msg: GatherIntent): void {
@@ -1411,6 +1605,14 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       piece.page = p.page;
       this.state.pieces.set(piece.id, piece);
     }
+    // Display cases live in the mail store (goods must move atomically with
+    // pouches). A case piece with no record, say after a restore from an older
+    // backup, gets an empty one rather than a dead shelf.
+    this.state.pieces.forEach((piece) => {
+      if (piece.templateKey !== DISPLAY_CASE_TEMPLATE) return;
+      if (isGuestAccount(piece.makerId)) return;
+      this.syncCase(mail.caseRecord(piece.id) ?? mail.createCase(piece.id, piece.makerId));
+    });
     for (const n of save.nodes) {
       const node = new NodeSchema();
       node.id = n.id;

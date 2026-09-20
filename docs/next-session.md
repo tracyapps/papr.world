@@ -6,6 +6,29 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Small fixes (2026-09-20, sixth pass).** Tech tree cards: the status tag no
+  longer runs over the title (the heading row wraps), "Not yet in the game" is now
+  "Soon" (screen readers still hear "not in the game yet"), and tags are a little
+  smaller (9 px, was 9.5). Critter conversations: the card stays at the bottom, and
+  when the animal is behind it the view slides up (a screen-space camera offset,
+  `game/dialogueFraming.ts`, eased, instant under reduced motion) until the animal
+  is in the clear band above the card, then slides back on close. Seen working
+  with a butterfly. Tablet and touch controls are estimated in
+  `touch-and-tablet.md`; not built.
+- **Display cases (2026-09-20, fifth pass).** Protocol **v11**. A `display-case`
+  build piece (tech node `display-cases`), outdoors only. **Show** holds keepsake
+  looks (copies; the trinket stays on the shelf); **Free** holds stacks from the
+  owner's pouch that a visitor takes one at a time, under an owner-set limit per
+  visitor per time window (default 1 a day), with an owner-only log. A blocked
+  visitor hears what an empty case says. Solo cases are Show only
+  (`world.localCases`). Server: `server/src/cases.ts` (rules), `mail.ts` (store),
+  `PaperRoom.ts` (six messages, `cases` in synced state). Client: `game/cases.ts`
+  (state and words), `game/casePanel.ts` (docked panel, E and click). Seen working
+  in the browser (solo Show; Free through a fake server). **Not proven:** two real
+  browsers in one room. **Before deploying:** back up `/data` (`mail.json` now
+  holds `cases`); every client must refresh (v11). Not built: priced cases, cases
+  indoors, the mesh showing its contents. Next: the map by scene (step 4), or
+  parties.
 - **Guests, friends and visiting (2026-09-20, fourth pass).** Protocol **v10**.
   Friendships (account-global, `server/src/friends.ts`), per-home door settings
   (friends walk / knock / closed, others knock / closed, open house), knock with
@@ -19,7 +42,7 @@ top of home markers and the quests-and-trinkets system. Start here.
   pass, including a real-socket room test. **Not proven yet:** two real browsers
   in one room. Not built: parties, invites, scheduled open house, mailbox
   balloons. **Before deploying:** back up `/data` (new `friends.json` and
-  `homePolicies` in the room save). Next: display cases (slice 7).
+  `homePolicies` in the room save). Display cases followed (below).
 - **Housekeeping, key swap, and the house design (2026-09-20, third pass).**
   (1) Art: crossbound-timber moved to `board/`; `LEGACY_RESOURCE_ART` retired
   (the last legacy entry was already generated); the dead Thing Maker

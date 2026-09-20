@@ -195,7 +195,7 @@ describe('tech tree catalog shape', () => {
     expect(readyIds.sort()).toEqual([
       'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'gardening-2', 'trimming-1', 'trimming-2',
       'mining-1', 'building-1', 'building-2', 'building-3',
-      'garden-structures', 'outdoor-furniture', 'simple-crossings', 'wetland-growing',
+      'garden-structures', 'outdoor-furniture', 'display-cases', 'simple-crossings', 'wetland-growing',
       'materials-refinement-1', 'materials-refinement-2',
       'house-floors', 'house-walls', 'house-roofing', 'extra-rooms', 'stairs-and-upper-floors',
     ].sort());

@@ -257,6 +257,18 @@ export const RECIPE_DEFS = {
     ingredients: [],
     output: { kind: 'build-piece', templateKey: 'picnic-table', label: 'Picnic Table' },
   },
+  'display-case': {
+    id: 'display-case',
+    name: 'Display Case',
+    planName: 'Plan: a frame, a clear front, and a shelf worth looking at',
+    planSource: 'knowledge-tree',
+    description: 'A glass-fronted case, built in place. Show keepsakes in it, or stock it for neighbors to take.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'build-piece', templateKey: 'display-case', label: 'Display Case' },
+  },
   'footbridge': {
     id: 'footbridge',
     name: 'Footbridge',

@@ -90,6 +90,11 @@ export const BUILD_PIECE_DEFS = {
     summary: 'A broad table with benches for shared meals and important snacks.',
     radiusX: 0.95, radiusZ: 0.78, overlap: 'none', solid: true,
   },
+  'display-case': {
+    key: 'display-case', label: 'Display case',
+    summary: 'A glass-fronted case for keepsakes to look at, or something to leave for a neighbor.',
+    radiusX: 0.66, radiusZ: 0.4, overlap: 'none', solid: true,
+  },
   'footbridge': {
     key: 'footbridge', label: 'Footbridge',
     summary: 'A short raised crossing assembled from supports, deck, and rails.',

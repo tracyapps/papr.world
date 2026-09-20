@@ -71,6 +71,9 @@ function buildVisual(group: THREE.Group, key: BuildPieceKey, material: THREE.Mes
     case 'picnic-table':
       buildPicnicTable(group, material);
       break;
+    case 'display-case':
+      buildDisplayCase(group, material);
+      break;
     case 'footbridge':
       buildFootbridge(group, material);
       break;
@@ -150,6 +153,36 @@ function buildPicnicTable(group: THREE.Group, chosen: THREE.MeshStandardMaterial
   for (const x of [-0.62, 0.62]) {
     for (const z of [-0.3, 0.3]) group.add(createWall(0.1, 0.75, dark, [x, 0.375, z]));
   }
+}
+
+let clearFront: THREE.MeshStandardMaterial | null = null;
+
+/** The case's clear front: a pale, see-through sheet, shared by every case. */
+function getClearFront(): THREE.MeshStandardMaterial {
+  clearFront ??= new THREE.MeshStandardMaterial({
+    color: '#dbeef2', transparent: true, opacity: 0.3, roughness: 0.15, depthWrite: false,
+  });
+  return clearFront;
+}
+
+function buildDisplayCase(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  const dark = getMaterial('paper.brown');
+  const glass = getClearFront();
+  // A low cupboard for a base, with a top the shelf sits on.
+  group.add(createWall(1.2, 0.36, chosen, [0, 0.18, 0.3]));
+  group.add(createWall(1.2, 0.36, chosen, [0, 0.18, -0.3]));
+  for (const x of [-0.6, 0.6]) group.add(createWall(0.6, 0.36, chosen, [x, 0.18, 0], Math.PI / 2));
+  group.add(createSheet(1.2, 0.62, chosen, [0, 0.36, 0]));
+  // The clear box above it, with a slim frame at each corner and a lid.
+  group.add(createWall(1.16, 0.6, glass, [0, 0.68, 0.29]));
+  group.add(createWall(1.16, 0.6, glass, [0, 0.68, -0.29]));
+  for (const x of [-0.58, 0.58]) group.add(createWall(0.58, 0.6, glass, [x, 0.68, 0], Math.PI / 2));
+  for (const x of [-0.6, 0.6]) {
+    for (const z of [-0.3, 0.3]) group.add(createWall(0.05, 0.62, dark, [x, 0.68, z]));
+  }
+  group.add(createSheet(1.28, 0.7, chosen, [0, 1.0, 0]));
+  // A shelf partway up, so there are two places to put things.
+  group.add(createSheet(1.1, 0.5, dark, [0, 0.68, 0]));
 }
 
 function buildFootbridge(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {

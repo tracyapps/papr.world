@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { PlacedPiece } from '../../shared/src/index';
 import { scene } from '../render/context';
+import { registerCasePiece, unregisterCasePiece } from '../game/cases';
 import { getGameState } from '../sim/state';
 import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
 import { sampleTerrainHeight } from '../world/terrain';
@@ -19,6 +20,7 @@ export function addSharedPiece(piece: PlacedPiece): void {
   group.position.set(piece.x, sampleTerrainHeight(piece.x, piece.z) + 0.01, piece.z);
   root.add(group);
   visuals.set(piece.id, { piece, group });
+  registerCasePiece(piece);
   syncSharedPieceVisibility();
 }
 
@@ -27,6 +29,7 @@ export function removeSharedPiece(id: string): void {
   if (!visual) return;
   visual.group.removeFromParent();
   visuals.delete(id);
+  unregisterCasePiece(id);
 }
 
 /** Hide the server echo of a piece already represented by this device's solo save. */
@@ -34,6 +37,11 @@ export function syncSharedPieceVisibility(): void {
   for (const { piece, group } of visuals.values()) {
     group.visible = !hasLocalEquivalent(piece);
   }
+}
+
+/** The group drawing a piece the neighborhood knows about (hidden when this device draws its own copy). */
+export function getSharedPieceVisual(id: string): THREE.Object3D | null {
+  return visuals.get(id)?.group ?? null;
 }
 
 export function sharedPieceCount(): number {

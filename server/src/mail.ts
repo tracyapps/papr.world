@@ -5,15 +5,33 @@ import {
   LIMITS,
   sanitizeMailItem,
   type AccountInventory,
+  type CaseSetIntent,
+  type CaseShowIntent,
+  type CaseStockIntent,
   type MailAttachmentIntent,
   type MailItem,
 } from '../../shared/src/index';
+import {
+  applyRemove,
+  applySet,
+  applyShow,
+  applyStock,
+  applyTake,
+  cloneCase,
+  newCaseRecord,
+  sanitizeCaseRecord,
+  type CaseChange,
+  type CaseEdit,
+  type CaseRecord,
+} from './cases';
 
 type StoreFile = {
   version: 2;
   mailboxes: Record<string, MailItem[]>;
   claimedMailIds: Record<string, string[]>;
   inventories: Record<string, AccountInventory>;
+  /** Display cases by piece id. Absent in files written before cases existed. */
+  cases?: Record<string, CaseRecord>;
 };
 
 function writeAtomic(path: string, contents: string): void {
@@ -28,6 +46,8 @@ export class MailStore {
   private mailboxes = new Map<string, MailItem[]>();
   private claimedMailIds = new Map<string, string[]>();
   private inventories = new Map<string, AccountInventory>();
+  /** Display cases: goods held for visitors, kept beside the inventories they move between. */
+  private cases = new Map<string, CaseRecord>();
   private listeners = new Set<(accountId: string, item: MailItem) => void>();
   private inventoryListeners = new Set<(accountId: string, inventory: AccountInventory) => void>();
   private path: string;
@@ -65,6 +85,10 @@ export class MailStore {
           if (ids.length > 0) this.claimedMailIds.set(accountId, ids);
         }
       }
+      for (const [id, raw] of Object.entries(parsed.cases ?? {})) {
+        const record = sanitizeCaseRecord(raw);
+        if (record && record.id === id) this.cases.set(id, record);
+      }
     } catch (error) {
       console.error(`mail: failed to read ${this.path}, starting empty`, error);
     }
@@ -74,8 +98,9 @@ export class MailStore {
     const mailboxes = Object.fromEntries(this.mailboxes);
     const claimedMailIds = Object.fromEntries(this.claimedMailIds);
     const inventories = Object.fromEntries(this.inventories);
+    const cases = Object.fromEntries(this.cases);
     writeAtomic(this.path, JSON.stringify({
-      version: 2, mailboxes, claimedMailIds, inventories,
+      version: 2, mailboxes, claimedMailIds, inventories, cases,
     } satisfies StoreFile, null, 2));
   }
 
@@ -205,6 +230,98 @@ export class MailStore {
     return cloneInventory(inventory);
   }
 
+  // ---- Display cases --------------------------------------------------------
+  //
+  // Goods a case holds are debited from the owner's pouch when stocked and
+  // credited to a visitor's when taken, each in one flush with a rollback, the
+  // same discipline as `deliverParcel`. The rules are in ./cases.ts.
+
+  /** A copy of the case for this piece, or null when the piece is not a case. */
+  caseRecord(id: string): CaseRecord | null {
+    const record = this.cases.get(id);
+    return record ? cloneCase(record) : null;
+  }
+
+  /** Every case in the given set of piece ids, for hydrating a room. */
+  casesAmong(ids: Iterable<string>): CaseRecord[] {
+    const found: CaseRecord[] = [];
+    for (const id of ids) {
+      const record = this.cases.get(id);
+      if (record) found.push(cloneCase(record));
+    }
+    return found;
+  }
+
+  /** Make a case of a newly placed piece. Doing it twice changes nothing. */
+  createCase(id: string, owner: string): CaseRecord {
+    const existing = this.cases.get(id);
+    if (existing) return cloneCase(existing);
+    const record = newCaseRecord(id, owner);
+    this.cases.set(id, record);
+    try {
+      this.flush();
+    } catch (error) {
+      this.cases.delete(id);
+      throw error;
+    }
+    return cloneCase(record);
+  }
+
+  caseSet(id: string, actor: string, intent: CaseSetIntent) {
+    return this.editCase(id, actor, null, (_inventory, record) => applySet(record, intent));
+  }
+
+  caseShow(id: string, actor: string, intent: CaseShowIntent) {
+    return this.editCase(id, actor, null, (_inventory, record) => applyShow(record, intent));
+  }
+
+  caseStock(id: string, actor: string, intent: CaseStockIntent) {
+    return this.editCase(id, actor, actor, (inventory, record) => applyStock(inventory, record, intent));
+  }
+
+  caseRemove(id: string, actor: string, index: number) {
+    return this.editCase(id, actor, actor, (inventory, record) => applyRemove(inventory, record, index));
+  }
+
+  /** A visitor takes one. Not the owner's business to check: anyone the room lets through may ask. */
+  caseTake(id: string, visitor: { accountId: string; name: string }, index: number, now: number) {
+    return this.editCase(id, null, visitor.accountId, (inventory, record) =>
+      applyTake(inventory, record, index, visitor, now));
+  }
+
+  /**
+   * One atomic edit of a case and, when `inventoryOf` is set, that account's
+   * pouch. `owner` set means only the case's owner may make it. A refusal
+   * changes nothing and writes nothing.
+   */
+  private editCase(
+    id: string,
+    owner: string | null,
+    inventoryOf: string | null,
+    apply: (inventory: AccountInventory, record: CaseRecord) => CaseChange,
+  ): CaseEdit | null {
+    const record = this.cases.get(id);
+    if (!record) return null;
+    if (owner !== null && record.owner !== owner) {
+      return { change: { ok: false, outcome: 'not-yours' }, record: cloneCase(record) };
+    }
+    const inventory = inventoryOf ? this.mutableInventory(inventoryOf) : cloneInventory(EMPTY_INVENTORY);
+    const previousRecord = cloneCase(record);
+    const previousInventory = cloneInventory(inventory);
+    const change = apply(inventory, record);
+    if (!change.ok) return { change, record: cloneCase(record) };
+    if (inventoryOf) inventory.revision += 1;
+    try {
+      this.flush();
+    } catch (error) {
+      this.cases.set(id, previousRecord);
+      if (inventoryOf) this.inventories.set(inventoryOf, previousInventory);
+      throw error;
+    }
+    if (inventoryOf) this.notifyInventory(inventoryOf, inventory);
+    return { change, record: cloneCase(record) };
+  }
+
   private mutableInventory(accountId: string): AccountInventory {
     const existing = this.inventories.get(accountId);
     if (existing) return existing;
@@ -243,6 +360,8 @@ export class MailStore {
     for (const listener of this.inventoryListeners) listener(accountId, snapshot);
   }
 }
+
+const EMPTY_INVENTORY: AccountInventory = { revision: 1, chips: 0, resources: {}, tools: {}, items: {} };
 
 function cloneMail(item: MailItem): MailItem {
   return { ...item, payload: { ...item.payload } };

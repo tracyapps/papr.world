@@ -75,6 +75,22 @@ export class HomeSchema extends Schema {
   @type('boolean') open = false;
 }
 
+export class CaseSchema extends Schema {
+  /** The id of the placed piece it is; also the key in `cases`. */
+  @type('string') id = '';
+  /** Durable account id of the owner. */
+  @type('string') owner = '';
+  /** 'show' or 'free'. */
+  @type('string') mode = 'show';
+  @type('string') label = '';
+  /** What it holds, as one bounded JSON string (see encodeCaseItems). */
+  @type('string') items = '[]';
+  /** Per-visitor limit: how many. 0 means no limit. */
+  @type('number') limitCount = 0;
+  /** Per-visitor limit: over how many minutes. */
+  @type('number') limitWindow = 0;
+}
+
 export class NodeSchema extends Schema {
   @type('string') id = '';
   @type('string') kind = '';
@@ -92,4 +108,6 @@ export class PaperRoomState extends Schema {
   @type({ map: NodeSchema }) nodes = new MapSchema<NodeSchema>();
   /** Keyed by accountId — one home per account, moving is overwriting the one entry. */
   @type({ map: HomeSchema }) homes = new MapSchema<HomeSchema>();
+  /** Display cases, keyed by the id of the piece they are. */
+  @type({ map: CaseSchema }) cases = new MapSchema<CaseSchema>();
 }

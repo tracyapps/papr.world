@@ -26,6 +26,16 @@ import type {
   KnockCleared,
   KnockNotice,
 } from './guests';
+import type {
+  CaseDetail,
+  CaseRemoveIntent,
+  CaseRequestIntent,
+  CaseResult,
+  CaseSetIntent,
+  CaseShowIntent,
+  CaseStockIntent,
+  CaseTakeIntent,
+} from './cases';
 
 /** Credentials for a durable "paper passport" account (see server /account). */
 export type AccountCredentials = {
@@ -106,6 +116,18 @@ export const ClientMessage = {
   KnockAnswer: 'knock-answer',
   /** Ask a guest to leave my home. */
   AskToLeave: 'ask-to-leave',
+  /** Owner: change a display case's mode, label or per-visitor limit. */
+  CaseSet: 'case-set',
+  /** Owner: move a stack from my pouch into a free case. */
+  CaseStock: 'case-stock',
+  /** Owner: put a trinket's look on a show case. */
+  CaseShow: 'case-show',
+  /** Owner: take a stack back into my pouch, or a trinket off the case. */
+  CaseRemove: 'case-remove',
+  /** Take one from a free case. */
+  CaseTake: 'case-take',
+  /** Ask what a case means for me: my allowance, and the log if it is mine. */
+  CaseRequest: 'case-request',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -230,6 +252,12 @@ export type ClientPayloads = {
   [ClientMessage.LeaveHome]: Record<string, never>;
   [ClientMessage.KnockAnswer]: KnockAnswerIntent;
   [ClientMessage.AskToLeave]: AskToLeaveIntent;
+  [ClientMessage.CaseSet]: CaseSetIntent;
+  [ClientMessage.CaseStock]: CaseStockIntent;
+  [ClientMessage.CaseShow]: CaseShowIntent;
+  [ClientMessage.CaseRemove]: CaseRemoveIntent;
+  [ClientMessage.CaseTake]: CaseTakeIntent;
+  [ClientMessage.CaseRequest]: CaseRequestIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------
@@ -282,6 +310,10 @@ export const ServerMessage = {
   KnockCleared: 'knock-cleared',
   /** The server has taken me out of a home. */
   HomeExit: 'home-exit',
+  /** How a display-case action ended. See `CaseOutcome`. */
+  CaseResult: 'case-result',
+  /** My allowance at a case, and the log if the case is mine. */
+  CaseDetail: 'case-detail',
 } as const;
 export type ServerMessageType = (typeof ServerMessage)[keyof typeof ServerMessage];
 
@@ -373,4 +405,6 @@ export type ServerPayloads = {
   [ServerMessage.KnockNotice]: KnockNotice;
   [ServerMessage.KnockCleared]: KnockCleared;
   [ServerMessage.HomeExit]: HomeExit;
+  [ServerMessage.CaseResult]: CaseResult;
+  [ServerMessage.CaseDetail]: CaseDetail;
 };

@@ -16,3 +16,8 @@ export function setPlacedPieceVisualVisible(id: string, visible: boolean) {
   const object = visuals.get(id);
   if (object) object.visible = visible;
 }
+
+/** The object drawing a piece standing on this device's own pages, if it is drawn. */
+export function getPlacedPieceVisual(id: string): THREE.Object3D | null {
+  return visuals.get(id) ?? null;
+}

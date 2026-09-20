@@ -21,6 +21,15 @@ import {
   DEFAULT_ROOM,
   PROTOCOL_VERSION,
   ServerMessage,
+  decodeCaseItems,
+  type CaseDetail,
+  type CaseRemoveIntent,
+  type CaseResult,
+  type CaseSetIntent,
+  type CaseShowIntent,
+  type CaseState,
+  type CaseStockIntent,
+  type CaseTakeIntent,
   type AccountCredentials,
   type AccountInventory,
   type AvatarRef,
@@ -133,6 +142,13 @@ export type NetCallbacks = {
   onKnockCleared?: (cleared: KnockCleared) => void;
   /** The owner asked you to leave. */
   onHomeExit?: (exit: HomeExit) => void;
+  /** A display case appeared, or changed (mode, label, limit, or what it holds). */
+  onCaseChange?: (state: CaseState) => void;
+  onCaseRemove?: (id: string) => void;
+  /** How your display-case action ended. */
+  onCaseResult?: (result: CaseResult) => void;
+  /** Your allowance at a case, and its log if it is yours. */
+  onCaseDetail?: (detail: CaseDetail) => void;
 };
 
 export type NetConnection = {
@@ -176,6 +192,13 @@ export type NetConnection = {
   sendKnockAnswer: (visitor: string, admit: boolean) => void;
   /** Owner: ask one guest to step out. Not a block. */
   sendAskToLeave: (accountId: string) => void;
+  /** Display cases. The server decides; the answer is a CaseResult. */
+  sendCaseSet: (intent: CaseSetIntent) => void;
+  sendCaseStock: (intent: CaseStockIntent) => void;
+  sendCaseShow: (intent: CaseShowIntent) => void;
+  sendCaseRemove: (intent: CaseRemoveIntent) => void;
+  sendCaseTake: (intent: CaseTakeIntent) => void;
+  sendCaseRequest: (id: string) => void;
   disconnect: () => void;
 };
 
@@ -252,6 +275,7 @@ export async function connect(
   wirePieces(room, stateCallbacks, callbacks);
   wireNodes(room, stateCallbacks, callbacks);
   wireHomes(room, stateCallbacks, callbacks);
+  wireCases(room, stateCallbacks, callbacks);
   wireMessages(room, callbacks);
   // Three distinct endings, and they used to be one.
   //
@@ -336,6 +360,12 @@ export async function connect(
       const payload: AskToLeaveIntent = { accountId };
       room.send(ClientMessage.AskToLeave, payload);
     },
+    sendCaseSet: (intent) => room.send(ClientMessage.CaseSet, intent),
+    sendCaseStock: (intent) => room.send(ClientMessage.CaseStock, intent),
+    sendCaseShow: (intent) => room.send(ClientMessage.CaseShow, intent),
+    sendCaseRemove: (intent) => room.send(ClientMessage.CaseRemove, intent),
+    sendCaseTake: (intent) => room.send(ClientMessage.CaseTake, intent),
+    sendCaseRequest: (id) => room.send(ClientMessage.CaseRequest, { id }),
     disconnect: () => {
       void room.leave();
     },
@@ -474,6 +504,32 @@ function wireHomes(
     callbacks.onHomeRemove?.(accountId));
 }
 
+function readCase(id: string, raw: any): CaseState {
+  const count = Number(raw.limitCount) || 0;
+  const windowMinutes = Number(raw.limitWindow) || 0;
+  return {
+    id,
+    owner: raw.owner ?? '',
+    mode: raw.mode === 'free' ? 'free' : 'show',
+    label: raw.label ?? '',
+    items: decodeCaseItems(raw.items ?? ''),
+    limit: count > 0 && windowMinutes > 0 ? { count, windowMinutes } : null,
+  };
+}
+
+/** Display cases, keyed by the id of the piece they are. */
+function wireCases(
+  room: Room,
+  $: NonNullable<ReturnType<typeof getStateCallbacks>>,
+  callbacks: NetCallbacks,
+): void {
+  $(room.state as any).cases.onAdd((raw: any, id: string) => {
+    callbacks.onCaseChange?.(readCase(id, raw));
+    $(raw).onChange(() => callbacks.onCaseChange?.(readCase(id, raw)));
+  });
+  $(room.state as any).cases.onRemove((_raw: any, id: string) => callbacks.onCaseRemove?.(id));
+}
+
 /**
  * Every server-sent event.
  *
@@ -513,4 +569,6 @@ function wireMessages(room: Room, callbacks: NetCallbacks): void {
   room.onMessage(ServerMessage.KnockNotice, (notice: KnockNotice) => callbacks.onKnockNotice?.(notice));
   room.onMessage(ServerMessage.KnockCleared, (cleared: KnockCleared) => callbacks.onKnockCleared?.(cleared));
   room.onMessage(ServerMessage.HomeExit, (exit: HomeExit) => callbacks.onHomeExit?.(exit));
+  room.onMessage(ServerMessage.CaseResult, (result: CaseResult) => callbacks.onCaseResult?.(result));
+  room.onMessage(ServerMessage.CaseDetail, (detail: CaseDetail) => callbacks.onCaseDetail?.(detail));
 }

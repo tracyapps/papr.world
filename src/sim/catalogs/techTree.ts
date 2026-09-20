@@ -518,6 +518,21 @@ export const TECH_DEFS = {
     ],
     grants: ['picnic-table'],
   },
+  'display-cases': {
+    id: 'display-cases',
+    name: 'Display Cases',
+    summary: 'A glass-fronted case: keepsakes to look at, or something to leave out for a neighbor.',
+    branch: 'building-construction',
+    requires: ['outdoor-furniture'],
+    readiness: 'ready',
+    learningHours: 12,
+    tasks: [
+      { kind: 'own-tool', toolId: 'basic-mallet', weight: 1 },
+      { kind: 'own-tool', toolId: 'sturdy-scissors', weight: 1 },
+      { kind: 'make', recipeId: 'sturdy-scissors', quantity: 1, weight: 2 },
+    ],
+    grants: ['display-case'],
+  },
   'simple-crossings': {
     id: 'simple-crossings',
     name: 'Simple Crossings',
