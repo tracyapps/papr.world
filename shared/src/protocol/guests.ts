@@ -115,6 +115,8 @@ export type FriendRequestRecord = {
   accountId: string;
   name: string;
   at: number;
+  /** The note the asker attached, if any (see `FriendRequestIntent.message`). */
+  message?: string;
 };
 
 /** Everything a player knows about their own friendships. Sent whole on every change. */
@@ -126,7 +128,7 @@ export type FriendsSnapshot = {
   outgoing: FriendRequestRecord[];
 };
 
-export type FriendRequestIntent = { accountId: string };
+export type FriendRequestIntent = { accountId: string; message?: string };
 export type FriendAnswerIntent = { accountId: string; accept: boolean };
 export type FriendRemoveIntent = { accountId: string };
 

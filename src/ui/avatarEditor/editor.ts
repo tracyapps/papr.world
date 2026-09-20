@@ -5,8 +5,12 @@
 //
 //   1. "shape"   — choose the cutout. Searchable, sortable grid; the FIRST
 //                  tile is always "Draw your avatar" (a big question mark),
-//                  which adds one extra step:
-//   2. "outline" — (custom only) draw the cutout outline, confirm it.
+//                  followed by "My shapes" (everything you have drawn and
+//                  used), then the ready-made shapes. Drawing adds one step:
+//   2. "outline" — (custom only) draw the cutout with a pencil and reshape it
+//                  by its points: as many strokes as you like, pieces that
+//                  add to or cut out of the shape (see shapeEditor.ts).
+//                  Also reachable later, from the studio's "Edit shape…".
 //   3. "studio"  — a full-screen workshop: the paper stack on one side, the
 //                  cutout on a work table in the middle, and a bench with
 //                  three tools — Faces, Arms & hair, Draw. Changing the shape
@@ -43,6 +47,7 @@ import {
   DESIGN_LIMITS,
   DESIGN_SHEET,
   type AvatarDesign,
+  type CustomShape,
   type DesignStamp,
   type DesignStroke,
   type StrokeMedium,
@@ -63,6 +68,18 @@ import {
   type StampTemplate,
 } from './catalog';
 import { designToSvg, silhouettePathFor } from './render';
+import { mountShapeEditor, type ShapeEditorHandle } from './shapeEditor';
+import { outlineFromShape, pieceFromOutline, shapeToPathD, thumbnailBox } from './shapeGeometry';
+import {
+  SHAPE_INVENTORY_MAX,
+  deleteShape,
+  keepShape,
+  listShapes,
+  readShapeDraft,
+  writeShapeDraft,
+  type KeepResult,
+  type SavedShape,
+} from './shapeInventory';
 import { refreshAllBacking, refreshBacking } from './stampBacking';
 import {
   deleteDesign,
@@ -262,8 +279,12 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
   let stampQuery = '';
   let limbQuery = '';
   let medium: StrokeMedium = 'crayon';
-  /** Outline-in-progress for the "draw your avatar" step. */
-  let outlinePoints: number[] = [];
+  /** The shape editor while the "outline" step is on screen. */
+  let shapeEditor: ShapeEditorHandle | null = null;
+  const leaveShapeEditor = () => {
+    shapeEditor?.destroy();
+    shapeEditor = null;
+  };
 
   const overlay = document.createElement('div');
   overlay.className = 'hud-overlay avatar-editor avatar-studio is-open';
@@ -386,6 +407,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
   // ==== Step 1: choose the cutout shape =====================================
 
   const renderShapeStep = () => {
+    leaveShapeEditor();
     step = 'shape';
     const draft = options.initial ? null : readDraft();
     stepHost.innerHTML = `
@@ -438,13 +460,35 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
       draw.innerHTML = `<span class="avatar-editor-draw-mark" aria-hidden="true">?</span>
         <span class="avatar-editor-shape-label">Draw your avatar</span>`;
       draw.addEventListener('click', () => {
-        outlinePoints = [];
-        renderOutlineStep();
-        announce('Draw your cutout outline on the sheet, then confirm it.');
+        const unfinished = readShapeDraft();
+        renderOutlineStep({ kind: 'new', shape: unfinished, name: '', replaceId: null });
+        announce(
+          unfinished
+            ? 'Picked up your unfinished drawing. Start over clears it.'
+            : 'Draw your cutout with the pencil, then use this shape.',
+        );
       });
       grid.appendChild(draw);
 
-      let shown = 0;
+      // ---- My shapes: everything drawn and used, newest first ----
+      const mine = listShapes()
+        .filter((saved) => matchesSaved(saved, query))
+        .reverse();
+      if (query.length === 0 || mine.length > 0) {
+        const header = document.createElement('h3');
+        header.className = 'avatar-editor-shape-category';
+        header.textContent = 'My shapes';
+        grid.appendChild(header);
+      }
+      if (query.length === 0 && mine.length === 0) {
+        const none = document.createElement('p');
+        none.className = 'avatar-editor-shape-none';
+        none.textContent = 'Shapes you draw and use are kept here.';
+        grid.appendChild(none);
+      }
+      for (const saved of mine) grid.appendChild(savedTile(saved));
+
+      let shown = mine.length;
       let lastCategory = '';
       for (const shape of sortedShapes()) {
         if (!matchesQuery(shape, query)) continue;
@@ -502,90 +546,180 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
     announce(`Cutout shape: ${shape.label}. Now pick paper, pattern, and crayons.`);
   };
 
+  // ---- My shapes -----------------------------------------------------------------
+
+  const matchesSaved = (saved: SavedShape, query: string): boolean =>
+    query.length === 0 ||
+    query
+      .toLowerCase()
+      .split(/\s+/)
+      .every((term) => `${saved.name} my shape drawn`.toLowerCase().includes(term));
+
+  const thumbnails = new Map<string, string>();
+  const thumbnailFor = (saved: SavedShape): string => {
+    const key = `${saved.id}:${saved.updatedAt}`;
+    let markup = thumbnails.get(key);
+    if (markup === undefined) {
+      const box = thumbnailBox(saved.shape);
+      markup =
+        `<svg viewBox="${box.x.toFixed(1)} ${box.y.toFixed(1)} ${box.width.toFixed(1)} ${box.height.toFixed(1)}" aria-hidden="true">` +
+        `<path d="${shapeToPathD(saved.shape)}" fill="#c9a876" fill-rule="evenodd" stroke="#f3ecdc" stroke-width="2.4" stroke-linejoin="round"/></svg>`;
+      thumbnails.set(key, markup);
+    }
+    return markup;
+  };
+
+  /** One saved shape: pick it, edit it, or delete it. */
+  const savedTile = (saved: SavedShape): HTMLElement => {
+    const item = document.createElement('div');
+    item.className = 'avatar-editor-shape-item';
+    item.setAttribute('role', 'listitem');
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'avatar-editor-shape-tile';
+    tile.setAttribute('aria-label', `${saved.name} — a shape you drew`);
+    tile.innerHTML = thumbnailFor(saved);
+    const label = document.createElement('span');
+    label.className = 'avatar-editor-shape-label';
+    label.textContent = saved.name;
+    tile.appendChild(label);
+    tile.addEventListener('click', () => pickSaved(saved));
+
+    const actions = document.createElement('div');
+    actions.className = 'avatar-editor-shape-item-actions';
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.textContent = 'Edit';
+    edit.setAttribute('aria-label', `Edit ${saved.name}`);
+    edit.addEventListener('click', () => {
+      renderOutlineStep({ kind: 'new', shape: saved.shape, name: saved.name, replaceId: saved.id });
+      announce(`Editing ${saved.name}. Use this shape saves your changes.`);
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Delete';
+    remove.setAttribute('aria-label', `Delete ${saved.name}`);
+    remove.addEventListener('click', () => {
+      if (!window.confirm(`Delete "${saved.name}" from My shapes? Looks that already use it keep their own copy.`)) return;
+      deleteShape(saved.id);
+      const search = stepHost.querySelector<HTMLInputElement>('.avatar-editor-search');
+      search?.dispatchEvent(new Event('input'));
+      search?.focus();
+      announce(`Deleted ${saved.name}.`);
+    });
+    actions.append(edit, remove);
+    item.append(tile, actions);
+    return item;
+  };
+
+  /** A whole new look on a saved shape. */
+  const pickSaved = (saved: SavedShape) => {
+    const outline = outlineFromShape(saved.shape);
+    if (!outline) {
+      announce('That shape has nothing cut out. Edit it, or pick another.');
+      return;
+    }
+    const fresh = newDesign();
+    fresh.silhouette = 'custom';
+    fresh.customShape = structuredClone(saved.shape);
+    fresh.customOutline = outline;
+    fresh.name = design.name;
+    design = fresh;
+    dirty = false;
+    undoStack = [];
+    redoStack = [];
+    renderStyleStep();
+    announce(`Cutout shape: ${saved.name}. Now pick paper, pattern, and crayons.`);
+  };
+
+  const keptNote = (result: KeepResult): string => {
+    switch (result.kept) {
+      case 'new':
+        return ` Kept in My shapes as "${result.saved.name}".`;
+      case 'updated':
+        return ` Updated "${result.saved.name}" in My shapes.`;
+      case 'already':
+        return ` Already in My shapes as "${result.saved.name}".`;
+      case 'full':
+        return ` My shapes is full (${SHAPE_INVENTORY_MAX}) — delete one there to keep this shape.`;
+      default:
+        return ' It could not be kept in My shapes on this device.';
+    }
+  };
+
   // ==== Step 2 (custom only): draw the outline ==============================
 
-  const renderOutlineStep = () => {
+  type OutlineSource =
+    | { kind: 'new'; shape: CustomShape | null; name: string; replaceId: string | null }
+    /** Reshape the cutout of the design being decorated; everything on it stays. */
+    | { kind: 'design' };
+
+  const renderOutlineStep = (source: OutlineSource) => {
+    leaveShapeEditor();
     step = 'outline';
-    stepHost.innerHTML = `
-      <p class="avatar-editor-lead">Draw the outline of your cutout — one continuous line works best.
-        We'll close the loop and cut along it.</p>
-      <div class="avatar-editor-columns">
-        <div class="avatar-editor-controls">
-          <div class="avatar-editor-swatches">
-            <button type="button" data-action="outline-restart">Start over</button>
-            <button type="button" data-action="outline-back">Back to shapes</button>
-            <button type="button" class="avatar-editor-save" data-action="outline-confirm" disabled>
-              Use this shape</button>
-          </div>
-          <p class="avatar-editor-sheet-hint">Prefer not to draw? "Back to shapes" has ready-made
-            cutouts — they're a full avatar on their own.</p>
-        </div>
-        <div class="avatar-editor-sheet-wrap">
-          <div class="avatar-editor-sheet" data-role="sheet"
-               aria-label="Outline sheet. Draw the cutout edge with a mouse, finger, or stylus."></div>
-        </div>
-      </div>`;
-    const confirm = $<HTMLButtonElement>('[data-action="outline-confirm"]', stepHost);
+    const editingDesign = source.kind === 'design';
+    let initial: CustomShape | null = null;
+    if (source.kind === 'new') initial = source.shape;
+    else if (design.customShape) initial = structuredClone(design.customShape);
+    else {
+      // A cutout drawn before shapes could be edited: its outline becomes one piece.
+      const piece = design.customOutline ? pieceFromOutline(design.customOutline) : null;
+      initial = piece ? { pieces: [piece] } : null;
+    }
+    const isNewDrawing = source.kind === 'new' && !source.replaceId;
 
-    const redrawOutline = () => {
-      const pts: string[] = [];
-      for (let i = 0; i + 1 < outlinePoints.length; i += 2) {
-        pts.push(`${outlinePoints[i]},${outlinePoints[i + 1]}`);
-      }
-      const preview =
-        outlinePoints.length >= 6
-          ? `<polygon points="${pts.join(' ')}" fill="rgba(201,168,118,0.55)" stroke="#4a453c" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="4 2"/>`
-          : `<polyline points="${pts.join(' ')}" fill="none" stroke="#4a453c" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="4 2"/>`;
-      // The dashed guide is where template cutouts live. Drawing outside it is
-      // allowed — it is your cutout — but the ring is where arms and hair go,
-      // so a body drawn out there will have stamps landing on top of it.
-      const guide =
-        `<rect x="${DESIGN_CUTOUT.x}" y="${DESIGN_CUTOUT.y}" width="${DESIGN_CUTOUT.width}" ` +
-        `height="${DESIGN_CUTOUT.height}" fill="none" stroke="rgba(74,69,60,0.3)" ` +
-        `stroke-width="0.8" stroke-dasharray="4 3"/>`;
-      $('[data-role="sheet"]', stepHost).innerHTML =
-        `<svg class="avatar-editor-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${DESIGN_SHEET.width} ${DESIGN_SHEET.height}">${guide}${preview}</svg>`;
-      confirm.disabled = outlinePoints.length < 6;
-    };
-
-    wireSheetDrawing(
-      $('[data-role="sheet"]', stepHost),
-      (x, y) => {
-        if (outlinePoints.length >= DESIGN_LIMITS.maxOutlinePoints * 2) return;
-        outlinePoints.push(x, y);
-        redrawOutline();
-      },
-      () => announce('Outline continued. Confirm when it looks right.'),
-    );
-
-    stepHost.addEventListener('click', (event) => {
-      const action = (event.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset
-        .action;
-      if (action === 'outline-restart') {
-        outlinePoints = [];
-        redrawOutline();
-        announce('Outline cleared — draw a new one.');
-      }
-      if (action === 'outline-back') renderShapeStep();
-      if (action === 'outline-confirm' && outlinePoints.length >= 6) {
-        const fresh = newDesign();
-        fresh.silhouette = 'custom';
-        fresh.customOutline = [...outlinePoints];
-        fresh.name = design.name;
-        design = fresh;
-        dirty = true; // a drawn outline is already work worth warning about
-        undoStack = [];
-        redoStack = [];
+    shapeEditor = mountShapeEditor(stepHost, {
+      initial,
+      initialName: source.kind === 'new' ? source.name : '',
+      lead: editingDesign
+        ? 'Reshape your cutout. The paper, faces and drawing you added stay as they are.'
+        : 'Draw the outline of your cutout — as long as you like, in as many lines as you like. Points can be moved afterwards.',
+      confirmLabel: 'Use this shape',
+      backLabel: editingDesign ? 'Back to the studio' : 'Back to shapes',
+      announce,
+      onDraft: isNewDrawing ? writeShapeDraft : undefined,
+      onBack: () => (editingDesign ? renderStyleStep() : renderShapeStep()),
+      onConfirm: (shape, name) => {
+        const outline = outlineFromShape(shape);
+        if (!outline) {
+          announce('There is nothing cut out yet. Add a piece first.');
+          return;
+        }
+        const kept = keepShape(shape, {
+          replaceId: source.kind === 'new' ? source.replaceId : null,
+          name,
+        });
+        if (source.kind === 'new') {
+          if (isNewDrawing) writeShapeDraft(null);
+          const fresh = newDesign();
+          fresh.silhouette = 'custom';
+          fresh.customShape = shape;
+          fresh.customOutline = outline;
+          fresh.name = design.name;
+          design = fresh;
+          dirty = true; // a drawn shape is already work worth warning about
+          undoStack = [];
+          redoStack = [];
+        } else {
+          design.customShape = shape;
+          design.customOutline = outline;
+          markDirty();
+        }
         renderStyleStep();
-        announce('Custom cutout confirmed. Now pick paper, pattern, and crayons.');
-      }
+        announce(
+          (editingDesign ? 'Cutout reshaped.' : 'Custom cutout confirmed. Now pick paper, pattern, and crayons.') +
+            keptNote(kept),
+        );
+      },
     });
-    redrawOutline();
+    shapeEditor.focus();
   };
 
   // ==== Step 3: paper color, paper pattern, crayons =========================
 
   const renderStyleStep = () => {
+    leaveShapeEditor();
     step = 'style';
     const shapeLabel =
       design.silhouette === 'custom'
@@ -600,6 +734,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
                    placeholder="name of the avatar" />
           </label>
           <p class="studio-cutout"><strong>${shapeLabel}</strong>
+            ${design.silhouette === 'custom' ? '<button type="button" data-action="edit-shape">Edit shape…</button>' : ''}
             <button type="button" data-action="change-shape">Change shape…</button></p>
         </div>
         <div class="studio-bar-right">
@@ -1618,6 +1753,11 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
       const action = (event.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset
         .action;
       if (!action) return;
+      if (action === 'edit-shape') {
+        renderOutlineStep({ kind: 'design' });
+        announce('Reshaping your cutout. Everything you added stays put.');
+        return;
+      }
       if (action === 'change-shape') {
         if (!dirty) {
           renderShapeStep();
@@ -1783,6 +1923,7 @@ export function openAvatarEditor(options: AvatarEditorOptions): void {
   // ==== Open/close ==========================================================
 
   const close = () => {
+    leaveShapeEditor();
     window.clearInterval(autosaveTimer);
     window.removeEventListener('pagehide', autosaveOnHide);
     document.removeEventListener('visibilitychange', autosaveOnVisibility);

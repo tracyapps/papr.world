@@ -43,10 +43,13 @@ color, and pattern are **three separate fields, chosen shape-first**:
 
 1. **Shape** — a searchable, sortable grid of cutout silhouettes. The first
    tile is always **"Draw your avatar"** (a big question mark). Picking it
-   adds exactly one step: draw the cutout outline freehand and confirm
-   ("Use this shape") before moving on. Every template maps to a collision
-   `preset` (small / medium / wide / tall / wheeled / hovering) so gameplay
-   never reads the art; drawn outlines default to `medium`.
+   adds exactly one step: draw the cutout with the pencil and reshape it by its
+   movable points (as many strokes as you like, pieces that add to or cut out
+   of the shape), then confirm ("Use this shape"). Shapes you use are kept
+   under **My shapes**, right below that tile. Every template maps to a
+   collision `preset` (small / medium / wide / tall / wheeled / hovering) so
+   gameplay never reads the art; drawn shapes default to `medium`. Details:
+   `src/ui/avatarEditor/README.md` ("Drawing your own shape").
 2. **Paper color** — the construction-paper stock the cutout is made of.
 3. **Paper pattern** — lined, graph, dot grid, torn edge...
 4. **Drawing** — freeform crayon strokes on top: named palette, brush

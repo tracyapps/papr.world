@@ -25,6 +25,17 @@ export function homePosition(place: { x: number; z: number }): { x: number; z: n
   return { x: place.x + HOME_OFFSET.x, z: place.z + HOME_OFFSET.z };
 }
 
+/**
+ * The Home place a lot is built around. A lot is exactly where the Home
+ * bookmark sits, so this is the one seam between "where the neighbourhood put
+ * you" (world/neighborhood.ts) and the `place` that `homePosition`,
+ * `homeFacing`, `homeDoorstep` and `homeSolids` all take. If lots ever stop
+ * coinciding with places, this is the single line that changes.
+ */
+export function homePlaceForLot(lot: { x: number; z: number }): { x: number; z: number } {
+  return { x: lot.x, z: lot.z };
+}
+
 export function isNearHome(
   position: { x: number; z: number },
   place: { x: number; z: number },

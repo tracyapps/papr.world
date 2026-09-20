@@ -181,7 +181,8 @@ export type NetConnection = {
   sendPlayerCardRequest: (intent: PlayerCardIntent) => void;
   /** Publish where your own Home marker sits, for neighbors to see. */
   sendSetHome: (intent: SetHomeIntent) => void;
-  sendFriendRequest: (accountId: string) => void;
+  /** Ask to be friends, with an optional short note that rides along. */
+  sendFriendRequest: (accountId: string, message?: string) => void;
   sendFriendAnswer: (accountId: string, accept: boolean) => void;
   sendFriendRemove: (accountId: string) => void;
   sendSetHomePolicy: (policy: HomePolicy) => void;
@@ -334,8 +335,8 @@ export async function connect(
     sendWearDesign: (intent) => room.send(ClientMessage.WearDesign, intent),
     sendPlayerCardRequest: (intent) => room.send(ClientMessage.RequestPlayerCard, intent),
     sendSetHome: (intent) => room.send(ClientMessage.SetHome, intent),
-    sendFriendRequest: (accountId) => {
-      const payload: FriendRequestIntent = { accountId };
+    sendFriendRequest: (accountId, message) => {
+      const payload: FriendRequestIntent = { accountId, ...(message ? { message } : {}) };
       room.send(ClientMessage.FriendRequest, payload);
     },
     sendFriendAnswer: (accountId, accept) => {

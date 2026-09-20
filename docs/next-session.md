@@ -1,11 +1,79 @@
 # Next Session
 
-Updated 2026-09-18 after the tropical biome build, the marsh/desert/forest
-art wiring, the parrot flagship, and the tropical quests/trinkets batch, on
-top of home markers and the quests-and-trinkets system. Start here.
+Updated 2026-09-20 after the touch/tablet pass, the neighbourhood clump and
+address plates, profiles and visibility, friend-request notes, the safety reach
+fix, and one-command data backups. Start here.
 
 ## What landed
 
+- **Data backups, one command (2026-09-20).** Answering "is backing up `/data`
+  easy, and does a deploy need a re-import?": it is now one command, and **no
+  deploy ever needs a re-import** — `/data` is a Railway volume that survives
+  redeploys, so the files are simply still there when the new process starts. A
+  copy is worth having only before a *shape* change (`SAVE_VERSION` or a store's
+  fields), where a bad migration reads as "the world is empty" rather than as an
+  error. New: `tools/backup-data.mjs` (`npm run data:backup`) snapshots a local
+  data dir with a sha256 manifest, can pull from a running server, and can
+  restore (refuses without `--yes`, never deletes); `GET /admin/backup`
+  (`server/src/backup.ts` + `backupHandlers.ts`) is a read-only, allowlisted
+  snapshot behind its own `PP_BACKUP_TOKEN` — unset means CLOSED, and the boot log
+  says which. Full write-up in `docs/data-backups.md`; `hosting.md` gained the
+  third token and lost a stale `PROTOCOL_VERSION is 8` line. Verified end-to-end
+  against a real local server (401 with no token, 401 with a wrong one, 200 with
+  the right one, 503 when unset, and the CLI pulling over HTTP).
+- **Drawable shapes (2026-09-20, eighth pass, uncommitted).** "Draw your avatar"
+  is now a real shape editor: large sheet, pencil with no length limit, movable
+  auto-smoothed points, pieces that add or cut out (unite/subtract), multi-stroke,
+  undo/redo, keyboard nudging, starters (oval/square/triangle). A shape is
+  `AvatarDesign.customShape` (`pieces`); `customOutline` is kept as the legacy
+  flattened loop. **No protocol bump** (additive, old clients ignore it; limits
+  `maxShapePieces` 12 / `maxShapeAnchors` 600). Shapes you use land in **My shapes**
+  under the draw tile (`pp.shapes.v1`, device-local, 40 max, edit/delete there);
+  the studio gained **Edit shape…**. New dependency **`polygon-clipping`** — run
+  `npm install` (pure JS; `package-lock.json` already updated). Code:
+  `src/ui/avatarEditor/{shapeGeometry,shapeEditor,shapeInventory}.ts`. Owed:
+  sync My shapes to the account (designs already carry their own copy), a
+  live-updating My shapes grid across tabs, pinch-zoom on the drawing sheet.
+
+- **Touch/tablet play, and the social layer (2026-09-20, seventh pass).** Two
+  things at once, both uncommitted. **Touch (slices 1–3):** a new
+  `src/game/touchControls.ts` — an analog move pad read camera-relative with a
+  radial deadzone, an Act button (what E does), a Rotate button (build mode),
+  and zoom +/− as the non-gesture twin of pinch — plus multi-pointer bookkeeping
+  and pinch-zoom in `src/game/input.ts` (pointers tracked by `pointerId` now, so
+  a second finger stops fighting the first), a `touchControls: 'auto'|'on'|'off'`
+  setting (`pointer: coarse`), `viewport-fit=cover`, `touch-action: none` on the
+  canvas, and nine `100vh` → `100dvh`. Slices 4 (tap-to-aim previews) and 5
+  (tablet layout, 44 px targets) are still owed. `docs/touch-and-tablet.md`
+  records the pattern review — the one plan change is that the Act button stays
+  put and lights up rather than appearing under the thumb. **No protocol change.**
+  **Neighbourhood clumps and address plates:** `src/world/neighborhood.ts` places
+  homes on deterministic concentric-ring lots (`LOT_SPACING = 8`, self-healing
+  tie-break by account id) so two players' starter tents stop stacking; the
+  starter tent and Thing Maker L1 are unchanged. Every neighbour home gained an
+  **address plate** (`No. 12 · Wren`, number derived from the account id) that
+  opens their player card, registered above the house click. **Profiles:**
+  `shared/src/protocol/profile.ts` — bio (280) and up to 6 social links with
+  per-field visibility (everyone / friends / friends-of-friends, default
+  friends), and `profileForViewer(..., { hasSentRequest })` for the owner rule
+  (asking to be friends shows them your basics). Store `data/profiles.json`,
+  desk routes `GET`/`POST /account/profile`, an in-room `SetProfile`, and a
+  "Your profile" card on the desk. **Friend notes:** a request may carry an
+  optional ≤140-char note, shown to the recipient, with the disclosure sentence
+  written in-game and on the desk. **Safety reach:** Block and Report are now on
+  the player card, the friends panel and the door panel, not just the chat ⋯
+  menu. Two real defects were found by review and fixed: a `playerCard ↔
+  sharedSession` import cycle that only booted by import-order luck, and a
+  silence-rule hole where a blocked request's absence from the asker's own list
+  revealed the block (now a tombstone, so the asker's view is invariant).
+  `docs/address-plates-and-profiles.md` is new; the full review is in
+  `.cluster/papr-touch-home-social/review.md` and the delivery in `DELIVERY/`.
+  **Not verified in a browser or with two clients.** Before deploying: back up
+  `/data`. **Housekeeping owed:** delete `src/game/__tmp_dep.ts` and
+  `src/game/__tmp_mock_probe.test.ts` (inert scratch files; the sandbox refused
+  the delete), and note that a concurrent avatar-shape workstream has left
+  `polygon-clipping` declared but uninstalled, so `npm install` is needed before
+  the tree typechecks.
 - **Small fixes (2026-09-20, sixth pass).** Tech tree cards: the status tag no
   longer runs over the title (the heading row wraps), "Not yet in the game" is now
   "Soon" (screen readers still hear "not in the game yet"), and tags are a little
@@ -706,7 +774,7 @@ top of home markers and the quests-and-trinkets system. Start here.
   tokens in game URLs, logs, or persistent browser storage.
 - Signup links may expire; accepted account and world memberships do not depend
   on retaining an invitation link.
-- `PROTOCOL_VERSION` is 9. Bump it for wire-shape changes, not for the desk-only
+- `PROTOCOL_VERSION` is 11. Bump it for wire-shape changes, not for the desk-only
   navigation control. The `wear-design` room message (Phase D) was added
   without a bump, deliberately: it is purely additive — no existing shape
   changed, older clients simply never send it, and an older server ignores

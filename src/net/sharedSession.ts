@@ -11,6 +11,7 @@ import {
   setCaseTransport,
 } from '../game/cases';
 import {
+  getSelfAccount,
   getServerInside,
   presenceHeld,
   receiveEntryResult,
@@ -28,9 +29,12 @@ import { publishedLook } from '../game/dwellingLook';
 import { isInteriorActive } from '../world/activeScene';
 import { getWornDesign } from '../ui/avatarEditor/wardrobe';
 import { initializeSharedChat } from '../ui/sharedChat';
-import { handlePlayerCardResponse, setPlayerCardRequestHandler } from '../ui/playerCard';
+import { handlePlayerCardResponse, setPlayerCardRequestHandler, setPlayerCardSafetyHandlers } from '../ui/playerCard';
 import { getCurrentPageId } from '../world/streaming';
-import { getPlace, HOME_PLACE_ID } from '../world/places';
+import { allNeighborHomes, subscribeNeighborHomes } from '../world/neighborHomes';
+import { HOME_FALLBACK_PLACE } from '../world/homeSite';
+import { KEEP_HOME_LOT, resolveHomeLot } from '../world/neighborhood';
+import { getPlace, HOME_PLACE_ID, setHomePlace } from '../world/places';
 import { connect, type NetConnection } from './client';
 import { describeClose } from './closeReason';
 import { getOrCreatePassport } from './passport';
@@ -508,7 +512,7 @@ export async function initializeSharedSession(): Promise<void> {
       publishHome();
       const room = liveConnection;
       setGuestTransport({
-        requestFriend: (accountId) => room.sendFriendRequest(accountId),
+        requestFriend: (accountId: string, message?: string) => room.sendFriendRequest(accountId, message),
         answerFriend: (accountId, accept) => room.sendFriendAnswer(accountId, accept),
         removeFriend: (accountId) => room.sendFriendRemove(accountId),
         setHomePolicy: (policy) => room.sendSetHomePolicy(policy),
@@ -604,6 +608,9 @@ export function publishWornDesign(input: AvatarDesign | null): void {
  * there is no durable account behind a guest's Home to show anyone anyway.
  */
 export function publishHome(): void {
+  // The clump decides where a home belongs; settle that before announcing the
+  // spot, so the position we publish is the resolved one.
+  resolveHomeLotForSelf();
   const home = getPlace(HOME_PLACE_ID);
   // A guest has no account to hold a home, and saying so on every change of
   // house would be noise, not information.
@@ -617,6 +624,44 @@ export function publishHome(): void {
     parts: look.parts,
     building: look.building,
   });
+}
+
+/**
+ * Put this account's home where the clump says it belongs.
+ *
+ * The lot layout (world/neighborhood.ts) is per page and deterministic, so a
+ * home is placed by resolving against the homes already standing on the page
+ * rather than by syncing a lot number. The answer is written into the saved
+ * Home place, which is what a reload and every other client then read; the
+ * move itself republishes through the game-state change it causes, so there is
+ * exactly one place that sends `set-home`.
+ *
+ * No-op in solo play (no connection) and for guests (no durable account to
+ * hold a home). The anchors use the SPAWN as origin — the same fixed point the
+ * Home bookmark starts on, so a solo player's empty clump resolves to that
+ * point, untouched.
+ */
+function resolveHomeLotForSelf(): void {
+  if (!connection || selfIsGuest()) return;
+  const home = getPlace(HOME_PLACE_ID);
+  if (!home) return;
+  const page = getCurrentPageId();
+  const anchors = allNeighborHomes()
+    .filter((neighbor) => neighbor.page === page)
+    .map((neighbor) => ({
+      accountId: neighbor.accountId,
+      x: neighbor.place.x,
+      z: neighbor.place.z,
+    }));
+  const lot = resolveHomeLot({
+    selfAccountId: getSelfAccount(),
+    selfLot: { x: home.x, z: home.z },
+    anchors,
+    origin: HOME_FALLBACK_PLACE,
+    page,
+  });
+  if (lot === KEEP_HOME_LOT || lot === null) return;
+  setHomePlace(lot.x, lot.z);
 }
 
 /** What was last sent, so a change of house or spot is sent again and nothing else is. */
@@ -636,6 +681,34 @@ function republishHomeIfChanged(): void {
 }
 onGameStateChanged(republishHomeIfChanged);
 
+// THE ORDERING TRAP: neighbours only arrive after connect, one `onHomeAdd` at
+// a time, so the first publish can run against an empty list and leave two
+// homes on the spawn. Re-check every time the list changes — both clients
+// re-run the same pure rule and settle on the same lots without a round trip.
+subscribeNeighborHomes(resolveHomeLotForSelf);
+
+/**
+ * Block an account from this session: their chat and mail stop reaching you
+ * and their front door closes to you. This funnels into the same room message
+ * the chat ⋯ menu sends (`ClientMessage.Block`) and is silent by design — the
+ * blocked player is never told, and nothing about it is broadcast.
+ */
+export function blockAccount(accountId: string): void {
+  if (!accountId) return;
+  connection?.sendBlock(accountId);
+}
+
+/**
+ * File a safety report about a player, optionally with a line of details.
+ * `ReportIntent.messageId` is optional, so a report about a person — not one
+ * chat line — needs no message id; this is the same room message the chat ⋯
+ * menu uses (`ClientMessage.Report`).
+ */
+export function reportAccount(accountId: string, details?: string): void {
+  if (!accountId) return;
+  connection?.sendReport({ accountId, ...(details ? { details } : {}) });
+}
+
 /**
  * Ask the server for another player's card (avatar-and-identity.md §3). A
  * no-op in solo play — there is no one else's account to ask about — and the
@@ -648,7 +721,11 @@ export function requestPlayerCard(accountId: string): void {
 
 // `connection` is read fresh on every call, so this survives reconnects and
 // leaving/rejoining without needing to be re-registered per session.
+// Injecting the card's outgoing calls (rather than letting playerCard import
+// them from here) is what keeps this module a one-way dependency: see the note
+// on `setPlayerCardSafetyHandlers` in ui/playerCard.ts for the cycle it avoids.
 setPlayerCardRequestHandler(requestPlayerCard);
+setPlayerCardSafetyHandlers({ block: blockAccount, report: reportAccount });
 
 export function disconnectSharedSession(): void {
   leftOnPurpose = true;

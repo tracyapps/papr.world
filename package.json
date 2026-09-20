@@ -11,6 +11,7 @@
     "build": "npm run content:check && npm run styles:check && tsc && vite build",
     "build:web": "node tools/build-web.mjs",
     "content:check": "node tools/validate-conversations.mjs",
+    "data:backup": "node tools/backup-data.mjs",
     "dev": "vite --host 0.0.0.0",
     "docs:build": "node tools/build-reference.mjs",
     "edge:check": "tsc -p tsconfig.edge.json",
@@ -36,6 +37,7 @@
   "dependencies": {
     "@colyseus/sdk": "^0.17.43",
     "@types/three": "^0.181.0",
+    "polygon-clipping": "^0.15.7",
     "three": "^0.181.2",
     "vite": "^7.0.0"
   },

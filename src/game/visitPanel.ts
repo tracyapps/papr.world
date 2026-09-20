@@ -7,7 +7,8 @@
 // waits, and the answer is a sentence that stays on the panel.
 
 import { isGuestAccount } from '../../shared/src/index';
-import { openPlayerCardFor } from '../ui/playerCard';
+import { blockAccount, reportAccount } from '../net/sharedSession';
+import { buildFriendRequestNote, confirmBlock, openPlayerCardFor } from '../ui/playerCard';
 import { HOME_REACH } from '../world/homeSite';
 import {
   distanceToNeighborEdge,
@@ -41,6 +42,7 @@ let targetId = '';
 let opener: HTMLElement | null = null;
 let localMessage = '';
 let renderedActions = '';
+let friendForId = '';
 let lastTick = 0;
 
 const slot = { close: closeVisitPanel, element: () => panel };
@@ -75,6 +77,10 @@ function actionsFor(home: NeighborHome): ActionSpec[] {
     }
   }
   actions.push({ id: 'card', label: 'Their player card', quiet: true });
+  if (canBefriend) {
+    actions.push({ id: 'block', label: 'Block', quiet: true });
+    actions.push({ id: 'report', label: 'Report', quiet: true });
+  }
   return actions;
 }
 
@@ -113,6 +119,26 @@ function render(force = false) {
   if (!actionsHost) return;
 
   const actions = actionsFor(home);
+  const canBefriend = guestsAvailable() && !selfIsGuest() && !isGuestAccount(home.accountId);
+
+  // The optional note + the disclosure that must accompany the ask. Rebuilt
+  // only when the neighbor changes (or the ask becomes available again), so
+  // a half-typed note survives the gentle periodic refresh.
+  const friendHost = panel.querySelector<HTMLElement>('[data-visit-friend]');
+  if (friendHost) {
+    const canAdd = canBefriend && friendStateOf(home.accountId) === 'none';
+    friendHost.hidden = !canAdd;
+    if (canAdd && friendForId !== home.accountId) {
+      friendForId = home.accountId;
+      friendHost.replaceChildren(buildFriendRequestNote(`visit-${home.accountId}`).element);
+    } else if (!canAdd) {
+      friendForId = '';
+      friendHost.replaceChildren();
+    }
+  }
+  const safetyHint = panel.querySelector<HTMLElement>('[data-visit-safety-hint]');
+  if (safetyHint) safetyHint.hidden = !canBefriend;
+
   const key = JSON.stringify(actions);
   if (key === renderedActions && !force) return;
   renderedActions = key;
@@ -162,7 +188,9 @@ export function initializeVisitPanel() {
     <p class="seed-store-message" data-visit-summary></p>
     <p class="seed-store-message" data-visit-relation></p>
     <p class="seed-store-message" data-visit-message aria-live="polite"></p>
-    <div class="seed-shop-actions visit-actions" data-visit-actions></div>`;
+    <div class="visit-friend" data-visit-friend hidden></div>
+    <div class="seed-shop-actions visit-actions" data-visit-actions></div>
+    <p class="visit-safety-hint" data-visit-safety-hint hidden>Blocking is quiet and lasting: it stops their messages to you and closes your door to them. It is not the same as asking a visitor to leave.</p>`;
   app.append(panel);
 
   prompt = document.createElement('div');
@@ -186,10 +214,25 @@ export function initializeVisitPanel() {
     const home = getNeighborHome(targetId);
     if (!act || !home) return;
     if (act === 'go') tryGo(home);
-    else if (act === 'friend-add') requestFriend(home.accountId);
+    else if (act === 'friend-add') {
+      const note = panel?.querySelector<HTMLInputElement>('.friend-request-note-input')?.value.trim();
+      requestFriend(home.accountId, note || undefined);
+    }
     else if (act === 'friend-accept') answerFriend(home.accountId, true);
     else if (act === 'friend-decline') answerFriend(home.accountId, false);
     else if (act === 'card') openPlayerCardFor({ accountId: home.accountId, name: home.name, drawingKey: '' });
+    else if (act === 'block') {
+      if (confirmBlock(home.name)) {
+        blockAccount(home.accountId);
+        localMessage = 'You will not see their messages any more.';
+        render(true);
+      }
+    }
+    else if (act === 'report') {
+      reportAccount(home.accountId);
+      localMessage = 'Report sent. Thank you for telling us.';
+      render(true);
+    }
   });
 
   registerGuestPanel(slot);
@@ -213,6 +256,7 @@ export function closeVisitPanel(): boolean {
   open = false;
   targetId = '';
   renderedActions = '';
+  friendForId = '';
   render();
   opener?.focus();
   opener = null;

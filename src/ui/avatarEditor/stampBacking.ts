@@ -58,6 +58,7 @@ export function stampWouldCrop(design: AvatarDesign, stamp: DesignStamp): boolea
   svg.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden;opacity:0');
   const path = document.createElementNS(SVG_NS, 'path');
   path.setAttribute('d', silhouettePathFor(design));
+  if (design.silhouette === 'custom') path.setAttribute('fill-rule', 'evenodd');
   svg.appendChild(path);
   document.body.appendChild(svg);
 

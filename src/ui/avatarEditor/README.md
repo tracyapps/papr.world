@@ -10,10 +10,15 @@ here, that is the seam you actually want.
 
 
 1. **Shape** — searchable/sortable grid of cutout shapes. The first tile is
-   always **"Draw your avatar"** (big question mark). Search matches label,
-   category, and each shape's `keywords`.
-2. **Outline** *(custom only)* — draw the cutout edge, confirm ("Use this
-   shape"), or go back to the grid.
+   always **"Draw your avatar"** (big question mark), then **My shapes**
+   (every drawn shape the player has used; edit or delete each), then the
+   ready-made shapes. Search matches label, category, and each shape's
+   `keywords` — and a saved shape's name.
+2. **Outline** *(custom only)* — the shape editor (`shapeEditor.ts`): a large
+   sheet, a pencil, and movable points. See "Drawing your own shape" below.
+   Reached from "Draw your avatar", from a My shapes tile's **Edit**, and
+   later from the studio's **"Edit shape…"** (which keeps paper, stamps and
+   strokes).
 3. **Studio** — a full-screen workshop. Paper stack on the left, the cutout
    on a work table in the middle, a tool bench on the right with three tabs:
    **Faces** (stamps that clip to the cutout), **Arms & hair** (stamps behind
@@ -99,6 +104,34 @@ npm run avatar:preview   # PNG of whole composed avatars — checks layering
 The compilers hardcode matching numbers (they are `.mjs` tools and cannot
 import the TS), and `shapes.test.ts` fails if the two ever drift apart.
 
+## Drawing your own shape
+
+A shape is a stack of **pieces** (`CustomShape` in `shared/`). Each piece is a
+closed loop of movable points that either **adds** to the shape or **cuts out**
+of it, applied in order (union / difference via `polygon-clipping`, so holes,
+islands and overlaps just work). There is no limit on line length and no
+one-stroke rule: a stroke starting at the last point of the piece just drawn
+carries it on, ending on the first point closes it, and any other stroke is a
+new piece. Limits are on the *result* (`maxShapePieces` 12, `maxShapeAnchors`
+600), never on how long a line the player draws.
+
+- **Pencil** fits the drawn line to a few points (Detail setting: fewer /
+  balanced / more; sharp turns become corners). **Edit points** drags points,
+  drags whole pieces, double-click an edge to add a point, double-click a point
+  to swap corner/smooth. Curves are auto-smoothed (no Bezier handles).
+- Keyboard and touch are first-class: oval/square/triangle starters, every point
+  is a focusable control (arrows, Shift for 5x, Enter = corner/smooth, Delete),
+  buttons for every action, ≥20px grab radius for touch, Ctrl/Cmd+Z, live-region
+  announcements. Subtract pieces are dashed and hatched, not just a colour.
+- The design stores `customShape` (pieces) *and* the legacy `customOutline`
+  (largest loop, ≤300 pts) so old clients still draw something. No protocol bump:
+  the field is additive and old clients ignore it. Even-odd fill is used for
+  custom silhouettes only (`fillRuleFor` in `render.ts`).
+- **My shapes** is device-local (`pp.shapes.v1`, max 40). "Use this shape"
+  keeps the shape (renaming/deleting is in the grid); every design carries its
+  own copy, so deleting a saved shape never changes a look. The unfinished
+  drawing is kept in `pp.shapes.draft.v1` and offered again from the draw tile.
+
 ## What's here
 
 - `shapeTypes.ts` — `SilhouetteTemplate` type + category order.
@@ -106,8 +139,12 @@ import the TS), and `shapes.test.ts` fails if the two ever drift apart.
 - `stampTypes.ts` — `StampTemplate`, roles, and the `on`/`behind` layer.
 - `stamps.generated.ts` — GENERATED stamp data. Edit assets, not this.
 - `catalog.ts` — papers, crayons, brushes; re-exports shapes and stamps.
+- `shapeGeometry.ts` — pure shape maths: curves, union/subtract, pencil
+  fitting, point edits, hit testing, starters. Heavily tested.
+- `shapeEditor.ts` — the drawing/editing screen (state, pointer + keyboard).
+- `shapeInventory.ts` — My shapes + the unfinished-drawing draft (localStorage).
 - `render.ts` — pure design → SVG string; `silhouettePathFor` resolves
-  template keys *and* drawn custom outlines. Owns the layer order: behind
+  template keys, drawn shapes (`customShape`) *and* legacy custom outlines. Owns the layer order: behind
   stamps (unclipped) → cut edge → clipped paper, pattern, on stamps,
   strokes.
 - `stampBacking.ts` — decides, by hit-testing the real cutout path, whether
@@ -141,7 +178,7 @@ Still open: wardrobe UI (Phase C) and designs over the wire (Phase D).
 
 - Templates are the accessible path — a full avatar with zero drawing.
 - Vector strokes only; rasters never enter the data model.
-- Collision preset comes from the template mapping (custom outlines default
+- Collision preset comes from the template mapping (custom shapes default
   to `medium`), never measured from the art — a player who stamps on six
   arms does not get a wider hitbox.
 - Stamps travel as a catalog key plus five numbers. Like silhouettes, the

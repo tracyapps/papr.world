@@ -112,7 +112,8 @@ In the Railway service, set:
 | --- | --- | --- |
 | `PP_CORS_ORIGIN` | `https://papr.world` | The exact site origin, no trailing slash. Leaving it unset means "any origin", which is fine locally and wrong in public. |
 | `PP_REVIEWER_TOKEN` | `openssl rand -base64 32` | Opens the **feedback** desk at `?review=1`. |
-| `PP_MODERATION_TOKEN` | a *different* `openssl rand -base64 32` | Opens the **safety report** queue. Deliberately not the same token — see "Two tokens" below. |
+| `PP_MODERATION_TOKEN` | a *different* `openssl rand -base64 32` | Opens the **safety report** queue. Deliberately not the same token — see the token note below. |
+| `PP_BACKUP_TOKEN` | a *third*, different `openssl rand -base64 32` | Opens `GET /admin/backup`, a read-only snapshot of the whole data directory. Unset closes it. See `data-backups.md`. |
 
 `PORT` is injected by Railway; don't set it.
 
@@ -122,6 +123,7 @@ on every boot, and one of those lines should still be a warning:
 ```
 removal: DISABLED — PAPR_OWNER_ACCOUNT is unset, nobody can remove anyone, guests allowed
 safety reports: queued, /review/reports needs PP_MODERATION_TOKEN
+data backups: /admin/backup is CLOSED (PP_BACKUP_TOKEN unset) — deploy-time copies still work locally
 CORS: pinned to https://papr.world
 ```
 
@@ -281,6 +283,7 @@ pencil-and-paper server listening on port 8080
 room "neighborhood" ready (max 16) — /health, POST /account, feedback + review API
 removal: enabled — owner account 1a2b3c4d…, guests refused
 safety reports: queued, /review/reports needs PP_MODERATION_TOKEN
+data backups: /admin/backup is CLOSED (PP_BACKUP_TOKEN unset) — deploy-time copies still work locally
 CORS: pinned to https://papr.world
 ```
 
@@ -406,10 +409,13 @@ build variable — the game still will not connect until step 3 is right.
 
 ## Things that will bite
 
-**Two tokens, on purpose.** `PP_REVIEWER_TOKEN` opens product feedback;
-`PP_MODERATION_TOKEN` opens safety reports. They are separate so you can hand
-somebody bug triage without also handing them "who reported whom". Neither
-queue ever appears in the other's export.
+**Three tokens, on purpose.** `PP_REVIEWER_TOKEN` opens product feedback;
+`PP_MODERATION_TOKEN` opens safety reports; `PP_BACKUP_TOKEN` opens the data
+snapshot. They are separate so you can hand somebody bug triage without also
+handing them "who reported whom", and can hand backup access to somebody who
+triages nothing at all — a full backup is the most sensitive download the server
+has, because it carries every profile, letter, report and design at once. No
+queue ever appears in another's export.
 
 **The volume, again.** It is worth checking twice. Two different ways it goes
 wrong: not mounted at all (the service looks completely healthy and discards
@@ -428,9 +434,17 @@ tear for exactly this reason.
 instances will corrupt saves. If you outgrow one process, that is a real
 piece of work, not a slider.
 
-**Back up before a protocol change.** `PROTOCOL_VERSION` is 8. Bumping it
-refuses older clients on purpose — but download `/data` first if a save-shape
-change is involved.
+**Back up before a shape change, not before a deploy.** `/data` lives on a
+Railway volume and survives redeploys, so an ordinary deploy needs no copy and
+never needs a re-import — the files are simply still there. What wants a copy is
+a change to the *shape* of what is on disk (`SAVE_VERSION`, or any store's
+fields): `RoomStore.load` refuses a save it does not recognise and leaves the
+file alone, which is the right call but means a bad migration presents as "the
+world is empty" rather than as an error. "Back up" is one command — see
+`data-backups.md`.
+
+(`PROTOCOL_VERSION` is 11, and bumping it is a different thing: it refuses older
+*clients* on purpose and touches no data at all.)
 
 **Secrets stay on Railway.** `PP_MODERATION_TOKEN` and `PP_REVIEWER_TOKEN`
 never go in Vercel, in a URL, in the repository, or in a tester invitation.

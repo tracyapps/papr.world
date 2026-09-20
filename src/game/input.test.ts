@@ -12,7 +12,10 @@ vi.mock('./camera', () => ({
   adjustCameraZoom: () => {},
   applyGamepadLook: () => {},
 }));
-vi.mock('./settings', () => ({ getSetting: () => 'grab-world' }));
+// `onSettingsChanged` is part of the mock because input.ts now imports the
+// touch overlay, which subscribes to settings at module scope; a mock missing
+// it would throw "not a function" inside input's own tests.
+vi.mock('./settings', () => ({ getSetting: () => 'grab-world', onSettingsChanged: () => {} }));
 
 const { initializeInput } = await import('./input');
 

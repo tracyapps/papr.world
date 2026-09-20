@@ -1,5 +1,8 @@
 import { applyDeadzone } from '../core/math';
 import { addYaw, adjustCameraPitch, adjustCameraZoom, applyGamepadLook } from './camera';
+// The pinch arithmetic is pure and lives with the rest of the touch geometry;
+// this module owns *when* it is applied, not the numbers themselves.
+import { pinchZoomDelta, twoPointerDistance } from './touchControls';
 import { getSetting } from './settings';
 
 // Keyboard, pointer, wheel, and gamepad input.
@@ -54,6 +57,23 @@ const input: InputState = {
   right: false,
 };
 
+/**
+ * A virtual stick any on-screen control can drive.
+ *
+ * The touch move pad is the only caller today, but it deliberately does not
+ * live in the touch module: `getMovementInput` has to stay the single place
+ * movement is summed from every source — keyboard, gamepad, and now a thumb —
+ * so every consumer keeps reading one function and no source can be applied
+ * twice or forgotten. main.ts only hands the setter across; the sum is here.
+ */
+const virtualMovement: MovementInput = { x: 0, y: 0 };
+
+/** Set the virtual stick's position, in the same -1..1 space the keys use. */
+export function setVirtualMovement(movement: MovementInput) {
+  virtualMovement.x = movement.x;
+  virtualMovement.y = movement.y;
+}
+
 const keys: Record<string, keyof InputState> = {
   ArrowUp: 'forward',
   KeyW: 'forward',
@@ -70,6 +90,38 @@ let lastPointerX = 0;
 let lastPointerY = 0;
 let orbitButton: 0 | 1 | 2 | null = null;
 /**
+ * Which pointer owns the orbit.
+ *
+ * A mouse only ever has one, but every finger is its own pointer: without
+ * this, a second finger arriving mid-drag handed its coordinates to the first
+ * finger's gesture and the camera snapped between them. Core builds have two
+ * hands and a tablet has ten fingers; the camera follows exactly one of them.
+ */
+let orbitPointerId: number | null = null;
+/**
+ * Every pointer currently down on the world, keyed by `pointerId`.
+ *
+ * Kept so the *number* of fingers can be known — which is the whole of multi-
+ * touch here: one finger orbits, two pinch-zoom, three or more are ignored
+ * rather than fought over. A pointer leaves this map on release, on cancel,
+ * on window blur and on a HUD widget stealing its capture, so it can never
+ * quietly accumulate.
+ */
+const trackedPointers = new Map<number, { x: number; y: number }>();
+/**
+ * Finger span at the last pinch frame, or null when no two-finger gesture is
+ * running. Null is what makes the first pinch frame a pure baseline rather
+ * than a jump computed against a stale distance from a previous pinch.
+ */
+let pinchDistance: number | null = null;
+
+/** The current span of exactly two pointers, or null if there are not two. */
+function currentPinchDistance(): number | null {
+  if (trackedPointers.size !== 2) return null;
+  const [first, second] = [...trackedPointers.values()];
+  return twoPointerDistance(first.x, first.y, second.x, second.y);
+}
+/**
  * A left press that is still eligible to become a click.
  *
  * `pointerId` is recorded so a release can prove it belongs to *this* press.
@@ -83,7 +135,30 @@ function clearPointerGestures() {
   pendingPrimary = null;
   isOrbiting = false;
   orbitButton = null;
+  orbitPointerId = null;
+  trackedPointers.clear();
+  pinchDistance = null;
   document.documentElement.classList.remove('is-camera-orbiting');
+}
+
+/**
+ * Forget everything one pointer was doing, leaving the others alone.
+ *
+ * This is the multi-touch half of `clearPointerGestures`. A blanket clear on
+ * every pointer's release is fine while there is only ever one pointer, but
+ * with a thumb on the move pad it would mean letting go of the pad also
+ * dropped the finger that was orbiting the camera.
+ */
+function dropPointer(pointerId: number) {
+  trackedPointers.delete(pointerId);
+  if (pendingPrimary?.pointerId === pointerId) pendingPrimary = null;
+  if (orbitPointerId === pointerId) {
+    isOrbiting = false;
+    orbitButton = null;
+    orbitPointerId = null;
+    document.documentElement.classList.remove('is-camera-orbiting');
+  }
+  pinchDistance = currentPinchDistance();
 }
 
 /**
@@ -149,6 +224,12 @@ export function getMovementInput(): MovementInput {
   if (input.back) movement.y -= 1;
   if (input.right) movement.x += 1;
   if (input.left) movement.x -= 1;
+
+  // The touch pad. Added before the clamp below like every other source, so a
+  // thumb held at full throw and a held arrow key still sum to a single unit
+  // of speed rather than doubling it.
+  movement.x += virtualMovement.x;
+  movement.y += virtualMovement.y;
 
   const gamepads = navigator.getGamepads?.() ?? [];
   for (const gamepad of gamepads) {
@@ -311,16 +392,42 @@ export function initializeInput(callbacks: InputCallbacks) {
   window.addEventListener('pointerdown', (event) => {
     if (isFormElementEvent(event)) return;
 
-    // A press on HUD chrome is not a world gesture. Recording it anyway is
-    // what let a panel press become a world click later.
+    // A press on HUD chrome (a panel, the touch pad, an on-screen button) is
+    // not a world gesture. It must not begin one — but it must not end
+    // somebody else's either. A thumb on the move pad while a finger orbits
+    // the camera is the ordinary way to play on a tablet, and clearing every
+    // gesture here would kill the camera each time the other hand moved.
     if (!callbacks.isWorldTarget(event)) {
-      clearPointerGestures();
+      dropPointer(event.pointerId);
       return;
     }
+
+    trackedPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    // The second finger makes this a pinch, and a pinch is not also an orbit —
+    // otherwise the camera yaws while it zooms. Whatever the first finger had
+    // begun is ended here on purpose; it can begin again once the pinch is
+    // over. Three or more fingers are counted but otherwise ignored, so an
+    // accidental palm contact cannot steer anything.
+    if (trackedPointers.size > 1) {
+      isOrbiting = false;
+      orbitButton = null;
+      orbitPointerId = null;
+      pendingPrimary = null;
+      document.documentElement.classList.remove('is-camera-orbiting');
+      pinchDistance = currentPinchDistance();
+      return;
+    }
+
+    // One finger: no pinch in progress, so the baseline is forgotten. Leaving
+    // it set would make the first frame of the *next* pinch compute a jump
+    // against a distance from the last one.
+    pinchDistance = null;
 
     if (event.button === 2 || event.button === 1) {
       isOrbiting = true;
       orbitButton = event.button;
+      orbitPointerId = event.pointerId;
       document.documentElement.classList.add('is-camera-orbiting');
       lastPointerX = event.clientX;
       lastPointerY = event.clientY;
@@ -338,6 +445,7 @@ export function initializeInput(callbacks: InputCallbacks) {
       if (callbacks.shouldOrbitWithPrimary(event)) {
         isOrbiting = true;
         orbitButton = 0;
+        orbitPointerId = event.pointerId;
         document.documentElement.classList.add('is-camera-orbiting');
       }
     }
@@ -346,14 +454,9 @@ export function initializeInput(callbacks: InputCallbacks) {
   window.addEventListener('pointerup', (event) => {
     const claimed = pendingPrimary;
 
-    // Clear first, unconditionally. Whatever happens below, this press is
-    // over — an early return must never leave it pending.
-    if (claimed?.pointerId === event.pointerId) pendingPrimary = null;
-    if (orbitButton === event.button) {
-      isOrbiting = false;
-      orbitButton = null;
-      document.documentElement.classList.remove('is-camera-orbiting');
-    }
+    // Clear first, unconditionally, and only for this pointer — the other
+    // finger's gesture is none of this pointer's business.
+    dropPointer(event.pointerId);
 
     if (event.button !== 0) return;
     if (!claimed || claimed.pointerId !== event.pointerId) return;
@@ -365,7 +468,10 @@ export function initializeInput(callbacks: InputCallbacks) {
     callbacks.onPrimaryAction(event);
   }, { capture: true });
 
-  window.addEventListener('pointercancel', clearPointerGestures, { capture: true });
+  // A cancelled pointer ends only its own gesture. Touch pointers are
+  // cancelled the moment the browser claims the gesture (a system swipe, a
+  // call arriving), and one finger's cancellation must not end the other's.
+  window.addEventListener('pointercancel', (event) => dropPointer(event.pointerId), { capture: true });
 
   // A capture handed to a HUD widget mid-gesture means the world gesture is
   // over, however it started.
@@ -375,6 +481,22 @@ export function initializeInput(callbacks: InputCallbacks) {
   window.addEventListener('blur', clearPointerGestures);
 
   window.addEventListener('pointermove', (event) => {
+    const tracked = trackedPointers.get(event.pointerId);
+    if (tracked) {
+      tracked.x = event.clientX;
+      tracked.y = event.clientY;
+    }
+
+    // Reap a ghost pointer. A touch that ends off-window never delivers its
+    // `pointerup`, and one stale entry would leave `trackedPointers.size` at 2
+    // forever — turning every later single-finger drag into a pinch, so the
+    // camera quietly stops turning until a reload. A tracked pointer moving
+    // with no button held is no longer down; the same self-heal idea as
+    // `pendingPrimary` just below.
+    if (tracked && event.buttons === 0) {
+      dropPointer(event.pointerId);
+    }
+
     // Self-heal: the pointer is moving with no left button held, so any press
     // we are still holding was released somewhere we never heard about.
     // Cheaper and more reliable than trying to enumerate the ways that
@@ -384,6 +506,21 @@ export function initializeInput(callbacks: InputCallbacks) {
     }
 
     if (callbacks.isPointerCaptured()) return;
+
+    // Two fingers on the world: pinch to zoom, and nothing else. The orbit was
+    // already ended when the second finger landed, so there is no camera drag
+    // to continue here. The first pinch frame only records the span — comparing
+    // against a distance from a previous gesture would jump the camera.
+    if (trackedPointers.size > 1) {
+      const distance = currentPinchDistance();
+      if (distance !== null) {
+        if (pinchDistance !== null) {
+          adjustCameraZoom(pinchZoomDelta(pinchDistance, distance));
+        }
+        pinchDistance = distance;
+      }
+      return;
+    }
 
     if (pendingPrimary) {
       const distance = Math.hypot(
@@ -397,11 +534,15 @@ export function initializeInput(callbacks: InputCallbacks) {
     }
 
     if (!isOrbiting) return;
+    // Only the finger that began the orbit may steer it; any other pointer's
+    // movement is not the camera's.
+    if (orbitPointerId !== event.pointerId) return;
     // If the active press was released off-window, stop orbiting rather than
     // sticking to the cursor.
     if (orbitButton === null || (event.buttons & buttonMask(orbitButton)) === 0) {
       isOrbiting = false;
       orbitButton = null;
+      orbitPointerId = null;
       document.documentElement.classList.remove('is-camera-orbiting');
       return;
     }

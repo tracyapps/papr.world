@@ -8,6 +8,7 @@
 
 import { isDwellingPartId, type DwellingPartId } from '../sim/catalogs/dwellings';
 import { HOME_BODY_RADIUS, HOME_REACH, homeDoorstep, homePosition, homeSolids, type HomeSolid } from './homeSite';
+import { stableHash } from './neighborhood';
 
 export type NeighborHome = {
   accountId: string;
@@ -15,6 +16,13 @@ export type NeighborHome = {
   name: string;
   /** The Home place they published; the house stands beside it. */
   place: { x: number; z: number };
+  /**
+   * The page that Home place is on. Kept because a neighbourhood is per page:
+   * the lot layout (world/neighborhood.ts) may only take the homes standing on
+   * the page it is laying out, or a clump would be dodging people it will never
+   * see. '' when an older marker did not carry one.
+   */
+  page: string;
   parts: DwellingPartId[];
   /** The part going up right now (drawn as scaffolding), if any. */
   building: DwellingPartId | null;
@@ -28,6 +36,7 @@ export type NeighborHomeInput = {
   name: string;
   x: number;
   z: number;
+  page?: string;
   parts?: readonly string[];
   building?: string;
   open?: boolean;
@@ -48,6 +57,7 @@ export function neighborHomeFrom(input: NeighborHomeInput): NeighborHome | null 
     accountId: input.accountId,
     name: input.name || 'A neighbor',
     place: { x: input.x, z: input.z },
+    page: typeof input.page === 'string' ? input.page : '',
     parts: [...new Set(parts)],
     building: isDwellingPartId(input.building) ? input.building : null,
     open: input.open === true,
@@ -130,4 +140,38 @@ export function signWords(home: NeighborHome): { heading: string; line: string }
   if (home.open) return { heading: 'OPEN HOUSE', line: 'come on in' };
   if (home.parts.length === 0) return { heading: 'BUILDING A HOME', line: 'a new neighbor, papering in' };
   return { heading: 'HOME', line: '' };
+}
+
+// ---- The address plate ------------------------------------------------------
+
+/** How many numbers the street runs to. Two digits fit a small plate, and a
+ *  collision only ever means two homes share a number nobody has to file by. */
+const ADDRESS_NUMBERS = 99;
+
+/**
+ * The plate beside a home's door: who lives there, and the number a passer-by
+ * can point at. `accountId` travels with it so a click on the plate can open
+ * that player's card (`ui/playerCard.ts` `openPlayerCardFor`), which is a
+ * different thing from the door panel the house itself opens.
+ */
+export type HomeAddress = {
+  accountId: string;
+  name: string;
+  /** 1 to 99, derived from the account id. */
+  number: number;
+  /** The plate in one line of words, e.g. `No. 12 · Wren`. */
+  text: string;
+};
+
+/**
+ * A home's address plate. The number is derived from the account id rather
+ * than assigned, so every client draws the same one with nothing stored,
+ * nothing synced and no lot record to look up, and it survives a rename: the
+ * house keeps its number when its owner changes their name. Same trick as the
+ * avatars and the lots — derived, never exchanged.
+ */
+export function homeAddress(home: { accountId: string; name: string }): HomeAddress {
+  const name = home.name || 'A neighbor';
+  const number = 1 + (stableHash(home.accountId) % ADDRESS_NUMBERS);
+  return { accountId: home.accountId, name, number, text: `No. ${number} · ${name}` };
 }

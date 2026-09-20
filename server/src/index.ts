@@ -27,10 +27,12 @@ import {
   type ModerationStatus,
 } from '../../shared/src/index';
 import { PaperRoom } from './rooms/PaperRoom';
-import { accounts, feedbackStore, mail, moderation, soloMigrations, accountTech, avatarDesigns, OWNER_ACCOUNT } from './stores';
+import { accounts, feedbackStore, mail, moderation, soloMigrations, accountTech, avatarDesigns, profiles, OWNER_ACCOUNT } from './stores';
 import { createAdminHandlers, readAdminConfig } from './admin';
 import { createAccountIdentityHandlers } from './accountIdentity';
 import { createAvatarDesignHandlers } from './avatarDesignHandlers';
+import { createBackupHandlers } from './backupHandlers';
+import { createProfileHandlers } from './profileHandlers';
 import { database } from './runtime';
 
 const port = Number(process.env.PORT ?? 2567);
@@ -52,6 +54,13 @@ const accountIdentity = createAccountIdentityHandlers({
 });
 const avatarDesignApi = createAvatarDesignHandlers({
   database, designs: avatarDesigns, clerk: clerkConfig,
+});
+const backupApi = createBackupHandlers({
+  dataDir: process.env.PP_DATA_DIR ?? 'data',
+  token: process.env.PP_BACKUP_TOKEN,
+});
+const profileApi = createProfileHandlers({
+  database, profiles, clerk: clerkConfig,
 });
 
 function withCors(req: IncomingMessage, res: ServerResponse): void {
@@ -435,6 +444,12 @@ const gameServer = new Server({
     app.get('/avatar-designs/:id', (req: Request, res: Response) => {
       void avatarDesignApi.fetchById(req, res);
     });
+    app.get('/account/profile', (req: Request, res: Response) => {
+      void profileApi.get(req, res);
+    });
+    app.post('/account/profile', (req: Request, res: Response) => {
+      void profileApi.update(req, res);
+    });
     app.post('/feedback', (req: Request, res: Response) => {
       void handleFeedback(req, res);
     });
@@ -452,6 +467,11 @@ const gameServer = new Server({
     app.get('/review/reports/export', handleReportExport);
     app.patch('/review/reports/:id', (req: Request, res: Response) => {
       void handleReportUpdate(req, res);
+    });
+    // A whole-directory snapshot, read-only, behind its own token. See
+    // backupHandlers.ts for why it is a third token rather than the moderator's.
+    app.get('/admin/backup', (req: Request, res: Response) => {
+      backupApi.download(req, res);
     });
   },
 });
@@ -483,6 +503,11 @@ console.log(
   process.env.PP_MODERATION_TOKEN
     ? 'safety reports: queued, /review/reports needs PP_MODERATION_TOKEN'
     : 'safety reports: still queued to disk, but /review/reports is CLOSED (PP_MODERATION_TOKEN unset)',
+);
+console.log(
+  process.env.PP_BACKUP_TOKEN
+    ? 'data backups: GET /admin/backup is open (PP_BACKUP_TOKEN set)'
+    : 'data backups: /admin/backup is CLOSED (PP_BACKUP_TOKEN unset) — deploy-time copies still work locally',
 );
 console.log(
   corsOrigin === '*'

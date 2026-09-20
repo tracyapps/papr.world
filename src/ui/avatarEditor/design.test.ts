@@ -242,3 +242,64 @@ describe('stroke media', () => {
     expect(designToSvg(design)).toContain('stroke-opacity="1"');
   });
 });
+
+describe('a drawn cutout with editable pieces', () => {
+  const ring = { op: 'add' as const, points: [20, 20, 100, 20, 100, 120, 20, 120], sharp: [0, 1, 2, 3] };
+  const hole = { op: 'subtract' as const, points: [50, 50, 70, 50, 70, 80, 50, 80], sharp: [0, 1, 2, 3] };
+
+  function drawn(pieces: Array<typeof ring | typeof hole>, extra: Record<string, unknown> = {}) {
+    return {
+      version: 1 as const,
+      id: 'shape-1',
+      name: 'drawn',
+      silhouette: 'custom',
+      customShape: { pieces },
+      paper: { color: 'kraft', pattern: 'plain' },
+      strokes: [],
+      preset: 'medium' as const,
+      sharedOnCard: false,
+      createdAt: 1,
+      updatedAt: 1,
+      ...extra,
+    };
+  }
+
+  it('cuts along the joined pieces, with a hole where one was subtracted', async () => {
+    const { sanitizeAvatarDesign } = await import('../../../shared/src/index');
+    const { silhouettePathFor, designToSvg } = await import('./render');
+    const design = sanitizeAvatarDesign(drawn([ring, hole]))!;
+    const path = silhouettePathFor(design);
+    expect(path.match(/M/g)).toHaveLength(2);
+    const svg = designToSvg(design);
+    expect(svg).toContain('fill-rule="evenodd"');
+    expect(svg).toContain('clip-rule="evenodd"');
+  });
+
+  it('prefers the editable shape over the plain outline beside it', async () => {
+    const { sanitizeAvatarDesign } = await import('../../../shared/src/index');
+    const { silhouettePathFor } = await import('./render');
+    const design = sanitizeAvatarDesign(drawn([ring], { customOutline: [1, 1, 5, 1, 3, 4] }))!;
+    expect(silhouettePathFor(design)).toContain('20');
+    expect(silhouettePathFor(design)).not.toContain('M1 1');
+  });
+
+  it('still cuts a design from before shapes could be edited', async () => {
+    const { sanitizeAvatarDesign } = await import('../../../shared/src/index');
+    const { silhouettePathFor, designToSvg } = await import('./render');
+    const old = sanitizeAvatarDesign({ ...drawn([ring]), customShape: undefined, customOutline: [10, 10, 90, 10, 50, 100] })!;
+    expect(silhouettePathFor(old)).toBe('M10 10 L90 10 L50 100 Z');
+    expect(designToSvg(old)).toContain('fill-rule="evenodd"');
+  });
+
+  it('keeps holes as holes: the hole loop turns the other way from the outer one', async () => {
+    const { resolveShape, ringArea } = await import('./shapeGeometry');
+    const multi = resolveShape({ pieces: [ring, hole] });
+    const signed = (r: Array<[number, number]>) => {
+      let sum = 0;
+      for (let i = 0; i + 1 < r.length; i++) sum += r[i]![0] * r[i + 1]![1] - r[i + 1]![0] * r[i]![1];
+      return sum;
+    };
+    expect(Math.sign(signed(multi[0]![0]!))).toBe(-Math.sign(signed(multi[0]![1]!)));
+    expect(ringArea(multi[0]![1]!)).toBeCloseTo(600, 0);
+  });
+});

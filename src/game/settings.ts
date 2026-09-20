@@ -20,6 +20,16 @@ export type CameraDragMode = 'grab-world' | 'move-camera';
  */
 export type ToolbarStyle = 'full' | 'compact';
 
+/**
+ * Whether the on-screen touch controls are shown:
+ * - 'auto': on when the primary pointer is coarse (`pointer: coarse`), which
+ *   is the honest test for a tablet with no mouse attached. Default.
+ * - 'on': shown regardless — for a touchscreen whose pointer query lies, or a
+ *   tablet being driven with a mouse.
+ * - 'off': never shown, for a tablet being used with a keyboard.
+ */
+export type TouchControlsMode = 'auto' | 'on' | 'off';
+
 export type Settings = {
   /**
    * What a camera drag means:
@@ -70,6 +80,13 @@ export type Settings = {
   hudScale: number;
   /** Full-height rail or compact floating palette. See `ToolbarStyle`. */
   toolbarStyle: ToolbarStyle;
+  /**
+   * On-screen move pad, Act/Rotate and zoom buttons. See `TouchControlsMode`.
+   * The gestures themselves (one-finger orbit, two-finger pinch) are not
+   * gated by this — they are the same pointer events a mouse already sends,
+   * and turning them off would mean turning off dragging.
+   */
+  touchControls: TouchControlsMode;
   /** The first-run "this is an early alpha" card has been read. */
   alphaNoticeSeen: boolean;
 };
@@ -94,6 +111,7 @@ const DEFAULTS: Settings = {
   uiTextScale: 1,
   hudScale: 1,
   toolbarStyle: 'full',
+  touchControls: 'auto',
   alphaNoticeSeen: false,
 };
 
@@ -137,6 +155,13 @@ function load(): Settings {
       }
       if (parsed.toolbarStyle === 'full' || parsed.toolbarStyle === 'compact') {
         settings.toolbarStyle = parsed.toolbarStyle;
+      }
+      // Validated the same way the other enums are: a stored value that is
+      // not one of the three is ignored rather than trusted, so a hand-edited
+      // or half-written localStorage entry falls back to 'auto' instead of
+      // leaving the overlay in a state no code path can reason about.
+      if (parsed.touchControls === 'auto' || parsed.touchControls === 'on' || parsed.touchControls === 'off') {
+        settings.touchControls = parsed.touchControls;
       }
       if (typeof parsed.alphaNoticeSeen === 'boolean') settings.alphaNoticeSeen = parsed.alphaNoticeSeen;
     }

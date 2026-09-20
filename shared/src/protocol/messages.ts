@@ -11,6 +11,7 @@
 
 import type { AccountInventory, AvatarRef, MailItem } from './state';
 import type { AvatarDesign } from './avatarDesign';
+import type { ProfileRelationship, ProfileSocialLink, ProfileUpdate } from './profile';
 import type {
   AskToLeaveIntent,
   EnterHomeIntent,
@@ -108,6 +109,12 @@ export const ClientMessage = {
   FriendRemove: 'friend-remove',
   /** Set who may come through my front door. */
   SetHomePolicy: 'set-home-policy',
+  /**
+   * Set my own profile — bio, social links, and each field's audience. A
+   * partial update: send only what changed, the server merges the rest. See
+   * `profile.ts` for the shape and the visibility rules.
+   */
+  SetProfile: 'set-profile',
   /** Go in, or knock: the server decides which. My own home always works. */
   EnterHome: 'enter-home',
   /** Step back out of the home I am inside. */
@@ -220,6 +227,13 @@ export type PlayerCardIntent = {
   accountId: string;
 };
 
+/**
+ * A partial profile edit — only the fields the client wants to change. The
+ * server merges the rest from the stored profile; see `sanitizeProfileUpdate`
+ * in `profile.ts`, which this type mirrors field-for-field.
+ */
+export type SetProfileIntent = ProfileUpdate;
+
 export type SetHomeIntent = {
   x: number;
   z: number;
@@ -244,6 +258,7 @@ export type ClientPayloads = {
   [ClientMessage.WearDesign]: WearDesignIntent;
   [ClientMessage.RequestPlayerCard]: PlayerCardIntent;
   [ClientMessage.SetHome]: SetHomeIntent;
+  [ClientMessage.SetProfile]: SetProfileIntent;
   [ClientMessage.FriendRequest]: FriendRequestIntent;
   [ClientMessage.FriendAnswer]: FriendAnswerIntent;
   [ClientMessage.FriendRemove]: FriendRemoveIntent;
@@ -380,6 +395,12 @@ export type PlayerCardInfo = {
   papersSince?: number;
   /** Design ids this account has opted (`sharedOnCard`) to show, newest first. */
   sharedDesignIds?: string[];
+  /** The owner's bio, when the viewer's relationship permits it (see profile.ts). */
+  bio?: string;
+  /** Social links the viewer may see. */
+  links?: ProfileSocialLink[];
+  /** How the viewer relates to this account — drives which fields appear. */
+  relationship?: ProfileRelationship;
 };
 
 export type MailSent = {

@@ -1,4 +1,4 @@
-import { registerMapFeature, removeMapFeature } from './mapFeatures';
+import { registerMapFeature, removeMapFeature, updateMapFeaturePosition } from './mapFeatures';
 import { getGameState, updateGameState, type SavedPlaceState } from '../sim/state';
 import { GREENHOUSE_POSITION } from './seedStoreLayout';
 
@@ -111,6 +111,34 @@ export function addPlace(name: string, x: number, z: number): Place {
   registerPlaceMarker(place);
   notify();
   return place;
+}
+
+/**
+ * Move the saved Home place. Home is the one builtin that may relocate: the
+ * neighbourhood's lot layout (world/neighborhood.ts) decides which lot this
+ * account's home belongs on, and this writes that decision into the place the
+ * save already persists — so the spot is stable across reloads and every
+ * client reads the same one. Its name is still rename-only and it is still
+ * never removed; only x/z changes.
+ *
+ * Returns whether it actually moved. Notifies the same listeners as any other
+ * place change, so panels re-render and the minimap marker follows.
+ */
+export function setHomePlace(x: number, z: number): boolean {
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return false;
+  const home = getPlace(HOME_PLACE_ID);
+  if (!home) return false;
+  if (home.x === x && home.z === z) return false;
+  updateGameState((state) => {
+    const stored = state.player.places.find((place) => place.id === HOME_PLACE_ID);
+    if (stored) {
+      stored.x = x;
+      stored.z = z;
+    }
+  });
+  updateMapFeaturePosition(`place:${HOME_PLACE_ID}`, x, z);
+  notify();
+  return true;
 }
 
 export function renamePlace(id: string, name: string): boolean {

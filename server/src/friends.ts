@@ -19,10 +19,31 @@
 
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { LIMITS, sanitizeName } from '../../shared/src/index';
+import { LIMITS, sanitizeFriendRequestMessage, sanitizeName } from '../../shared/src/index';
 
 type Edge = { name: string; since: number };
-type Request = { from: string; to: string; fromName: string; toName: string; at: number };
+type Request = {
+  from: string;
+  to: string;
+  fromName: string;
+  toName: string;
+  at: number;
+  /** The optional note the asker attached. Absent when there was none. */
+  message?: string;
+  /**
+   * `'gone'` — a request that will never be delivered or answered, kept only so
+   * the asker's own list looks the same as it would after a real send.
+   *
+   * WHY THIS EXISTS. A block is silent: the blocked person is told nothing, and
+   * the asker is shown a success. But a success that stored nothing left a tell
+   * — the request never appeared in the asker's own outgoing list, so "I asked,
+   * and it is not in my list" meant "they have blocked me". A refused request
+   * (`silently-dropped`) and a declined one are therefore recorded as a
+   * tombstone: visible in `outgoing()` to the asker alone, never in `incoming()`,
+   * and never answerable. See `tombstone()` and `answer()`.
+   */
+  state?: 'gone';
+};
 
 type StoreFile = {
   version: 1;
@@ -89,12 +110,15 @@ export class FriendStore {
       }
       for (const raw of parsed.requests ?? []) {
         if (typeof raw?.from !== 'string' || typeof raw?.to !== 'string' || typeof raw?.at !== 'number') continue;
+        const message = sanitizeFriendRequestMessage(raw.message);
         this.requests.push({
           from: raw.from,
           to: raw.to,
           fromName: sanitizeName(raw.fromName),
           toName: sanitizeName(raw.toName),
           at: raw.at,
+          ...(message ? { message } : {}),
+          ...(raw.state === 'gone' ? { state: 'gone' as const } : {}),
         });
       }
     } catch (error) {
@@ -133,62 +157,124 @@ export class FriendStore {
       .sort((a, b) => a.since - b.since);
   }
 
-  /** Requests made to `accountId`, newest first. */
-  incoming(accountId: string): { accountId: string; name: string; at: number }[] {
+  /** Requests made to `accountId`, newest first. A tombstone is never one of them. */
+  incoming(accountId: string): { accountId: string; name: string; at: number; message?: string }[] {
     this.prune();
     return this.requests
-      .filter((request) => request.to === accountId)
-      .map((request) => ({ accountId: request.from, name: request.fromName, at: request.at }))
+      .filter((request) => request.to === accountId && request.state !== 'gone')
+      .map((request) => ({
+        accountId: request.from,
+        name: request.fromName,
+        at: request.at,
+        ...(request.message ? { message: request.message } : {}),
+      }))
       .sort((a, b) => b.at - a.at);
   }
 
   /** Requests `accountId` has made, newest first. */
-  outgoing(accountId: string): { accountId: string; name: string; at: number }[] {
+  outgoing(accountId: string): { accountId: string; name: string; at: number; message?: string }[] {
     this.prune();
     return this.requests
       .filter((request) => request.from === accountId)
-      .map((request) => ({ accountId: request.to, name: request.toName, at: request.at }))
+      .map((request) => ({
+        accountId: request.to,
+        name: request.toName,
+        at: request.at,
+        ...(request.message ? { message: request.message } : {}),
+      }))
       .sort((a, b) => b.at - a.at);
   }
 
-  request(from: string, fromName: string, to: string, toName: string): RequestStatus {
+  request(from: string, fromName: string, to: string, toName: string, message?: string): RequestStatus {
     if (!from || !to || from === to || from.startsWith('guest:') || to.startsWith('guest:')) return 'invalid';
+    // You blocked them: say so plainly — that is your own doing, not a secret.
     if (this.isBlocked(from, to)) return 'you-blocked';
-    // They blocked you: report success, store nothing. Saying otherwise would
-    // tell the blocked person they were blocked.
-    if (this.isBlocked(to, from)) return 'silently-dropped';
+    // Blocking purges any friendship, so this can sit above the block check
+    // without ever masking one.
     if (this.areFriends(from, to)) return 'already-friends';
     this.prune();
 
-    // They already asked you: a request back is a yes.
-    if (this.requests.some((request) => request.from === to && request.to === from)) {
-      return this.answer(from, to, true) === 'accepted' ? 'accepted' : 'full';
-    }
+    // Asking twice is asking twice, whatever became of the first one. This has
+    // to come BEFORE the blocked check: otherwise a repeat request answers
+    // 'silently-dropped' where an honest one answers 'already-sent', and the
+    // asker has a second oracle to read a block from.
     if (this.requests.some((request) => request.from === from && request.to === to)) return 'already-sent';
 
-    if ((this.friends.get(from)?.size ?? 0) >= LIMITS.friendsMax) return 'full';
-    if (this.requests.filter((request) => request.from === from).length >= LIMITS.friendRequestsMax) return 'full';
-    if (this.requests.filter((request) => request.to === to).length >= LIMITS.friendRequestsMax) {
-      // Their inbox is full. Look the same as a success from here; a person
-      // should not be able to learn how many requests someone has waiting.
+    // They already asked you: a request back is a yes. A tombstone is not a
+    // question, so it does not count here.
+    if (this.requests.some((request) => (
+      request.state !== 'gone' && request.from === to && request.to === from
+    ))) {
+      return this.answer(from, to, true) === 'accepted' ? 'accepted' : 'full';
+    }
+
+    // They blocked you: report success, and record a tombstone so the asker's
+    // own list cannot be read as an answer (see `tombstone`).
+    if (this.isBlocked(to, from)) {
+      this.tombstone(from, fromName, to, toName, message);
       return 'silently-dropped';
     }
 
+    if ((this.friends.get(from)?.size ?? 0) >= LIMITS.friendsMax) return 'full';
+    if (this.requests.filter((request) => request.from === from).length >= LIMITS.friendRequestsMax) return 'full';
+    if (this.requests.filter((request) => request.to === to && request.state !== 'gone').length >= LIMITS.friendRequestsMax) {
+      // Their inbox is full. Look the same as a success from here; a person
+      // should not be able to learn how many requests someone has waiting.
+      this.tombstone(from, fromName, to, toName, message);
+      return 'silently-dropped';
+    }
+
+    const note = sanitizeFriendRequestMessage(message);
     this.requests.push({
       from, to, at: this.now(),
       fromName: sanitizeName(fromName), toName: sanitizeName(toName),
+      ...(note ? { message: note } : {}),
     });
     this.flush();
     return 'sent';
   }
 
+  /**
+   * Record a request that will never be delivered, for the asker's eyes only.
+   *
+   * The asker asked; as far as they are concerned, a request exists. Writing a
+   * tombstone is what makes that true, so their outgoing list cannot be used as
+   * a lie detector for a block or a full inbox. `incoming()` skips every
+   * tombstone, so the person it names never learns it was written, and it is
+   * never answerable (`answer` skips it too).
+   *
+   * Bounded by the same per-asker cap as a real request, so somebody who keeps
+   * knocking on a blocked door cannot grow the file without limit.
+   */
+  private tombstone(from: string, fromName: string, to: string, toName: string, message?: string): void {
+    if (this.requests.some((request) => request.from === from && request.to === to)) return;
+    if (this.requests.filter((request) => request.from === from).length >= LIMITS.friendRequestsMax) return;
+    // The note rides along too. A real send keeps it, so a tombstone that
+    // dropped it would be a second tell: "I wrote a note and my note is gone".
+    const note = sanitizeFriendRequestMessage(message);
+    this.requests.push({
+      from, to, at: this.now(),
+      fromName: sanitizeName(fromName), toName: sanitizeName(toName),
+      ...(note ? { message: note } : {}),
+      state: 'gone',
+    });
+    this.flush();
+  }
+
   /** `me` answers a request that `from` made to them. */
   answer(me: string, from: string, accept: boolean): AnswerStatus {
     this.prune();
-    const index = this.requests.findIndex((request) => request.from === from && request.to === me);
+    const index = this.requests.findIndex((request) => (
+      request.from === from && request.to === me && request.state !== 'gone'
+    ));
     if (index === -1) return 'none';
     const [request] = this.requests.splice(index, 1);
     if (!accept) {
+      // A quiet no: the asker must not be able to tell a decline from a request
+      // that simply lapsed, so their own copy is left in place as a tombstone.
+      // Deleting it here is what made "I asked, and then it vanished" read as
+      // "they said no".
+      this.requests.push({ ...request, state: 'gone' });
       this.flush();
       return 'declined';
     }

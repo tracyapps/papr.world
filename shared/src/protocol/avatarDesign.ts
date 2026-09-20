@@ -51,6 +51,10 @@ export const DESIGN_LIMITS = {
   strokeWidthMax: 8,
   /** Points in a drawn custom cutout outline (pairs of numbers). */
   maxOutlinePoints: 300,
+  /** Pieces (added or subtracted paths) in one drawn cutout. */
+  maxShapePieces: 12,
+  /** Anchor points across all the pieces of one drawn cutout. */
+  maxShapeAnchors: 600,
   /** Stamps stuck on one design — plenty of face, not a collage engine. */
   maxStamps: 32,
   /** Stamp size multipliers, against each stamp's natural size. */
@@ -90,6 +94,68 @@ export type DesignStroke = {
 };
 
 const MEDIA: StrokeMedium[] = ['crayon', 'watercolor', 'spray'];
+
+/**
+ * A drawn cutout, kept as something you can keep editing: paths made of movable
+ * anchor points, each one either added to the shape or subtracted from it.
+ *
+ * The cutout you see is worked out from these, in order: start empty, add the
+ * paths that add, take away the ones that subtract. Only numbers travel; the
+ * curve through the anchors and the union are the client's to compute (see
+ * `src/ui/avatarEditor/shapeGeometry.ts`), so a hand-edited design can never
+ * smuggle path markup into a renderer.
+ */
+export type ShapeOp = 'add' | 'subtract';
+
+export type ShapePiece = {
+  op: ShapeOp;
+  /**
+   * Anchor points, flat [x0, y0, x1, y1, ...] in sheet coordinates. A piece is
+   * always a closed loop: the last anchor joins back to the first.
+   */
+  points: number[];
+  /** Anchors (by position) that are sharp corners; every other anchor is smooth. */
+  sharp?: number[];
+};
+
+export type CustomShape = { pieces: ShapePiece[] };
+
+/**
+ * A well-formed, bounded copy of a custom shape, or null when it has nothing
+ * to cut out (no path that adds, or no path with three anchors).
+ */
+export function sanitizeCustomShape(raw: unknown): CustomShape | null {
+  if (!raw || typeof raw !== 'object' || !Array.isArray((raw as CustomShape).pieces)) return null;
+  const pieces: ShapePiece[] = [];
+  let anchorBudget = DESIGN_LIMITS.maxShapeAnchors;
+  for (const entry of (raw as CustomShape).pieces.slice(0, DESIGN_LIMITS.maxShapePieces)) {
+    if (!entry || typeof entry !== 'object') continue;
+    const value = entry as Partial<ShapePiece>;
+    const op: ShapeOp = value.op === 'subtract' ? 'subtract' : 'add';
+    if (!Array.isArray(value.points)) continue;
+    const points: number[] = [];
+    let bad = false;
+    for (let i = 0; i + 1 < value.points.length && points.length / 2 < anchorBudget; i += 2) {
+      const x = value.points[i];
+      const y = value.points[i + 1];
+      if (!isFiniteNumber(x) || !isFiniteNumber(y)) {
+        bad = true;
+        break;
+      }
+      points.push(roundCoord(clamp(x, 0, DESIGN_SHEET.width)), roundCoord(clamp(y, 0, DESIGN_SHEET.height)));
+    }
+    if (bad || points.length < 6) continue;
+    anchorBudget -= points.length / 2;
+    const anchors = points.length / 2;
+    const sharp = Array.isArray(value.sharp)
+      ? [...new Set(value.sharp.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < anchors))].sort(
+          (a, b) => a - b,
+        )
+      : [];
+    pieces.push({ op, points, ...(sharp.length > 0 ? { sharp } : {}) });
+  }
+  return pieces.some((piece) => piece.op === 'add') ? { pieces } : null;
+}
 
 /**
  * One stamp stuck onto a design — a pre-drawn detail from the stamp catalog.
@@ -157,8 +223,17 @@ export type AvatarDesign = {
    * Only when silhouette === 'custom': the drawn cutout outline as a closed
    * polygon, flat [x0, y0, x1, y1, ...] in sheet coordinates. The renderer
    * closes it (Z); it never travels as path markup, only as numbers.
+   *
+   * Kept beside `customShape` as the plain, flattened version of it (its
+   * largest loop), so a build that only knows this field still cuts out the
+   * right silhouette. The editor writes both.
    */
   customOutline?: number[];
+  /**
+   * Only when silhouette === 'custom': the editable source of the cutout,
+   * which the renderer prefers over `customOutline` when it is there.
+   */
+  customShape?: CustomShape;
   /** Paper stock the cutout is scissored from. */
   paper: {
     /** Base color key from the paper catalog (e.g. "construction-red"). */
@@ -312,8 +387,10 @@ export function sanitizeAvatarDesign(raw: unknown): AvatarDesign | null {
   // Custom outline: only meaningful with the 'custom' silhouette, only kept
   // when it forms at least a triangle of finite, on-sheet points.
   let customOutline: number[] | undefined;
+  let customShape: CustomShape | undefined;
   let silhouette = sanitizeKey(value.silhouette, 'round-pal');
   if (silhouette === 'custom') {
+    customShape = sanitizeCustomShape(value.customShape) ?? undefined;
     const raw = Array.isArray(value.customOutline) ? value.customOutline : [];
     const budget = Math.min(raw.length, DESIGN_LIMITS.maxOutlinePoints * 2);
     const points: number[] = [];
@@ -327,11 +404,9 @@ export function sanitizeAvatarDesign(raw: unknown): AvatarDesign | null {
       }
       points.push(roundCoord(clamp(x, 0, DESIGN_SHEET.width)), roundCoord(clamp(y, 0, DESIGN_SHEET.height)));
     }
-    if (!bad && points.length >= 6) {
-      customOutline = points;
-    } else {
-      silhouette = 'round-pal'; // unusable outline degrades to a template
-    }
+    if (!bad && points.length >= 6) customOutline = points;
+    // Unusable outline AND no usable shape degrades to a template.
+    if (!customOutline && !customShape) silhouette = 'round-pal';
   }
 
   const strokesRaw = Array.isArray(value.strokes)
@@ -363,6 +438,7 @@ export function sanitizeAvatarDesign(raw: unknown): AvatarDesign | null {
     name: name.length > 0 ? name : 'untitled cutout',
     silhouette,
     ...(customOutline ? { customOutline } : {}),
+    ...(customShape ? { customShape } : {}),
     paper: {
       color: sanitizeKey(value.paper?.color, 'kraft'),
       pattern: sanitizeKey(value.paper?.pattern, 'plain'),

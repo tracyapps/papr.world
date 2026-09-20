@@ -26,7 +26,7 @@ const AVATAR_PRESETS: AvatarRef['preset'][] = [
 ];
 
 /** Drop ASCII control characters (code < 0x20 and 0x7f) without regex-escape ambiguity. */
-function stripControlChars(text: string): string {
+export function stripControlChars(text: string): string {
   let out = '';
   for (let i = 0; i < text.length; i++) {
     const code = text.charCodeAt(i);
@@ -77,6 +77,17 @@ export function sanitizeChat(raw: unknown): string | null {
 export function sanitizeMailText(raw: unknown): string | null {
   const text = typeof raw === 'string' ? raw : '';
   const cleaned = stripControlChars(text).trim().slice(0, LIMITS.mailTextMaxLength);
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+/**
+ * The optional note that may ride along with a friend request. Same rules as
+ * chat and mail — trimmed, control characters stripped, bounded — and null
+ * when there is nothing worth sending, so an empty note is simply omitted.
+ */
+export function sanitizeFriendRequestMessage(raw: unknown): string | null {
+  const text = typeof raw === 'string' ? raw : '';
+  const cleaned = stripControlChars(text).trim().slice(0, LIMITS.friendRequestMessageMax);
   return cleaned.length > 0 ? cleaned : null;
 }
 

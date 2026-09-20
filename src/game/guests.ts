@@ -26,7 +26,8 @@ import {
 
 /** What the game can ask the room to do. Set by the network layer while connected. */
 export type GuestTransport = {
-  requestFriend: (accountId: string) => void;
+  /** `message` is the optional short note that rides along with the ask. */
+  requestFriend: (accountId: string, message?: string) => void;
   answerFriend: (accountId: string, accept: boolean) => void;
   removeFriend: (accountId: string) => void;
   setHomePolicy: (policy: HomePolicy) => void;
@@ -153,8 +154,8 @@ export function friendStateOf(accountId: string): FriendState {
   return 'none';
 }
 
-export function requestFriend(accountId: string) {
-  transport?.requestFriend(accountId);
+export function requestFriend(accountId: string, message?: string) {
+  transport?.requestFriend(accountId, message);
 }
 
 export function answerFriend(accountId: string, accept: boolean) {

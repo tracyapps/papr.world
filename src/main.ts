@@ -9,8 +9,9 @@ import { avatar, spawnAvatar, updateAvatar } from './game/avatar';
 import { initializeAvatarLook } from './game/avatarLook';
 import { isAvatarStudioOpen } from './ui/avatarEditor/editor';
 import { initializeGuidance, updateGuidance } from './game/guidance';
-import { getCameraDebug, getYaw, updateCamera } from './game/camera';
-import { initializeInput, updateGamepadCamera } from './game/input';
+import { getCameraDebug, getYaw, updateCamera, adjustCameraZoom } from './game/camera';
+import { initializeInput, setVirtualMovement, updateGamepadCamera } from './game/input';
+import { initializeTouchControls, refreshTouchControls } from './game/touchControls';
 import {
   isMakerPanelOpen,
   distanceToThingMaker,
@@ -38,7 +39,7 @@ import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from '.
 import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
-import { pickSharedHomeAtScreen } from './net/sharedHomeVisuals';
+import { pickSharedHomeAtScreen, pickSharedHomePlateAtScreen } from './net/sharedHomeVisuals';
 import { hasCozyInteractionAt, initializeCozyInteractions, tryCozyInteractionAt, updateCozyInteractions } from './game/cozyInteractions';
 import { initializeInteractionCursor } from './game/interactionCursor';
 import { initializeHarvesting, isHarvestableAtScreen, tryHarvestAt, updateHarvestables } from './game/harvesting';
@@ -327,6 +328,22 @@ registerScreenInteraction({
     return true;
   },
 });
+// The address plate beside a neighbor's door opens their player card — the
+// number is a second way to reach the person, apart from the door panel the
+// house itself opens. It sits ABOVE home-marker (82) so the house and the sign
+// do not catch the click first.
+registerScreenInteraction({
+  id: 'home-plate',
+  priority: 83,
+  hitTest: (x, y) => pickSharedHomePlateAtScreen(x, y) !== null,
+  interact: (x, y) => {
+    const address = pickSharedHomePlateAtScreen(x, y);
+    if (!address) return false;
+    if (isIndoors()) return false;
+    openPlayerCardFor({ accountId: address.accountId, name: address.name, drawingKey: '' });
+    return true;
+  },
+});
 // A neighbor's home opens their door panel (what it looks like, whether it is
 // open, and the button that goes in or knocks) — the same person as their
 // avatar, just not standing there right now. Their card is one button away.
@@ -422,45 +439,69 @@ registerScreenInteraction({
   hitTest: (x, y) => getActionMode() === 'place' && pickTerrainAtScreen(x, y) !== null,
   interact: tryPlaceAt,
 });
+/**
+ * What E does — and, unchanged, what the touch overlay's Act button does.
+ *
+ * Hoisted out of the `initializeInput` call on purpose: there is one
+ * implementation of "walk up and press the thing", reached from two input
+ * paths, rather than two copies that agree on the day they are written.
+ */
+function toggleNearby() {
+  // Indoors the only things within reach are the way out and the home's own
+  // panel; the surface's shops and machines are somewhere else entirely.
+  if (isIndoors()) {
+    if (isNearInteriorExit(avatar.position)) goOutside();
+    // Somebody else's home has nothing of yours to plan or build in it.
+    else if (!isVisiting()) setHomePanelOpen(!isHomePanelOpen());
+    return;
+  }
+  if (isNearSeedStore(avatar.position)) {
+    closeMillPanel();
+    setSeedStorePanelOpen(!isSeedStorePanelOpen());
+    return;
+  }
+  if (isNearHomePanel(avatar.position) && homeIsNearerThanMaker()) {
+    closeMillPanel();
+    setHomePanelOpen(!isHomePanelOpen());
+    return;
+  }
+  if (isNearMill(avatar.position)) {
+    setMillPanelOpen(!isMillPanelOpen(), 'counter');
+    return;
+  }
+  if (isNearThingMaker(avatar.position)) {
+    closeSeedStorePanel();
+    closeMillPanel();
+    closeHomePanel();
+    setMakerPanelOpen(!isMakerPanelOpen());
+    return;
+  }
+  if (isNearHomePanel(avatar.position)) {
+    setHomePanelOpen(!isHomePanelOpen());
+    return;
+  }
+  if (toggleCasePanelNear(avatar.position, getCurrentPageId())) return;
+  toggleVisitPanelNear(avatar.position);
+}
+
+/**
+ * Whether Act has anything to do right now, so the button can say so before
+ * it is pressed. It mirrors the branches in `toggleNearby` that have a
+ * boolean test of their own; the visit panel's does not, and is left out
+ * rather than guessed at.
+ */
+function isActAvailable(): boolean {
+  if (isIndoors()) return isNearInteriorExit(avatar.position) || !isVisiting();
+  return isNearSeedStore(avatar.position)
+    || isNearHomePanel(avatar.position)
+    || isNearMill(avatar.position)
+    || isNearThingMaker(avatar.position)
+    || isNearCase(avatar.position, getCurrentPageId());
+}
+
 initializeInput({
   onToggleScrapbook: () => setScrapbookOpen(!isScrapbookOpen()),
-  onToggleNearby: () => {
-    // Indoors the only things within reach are the way out and the home's own
-    // panel; the surface's shops and machines are somewhere else entirely.
-    if (isIndoors()) {
-      if (isNearInteriorExit(avatar.position)) goOutside();
-      // Somebody else's home has nothing of yours to plan or build in it.
-      else if (!isVisiting()) setHomePanelOpen(!isHomePanelOpen());
-      return;
-    }
-    if (isNearSeedStore(avatar.position)) {
-      closeMillPanel();
-      setSeedStorePanelOpen(!isSeedStorePanelOpen());
-      return;
-    }
-    if (isNearHomePanel(avatar.position) && homeIsNearerThanMaker()) {
-      closeMillPanel();
-      setHomePanelOpen(!isHomePanelOpen());
-      return;
-    }
-    if (isNearMill(avatar.position)) {
-      setMillPanelOpen(!isMillPanelOpen(), 'counter');
-      return;
-    }
-    if (isNearThingMaker(avatar.position)) {
-      closeSeedStorePanel();
-      closeMillPanel();
-      closeHomePanel();
-      setMakerPanelOpen(!isMakerPanelOpen());
-      return;
-    }
-    if (isNearHomePanel(avatar.position)) {
-      setHomePanelOpen(!isHomePanelOpen());
-      return;
-    }
-    if (toggleCasePanelNear(avatar.position, getCurrentPageId())) return;
-    toggleVisitPanelNear(avatar.position);
-  },
+  onToggleNearby: toggleNearby,
   // Saved places and the map are of the outdoors; there is nothing to mark or
   // chart inside a tent (a floor plan comes with the map-by-scene step).
   onMarkPlace: () => {
@@ -531,6 +572,23 @@ initializeInput({
   isWorldTarget: (event) => event.target === canvas,
 });
 
+// Touch/tablet overlay. Every button here is the non-gesture twin of a key
+// that already works: Act is E, Rotate is R inside build mode, and the zoom
+// buttons are + and −. The pad feeds input.ts's virtual stick, so movement
+// still has exactly one sum. The module decides for itself whether to draw
+// anything (the `touchControls` setting), which keeps that decision out of
+// here.
+initializeTouchControls({
+  onMove: setVirtualMovement,
+  onAct: toggleNearby,
+  // Only drawn in build mode, so it needs none of R's camera-pitch fallback.
+  onRotate: rotateSelectedBuildPiece,
+  onZoomIn: () => adjustCameraZoom(-0.8),
+  onZoomOut: () => adjustCameraZoom(0.8),
+  isActAvailable,
+  isRotateAvailable: () => getActionMode() === 'place',
+});
+
 // The overlay previews whatever the pointer is over, so the bootstrap keeps
 // the last pointer position rather than every consumer adding its own
 // listener and them drifting out of sync.
@@ -580,6 +638,8 @@ function animateIndoors(delta: number) {
   updateVisitPrompt(avatar.position, true);
   updateCasePrompt(avatar.position, getCurrentPageId(), true);
   updateHome();
+  // Act stays live indoors: it is the way out, and the home's own panel.
+  refreshTouchControls();
   updateCamera(avatar.position);
   updateCritterDialogueFraming(delta);
   renderer.render(interiorScene, camera);
@@ -645,6 +705,9 @@ function animate(animationTime = 0) {
   updateSeedStorePrompt(avatar.position);
   updateMillPrompt(avatar.position);
   updateHomePrompt(avatar.position, isNearThingMaker(avatar.position) && !homeNearer);
+  // The Act button's highlight follows the same reach tests the prompt does;
+  // refreshing it once a frame is what keeps the two from disagreeing.
+  refreshTouchControls();
   const nearOtherPrompt = isNearSeedStore(avatar.position) || isNearMill(avatar.position)
     || isNearThingMaker(avatar.position) || isNearHomePanel(avatar.position);
   const nearCase = isNearCase(avatar.position, getCurrentPageId());
@@ -677,6 +740,10 @@ function animate(animationTime = 0) {
   } else {
     updateBuildOverlay(delta, elapsed, avatar.position, null);
   }
+
+  // The Rotate button appears the moment build mode does; refreshed with the
+  // overlay it belongs to, hence the second call once the mode is known.
+  refreshTouchControls();
 
   updateLighting(avatar.position);
   updateSky(avatar.position, elapsed);

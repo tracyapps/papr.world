@@ -248,14 +248,17 @@ describe('friends', () => {
     await until(() => lastEntry(ada) === 'admitted', 'a friend walks in');
   });
 
-  it('keeps a "no" quiet', async () => {
+  it('keeps a "no" quiet: the asker is not told, and their own list is untouched', async () => {
     const sam = await join('Sam6');
     const ada = await join('Ada6');
     ada.room.send(ClientMessage.FriendRequest, { accountId: sam.accountId });
     await until(() => sam.friends?.incoming.length === 1, 'asked');
     const before = ada.notices.length;
     sam.room.send(ClientMessage.FriendAnswer, { accountId: ada.accountId, accept: false });
-    await until(() => ada.friends?.outgoing.length === 0, 'Ada\'s request is gone');
+    await until(() => (sam.friends?.incoming ?? []).length === 0, 'the request leaves Sam\'s list');
+    // The asker's own list is unchanged — still showing the request they sent —
+    // so "it vanished" can never be read as a no.
+    expect(ada.friends?.outgoing).toHaveLength(1);
     expect(ada.notices.length).toBe(before);
   });
 

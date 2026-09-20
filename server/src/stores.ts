@@ -16,6 +16,7 @@ import { MailStore } from './mail';
 import { SoloMigrationStore } from './soloMigration';
 import { AccountTechStore } from './accountTech';
 import { AvatarDesignStore } from './avatarDesigns';
+import { ProfileStore } from './profiles';
 
 export const DATA_DIR = process.env.PP_DATA_DIR ?? 'data';
 
@@ -68,6 +69,7 @@ export const mail = new MailStore(DATA_DIR);
 export const soloMigrations = new SoloMigrationStore(DATA_DIR);
 export const accountTech = new AccountTechStore(DATA_DIR);
 export const avatarDesigns = new AvatarDesignStore(DATA_DIR);
+export const profiles = new ProfileStore(DATA_DIR);
 
 /**
  * The account that may remove people from any neighborhood.

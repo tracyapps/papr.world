@@ -101,6 +101,8 @@ export const LIMITS = {
   friendsMax: 200,
   /** Pending requests, each direction, per account. */
   friendRequestsMax: 50,
+  /** The note that may ride along with a request, in characters. */
+  friendRequestMessageMax: 140,
   /** A request nobody answers lapses quietly after this long. */
   friendRequestTtlMs: 30 * 24 * 60 * 60 * 1000,
   /** A knock nobody answers lapses quietly after this long. */
@@ -113,6 +115,15 @@ export const LIMITS = {
   knockNoteIntervalMs: 6 * 60 * 60 * 1000,
   /** Finished parts a home marker may list (there are six today). */
   homePartsMax: 12,
+
+  // ---- Profiles (docs/accounts-worlds-and-social.md, "Names and profiles") ----
+
+  /** A player's bio, in characters — a paragraph, not a page. */
+  bioMax: 280,
+  /** Social links one profile may carry. */
+  socialLinksMax: 6,
+  /** Longest accepted social URL; long enough for a real link, short of abuse. */
+  socialUrlMax: 200,
 
   // ---- Display cases (docs/house-and-home.md, "Display cases") ----
 

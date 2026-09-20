@@ -58,6 +58,109 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
         <p class="identity-card__id">Account <code data-account-id></code></p>
       </section>
 
+      <section class="paper-card profile-card">
+        <p class="label">How you are seen</p>
+        <h2>Your profile</h2>
+        <p class="soft">
+          A short introduction that travels with your account — what other players
+          may read about you when they look.
+        </p>
+
+        <p class="profile__status" data-profile-status role="status" aria-live="polite">
+          Opening your profile…
+        </p>
+
+        <form class="profile" data-profile-form hidden>
+          <div class="profile__block">
+            <label class="profile__label" for="profile-bio">A little about you</label>
+            <p class="soft" id="profile-bio-help">
+              Write a line or two. Other players may see this, depending on who you set it for below.
+            </p>
+            <textarea
+              class="field"
+              id="profile-bio"
+              name="profile-bio"
+              rows="3"
+              data-profile-bio
+              aria-describedby="profile-bio-help profile-bio-count"
+            ></textarea>
+            <p class="profile__count"><span id="profile-bio-count" data-profile-bio-count>0</span> / 280 characters</p>
+          </div>
+
+          <fieldset class="profile__audience" name="profile-visibility-bio">
+            <legend>Who can see your bio</legend>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-bio" value="everyone" />
+              <span class="choice__text">
+                <span class="choice__name">Everyone</span>
+                <span class="choice__note">Anyone who finds you can see it, even someone you have never met.</span>
+              </span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-bio" value="friends" />
+              <span class="choice__text">
+                <span class="choice__name">Friends</span>
+                <span class="choice__note">Only people you have both agreed to be friends with can see it.</span>
+              </span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-bio" value="friends-of-friends" />
+              <span class="choice__text">
+                <span class="choice__name">Friends of friends</span>
+                <span class="choice__note">Your friends can see it, and so can their friends.</span>
+              </span>
+            </label>
+          </fieldset>
+
+          <div class="profile__block">
+            <h3 class="profile__subtitle">Links</h3>
+            <p class="soft">
+              Up to six places a player can find you. Other players may see these,
+              depending on who you set them for below.
+            </p>
+            <div class="profile__links" data-profile-links></div>
+            <button class="btn btn--quiet" type="button" data-profile-add-link>Add a link</button>
+          </div>
+
+          <fieldset class="profile__audience" name="profile-visibility-links">
+            <legend>Who can see your links</legend>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-links" value="everyone" />
+              <span class="choice__text">
+                <span class="choice__name">Everyone</span>
+                <span class="choice__note">Anyone who finds you can see it, even someone you have never met.</span>
+              </span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-links" value="friends" />
+              <span class="choice__text">
+                <span class="choice__name">Friends</span>
+                <span class="choice__note">Only people you have both agreed to be friends with can see it.</span>
+              </span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="profile-visibility-links" value="friends-of-friends" />
+              <span class="choice__text">
+                <span class="choice__name">Friends of friends</span>
+                <span class="choice__note">Your friends can see it, and so can their friends.</span>
+              </span>
+            </label>
+          </fieldset>
+
+          <p class="profile__disclosure">
+            <strong>One thing worth saying plainly:</strong> if you ask somebody to be
+            friends, they can read your bio and your links — whatever you have set above.
+            Asking to be friends should never be a blind request; the person you are asking
+            gets to see who is asking. Nobody else sees more than your settings allow.
+          </p>
+
+          <p>
+            <button class="btn" type="button" data-profile-save>Save profile</button>
+          </p>
+          <p class="profile__note" data-profile-note role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
       <div class="desk-grid" aria-label="Account areas">
         <section class="paper-card worlds-card">
           <p class="label">Worlds</p>
@@ -154,4 +257,39 @@ const apiUrl = import.meta.env.PUBLIC_PAPR_API_URL
   .mailbox__note { margin: 8px 0 0; }
   .mailbox__note:empty { display: none; }
   :global(.desk-list .btn) { display: inline-block; margin-top: 10px; }
+
+  // ── Your profile ────────────────────────────────────────────────────────
+  // The editor's own controls are plain form elements, so the base rules for
+  // an input live below. They are :global because the link rows are built at
+  // runtime by account.ts and would otherwise drop their scoped attribute.
+  .profile-card { margin: 0 0 22px; }
+  .profile__status { margin: 10px 0 0; color: var(--ink-soft); }
+  .profile__block { margin: 18px 0 0; }
+  .profile__label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .profile__count { margin: 6px 0 0; font: 700 12px/1 $font-mono; letter-spacing: .04em; color: var(--ink-faint); }
+  .profile__note { margin: 10px 0 0; color: var(--ink-soft); }
+  .profile__note[data-kind="error"] { color: #a33; }
+  .profile__subtitle { margin: 0 0 6px; font-size: 18px; }
+  .profile__audience { margin: 18px 0 0; padding: 14px 16px 6px; border: 1px dashed var(--edge); border-radius: $radius-md; }
+  .profile__audience legend { @include label; padding: 0 8px; }
+  .profile__disclosure { margin: 20px 0 0; padding: 12px 16px; border-left: 4px solid var(--crayon); background: var(--paper-2); border-radius: 0 $radius-sm $radius-sm 0; max-width: none; }
+  :global(.choice) { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; cursor: pointer; }
+  :global(.choice input) { flex: none; margin: 4px 0 0; }
+  :global(.choice__name) { display: block; font-weight: 700; }
+  :global(.choice__note) { display: block; color: var(--ink-soft); font-size: 15px; }
+  :global(.visually-hidden) { @include sr-only; }
+  :global(.field) {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--edge);
+    border-radius: $radius-sm;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16px/1.5 $font-body;
+  }
+  :global(textarea.field) { min-height: 84px; resize: vertical; }
+  :global(.profile__links) { display: grid; gap: 10px; margin: 12px 0; }
+  :global(.profile-link) { display: grid; grid-template-columns: minmax(120px, 9rem) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+  @media (max-width: $bp-narrow) { :global(.profile-link) { grid-template-columns: 1fr; } }
+  :global(.profile-link .btn) { padding: 10px 14px; font-size: 14px; }
 </style>

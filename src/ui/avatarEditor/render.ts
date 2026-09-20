@@ -25,6 +25,7 @@ import {
   type DesignStroke,
 } from '../../../shared/src/index';
 import { findPaperColor, findSilhouette, findStamp } from './catalog';
+import { shapeToPathD } from './shapeGeometry';
 import type { StampLayer, StampTemplate } from './stampTypes';
 
 /** Lighten a #rrggbb toward white; the cut edge is paper, just unshadowed. */
@@ -43,11 +44,39 @@ function darken(hex: string, amount: number): string {
   return `#${((channel(16) << 16) | (channel(8) << 8) | channel(0)).toString(16).padStart(6, '0')}`;
 }
 
+/** Working out a drawn shape's outline is a union of curves; do it once per shape. */
+const shapePathCache = new Map<string, string>();
+
+function cachedShapePath(shape: NonNullable<AvatarDesign['customShape']>): string {
+  const key = JSON.stringify(shape.pieces);
+  const known = shapePathCache.get(key);
+  if (known !== undefined) return known;
+  const path = shapeToPathD(shape);
+  if (shapePathCache.size >= 32) shapePathCache.delete(shapePathCache.keys().next().value as string);
+  shapePathCache.set(key, path);
+  return path;
+}
+
 /**
- * The cutout path for a design: the player's own drawn outline when
- * silhouette === 'custom' (closed automatically), otherwise the template.
+ * Drawn cutouts can have holes and separate islands, so they are filled
+ * even-odd. Templates keep their own rule: some overlap same-way subpaths on
+ * purpose.
+ */
+export function fillRuleFor(design: AvatarDesign): string {
+  return design.silhouette === 'custom' ? ' fill-rule="evenodd" clip-rule="evenodd"' : '';
+}
+
+/**
+ * The cutout path for a design: the player's own drawn shape when
+ * silhouette === 'custom' (its editable pieces joined up, or, for a design
+ * from before shapes could be edited, its plain outline closed automatically),
+ * otherwise the template.
  */
 export function silhouettePathFor(design: AvatarDesign): string {
+  if (design.silhouette === 'custom' && design.customShape) {
+    const path = cachedShapePath(design.customShape);
+    if (path) return path;
+  }
   if (design.silhouette === 'custom' && design.customOutline && design.customOutline.length >= 6) {
     const pts = design.customOutline;
     let d = `M${pts[0]} ${pts[1]}`;
@@ -287,6 +316,7 @@ export type DesignSvgOptions = {
 export function designToSvg(design: AvatarDesign, options: DesignSvgOptions = {}): string {
   const { width, height } = DESIGN_SHEET;
   const cutPath = silhouettePathFor(design);
+  const rule = fillRuleFor(design);
   const paper = findPaperColor(design.paper.color);
   const safeId = design.id.replace(/[^a-zA-Z0-9-]/g, '');
   const clipId = `cut-${safeId}`;
@@ -297,7 +327,7 @@ export function designToSvg(design: AvatarDesign, options: DesignSvgOptions = {}
   const torn = design.paper.pattern === 'torn-edge';
 
   const shadow = options.shadow
-    ? `<path d="${cutPath}" transform="translate(2.5 3.5)" fill="#3d352d" opacity="0.18"/>`
+    ? `<path d="${cutPath}"${rule} transform="translate(2.5 3.5)" fill="#3d352d" opacity="0.18"/>`
     : '';
 
   // A stamp's "paper" role is the pale cut-edge tint, NOT the stock colour:
@@ -307,7 +337,7 @@ export function designToSvg(design: AvatarDesign, options: DesignSvgOptions = {}
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img">` +
-    `<defs><clipPath id="${clipId}"><path d="${cutPath}"/></clipPath>` +
+    `<defs><clipPath id="${clipId}"><path d="${cutPath}"${rule}/></clipPath>` +
     sprayFilterDefs(sprayId) +
     `</defs>` +
     // Arms, legs, hair: separate pieces of paper glued BEHIND the cutout, so
@@ -316,7 +346,7 @@ export function designToSvg(design: AvatarDesign, options: DesignSvgOptions = {}
     stampLayer(design, 'behind', palette, cutEdge) +
     shadow +
     // Cut edge: slightly wider silhouette behind everything, in pale paper.
-    `<path d="${cutPath}" fill="${cutEdge}" stroke="${cutEdge}" ` +
+    `<path d="${cutPath}"${rule} fill="${cutEdge}" stroke="${cutEdge}" ` +
     `stroke-width="${torn ? 4 : 2.4}" stroke-linejoin="round" ${torn ? 'stroke-dasharray="3 1.6"' : ''}/>` +
     `<g clip-path="url(#${clipId})">` +
     `<rect x="0" y="0" width="${width}" height="${height}" fill="${paper.fill}"/>` +

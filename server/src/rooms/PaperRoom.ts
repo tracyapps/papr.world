@@ -38,6 +38,8 @@ import {
   sanitizeSetHome,
   sanitizeHomePolicy,
   sanitizeAccountRef,
+  sanitizeProfileUpdate,
+  profileForViewer,
   isGuestAccount,
   joinHomeParts,
   splitHomeParts,
@@ -70,6 +72,7 @@ import {
   type PlayerCardIntent,
   type PlayerCardInfo,
   type SetHomeIntent,
+  type SetProfileIntent,
   type HomeMarker,
   type RemoveIntent,
   type ReportIntent,
@@ -87,12 +90,13 @@ import {
   type AskToLeaveIntent,
   type EntryOutcome,
 } from '../../../shared/src/index';
-import { accounts, avatarDesigns, blocks, friends, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { accounts, avatarDesigns, blocks, friends, isOwner, mail, moderation, OWNER_ACCOUNT, profiles, roomStore } from '../stores';
 import { KnockBook, decideAccess } from '../homeAccess';
 import { readAdminConfig, verifyClerkSessionToken } from '../admin';
 import { database } from '../runtime';
 import { authorizeManagedWorldEntry } from '../worldAuthorization';
 import { publicCase, visitorAllowance, type CaseEdit, type CaseRecord } from '../cases';
+import { relationshipBetween } from '../profiles';
 import {
   CaseSchema,
   HomeSchema,
@@ -272,6 +276,9 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     );
     this.onMessage(ClientMessage.SetHome, (client, msg: SetHomeIntent) =>
       this.handleSetHome(client, msg),
+    );
+    this.onMessage(ClientMessage.SetProfile, (client, msg: SetProfileIntent) =>
+      this.handleSetProfile(client, msg),
     );
     this.onMessage(ClientMessage.FriendRequest, (client, msg: FriendRequestIntent) =>
       this.handleFriendRequest(client, msg),
@@ -1017,7 +1024,10 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     if (
       !accountId
       || accountId.startsWith('guest:')
-      || (accountId !== player.accountId && blocks.isBlocked(accountId, player.accountId))
+      || (accountId !== player.accountId && (
+        blocks.isBlocked(accountId, player.accountId)
+        || blocks.isBlocked(player.accountId, accountId)
+      ))
     ) {
       client.send(ServerMessage.PlayerCard, notFound);
       return;
@@ -1033,11 +1043,31 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       .filter((design) => design.sharedOnCard)
       .map((design) => design.id);
 
+    // The profile half is viewer-filtered: the relationship decides which
+    // fields the owner's per-field visibility lets this particular viewer see.
+    // A block was already collapsed to `found: false` above, so this path only
+    // ever reaches somebody the target has not blocked (and a viewer who has
+    // blocked the target resolves to a stranger here, hiding the non-public
+    // fields).
+    const relationship = relationshipBetween(player.accountId, accountId, {
+      areFriends: (a, b) => friends.areFriends(a, b),
+      friendsOf: (id) => friends.list(id).map((friend) => friend.accountId),
+      isBlocked: (a, b) => blocks.isBlocked(a, b) || blocks.isBlocked(b, a),
+    });
+    // THE OWNER RULE: the target's own outstanding request to this viewer shows
+    // the basics whatever the visibility says. A guest can never be the
+    // addressee of a request, so there is nothing to look up for one.
+    const hasSentRequest = !isGuestAccount(player.accountId)
+      && friends.incoming(player.accountId).some((request) => request.accountId === accountId);
+    const visible = profileForViewer(profiles.profileFor(accountId), relationship, { hasSentRequest });
+
     client.send(ServerMessage.PlayerCard, {
       accountId,
       found: true,
       papersSince: account.createdAt,
       sharedDesignIds,
+      relationship,
+      ...visible,
     } satisfies PlayerCardInfo);
   }
 
@@ -1161,8 +1191,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       return;
     }
     const other = this.playerByAccount(target);
-    const otherName = other?.name ?? 'paper friend';
-    const status = friends.request(player.accountId, player.name, target, otherName);
+    const otherName = other?.name ?? profiles.nameFor(target) ?? 'paper friend';
+    const status = friends.request(player.accountId, player.name, target, otherName, msg?.message);
     switch (status) {
       case 'invalid':
         this.reject(client, ClientMessage.FriendRequest, 'invalid');
@@ -1232,6 +1262,28 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     // were removed, they simply are not on the list any more.
     this.pushFriends(player.accountId);
     this.pushFriends(other);
+  }
+
+  /**
+   * The owner sets their own profile (accounts-worlds-and-social.md, "Names
+   * and profiles"). A profile is account data, not room state — the room
+   * stores it and says NOTHING to anyone: no broadcast, no echo. A viewer
+   * reads the filtered subset later, one card at a time, through the
+   * relationship rules in `handlePlayerCardRequest`.
+   */
+  private handleSetProfile(client: Client, msg: SetProfileIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    if (isGuestAccount(player.accountId)) {
+      this.reject(client, ClientMessage.SetProfile, 'guest-not-allowed');
+      return;
+    }
+    const update = sanitizeProfileUpdate(msg);
+    if (!update) {
+      this.reject(client, ClientMessage.SetProfile, 'invalid');
+      return;
+    }
+    profiles.update(player.accountId, player.name, update);
   }
 
   private handleSetHomePolicy(client: Client, msg: HomePolicy): void {

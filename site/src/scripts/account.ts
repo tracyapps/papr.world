@@ -108,6 +108,71 @@ type WardrobeResponse = {
   error?: string;
 };
 
+// ── Your profile ───────────────────────────────────────────────────────────
+// These mirror `shared/src/protocol/profile.ts` and the `LIMITS` in
+// `shared/src/protocol/constants.ts` by hand, the same way the inventory and
+// mailbox shapes above are kept in sync: this Astro site does not build
+// against the shared package (see the type-duplication note above).
+type ProfileVisibility = 'everyone' | 'friends' | 'friends-of-friends';
+type ProfileField = 'bio' | 'links';
+type SocialLinkKind =
+  | 'website'
+  | 'instagram'
+  | 'x'
+  | 'youtube'
+  | 'twitch'
+  | 'discord'
+  | 'other';
+type ProfileSocialLink = { kind: SocialLinkKind; url: string };
+type PlayerProfile = {
+  bio: string;
+  links: ProfileSocialLink[];
+  visibility: Record<ProfileField, ProfileVisibility>;
+};
+
+/** A partial profile update — the `POST /account/profile` body. */
+type ProfileUpdatePayload = {
+  bio?: string;
+  links?: ProfileSocialLink[];
+  visibility?: Partial<Record<ProfileField, ProfileVisibility>>;
+};
+
+type ProfileResponse = {
+  profile?: PlayerProfile;
+  ok?: boolean;
+  error?: string;
+};
+
+/** The allow-list order the picker offers, matching `SOCIAL_LINK_KINDS`. */
+const SOCIAL_LINK_KINDS: readonly SocialLinkKind[] = [
+  'website',
+  'instagram',
+  'x',
+  'youtube',
+  'twitch',
+  'discord',
+  'other',
+];
+
+const SOCIAL_LINK_LABELS: Record<SocialLinkKind, string> = {
+  website: 'Website',
+  instagram: 'Instagram',
+  x: 'X',
+  youtube: 'YouTube',
+  twitch: 'Twitch',
+  discord: 'Discord',
+  other: 'Something else',
+};
+
+const PROFILE_VISIBILITY_LEVELS: readonly ProfileVisibility[] = [
+  'everyone',
+  'friends',
+  'friends-of-friends',
+];
+
+/** Hand-synced with `LIMITS` in `shared/src/protocol/constants.ts`. */
+const PROFILE_LIMITS = { bioMax: 280, socialLinksMax: 6, socialUrlMax: 200 } as const;
+
 // The game's local wardrobe key. Same hand-synced-by-hand rule as the solo
 // save key above: the game and this desk share an origin in production.
 const WARDROBE_STORAGE_KEY = 'pp.wardrobe.v1';
@@ -213,6 +278,14 @@ if (shell) {
   const migrationDescription = shell.querySelector<HTMLElement>('[data-migration-description]');
   const migrationButton = shell.querySelector<HTMLButtonElement>('[data-migration-button]');
   const migrationNote = shell.querySelector<HTMLElement>('[data-migration-note]');
+  const profileStatus = shell.querySelector<HTMLElement>('[data-profile-status]');
+  const profileForm = shell.querySelector<HTMLFormElement>('[data-profile-form]');
+  const profileBio = shell.querySelector<HTMLTextAreaElement>('[data-profile-bio]');
+  const profileBioCount = shell.querySelector<HTMLElement>('[data-profile-bio-count]');
+  const profileLinks = shell.querySelector<HTMLElement>('[data-profile-links]');
+  const profileAddLink = shell.querySelector<HTMLButtonElement>('[data-profile-add-link]');
+  const profileSave = shell.querySelector<HTMLButtonElement>('[data-profile-save]');
+  const profileNote = shell.querySelector<HTMLElement>('[data-profile-note]');
 
   const tell = (text: string, kind: 'info' | 'error' = 'info') => {
     if (!message) return;
@@ -609,6 +682,237 @@ if (shell) {
     };
   };
 
+  /**
+   * The profile editor. Everything below reads and writes the DOM the page
+   * already carries, so a reload or a failed save never leaves a half-built
+   * form on screen; the two routes are the desk's usual Clerk-authenticated
+   * pair (`GET` to read, `POST` a partial update to write). A bearer token is
+   * pulled fresh from the live Clerk session for each request and never kept
+   * anywhere — not in the URL, not in storage.
+   */
+  let profileWired = false;
+
+  const setProfileNote = (text: string, kind: 'info' | 'error' = 'info') => {
+    if (!profileNote) return;
+    profileNote.textContent = text;
+    profileNote.dataset.kind = kind;
+  };
+
+  const updateBioCount = () => {
+    if (!profileBioCount || !profileBio) return;
+    profileBioCount.textContent = String(profileBio.value.length);
+  };
+
+  const setVisibilityChoice = (name: string, value: ProfileVisibility) => {
+    for (const input of profileForm?.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`) ?? []) {
+      input.checked = input.value === value;
+    }
+  };
+
+  const readVisibility = (name: string): ProfileVisibility => {
+    const checked = profileForm?.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`);
+    const value = checked?.value;
+    return value && (PROFILE_VISIBILITY_LEVELS as readonly string[]).includes(value)
+      ? (value as ProfileVisibility)
+      : 'friends';
+  };
+
+  const refreshAddLink = () => {
+    if (!profileAddLink || !profileLinks) return;
+    const full = profileLinks.children.length >= PROFILE_LIMITS.socialLinksMax;
+    profileAddLink.disabled = full;
+    profileAddLink.textContent = full ? `All ${PROFILE_LIMITS.socialLinksMax} links added` : 'Add a link';
+  };
+
+  /** One kind-select + URL-input + remove row, labelled for a screen reader. */
+  const appendLinkRow = (kind: SocialLinkKind, url: string) => {
+    if (!profileLinks) return;
+    const index = profileLinks.children.length;
+    const row = document.createElement('div');
+    row.className = 'profile-link';
+
+    const kindId = `profile-link-kind-${index}`;
+    const kindLabel = document.createElement('label');
+    kindLabel.className = 'visually-hidden';
+    kindLabel.htmlFor = kindId;
+    kindLabel.textContent = 'Kind of link';
+
+    const select = document.createElement('select');
+    select.className = 'field';
+    select.id = kindId;
+    select.dataset.linkKind = '';
+    for (const option of SOCIAL_LINK_KINDS) {
+      const item = document.createElement('option');
+      item.value = option;
+      item.textContent = SOCIAL_LINK_LABELS[option];
+      select.append(item);
+    }
+    select.value = (SOCIAL_LINK_KINDS as readonly string[]).includes(kind) ? kind : 'website';
+
+    const urlId = `profile-link-url-${index}`;
+    const urlLabel = document.createElement('label');
+    urlLabel.className = 'visually-hidden';
+    urlLabel.htmlFor = urlId;
+    urlLabel.textContent = 'Link address';
+
+    const input = document.createElement('input');
+    input.className = 'field';
+    input.type = 'url';
+    input.id = urlId;
+    input.dataset.linkUrl = '';
+    input.maxLength = PROFILE_LIMITS.socialUrlMax;
+    input.placeholder = 'https://…';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.value = url;
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'btn btn--quiet';
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', 'Remove this link');
+    remove.addEventListener('click', () => {
+      row.remove();
+      refreshAddLink();
+    });
+
+    row.append(kindLabel, select, urlLabel, input, remove);
+    profileLinks.append(row);
+    refreshAddLink();
+  };
+
+  const renderProfileLinks = (links: ProfileSocialLink[]) => {
+    if (!profileLinks) return;
+    profileLinks.replaceChildren();
+    for (const link of links.slice(0, PROFILE_LIMITS.socialLinksMax)) {
+      appendLinkRow(link.kind, link.url);
+    }
+    refreshAddLink();
+  };
+
+  const renderProfile = (profile: PlayerProfile) => {
+    if (!profileForm || !profileBio) return;
+    profileBio.value = profile.bio ?? '';
+    updateBioCount();
+    const visibility = profile.visibility ?? { bio: 'friends', links: 'friends' };
+    setVisibilityChoice('profile-visibility-bio', visibility.bio);
+    setVisibilityChoice('profile-visibility-links', visibility.links);
+    renderProfileLinks(Array.isArray(profile.links) ? profile.links : []);
+  };
+
+  /** The links as the player has them on screen, refusing a non-http address. */
+  const collectLinks = (): ProfileSocialLink[] => {
+    const links: ProfileSocialLink[] = [];
+    for (const row of Array.from(profileLinks?.querySelectorAll<HTMLElement>('.profile-link') ?? [])) {
+      const select = row.querySelector<HTMLSelectElement>('[data-link-kind]');
+      const input = row.querySelector<HTMLInputElement>('[data-link-url]');
+      if (!select || !input) continue;
+      const url = input.value.trim();
+      if (!url) continue;
+      if (!/^https?:\/\/\S+$/i.test(url)) {
+        throw new Error('Every link needs to start with http:// or https://.');
+      }
+      const kind = (SOCIAL_LINK_KINDS as readonly string[]).includes(select.value)
+        ? (select.value as SocialLinkKind)
+        : 'other';
+      links.push({ kind, url });
+    }
+    return links;
+  };
+
+  const saveProfile = async (getToken: () => Promise<string | null>) => {
+    if (!profileSave) return;
+    profileSave.disabled = true;
+    profileSave.textContent = 'Saving…';
+    setProfileNote('');
+    try {
+      const body: ProfileUpdatePayload = {
+        bio: profileBio?.value ?? '',
+        links: collectLinks(),
+        visibility: {
+          bio: readVisibility('profile-visibility-bio'),
+          links: readVisibility('profile-visibility-links'),
+        },
+      };
+      const token = await getToken();
+      if (!token) throw new Error('Your sign-in session could not be refreshed.');
+      const response = await fetch(`${apiUrl}/account/profile`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json().catch(() => ({})) as ProfileResponse;
+      if (!response.ok || !result.profile) {
+        throw new Error(result.error || 'Your profile could not be saved.');
+      }
+      renderProfile(result.profile);
+      setProfileNote('Saved — this travels with your account from here on.');
+      profileSave.textContent = 'Saved';
+      window.setTimeout(() => {
+        if (!profileSave) return;
+        profileSave.disabled = false;
+        profileSave.textContent = 'Save profile';
+      }, 1600);
+    } catch (error) {
+      setProfileNote(
+        error instanceof Error ? error.message : 'Your profile could not be saved.',
+        'error',
+      );
+      profileSave.disabled = false;
+      profileSave.textContent = 'Save profile';
+    }
+  };
+
+  const wireProfile = (getToken: () => Promise<string | null>) => {
+    if (profileWired) return;
+    profileWired = true;
+    if (profileBio) {
+      profileBio.maxLength = PROFILE_LIMITS.bioMax;
+      profileBio.addEventListener('input', updateBioCount);
+    }
+    if (profileAddLink) {
+      profileAddLink.addEventListener('click', () => {
+        if (!profileLinks || profileLinks.children.length >= PROFILE_LIMITS.socialLinksMax) return;
+        appendLinkRow('website', '');
+        profileLinks.querySelector<HTMLInputElement>('.profile-link:last-child [data-link-url]')?.focus();
+      });
+    }
+    if (profileSave) {
+      profileSave.addEventListener('click', () => void saveProfile(getToken));
+    }
+  };
+
+  /**
+   * Reads the profile and either fills the form in or, when the route cannot
+   * answer (not signed in, not configured), says so in the desk's own voice
+   * rather than leaving a form that would fail on save.
+   */
+  const loadProfile = async (getToken: () => Promise<string | null>) => {
+    if (!profileForm || !profileStatus) return;
+    profileForm.hidden = true;
+    profileStatus.hidden = false;
+    profileStatus.textContent = 'Opening your profile…';
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('Your sign-in session could not be refreshed.');
+      const response = await fetch(`${apiUrl}/account/profile`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const body = await response.json().catch(() => ({})) as ProfileResponse;
+      if (!response.ok || !body.profile) {
+        throw new Error(body.error || 'Your profile could not be opened just now.');
+      }
+      renderProfile(body.profile);
+      profileStatus.hidden = true;
+      profileForm.hidden = false;
+    } catch (error) {
+      profileStatus.hidden = false;
+      profileStatus.textContent = error instanceof Error
+        ? error.message
+        : 'Your profile could not be opened just now.';
+    }
+  };
+
   let wardrobeRefreshWired = false;
   const loadWardrobe = async (getToken: () => Promise<string | null>) => {
     wireStudioButton(getToken);
@@ -730,6 +1034,8 @@ if (shell) {
     renderTech(carry?.tech);
     renderMailbox(carry?.mailbox, carry?.claimedMailIds, getToken);
     renderMigration(carry?.soloMigration, getToken);
+    wireProfile(getToken);
+    void loadProfile(getToken);
     void loadWardrobe(getToken);
     if (claimed) claimed.hidden = false;
     tell(`Your account is connected. ${worlds.length} world${worlds.length === 1 ? '' : 's'} available.`);
