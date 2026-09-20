@@ -67,6 +67,13 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'mossy-paper-fiber': {
     material: 'paper.monstera', visual: 'fiberTuft', mapColor: '#4f823f',
   },
+  'cypress-bark-folds': { material: 'paper.cork', visual: 'twigBundle', mapColor: '#71543f' },
+  'alpine-resin-paper': { material: 'paper.hill', visual: 'fiberTuft', mapColor: '#78914b' },
+  'acacia-thornwood': { material: 'paper.brown.warm', visual: 'twigBundle', mapColor: '#95633d' },
+  'baobab-pith-fiber': { material: 'paper.orangewrap', visual: 'fiberTuft', mapColor: '#b68557' },
+  'bamboo-strips': { material: 'paper.green', visual: 'twigBundle', mapColor: '#6f9842' },
+  'supple-shrub-shoots': { material: 'paper.salmon', visual: 'twigBundle', mapColor: '#8b7751' },
+  'pressed-petal-confetti': { material: 'paper.rainbow', visual: 'fiberTuft', mapColor: '#c66f91' },
   'confetti-stones': {
     material: 'paper.purple', visual: 'stoneCluster', mapColor: '#8252a0',
   },
@@ -98,6 +105,12 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'rainfold-pebbles': {
     material: 'paper.aqua', visual: 'stoneCluster', mapColor: '#4c91a8',
   },
+  'bog-peat-paper': { material: 'paper.brown', visual: 'stoneCluster', mapColor: '#554b35' },
+  'wetland-silt-clay': { material: 'paper.aqua', visual: 'stoneCluster', mapColor: '#718b7d' },
+  'granite-cardstone': { material: 'paper.grey', visual: 'stoneCluster', mapColor: '#777c80' },
+  'savanna-hardpan': { material: 'paper.orangewrap', visual: 'stoneCluster', mapColor: '#a27b48' },
+  'badlands-ochre': { material: 'paper.orangewrap', visual: 'stoneCluster', mapColor: '#b65f3d' },
+  'bamboo-loam': { material: 'paper.monstera', visual: 'stoneCluster', mapColor: '#53683f' },
   'carbon-soil': {
     material: 'paper.grey', visual: 'stoneCluster', mapColor: '#4d4945',
   },
@@ -127,6 +140,12 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'paper-tomato-seeds': {
     material: 'paper.green', visual: 'seedPile', mapColor: '#d2654f',
   },
+  'lotus-fold-seeds': { material: 'paper.rainbow', visual: 'seedPile', mapColor: '#cf7896' },
+  'marsh-reed-seeds': { material: 'paper.green', visual: 'seedPile', mapColor: '#718857' },
+  'sunpaper-seeds': { material: 'paper.orangewrap', visual: 'seedPile', mapColor: '#cca442' },
+  'bamboo-starts': { material: 'paper.green', visual: 'seedPile', mapColor: '#729848' },
+  'alpine-herb-seeds': { material: 'paper.hill', visual: 'seedPile', mapColor: '#798c61' },
+  'prickly-pear-seeds': { material: 'paper.green', visual: 'seedPile', mapColor: '#859750' },
   // The harvests themselves don't spawn as a loose ground pile today — they
   // come off a plant you grew, not off the ground directly. `harvestedFood`
   // is set here anyway (rather than the wrong-shaped fiberTuft) so these
@@ -148,6 +167,12 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'paper-tomato': {
     material: 'paper.green', visual: 'harvestedFood', mapColor: '#d14a35',
   },
+  'lotus-blossoms': { material: 'paper.rainbow', visual: 'harvestedFood', mapColor: '#d77e9d' },
+  'marsh-reed-stalks': { material: 'paper.green', visual: 'fiberTuft', mapColor: '#718557' },
+  'sunpaper-heads': { material: 'paper.orangewrap', visual: 'harvestedFood', mapColor: '#d1a43d' },
+  'young-bamboo': { material: 'paper.green', visual: 'harvestedFood', mapColor: '#759c4b' },
+  'alpine-herbs': { material: 'paper.hill', visual: 'harvestedFood', mapColor: '#778e63' },
+  'paper-prickly-pears': { material: 'paper.green', visual: 'harvestedFood', mapColor: '#8b9b51' },
   // Never spawns loose in the world (crafted-only, see recipes.ts) — visual
   // is set for type-completeness and in case it's ever dropped/stored. A
   // bundle of finished lumber is closer in shape to twigBundle than any

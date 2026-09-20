@@ -1,6 +1,6 @@
 import { cancelTimedAction } from './timedAction';
 
-export type ActionMode = 'interact' | 'dig' | 'plant' | 'place' | 'trim';
+export type ActionMode = 'interact' | 'dig' | 'plant' | 'place' | 'trim' | 'mine';
 
 type ActionModeListener = (mode: ActionMode) => void;
 

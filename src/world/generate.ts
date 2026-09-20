@@ -26,6 +26,10 @@ const CACTI: DecorKind[] = [
 // layer instead — see `TROPICAL_TREES` below and
 // `docs/tropical-biome-plan.md`.
 const PALMS: TreeKind[] = ['palm-1', 'palm-2', 'palm-3', 'palm-4', 'palm-5'];
+const CYPRESS: TreeKind[] = ['cypress-1', 'cypress-2'];
+const ALPINE_PINES: TreeKind[] = ['alpine-pine-1', 'alpine-pine-2'];
+const ACACIAS: TreeKind[] = ['acacia-1', 'acacia-2'];
+const BAOBABS: TreeKind[] = ['baobab-1'];
 
 // The tropical canopy, in three roles: palms as the anchor (the biome plan's
 // word), broadleaf jungle trees as the mass, and a banana here and there as
@@ -49,14 +53,23 @@ const TROPICAL_CANOPY: Array<{ kind: TreeKind; weight: number }> = [
  * garnish around the tree and harvestable budgets, not a second forest.
  */
 const UNDERGROWTH: Partial<Record<Biome, DecorKind[]>> = {
-  dunes: ['agave-1', 'agave-2', 'prickly-pear-1', 'shrub-desert-1', 'shrub-desert-2', 'marigold-1'],
-  forest: ['fern-1', 'fern-2', 'fern-3', 'mushroom-1', 'mushroom-2', 'berry-shrub-1', 'boulder-mossy-1'],
+  meadow: ['shrub-temperate-1', 'shrub-temperate-2', 'shrub-flowering-1', 'flower-daisy', 'flower-cosmos', 'flower-sunflower', 'flower-coneflower'],
+  dunes: ['agave-1', 'agave-2', 'prickly-pear-1', 'aloe', 'euphorbia', 'shrub-desert-1', 'shrub-desert-2', 'marigold-1', 'flower-marigold'],
+  forest: ['fern-1', 'fern-2', 'fern-3', 'mushroom-1', 'mushroom-2', 'mushroom-3', 'mushroom-morel', 'mushroom-shelf', 'moss-patch', 'moss-hummock', 'berry-shrub-1', 'shrub-flowering-2', 'flower-foxglove', 'boulder-mossy-1', 'fallen-log'],
   tropical: [
     'broadleaf-plant-1', 'broadleaf-plant-2', 'shrub-tropical-1', 'shrub-tropical-2',
     'shrub-tropical-3', 'hibiscus-1', 'anthurium-1', 'bird-of-paradise-1', 'bamboo-1',
-    'mangrove-1', 'fern-1', 'fern-2', 'mushroom-1', 'mushroom-2',
+    'mangrove-1', 'fern-1', 'fern-2', 'mushroom-1', 'mushroom-2', 'flower-plumeria', 'flower-protea',
   ],
+  swamp: ['mangrove-prop', 'shrub-swamp', 'horsetail', 'pitcher-plant', 'moss-ball', 'moss-drape', 'moss-hummock', 'mushroom-amanita', 'mushroom-fly-agaric', 'flower-spider-lily', 'flower-lotus'],
+  wetland: ['mangrove-1', 'horsetail', 'shrub-swamp', 'moss-patch', 'mushroom-coral', 'flower-lotus', 'flower-allium', 'flower-lupine'],
+  'rocky-highlands': ['grass-alpine', 'shrub-alpine', 'moss-ball', 'lichen-rock', 'flower-edelweiss', 'flower-lupine', 'flower-paintbrush'],
+  savanna: ['grass-savanna', 'shrub-savanna', 'shrub-thorny', 'termite-mound', 'aloe', 'flower-blackeyed-susan', 'flower-protea'],
+  badlands: ['grass-badlands', 'shrub-thorny', 'aloe', 'euphorbia', 'termite-mound', 'flower-paintbrush', 'flower-poppy'],
+  'bamboo-forest': ['bamboo-1', 'bamboo-2', 'bamboo-3', 'bamboo-tall', 'bamboo-shoot', 'moss-patch', 'moss-hummock', 'mushroom-coral', 'mushroom-3', 'flower-allium'],
 };
+
+const ROCKS: DecorKind[] = ['rock-small-1', 'rock-small-2', 'rock-medium', 'boulder-large', 'rock-stack', 'scree-pile', 'cliff-slab', 'lichen-rock'];
 
 /** Height range per undergrowth cutout, in world units. */
 const UNDERGROWTH_SIZES: Partial<Record<DecorKind, [number, number]>> = {
@@ -70,6 +83,20 @@ const UNDERGROWTH_SIZES: Partial<Record<DecorKind, [number, number]>> = {
   'hibiscus-1': [0.9, 1.25], 'anthurium-1': [0.8, 1.05], 'bird-of-paradise-1': [1.0, 1.35],
   'bamboo-1': [2.3, 3.4], 'mangrove-1': [1.2, 1.7],
 };
+
+function decorHeight(art: DecorKind): [number, number] {
+  const authored = UNDERGROWTH_SIZES[art];
+  if (authored) return authored;
+  if (art.startsWith('flower-')) return [0.45, 0.9];
+  if (art.startsWith('mushroom')) return [0.4, 0.75];
+  if (art.startsWith('moss-')) return [0.25, 0.65];
+  if (art.startsWith('shrub-')) return [0.75, 1.25];
+  if (art.startsWith('bamboo-tall')) return [3.5, 5.8];
+  if (art.startsWith('bamboo')) return [1.3, 3.8];
+  if (art.includes('rock') || art.includes('boulder') || art.includes('slab') || art.includes('scree')) return [0.6, 1.8];
+  if (art.startsWith('grass-')) return [0.55, 1.0];
+  return [0.7, 1.3];
+}
 
 /**
  * Jungle broadleaf heights, in layers — the "canopy" feel is mostly a
@@ -215,6 +242,12 @@ export function generatePage(px: number, pz: number): PageData {
 
   const treeCount = biome === 'forest' ? 48 + Math.floor(rng() * 21)
     : biome === 'tropical' ? 26 + Math.floor(rng() * 15)
+    : biome === 'bamboo-forest' ? 8 + Math.floor(rng() * 6)
+    : biome === 'swamp' ? 18 + Math.floor(rng() * 12)
+    : biome === 'wetland' ? 8 + Math.floor(rng() * 7)
+    : biome === 'rocky-highlands' ? 12 + Math.floor(rng() * 9)
+    : biome === 'savanna' ? 8 + Math.floor(rng() * 7)
+    : biome === 'badlands' ? 2 + Math.floor(rng() * 3)
     : biome === 'meadow' ? 5 + Math.floor(rng() * 5)
     : 2 + Math.floor(rng() * 3);
   for (let i = 0; i < treeCount; i += 1) {
@@ -262,6 +295,19 @@ export function generatePage(px: number, pz: number): PageData {
       continue;
     }
 
+    if (biome === 'swamp' || biome === 'wetland' || biome === 'rocky-highlands' || biome === 'savanna' || biome === 'badlands') {
+      const pool = biome === 'swamp' || biome === 'wetland' ? CYPRESS
+        : biome === 'rocky-highlands' ? ALPINE_PINES
+        : rng() < (biome === 'savanna' ? 0.78 : 0.62) ? ACACIAS : BAOBABS;
+      const tree = pool[Math.floor(rng() * pool.length)];
+      const height = tree.startsWith('baobab') ? 7 + rng() * 5
+        : tree.startsWith('acacia') ? 4.5 + rng() * 3.5
+        : tree.startsWith('cypress') ? 5.5 + rng() * 5
+        : 5 + rng() * 5.5;
+      props.push({ kind: 'tree', tree, x, z, rotY: rng() * 0.9 - 0.45, height });
+      continue;
+    }
+
     const redwood = biome === 'forest' && rng() < 0.16;
     const giant = !redwood && biome === 'forest' && rng() < 0.08;
     props.push({
@@ -284,7 +330,11 @@ export function generatePage(px: number, pz: number): PageData {
   // the tropics — the biome plan's own words for it.
   const undergrowthPool = UNDERGROWTH[biome];
   if (undergrowthPool) {
-    const undergrowthCount = biome === 'tropical' ? 9 + Math.floor(rng() * 6)
+    const undergrowthCount = biome === 'bamboo-forest' ? 30 + Math.floor(rng() * 16)
+      : biome === 'swamp' || biome === 'wetland' ? 16 + Math.floor(rng() * 10)
+      : biome === 'rocky-highlands' || biome === 'savanna' || biome === 'badlands' ? 12 + Math.floor(rng() * 8)
+      : biome === 'meadow' ? 10 + Math.floor(rng() * 7)
+      : biome === 'tropical' ? 9 + Math.floor(rng() * 6)
       : biome === 'forest' ? 5 + Math.floor(rng() * 5)
       : 2 + Math.floor(rng() * 3);
     for (let i = 0; i < undergrowthCount; i += 1) {
@@ -293,7 +343,7 @@ export function generatePage(px: number, pz: number): PageData {
       // in a neighbouring biome's ground.
       if (dominantBiomeAt(x, z) !== biome && rng() > biomeConfidenceAt(x, z) * 0.35) continue;
       const art = undergrowthPool[Math.floor(rng() * undergrowthPool.length)];
-      const [minHeight, maxHeight] = UNDERGROWTH_SIZES[art] ?? [0.8, 1.2];
+      const [minHeight, maxHeight] = decorHeight(art);
       props.push({
         kind: 'decor',
         art,
@@ -303,6 +353,20 @@ export function generatePage(px: number, pz: number): PageData {
         height: minHeight + rng() * (maxHeight - minHeight),
       });
     }
+  }
+
+  // Rock formations are future mine targets, deliberately not trimmable.
+  // Highlands and badlands carry a real formation layer; other biomes get
+  // the occasional stone so the mine verb will have places to grow into.
+  const rockCount = biome === 'rocky-highlands' ? 10 + Math.floor(rng() * 8)
+    : biome === 'badlands' ? 7 + Math.floor(rng() * 6)
+    : biome === 'savanna' ? 2 + Math.floor(rng() * 3)
+    : rng() < 0.55 ? 1 + Math.floor(rng() * 3) : 0;
+  for (let i = 0; i < rockCount; i += 1) {
+    const { x, z } = spot();
+    const art = ROCKS[Math.floor(rng() * ROCKS.length)];
+    const [minHeight, maxHeight] = decorHeight(art);
+    props.push({ kind: 'decor', art, x, z, rotY: rng() * Math.PI * 2, height: minHeight + rng() * (maxHeight - minHeight) });
   }
 
   // Sparse palms on dunes: about one a page, never a grove. In the tropics
@@ -327,7 +391,7 @@ export function generatePage(px: number, pz: number): PageData {
   // Harvestables use the same page seed as scenery, so their types and
   // locations remain stable across clients and revisits. The tropics gather
   // like a forest — wet ground grows things.
-  const resourceCount = biome === 'forest' || biome === 'tropical' ? 14 + Math.floor(rng() * 7)
+  const resourceCount = biome === 'forest' || biome === 'tropical' || biome === 'swamp' || biome === 'wetland' || biome === 'bamboo-forest' ? 14 + Math.floor(rng() * 7)
     : biome === 'scrapflats' ? 10 + Math.floor(rng() * 6)
     : 8 + Math.floor(rng() * 6);
   const resourcePool = BIOME_RESOURCES[biome];
@@ -379,6 +443,34 @@ export function generatePage(px: number, pz: number): PageData {
       z,
       rotY: rng() * Math.PI,
     });
+  }
+
+  // Inland water is part of generated page data, so ponds and lakes use the
+  // same water registry, wading rules, shoreline art, and treasure-map layer
+  // as the authored clearing pond and the world-scale river.
+  const pondCount = biome === 'swamp' ? 2 + Math.floor(rng() * 3)
+    : biome === 'wetland' ? 1 + Math.floor(rng() * 3)
+    : rng() < 0.055 ? 1 : 0;
+  for (let i = 0; i < pondCount; i += 1) {
+    const { x, z } = spot();
+    const lake = i === 0 && (biome === 'swamp' || biome === 'wetland') && rng() < 0.3;
+    const width = lake ? 10 + rng() * 6 : 3.5 + rng() * 4.5;
+    const depth = lake ? 7 + rng() * 5 : 2.8 + rng() * 3.8;
+    props.push({
+      id: `${lake ? 'lake' : 'pond'}:${i}`,
+      kind: 'water',
+      width,
+      depth,
+      x,
+      z,
+      rotY: rng() * Math.PI,
+      map: { kind: 'terrain', color: lake ? '#477b9d' : '#5a8e9f' },
+    });
+    for (let index = terrain.length - 1; index >= 0; index -= 1) {
+      const patch = terrain[index];
+      if (Math.abs(patch.x - x) <= patch.radiusX + width / 2 + 0.8
+        && Math.abs(patch.z - z) <= patch.radiusZ + depth / 2 + 0.8) terrain.splice(index, 1);
+    }
   }
 
   const groundMaterial = BIOME_GROUND_MATERIALS[biome];

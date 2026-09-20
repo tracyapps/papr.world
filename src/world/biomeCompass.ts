@@ -160,4 +160,10 @@ export const BIOME_MAP_NAMES: Record<Biome, string> = {
   dunes: 'desert',
   scrapflats: 'scrap flats',
   tropical: 'jungle',
+  swamp: 'swamp',
+  wetland: 'wetlands',
+  'rocky-highlands': 'rocky highlands',
+  savanna: 'savanna',
+  badlands: 'badlands',
+  'bamboo-forest': 'bamboo forest',
 };

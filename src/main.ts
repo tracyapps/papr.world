@@ -75,6 +75,7 @@ import { getActionMode, setActionMode } from './game/actionMode';
 import { initializeToolToolbar, selectToolSlot } from './ui/toolToolbar';
 import { hasPlantInteractionAt, tryPlantInteractionAt, updatePlantInteractions } from './game/plantInteractions';
 import { describeTrimRegistry, hasTrimActionAt, tryTrimAt, updateTrimmableTrees } from './game/treeInteractions';
+import { describeMineRegistry, hasMineActionAt, tryMineAt, updateMineableRocks } from './game/rockInteractions';
 import { initializeHudLayout, requestHudLayout } from './ui/hudLayout';
 import { initializeProfessor } from './ui/professor';
 import { closeTechTreeView, initializeTechTreeView } from './ui/techTreeView';
@@ -293,6 +294,12 @@ registerScreenInteraction({
   interact: tryTrimAt,
 });
 registerScreenInteraction({
+  id: 'rock-mine',
+  priority: 24,
+  hitTest: hasMineActionAt,
+  interact: tryMineAt,
+});
+registerScreenInteraction({
   id: 'equipped-tool',
   priority: 20,
   hitTest: hasToolActionAt,
@@ -468,6 +475,7 @@ function animate(animationTime = 0) {
   updateCozyInteractions(delta, elapsed);
   updateHarvestables();
   updateTrimmableTrees();
+  updateMineableRocks();
   updatePlanting();
   updatePlantInteractions(delta, elapsed);
   updateRegionBanner(avatar.position);
@@ -514,6 +522,8 @@ declare global {
       teleport: (x: number, z: number) => void;
       /** Console-only: why the trim system can or cannot see a tree. */
       trees: () => ReturnType<typeof describeTrimRegistry>;
+      /** Console-only: nearby renewable rock formations and mining state. */
+      rocks: () => ReturnType<typeof describeMineRegistry>;
       /** Console-only shared-session visibility for two-browser smoke checks. */
       shared: () => ReturnType<typeof getSharedSessionDebug>;
       /** Console-only authoritative piece intent for multiplayer smoke checks. */
@@ -530,6 +540,7 @@ window.__paperWorld = {
     avatar.position.z = z;
   },
   trees: describeTrimRegistry,
+  rocks: describeMineRegistry,
   shared: getSharedSessionDebug,
   sharedPlace: (templateKey = 'paper-bench') => publishSharedPlacedPiece({
     id: 'console-only',

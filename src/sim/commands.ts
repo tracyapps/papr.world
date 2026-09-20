@@ -40,6 +40,12 @@ import {
   trimStageResponse,
   type TreeAddress,
 } from './catalogs/trees';
+import {
+  resolveMineYield,
+  rockFormationName,
+  rockIsReady,
+  type RockAddress,
+} from './catalogs/mining';
 import { BUILD_PIECE_DEFS, buildPieceDef, buildPiecesConflict, planterBoxAt, type BuildPieceKey } from '../world/buildPieces';
 import {
   buildAssemblyDef,
@@ -99,6 +105,7 @@ export type GameCommand =
   | { type: 'startCraft'; recipeId: RecipeId; now: number }
   | { type: 'tendPlant'; target: TerrainCellAddress; now: number }
   | { type: 'trimTree'; target: TreeAddress & { x: number; z: number }; now: number }
+  | { type: 'mineRock'; target: RockAddress & { x: number; z: number }; now: number }
   | { type: 'updatePlacedPiece'; id: string; x: number; z: number; rotY: number; material?: string; pageId: string }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
   | { type: 'upgradeThingMaker' };
@@ -204,7 +211,7 @@ const ACTIVITY_LOG_LIMIT = 80;
 
 function emptyPageState() {
   return {
-    terrainEdits: {}, resourceDrops: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
+    terrainEdits: {}, resourceDrops: {}, treeGrowth: {}, rockGrowth: {}, plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
   };
 }
 
@@ -451,7 +458,14 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       state.world.thingMaker.trayOutputs.push(active.recipeId);
       state.world.thingMaker.completedOutputs.push(active.recipeId);
       state.world.thingMaker.activeCraft = null;
-      return { ok: true, message: `Finished ${recipe.output.label}. It is waiting on the tray.` };
+      const message = `Finished ${recipe.output.label}. It is waiting on the tray.`;
+      appendActivity(state, {
+        id: `craft:${active.recipeId}:${active.completesAt}`,
+        kind: 'crafting',
+        message,
+        at: command.now,
+      });
+      return { ok: true, message };
     }
 
     case 'collectOutput': {
@@ -612,6 +626,13 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         changedAt: command.now,
       };
       addWorldDrop(page, discovery.resource, discovery.quantity, target.x + 0.42, target.z + 0.18, command.now, `dig-${target.cellKey}`);
+      const message = `Dug up ${discovery.quantity} ${RESOURCE_CORE_DEFS[discovery.resource].shortLabel}.`;
+      appendActivity(state, {
+        id: `dig:${target.pageId}:${target.cellKey}:${command.now}`,
+        kind: 'gathering',
+        message,
+        at: command.now,
+      });
       return {
         ok: true,
         drops: { [discovery.resource]: discovery.quantity },
@@ -660,7 +681,14 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         makerId: LOCAL_MAKER_ID,
         page: command.pageId,
       };
-      return { ok: true, message: `Placed the ${def.label}.` };
+      const message = `Placed the ${def.label}.`;
+      appendActivity(state, {
+        id: `build:${id}`,
+        kind: 'building',
+        message,
+        at: command.now,
+      });
+      return { ok: true, message };
     }
 
     case 'completeBuildStep': {
@@ -745,7 +773,14 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         page: activeSite.page,
       };
       delete page.buildSites[activeSite.id];
-      return { ok: true, allocation, message: `Built the ${def.label}.` };
+      const message = `Built the ${def.label}.`;
+      appendActivity(state, {
+        id: `build:${activeSite.id}`,
+        kind: 'building',
+        message,
+        at: command.now,
+      });
+      return { ok: true, allocation, message };
     }
 
     case 'updatePlacedPiece': {
@@ -909,15 +944,16 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'Finish with this bed before building the ground up.' };
       }
       const height = existing?.height ?? 0;
-      if (height >= MAX_BASIC_HILL_HEIGHT - 0.001) {
-        return { ok: false, reason: 'This little hill is as high as the basic hoe can safely shape it.' };
+      const maxHillHeight = MAX_BASIC_HILL_HEIGHT * tool.tier;
+      if (height >= maxHillHeight - 0.001) {
+        return { ok: false, reason: `This hill is as high as the ${tool.name} can safely shape it.` };
       }
       const spent = spendSoil(state, 1);
       if (!spent) return { ok: false, reason: 'Pick up a scoop of paper soil before building a hill.' };
       page.terrainEdits[command.target.cellKey] = {
         kind: 'dug', state: 'raised', x: command.target.x, z: command.target.z,
-        depth: 0, height: Math.min(MAX_BASIC_HILL_HEIGHT, height + TERRAIN_RAISE_STEP),
-        radius: TERRAIN_CELL_RADIUS, toolTier: 1,
+        depth: 0, height: Math.min(maxHillHeight, height + TERRAIN_RAISE_STEP),
+        radius: TERRAIN_CELL_RADIUS, toolTier: tool.tier,
         geologySeed: existing?.geologySeed ?? Math.abs(Math.imul(command.target.cellKey.length + 1, 2654435761)),
         revealedLayers: existing?.revealedLayers ?? [],
         surfaceRestoresAt: command.now + TERRAIN_SURFACE_RECOVERY_MS,
@@ -1065,10 +1101,73 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
           command.now, `trim-${target.treeKey}-${index}`);
       }
 
+      const message = `${describeTrimYield(yields)} fell beside the ${SPECIES_NAMES[target.species].one}.`;
+      appendActivity(state, {
+        id: `trim:${target.pageId}:${target.treeKey}:${command.now}`,
+        kind: 'gathering',
+        message,
+        at: command.now,
+      });
       return {
         ok: true,
         drops,
-        message: `${describeTrimYield(yields)} fell beside the ${SPECIES_NAMES[target.species].one}. ${trimStageResponse(target.species, treeStageFor(remaining))}`,
+        message: `${message} ${trimStageResponse(target.species, treeStageFor(remaining))}`,
+      };
+    }
+
+    case 'mineRock': {
+      const equippedTool = state.player.equippedTool;
+      const tool = equippedTool ? TOOL_DEFS[equippedTool] : null;
+      if (!tool || tool.verb !== 'mine' || (state.player.tools[equippedTool!] ?? 0) <= 0) {
+        return { ok: false, reason: 'Hold a mining pick to work that rock.' };
+      }
+      const { target } = command;
+      if (!target.pageId || !target.rockKey || !Number.isFinite(target.x) || !Number.isFinite(target.z)) {
+        return { ok: false, reason: 'That rock formation could not be found.' };
+      }
+
+      const page = state.world.pages[target.pageId] ??= emptyPageState();
+      const rockGrowth = page.rockGrowth ??= {};
+      const record = rockGrowth[target.rockKey];
+      if (!rockIsReady(record, command.now)) {
+        return { ok: false, reason: `The ${rockFormationName(target.formation)} is still folding itself back together.` };
+      }
+
+      const mines = (record?.mines ?? 0) + 1;
+      const yields = resolveMineYield({
+        rockKey: target.rockKey,
+        formation: target.formation,
+        biome: target.biome,
+        mines,
+      });
+      rockGrowth[target.rockKey] = {
+        growth: 0,
+        minedAt: command.now,
+        mines,
+        formation: target.formation,
+      };
+
+      const drops: ResourceAllocation = {};
+      for (const [index, entry] of yields.entries()) {
+        drops[entry.resource] = (drops[entry.resource] ?? 0) + entry.quantity;
+        const angle = ((index + mines * 0.41) / Math.max(1, yields.length)) * Math.PI * 2;
+        addWorldDrop(page, entry.resource, entry.quantity,
+          target.x + Math.cos(angle) * (0.65 + index * 0.15),
+          target.z + Math.sin(angle) * (0.65 + index * 0.15),
+          command.now, `mine-${target.rockKey}-${index}`);
+      }
+
+      const description = yields.map((entry) => `${entry.quantity} ${RESOURCE_CORE_DEFS[entry.resource].label}`).join(' and ');
+      appendActivity(state, {
+        id: `mine:${target.pageId}:${target.rockKey}:${command.now}`,
+        kind: 'gathering',
+        message: `Mined ${description} from the ${rockFormationName(target.formation)}.`,
+        at: command.now,
+      });
+      return {
+        ok: true,
+        drops,
+        message: `${description} broke free from the ${rockFormationName(target.formation)}. It will slowly reform.`,
       };
     }
 

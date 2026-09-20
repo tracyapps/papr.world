@@ -9,11 +9,19 @@ const REGION_NAMES: Record<Biome, string[]> = {
   dunes: ['Cardboard Desert', 'Kraftpaper Dunes', 'Corrugated Sands', 'Torn-Edge Desert'],
   scrapflats: ['Offcut Flats', 'Crumplefield Badlands', 'Cardstock Flats', 'The Scissor-Scrap Barrens'],
   tropical: ['Creaseline Jungle', 'Ribbonfrond Tropics', 'Sunfold Jungle', 'Confetti-Blossom Coast', 'Tapedrop Jungle'],
+  swamp: ['Mossfold Swamp', 'Cypress Crinkles', 'Inkwater Bog', 'Mucky Margins'],
+  wetland: ['Reedstitch Wetlands', 'Lilyfold Marsh', 'Soft-Silt Fen', 'Ripplepaper Mere'],
+  'rocky-highlands': ['Granite-Card Highlands', 'Scree Fold Range', 'Pencilpoint Peaks', 'Lichen Ridge'],
+  savanna: ['Sunpaper Savanna', 'Ribbon-Grass Plain', 'Acacia Fold', 'Baobab Reach'],
+  badlands: ['Ochre-Tear Badlands', 'Redfold Barrens', 'Corrugated Canyons', 'Paintbrush Mesa'],
+  'bamboo-forest': ['Bamboo-Rustle Grove', 'Green-Culm Forest', 'Folded Cane Wood', 'Panda Paperwood'],
 };
 
 const BIOME_LABELS: Record<Biome, string> = {
   clearing: 'home clearing', forest: 'forest', meadow: 'meadow', dunes: 'desert', scrapflats: 'scrap flats',
   tropical: 'tropics',
+  swamp: 'swamp', wetland: 'wetlands', 'rocky-highlands': 'rocky highlands', savanna: 'savanna',
+  badlands: 'badlands', 'bamboo-forest': 'bamboo forest',
 };
 
 export function getRegionName(px: number, pz: number, biome: Biome) {

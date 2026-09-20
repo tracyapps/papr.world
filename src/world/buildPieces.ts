@@ -80,6 +80,21 @@ export const BUILD_PIECE_DEFS = {
     overlap: 'none',
     solid: true,
   },
+  'garden-arbor': {
+    key: 'garden-arbor', label: 'Garden arbor',
+    summary: 'A leafy doorway assembled from two posts, a lintel, and binding.',
+    radiusX: 0.9, radiusZ: 0.38, overlap: 'none', solid: true,
+  },
+  'picnic-table': {
+    key: 'picnic-table', label: 'Picnic table',
+    summary: 'A broad table with benches for shared meals and important snacks.',
+    radiusX: 0.95, radiusZ: 0.78, overlap: 'none', solid: true,
+  },
+  'footbridge': {
+    key: 'footbridge', label: 'Footbridge',
+    summary: 'A short raised crossing assembled from supports, deck, and rails.',
+    radiusX: 1.35, radiusZ: 0.58, overlap: 'none', solid: false,
+  },
 } as const satisfies Record<string, ResolvedBuildPiece>;
 
 /**

@@ -6,6 +6,7 @@ import { SEED_STORE, SEED_STORE_BARTER, seedStoreSellPrice, type ShopId } from '
 import { TOOL_DEFS, toolsInFamily, type ToolId } from './tools';
 import { SPECIES_NAMES, SPECIES_YIELD, type TreeSpecies } from './trees';
 import { MILL_REFINEMENTS } from './millRefining';
+import { surfaceMineBiomes } from './mining';
 
 /**
  * How every material in the game can be got — the one table that answers
@@ -32,6 +33,8 @@ export type ObtainRoute =
   | { kind: 'dug'; biomes: Biome[]; layer: 1 | 2 | 3 }
   /** Cut from a living tree. */
   | { kind: 'trimmed'; species: TreeSpecies; minimumTier: 1 | 2 | 3; speciesName: string }
+  /** Worked from a renewable surface rock formation. */
+  | { kind: 'mined'; biomes: Biome[]; minimumTier: 1 | 2 | 3 }
   /** Grown in a garden bed. */
   | { kind: 'grown'; from: ResourceId }
   /** Made at the Thing Maker. `recipe` is the one that produces it. */
@@ -73,6 +76,12 @@ const SCATTERED_IN: Partial<Record<ResourceId, Biome[]>> = {
   // The tropics' wet ground gives up its own soil the way dunes give up
   // sunbaked board — loose, walkable, distinctly not ochre.
   'jungle-loam': ['tropical'],
+  'bog-peat-paper': ['swamp'],
+  'wetland-silt-clay': ['wetland'],
+  'granite-cardstone': ['rocky-highlands'],
+  'savanna-hardpan': ['savanna'],
+  'badlands-ochre': ['badlands'],
+  'bamboo-loam': ['bamboo-forest'],
   // Seed packets lie about near the kind of ground they want to grow in —
   // the farm finds the player almost as often as the player finds the farm.
   'raspberry-bush-seeds': ['clearing', 'meadow'],
@@ -82,6 +91,12 @@ const SCATTERED_IN: Partial<Record<ResourceId, Biome[]>> = {
   // Tomatoes like it warm: dunes and now the tropics. This also keeps the
   // "what grows well here?" knowledge lane alive in every live biome.
   'paper-tomato-seeds': ['meadow', 'dunes', 'tropical'],
+  'lotus-fold-seeds': ['swamp', 'wetland'],
+  'marsh-reed-seeds': ['wetland'],
+  'sunpaper-seeds': ['savanna'],
+  'bamboo-starts': ['bamboo-forest'],
+  'alpine-herb-seeds': ['rocky-highlands'],
+  'prickly-pear-seeds': ['dunes', 'badlands'],
 };
 
 /** Seeds you can gather from a plant you grew. */
@@ -92,6 +107,12 @@ const GROWN_FROM: Partial<Record<ResourceId, ResourceId>> = {
   'ribbon-corn': 'ribbon-corn-seeds',
   'folded-cabbage': 'folded-cabbage-seeds',
   'paper-tomato': 'paper-tomato-seeds',
+  'lotus-blossoms': 'lotus-fold-seeds',
+  'marsh-reed-stalks': 'marsh-reed-seeds',
+  'sunpaper-heads': 'sunpaper-seeds',
+  'young-bamboo': 'bamboo-starts',
+  'alpine-herbs': 'alpine-herb-seeds',
+  'paper-prickly-pears': 'prickly-pear-seeds',
 };
 
 const DIG_LAYERS: Array<1 | 2 | 3> = [1, 2, 3];
@@ -138,6 +159,9 @@ export function obtainRoutesFor(resource: ResourceId): ObtainRoute[] {
       routes.push({ kind: 'trimmed', species, minimumTier: lowestTierFor(species), speciesName: SPECIES_NAMES[species].many });
     }
   }
+
+  const mined = surfaceMineBiomes(resource);
+  if (mined.length) routes.push({ kind: 'mined', biomes: mined, minimumTier: 1 });
 
   const grown = GROWN_FROM[resource];
   if (grown) routes.push({ kind: 'grown', from: grown });
@@ -213,13 +237,20 @@ export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
   // Bananas are tropical-only; jungle broadleafs are `leafy` and grow in
   // forest and meadow too, which is correct — they are big leafy trees.
   banana: ['tropical'],
+  cypress: ['swamp', 'wetland'],
+  'alpine-pine': ['rocky-highlands'],
+  acacia: ['savanna'],
+  baobab: ['savanna'],
+  bamboo: ['bamboo-forest'],
   // Vines hang only from the tall jungle canopy (see `generate.ts`), which
   // is what makes crepe vine a tropical-exclusive material.
   vine: ['tropical'],
   // Undergrowth — these follow `UNDERGROWTH` in `generate.ts`, which is
   // where they are actually scattered.
-  mushroom: ['forest', 'tropical'],
-  shrub: ['dunes', 'forest', 'tropical'],
+  mushroom: ['forest', 'tropical', 'swamp', 'wetland', 'bamboo-forest'],
+  moss: ['forest', 'swamp', 'wetland', 'bamboo-forest'],
+  shrub: ['dunes', 'forest', 'tropical', 'swamp', 'wetland', 'rocky-highlands', 'savanna', 'badlands', 'bamboo-forest'],
+  flower: ['meadow', 'dunes', 'forest', 'tropical', 'swamp', 'wetland', 'rocky-highlands', 'savanna', 'badlands', 'bamboo-forest'],
 };
 
 /**
@@ -232,7 +263,7 @@ export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
 export function biomesFor(resource: ResourceId): Biome[] {
   const found = new Set<Biome>();
   for (const route of obtainRoutesFor(resource)) {
-    if (route.kind === 'scattered' || route.kind === 'dug') {
+    if (route.kind === 'scattered' || route.kind === 'dug' || route.kind === 'mined') {
       for (const biome of route.biomes) found.add(biome);
     }
     if (route.kind === 'trimmed') {
@@ -263,6 +294,10 @@ export function toolRequiredFor(resource: ResourceId): ToolId | null {
     .sort((a, b) => a.layer - b.layer)[0];
   if (shallowest) {
     return toolsInFamily('shovel').find((toolId) => TOOL_DEFS[toolId].tier >= shallowest.layer) ?? null;
+  }
+  const mined = routes.find((route): route is Extract<ObtainRoute, { kind: 'mined' }> => route.kind === 'mined');
+  if (mined) {
+    return toolsInFamily('pickaxe').find((toolId) => TOOL_DEFS[toolId].tier >= mined.minimumTier) ?? null;
   }
   return null;
 }

@@ -302,6 +302,11 @@ describe('terrain commands', () => {
     expect(Object.values(state.world.pages['0,0'].resourceDrops ?? {})).toEqual([
       expect.objectContaining({ resource: 'ochre-paperclay', amount: 2 }),
     ]);
+    expect(state.player.activityLog[0]).toMatchObject({
+      kind: 'gathering',
+      message: 'Dug up 2 Ochre clay.',
+      at: 1000,
+    });
     expect(state.world.pages['0,0'].terrainEdits['2,3'].revealedLayers).toEqual([SHALLOW_DISCOVERY]);
 
     const digDepth = state.world.pages['0,0'].terrainEdits['2,3'].depth;
@@ -404,9 +409,10 @@ describe('terrain commands', () => {
 
     expect(first.ok).toBe(true);
     expect(duplicate.ok).toBe(false);
-    expect(state.player.activityLog).toHaveLength(1);
-    expect(state.player.activityLog[0]?.message).toContain('Raspberry Bush');
-    expect(state.player.activityLog[0]?.message).toContain('ready to harvest');
+    const gardenEntries = state.player.activityLog.filter((entry) => entry.kind === 'garden');
+    expect(gardenEntries).toHaveLength(1);
+    expect(gardenEntries[0]?.message).toContain('Raspberry Bush');
+    expect(gardenEntries[0]?.message).toContain('ready to harvest');
   });
 
   it('harvests several fruit from a repeat crop and leaves the plant growing', () => {

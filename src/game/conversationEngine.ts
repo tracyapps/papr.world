@@ -211,6 +211,12 @@ const BIOME_LABELS: Record<Biome, string> = {
   dunes: 'desert',
   scrapflats: 'scrap flats',
   tropical: 'tropics',
+  swamp: 'swamp',
+  wetland: 'wetlands',
+  'rocky-highlands': 'rocky highlands',
+  savanna: 'savanna',
+  badlands: 'badlands',
+  'bamboo-forest': 'bamboo forest',
 };
 
 function hasAll(memory: ConversationMemory, flags: string[] | undefined) {
@@ -269,7 +275,7 @@ function rotateBySeed(lines: string[], seed: string): string[] {
 }
 
 function routeAppliesHere(route: ObtainRoute, biome: Biome): boolean {
-  if (route.kind === 'scattered' || route.kind === 'dug') return route.biomes.includes(biome);
+  if (route.kind === 'scattered' || route.kind === 'dug' || route.kind === 'mined') return route.biomes.includes(biome);
   if (route.kind !== 'trimmed') return false;
   return SPECIES_BIOMES[route.species].includes(biome);
 }
@@ -289,6 +295,9 @@ function localMaterialReplies(biome: Biome): string[] {
     const dug = localRoutes.find((route): route is Extract<ObtainRoute, { kind: 'dug' }> => (
       route.kind === 'dug'
     ));
+    const mined = localRoutes.find((route): route is Extract<ObtainRoute, { kind: 'mined' }> => (
+      route.kind === 'mined'
+    ));
 
     if (scattered) {
       replies.push(`“Keep an eye out for ${resource.label} around this ${BIOME_LABELS[biome]}. It lies loose, so walking across a bundle tucks it into your scrapbook.”`);
@@ -302,6 +311,10 @@ function localMaterialReplies(biome: Biome): string[] {
       const toolId = toolsInFamily('shovel')
         .find((candidate) => TOOL_DEFS[candidate].tier >= dug.layer);
       replies.push(`“There is ${resource.label} under the ${BIOME_LABELS[biome]}. ${toolId ? TOOL_DEFS[toolId].name : `a tier-${dug.layer} shovel`} reaches that paper layer.”`);
+    } else if (mined) {
+      const toolId = toolsInFamily('pickaxe')
+        .find((candidate) => TOOL_DEFS[candidate].tier >= mined.minimumTier);
+      replies.push(`“The rock formations around this ${BIOME_LABELS[biome]} hold ${resource.label}. Work one with ${toolId ? TOOL_DEFS[toolId].name : 'a mining pick'} and it will slowly reform.”`);
     }
   }
   return replies;

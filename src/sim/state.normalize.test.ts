@@ -99,5 +99,20 @@ describe('save normalization — hostile input must not crash a conversation', (
     expect(state.player.visitedBiomes).toEqual(['clearing']);
     expect(state.player.visitedPages).toEqual(['0,0']);
     expect(state.player.metCritters).toEqual([]);
+    expect(state.player.travelLog).toEqual([]);
+  });
+
+  it('keeps expanded biome visits and valid timestamped travel entries', () => {
+    const state = initializeGameState(storageHolding(baseSave({
+      visitedBiomes: ['clearing', 'swamp', 'rocky-highlands', 'not-real'],
+      travelLog: [
+        { id: 'travel:2,3', pageId: '2,3', biome: 'swamp', at: 1234 },
+        { id: 'bad', pageId: '3,3', biome: 'not-real', at: 1235 },
+      ],
+    })));
+    expect(state.player.visitedBiomes).toEqual(['clearing', 'swamp', 'rocky-highlands']);
+    expect(state.player.travelLog).toEqual([
+      { id: 'travel:2,3', pageId: '2,3', biome: 'swamp', at: 1234 },
+    ]);
   });
 });

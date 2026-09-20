@@ -65,6 +65,15 @@ function buildVisual(group: THREE.Group, key: BuildPieceKey, material: THREE.Mes
     case 'paper-lamp':
       buildLamp(group, material);
       break;
+    case 'garden-arbor':
+      buildArbor(group, material);
+      break;
+    case 'picnic-table':
+      buildPicnicTable(group, material);
+      break;
+    case 'footbridge':
+      buildFootbridge(group, material);
+      break;
   }
 }
 
@@ -121,4 +130,35 @@ function buildLamp(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
   cone.position.set(0, 1.53, 0);
   cone.castShadow = true;
   group.add(cone);
+}
+
+function buildArbor(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  for (const x of [-0.72, 0.72]) group.add(createWall(0.12, 2.15, chosen, [x, 1.075, 0]));
+  group.add(createWall(1.65, 0.14, chosen, [0, 2.08, 0]));
+  const leaf = getMaterial('paper.green');
+  for (const x of [-0.55, -0.18, 0.18, 0.55]) {
+    const sprig = createSheet(0.35, 0.22, leaf, [x, 2.16, 0]);
+    sprig.rotation.z = x * 0.3;
+    group.add(sprig);
+  }
+}
+
+function buildPicnicTable(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  const dark = getMaterial('paper.brown');
+  group.add(createSheet(1.7, 0.72, chosen, [0, 0.78, 0]));
+  for (const z of [-0.62, 0.62]) group.add(createSheet(1.65, 0.3, chosen, [0, 0.46, z]));
+  for (const x of [-0.62, 0.62]) {
+    for (const z of [-0.3, 0.3]) group.add(createWall(0.1, 0.75, dark, [x, 0.375, z]));
+  }
+}
+
+function buildFootbridge(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  const rail = getMaterial('paper.brown');
+  for (let index = -3; index <= 3; index += 1) {
+    group.add(createSheet(0.34, 1.0, chosen, [index * 0.38, 0.18 + Math.cos(index * 0.35) * 0.08, 0]));
+  }
+  for (const z of [-0.48, 0.48]) {
+    group.add(createWall(2.65, 0.08, rail, [0, 0.72, z]));
+    for (const x of [-1.15, -0.58, 0, 0.58, 1.15]) group.add(createWall(0.07, 0.68, rail, [x, 0.38, z]));
+  }
 }

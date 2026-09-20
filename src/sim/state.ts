@@ -4,8 +4,9 @@ import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import type { DigDiscovery } from './catalogs/geology';
 import { PLANT_STAGE_ORDER, SEED_DEFS, type PlantStage, type SeedId } from './catalogs/seeds';
 import { MAX_TREE_GROWTH, type TreeGrowthState, type TreeSpecies } from './catalogs/trees';
+import { MAX_ROCK_GROWTH, type RockFormation, type RockGrowthState } from './catalogs/mining';
 import { LIMITS, type MailItem, type PlacedPiece } from '../../shared/src/index';
-import type { Biome } from './catalogs/biomes';
+import { BIOME_IDS, type Biome } from './catalogs/biomes';
 import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
 
@@ -82,6 +83,8 @@ export type PageModificationState = {
    * until someone works it.
    */
   treeGrowth: Record<string, TreeGrowthState>;
+  /** Renewable surface formations that have been worked at least once. */
+  rockGrowth: Record<string, RockGrowthState>;
   plantedCells: Record<string, unknown>;
   placedEntities: Record<string, unknown>;
   /** Build pieces standing on this page, keyed by piece id. */
@@ -141,8 +144,15 @@ export type TerrainEditCellState = {
 
 export type ActivityEntry = {
   id: string;
-  kind: 'garden' | 'harvest';
+  kind: 'garden' | 'harvest' | 'gathering' | 'crafting' | 'building';
   message: string;
+  at: number;
+};
+
+export type TravelLogEntry = {
+  id: string;
+  pageId: string;
+  biome: Biome;
   at: number;
 };
 
@@ -241,6 +251,8 @@ export type GameState = {
     activityLog: ActivityEntry[];
     /** Newest first; everything a critter has told the player so far. */
     diaryEntries: DiaryEntry[];
+    /** Newest first; pages discovered after this log shape was introduced. */
+    travelLog: TravelLogEntry[];
     /** Newest first; letters remain after an attachment is collected. */
     mailbox: MailItem[];
     /** Stable mail ids whose attachment has already been taken. */
@@ -334,6 +346,7 @@ export function createDefaultGameState(): GameState {
       activeLearning: null,
       activityLog: [],
       diaryEntries: [],
+      travelLog: [],
       mailbox: [createWelcomeMail()],
       claimedMailIds: [],
       trinkets: [],
@@ -470,6 +483,23 @@ function normalizeTreeGrowth(value: unknown): Record<string, TreeGrowthState> {
   return result;
 }
 
+function normalizeRockGrowth(value: unknown): Record<string, RockGrowthState> {
+  const result: Record<string, RockGrowthState> = {};
+  for (const [rockKey, rawRock] of Object.entries(safeObject(value))) {
+    const rock = safeObject(rawRock);
+    if (typeof rock.growth !== 'number' || !Number.isFinite(rock.growth)) continue;
+    if (typeof rock.minedAt !== 'number' || !Number.isFinite(rock.minedAt)) continue;
+    result[rockKey] = {
+      growth: Math.max(0, Math.min(MAX_ROCK_GROWTH, rock.growth)),
+      minedAt: rock.minedAt,
+      mines: typeof rock.mines === 'number' && Number.isFinite(rock.mines)
+        ? Math.max(0, Math.floor(rock.mines)) : 0,
+      ...(typeof rock.formation === 'string' ? { formation: rock.formation as RockFormation } : {}),
+    };
+  }
+  return result;
+}
+
 /**
  * Placed pieces are dropped when malformed, the same way tree records are:
  * a corrupt record is invisible until the player places over its spot, which
@@ -547,6 +577,7 @@ function normalizePageModifications(value: unknown): Record<string, PageModifica
       terrainEdits: normalizeTerrainEdits(page.terrainEdits),
       resourceDrops: normalizeResourceDrops(page.resourceDrops),
       treeGrowth: normalizeTreeGrowth(page.treeGrowth),
+      rockGrowth: normalizeRockGrowth(page.rockGrowth),
       plantedCells: safeObject(page.plantedCells),
       placedEntities: safeObject(page.placedEntities),
       placedPieces: normalizePlacedPieces(page.placedPieces),
@@ -659,7 +690,7 @@ function normalizeState(value: unknown): GameState | null {
     ? player.activityLog.flatMap((rawEntry) => {
       const entry = safeObject(rawEntry);
       if (typeof entry.id !== 'string' || typeof entry.message !== 'string') return [];
-      if (entry.kind !== 'garden' && entry.kind !== 'harvest') return [];
+      if (!['garden', 'harvest', 'gathering', 'crafting', 'building'].includes(String(entry.kind))) return [];
       if (typeof entry.at !== 'number' || !Number.isFinite(entry.at)) return [];
       return [{
         id: entry.id,
@@ -690,6 +721,20 @@ function normalizeState(value: unknown): GameState | null {
         ...(note !== undefined ? { note } : {}),
       }];
     }).slice(0, DIARY_ENTRY_LIMIT)
+    : [];
+  state.player.travelLog = Array.isArray(player.travelLog)
+    ? player.travelLog.flatMap((rawEntry) => {
+      const entry = safeObject(rawEntry);
+      if (typeof entry.id !== 'string' || typeof entry.pageId !== 'string') return [];
+      if (typeof entry.biome !== 'string' || !BIOME_IDS.includes(entry.biome as Biome)) return [];
+      if (typeof entry.at !== 'number' || !Number.isFinite(entry.at)) return [];
+      return [{
+        id: entry.id.slice(0, 160),
+        pageId: entry.pageId.slice(0, 80),
+        biome: entry.biome as Biome,
+        at: Math.max(0, entry.at),
+      }];
+    }).slice(0, 400)
     : [];
   state.player.trinkets = Array.isArray(player.trinkets)
     ? player.trinkets.flatMap((rawTrinket) => {
@@ -750,9 +795,8 @@ function normalizeState(value: unknown): GameState | null {
     offered: finiteCounts(quests.offered),
     cooldownUntil: finiteCounts(quests.cooldownUntil),
   };
-  const validBiomes: Biome[] = ['clearing', 'forest', 'meadow', 'dunes', 'scrapflats'];
   state.player.visitedBiomes = Array.isArray(player.visitedBiomes)
-    ? [...new Set(player.visitedBiomes.filter((biome): biome is Biome => typeof biome === 'string' && validBiomes.includes(biome as Biome)))]
+    ? [...new Set(player.visitedBiomes.filter((biome): biome is Biome => typeof biome === 'string' && BIOME_IDS.includes(biome as Biome)))]
     : ['clearing'];
   state.player.visitedPages = Array.isArray(player.visitedPages)
     ? player.visitedPages.filter((id): id is string => typeof id === 'string').slice(0, 2000)

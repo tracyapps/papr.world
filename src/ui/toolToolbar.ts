@@ -30,6 +30,7 @@ const tornPaperUrl = new URL('../../assets/ui-art/paper-tear-2.svg', import.meta
 const SHOVEL_TOOL_IDS = toolsInFamily('shovel');
 const HOE_TOOL_IDS = toolsInFamily('hoe');
 const TRIM_TOOL_IDS = toolsInFamily('scissors');
+const MINE_TOOL_IDS = toolsInFamily('pickaxe');
 const HAMMER_TOOL_IDS = toolsInFamily('hammer');
 
 /**
@@ -101,6 +102,14 @@ const TOOLBAR_SLOTS: ToolbarSlot[] = [
   },
   {
     slot: 5,
+    label: 'Mining pick',
+    mode: 'mine',
+    requires: { kind: 'anyTool', toolIds: MINE_TOOL_IDS },
+    artUrl: getToolArt(MINE_TOOL_IDS[0])?.sourceUrl,
+    artFrame: getToolArt(MINE_TOOL_IDS[0])?.frame,
+  },
+  {
+    slot: 6,
     label: 'Build',
     mode: 'place',
     requires: { kind: 'anyTool', toolIds: HAMMER_TOOL_IDS },
@@ -338,7 +347,7 @@ export function initializeToolToolbar() {
   onSettingsChanged(renderToolbarSize);
   renderToolbar();
   renderToolbarSize();
-  // The rail now has five slots; let the layout pass re-measure and rescale
+  // Let the layout pass re-measure and rescale the growing rail
   // it so the lowest one still clears the scrapbook dock.
   requestHudLayout();
 }

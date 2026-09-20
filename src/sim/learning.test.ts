@@ -65,7 +65,7 @@ describe('one-at-a-time tech learning', () => {
 
     expect(startTechLearningState(state, 'digging-1', 1_000).ok).toBe(false);
     expect(startTechLearningState(state, 'digging-3', 1_000).ok).toBe(false);
-    expect(startTechLearningState(state, 'gardening-2', 1_000).ok).toBe(false);
+    expect(startTechLearningState(state, 'soil-mechanics', 1_000).ok).toBe(false);
   });
 
   it('uses elapsed real-world time and grants the plan when the wait finishes', () => {

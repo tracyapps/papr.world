@@ -65,14 +65,20 @@ export type TreeKind =
   | 'redwood-4'
   | 'redwood-5'
   | 'redwood-6'
-  | 'redwood-7';
+  | 'redwood-7'
+  | 'cypress-1'
+  | 'cypress-2'
+  | 'alpine-pine-1'
+  | 'alpine-pine-2'
+  | 'acacia-1'
+  | 'acacia-2'
+  | 'baobab-1';
 
 /**
- * Non-interactive scenery cutouts: decorative like a tree, but never
- * trimmable/harvestable/growable. Cactus lives here rather than in
- * `TreeKind` so desert scenery never enters the tree-growth economy — and
- * so do the biome undergrowth plants (ferns, flowers, shrubs, boulders),
- * which share a page's scenery budget without joining its yields.
+ * Low scenery cutouts rendered like trees. Interaction is data-driven:
+ * `decorTrimSpecies` enrolls living shrubs, flowers, fungi, moss, bamboo,
+ * and vines in renewable trimming, while ferns, cactus, logs, and every rock
+ * stay scenery (rocks are reserved for the future mine action).
  */
 export type DecorKind =
   | 'cactus-1'
@@ -114,7 +120,26 @@ export type DecorKind =
   // jungle tree's `vines` list, hooked under its canopy.
   | 'hanging-vine-1'
   | 'hanging-vine-2'
-  | 'hanging-vine-flowering-1';
+  | 'hanging-vine-flowering-1'
+  | 'hanging-vine-3'
+  | 'hanging-vine-4'
+  | 'hanging-vine-flowering-2'
+  | 'bamboo-2' | 'bamboo-3' | 'bamboo-tall' | 'bamboo-shoot'
+  | 'mangrove-prop' | 'horsetail' | 'pitcher-plant'
+  | 'grass-alpine' | 'grass-savanna' | 'grass-badlands'
+  | 'shrub-alpine' | 'shrub-savanna' | 'shrub-swamp' | 'shrub-temperate-1' | 'shrub-temperate-2'
+  | 'shrub-thorny' | 'shrub-flowering-1' | 'shrub-flowering-2'
+  | 'mushroom-3' | 'mushroom-amanita' | 'mushroom-coral' | 'mushroom-fly-agaric'
+  | 'mushroom-morel' | 'mushroom-shelf'
+  | 'moss-ball' | 'moss-drape' | 'moss-hummock' | 'moss-patch'
+  | 'flower-allium' | 'flower-blackeyed-susan' | 'flower-bougainvillea' | 'flower-coneflower'
+  | 'flower-cosmos' | 'flower-daisy' | 'flower-edelweiss' | 'flower-foxglove'
+  | 'flower-lotus' | 'flower-lupine' | 'flower-marigold' | 'flower-paintbrush'
+  | 'flower-plumeria' | 'flower-poppy' | 'flower-protea' | 'flower-spider-lily'
+  | 'flower-sunflower' | 'flower-zinnia'
+  | 'aloe' | 'euphorbia' | 'termite-mound'
+  | 'boulder-large' | 'cliff-slab' | 'lichen-rock' | 'rock-medium'
+  | 'rock-small-1' | 'rock-small-2' | 'rock-stack' | 'scree-pile' | 'fallen-log';
 
 /**
  * A vine hanging from a tree's canopy, positioned relative to its tree so it

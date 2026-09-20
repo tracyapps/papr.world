@@ -129,6 +129,36 @@ export const DIG_TABLES: Record<Biome, Record<DigLayer, WeightedResource[]>> = {
       { resource: 'graphite-cardstone', weight: 54 },
     ],
   },
+  swamp: {
+    1: [{ resource: 'bog-peat-paper', weight: 78 }, { resource: 'wetland-silt-clay', weight: 22 }],
+    2: [{ resource: 'bog-peat-paper', weight: 35 }, { resource: 'carbon-copy-shale', weight: 40 }, { resource: 'rainfold-pebbles', weight: 25 }],
+    3: [{ resource: 'carbon-copy-shale', weight: 48 }, { resource: 'graphite-cardstone', weight: 52 }],
+  },
+  wetland: {
+    1: [{ resource: 'wetland-silt-clay', weight: 75 }, { resource: 'bog-peat-paper', weight: 25 }],
+    2: [{ resource: 'wetland-silt-clay', weight: 42 }, { resource: 'rainfold-pebbles', weight: 34 }, { resource: 'carbon-copy-shale', weight: 24 }],
+    3: [{ resource: 'rainfold-pebbles', weight: 48 }, { resource: 'granite-cardstone', weight: 52 }],
+  },
+  'rocky-highlands': {
+    1: [{ resource: 'granite-cardstone', weight: 62 }, { resource: 'carbon-soil', weight: 38 }],
+    2: [{ resource: 'granite-cardstone', weight: 58 }, { resource: 'graphite-cardstone', weight: 42 }],
+    3: [{ resource: 'granite-cardstone', weight: 68 }, { resource: 'carbon-copy-shale', weight: 32 }],
+  },
+  savanna: {
+    1: [{ resource: 'savanna-hardpan', weight: 72 }, { resource: 'terracotta-pebbles', weight: 28 }],
+    2: [{ resource: 'savanna-hardpan', weight: 48 }, { resource: 'sunbaked-cardboard', weight: 32 }, { resource: 'carbon-copy-shale', weight: 20 }],
+    3: [{ resource: 'terracotta-pebbles', weight: 45 }, { resource: 'granite-cardstone', weight: 55 }],
+  },
+  badlands: {
+    1: [{ resource: 'badlands-ochre', weight: 74 }, { resource: 'terracotta-pebbles', weight: 26 }],
+    2: [{ resource: 'badlands-ochre', weight: 40 }, { resource: 'sunbaked-cardboard', weight: 36 }, { resource: 'carbon-copy-shale', weight: 24 }],
+    3: [{ resource: 'granite-cardstone', weight: 55 }, { resource: 'graphite-cardstone', weight: 45 }],
+  },
+  'bamboo-forest': {
+    1: [{ resource: 'bamboo-loam', weight: 76 }, { resource: 'rainfold-pebbles', weight: 24 }],
+    2: [{ resource: 'bamboo-loam', weight: 38 }, { resource: 'wetland-silt-clay', weight: 35 }, { resource: 'carbon-copy-shale', weight: 27 }],
+    3: [{ resource: 'rainfold-pebbles', weight: 46 }, { resource: 'granite-cardstone', weight: 54 }],
+  },
 };
 function hashText(value: string) {
   let hash = 2166136261;

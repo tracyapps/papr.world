@@ -1,23 +1,37 @@
 import { flushWardrobeSync } from '../net/accountWardrobe';
-import { getGameState, onGameStateChanged } from '../sim/state';
 import { accountDeskUrl } from '../net/accountDesk';
 import { disconnectSharedSession } from '../net/sharedSession';
+import { getGameState, onGameStateChanged } from '../sim/state';
+import { BIOME_MAP_NAMES, compassArrow, compassPoint, distanceWords } from '../world/biomeCompass';
+import { getGroundMapColor } from '../world/pageRuntime';
+import { buildActivityFeed, type LogFilter } from './activityFeed';
+import { getDirectionHints, onDirectionHintsChanged } from './directionHints';
+import { openTreasureMap } from './treasureMap';
 
-// The activity log used to be a scrapbook tab, pressed into a strip that
-// only had room for a line and a half and never scrolled — quiet updates
-// that were supposed to stay out of the way instead needed the whole
-// scrapbook opened to be read at all. It is a side drawer instead now, the
-// same shape as checking notifications on a desktop: tucked off the right
-// edge until asked for, tall enough to actually scroll, and out of the way
-// of everything else the moment it closes.
+const FILTERS: Array<{ id: LogFilter; label: string }> = [
+  { id: 'activity', label: 'Activity' },
+  { id: 'travel', label: 'Map & travel' },
+  { id: 'conversations', label: 'Conversations' },
+];
 
 let drawer: HTMLElement | null = null;
 let listElement: HTMLOListElement | null = null;
+let filterElement: HTMLElement | null = null;
+let mapElement: HTMLElement | null = null;
 let toggleButton: HTMLButtonElement | null = null;
+let countElement: HTMLElement | null = null;
 let open = false;
+let query = '';
+const activeFilters = new Set<LogFilter>(FILTERS.map((filter) => filter.id));
 
-function relativeActivityTime(at: number): string {
-  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - at) / 1000));
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]!);
+}
+
+export function relativeActivityTime(at: number, now = Date.now()): string {
+  const elapsedSeconds = Math.max(0, Math.floor((now - at) / 1000));
   if (elapsedSeconds < 60) return 'just now';
   const minutes = Math.floor(elapsedSeconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -26,17 +40,74 @@ function relativeActivityTime(at: number): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function render() {
+function totalLogCount() {
+  const player = getGameState().player;
+  return player.activityLog.length + player.travelLog.length + player.diaryEntries.length;
+}
+
+function renderToggleCount() {
+  const count = totalLogCount();
+  if (countElement) {
+    countElement.textContent = count > 99 ? '99+' : String(count);
+    countElement.hidden = count === 0;
+  }
+  toggleButton?.setAttribute('aria-label', count > 0 ? `Logs, ${count} entries` : 'Logs');
+}
+
+function renderFilters() {
+  if (!filterElement) return;
+  filterElement.innerHTML = FILTERS.map((filter) => {
+    const selected = activeFilters.has(filter.id);
+    return `
+      <button type="button" class="activity-log-filter${selected ? ' is-selected' : ''}"
+        data-log-filter="${filter.id}" aria-pressed="${selected}">${filter.label}</button>`;
+  }).join('');
+}
+
+function renderMapTools() {
+  if (!mapElement) return;
+  mapElement.hidden = !activeFilters.has('travel');
+  if (mapElement.hidden) return;
+  const hints = getDirectionHints();
+  mapElement.innerHTML = `
+    <button type="button" class="activity-log-map-button" data-open-log-map>Unfold the map <span aria-hidden="true">(N)</span></button>
+    ${hints.length === 0
+    ? '<p>Walk a little farther and nearby lands will appear here.</p>'
+    : `<ul>${hints.map((hint) => `
+        <li><span class="treasure-map-swatch" style="--swatch:${getGroundMapColor(hint.biome)}" aria-hidden="true"></span>
+          ${escapeHtml(BIOME_MAP_NAMES[hint.biome])} · ${compassPoint(hint.bearing)} ${compassArrow(hint.bearing)}, ${distanceWords(hint.distance)}</li>`).join('')}</ul>`}`;
+}
+
+function renderList() {
   if (!listElement) return;
-  const entries = getGameState().player.activityLog;
-  listElement.innerHTML = entries.length === 0
-    ? '<li class="scrapbook-empty">Quiet garden and harvest updates will show up here.</li>'
-    : entries.map((entry) => `
-      <li class="scrapbook-activity-entry" data-activity-kind="${entry.kind}">
-        <span class="scrapbook-activity-mark" aria-hidden="true"></span>
-        <span>${entry.message}</span>
-        <time datetime="${new Date(entry.at).toISOString()}">${relativeActivityTime(entry.at)}</time>
-      </li>`).join('');
+  const entries = buildActivityFeed(getGameState(), activeFilters, query);
+  if (activeFilters.size === 0) {
+    listElement.innerHTML = '<li class="activity-log-empty">Choose one or more filters to build this log.</li>';
+    return;
+  }
+  if (entries.length === 0) {
+    listElement.innerHTML = query.trim()
+      ? `<li class="activity-log-empty">Nothing matches “${escapeHtml(query.trim())}”.</li>`
+      : '<li class="activity-log-empty">Nothing has been recorded in these logs yet.</li>';
+    return;
+  }
+  listElement.innerHTML = entries.map((entry) => `
+    <li class="activity-log-entry" data-log-kind="${entry.filter}" data-entry-kind="${escapeHtml(entry.kind)}">
+      <span class="activity-log-entry-mark" aria-hidden="true"></span>
+      <article>
+        <header><strong>${escapeHtml(entry.title)}</strong><time datetime="${new Date(entry.at).toISOString()}">${relativeActivityTime(entry.at)}</time></header>
+        <p>${escapeHtml(entry.message)}</p>
+        <small>${escapeHtml(entry.detail)}</small>
+      </article>
+    </li>`).join('');
+}
+
+function render() {
+  renderToggleCount();
+  if (!open) return;
+  renderFilters();
+  renderMapTools();
+  renderList();
 }
 
 export function isActivityLogOpen() {
@@ -48,6 +119,7 @@ export function setActivityLogOpen(value: boolean) {
   open = value;
   drawer?.classList.toggle('is-open', open);
   drawer?.setAttribute('aria-hidden', String(!open));
+  if (drawer) drawer.inert = !open;
   toggleButton?.setAttribute('aria-expanded', String(open));
   if (open) render();
 }
@@ -59,17 +131,16 @@ export function toggleActivityLog() {
 export function initializeActivityLog() {
   toggleButton = document.createElement('button');
   toggleButton.id = 'hud-activity-log';
-  toggleButton.className = 'hud-icon-button';
+  toggleButton.className = 'hud-icon-button hud-log-button';
   toggleButton.type = 'button';
-  toggleButton.setAttribute('aria-label', 'Activity log');
+  toggleButton.setAttribute('aria-label', 'Logs');
   toggleButton.setAttribute('aria-expanded', 'false');
-  toggleButton.innerHTML = '<span aria-hidden="true">&#8801;</span>';
+  toggleButton.innerHTML = '<span aria-hidden="true">&#8801;</span><span class="activity-log-count" hidden></span>';
+  countElement = toggleButton.querySelector('.activity-log-count');
   toggleButton.addEventListener('click', toggleActivityLog);
   for (const eventName of ['pointerdown', 'pointerup', 'wheel'] as const) {
     toggleButton.addEventListener(eventName, (event) => event.stopPropagation());
   }
-  // "A button by the settings" — sits immediately before the cog rather than
-  // appended at the end, so the two feel grouped.
   const settingsButton = document.querySelector('#hud-settings');
   const hudActions = document.querySelector('#hud-actions');
   if (settingsButton && hudActions) hudActions.insertBefore(toggleButton, settingsButton);
@@ -78,40 +149,60 @@ export function initializeActivityLog() {
   drawer = document.createElement('aside');
   drawer.id = 'activity-log-drawer';
   drawer.className = 'activity-log-drawer';
-  drawer.setAttribute('aria-label', 'Activity log');
+  drawer.setAttribute('aria-label', 'Logs');
   drawer.setAttribute('aria-hidden', 'true');
+  drawer.inert = true;
   drawer.innerHTML = `
     <header class="activity-log-header">
-      <h2>Activity</h2>
-      <button type="button" class="hud-overlay-close" data-close-activity-log aria-label="Close activity log">×</button>
+      <h2>Logs</h2>
+      <button type="button" class="hud-overlay-close" data-close-activity-log aria-label="Close logs">×</button>
     </header>
-    <p class="activity-log-note">Things that happened without needing to interrupt you.</p>
+    <p class="activity-log-note">Mix activity, travel, and remembered conversations into one timeline.</p>
+    <div class="activity-log-filters" role="group" aria-label="Show log portions"></div>
+    <label class="activity-log-search" for="activity-log-search">Search
+      <input id="activity-log-search" type="search" placeholder="A place, neighbor, or event…" autocomplete="off">
+    </label>
+    <section class="activity-log-map" aria-label="Map and nearby lands"></section>
+    <ol class="activity-log-list"></ol>
     <div class="hud-setting hud-setting-action activity-log-leave">
-      <button class="hud-setting-button" type="button" id="activity-log-return-to-desk">
-        Return to your desk
-      </button>
+      <button class="hud-setting-button" type="button" id="activity-log-return-to-desk">Return to your desk</button>
       <small>Leaves this world cleanly and takes you back to your account.</small>
-    </div>
-    <ol class="activity-log-list scrapbook-activity-list"></ol>
-  `;
+    </div>`;
   document.body.append(drawer);
   listElement = drawer.querySelector('.activity-log-list');
+  filterElement = drawer.querySelector('.activity-log-filters');
+  mapElement = drawer.querySelector('.activity-log-map');
 
   drawer.querySelector('[data-close-activity-log]')?.addEventListener('click', () => setActivityLogOpen(false));
-  // Same cleanup path Settings' own "Return to your desk" button uses —
-  // leave the room for real before navigating so no stale presence lingers
-  // for anyone still inside. This is the copy people actually check first
-  // when they're looking for the way out, not the settings cog.
+  drawer.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const filter = target.closest<HTMLButtonElement>('[data-log-filter]')?.dataset.logFilter as LogFilter | undefined;
+    if (filter) {
+      if (activeFilters.has(filter)) activeFilters.delete(filter);
+      else activeFilters.add(filter);
+      render();
+      return;
+    }
+    if (target.closest('[data-open-log-map]')) openTreasureMap();
+  });
+  drawer.querySelector<HTMLInputElement>('#activity-log-search')?.addEventListener('input', (event) => {
+    query = (event.target as HTMLInputElement).value;
+    renderList();
+  });
   drawer.querySelector<HTMLButtonElement>('#activity-log-return-to-desk')?.addEventListener('click', () => {
     disconnectSharedSession();
-    // Let the account receive any look saved moments ago before the desk reads it.
     void flushWardrobeSync().then(() => window.location.assign(accountDeskUrl()));
   });
   for (const eventName of ['pointerdown', 'pointerup', 'wheel'] as const) {
     drawer.addEventListener(eventName, (event) => event.stopPropagation());
   }
 
-  onGameStateChanged(() => {
-    if (open) render();
+  onGameStateChanged(render);
+  onDirectionHintsChanged(() => {
+    if (open && activeFilters.has('travel')) renderMapTools();
   });
+  window.setInterval(() => {
+    if (open) renderList();
+  }, 30_000);
+  renderToggleCount();
 }

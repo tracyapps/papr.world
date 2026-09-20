@@ -21,7 +21,7 @@ describe('placed-piece material save shape', () => {
     const saved = createDefaultGameState();
     saved.world.pages['0,0'] = {
       ...saved.world.pages['0,0'],
-      terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
+      terrainEdits: {}, treeGrowth: {}, rockGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
       placedPieces: {
         'piece-1': {
           id: 'piece-1', templateKey: 'paper-bench', x: 1, z: 2, rotY: 0,
@@ -43,7 +43,7 @@ describe('placed-piece material save shape', () => {
     };
     saved.world.pages['0,0'] = {
       ...saved.world.pages['0,0'],
-      terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
+      terrainEdits: {}, treeGrowth: {}, rockGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
       placedPieces: { 'piece-1': pieceWithoutMaterial as never },
     };
     const storage = fakeStorage(JSON.stringify(saved));
@@ -56,7 +56,7 @@ describe('placed-piece material save shape', () => {
     const saved = createDefaultGameState();
     saved.world.pages['0,0'] = {
       ...saved.world.pages['0,0'],
-      terrainEdits: {}, treeGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
+      terrainEdits: {}, treeGrowth: {}, rockGrowth: {}, plantedCells: {}, placedEntities: {}, buildSites: {},
       placedPieces: {
         'piece-1': {
           id: 'piece-1', templateKey: 'paper-bench', x: 1, z: 2, rotY: 0,

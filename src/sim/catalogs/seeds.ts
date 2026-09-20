@@ -104,6 +104,42 @@ export const SEED_DEFS = {
     accent: '#d14a35',
     harvest: { resource: 'paper-tomato', quantity: 4, mode: 'repeat', repeatSeconds: 720 },
   },
+  'lotus-fold-seeds': {
+    id: 'lotus-fold-seeds', name: 'Lotus-fold Seeds', effect: 'garden',
+    description: 'Unfolds into pink paper lotus blossoms in a damp bed.',
+    stageSeconds: [75, 300, 960], spacing: 0.9, visual: 'flower', accent: '#d77e9d',
+    harvest: { resource: 'lotus-blossoms', quantity: 2, mode: 'repeat', repeatSeconds: 720 },
+  },
+  'marsh-reed-seeds': {
+    id: 'marsh-reed-seeds', name: 'Marsh-reed Seeds', effect: 'garden',
+    description: 'Grows a close row of long paper reeds for weaving.',
+    stageSeconds: [60, 260, 810], spacing: 0.5, visual: 'stalk', accent: '#718557',
+    harvest: { resource: 'marsh-reed-stalks', quantity: 4, mode: 'whole' },
+  },
+  'sunpaper-seeds': {
+    id: 'sunpaper-seeds', name: 'Sunpaper Seeds', effect: 'garden',
+    description: 'Raises a tall golden face that turns toward the paper sun.',
+    stageSeconds: [90, 420, 1320], spacing: 0.85, visual: 'stalk', accent: '#d1a43d',
+    harvest: { resource: 'sunpaper-heads', quantity: 2, mode: 'whole' },
+  },
+  'bamboo-starts': {
+    id: 'bamboo-starts', name: 'Bamboo Starts', effect: 'garden',
+    description: 'A quick-growing stand of edible young folded shoots.',
+    stageSeconds: [50, 210, 690], spacing: 0.7, visual: 'stalk', accent: '#759c4b',
+    harvest: { resource: 'young-bamboo', quantity: 3, mode: 'repeat', repeatSeconds: 540 },
+  },
+  'alpine-herb-seeds': {
+    id: 'alpine-herb-seeds', name: 'Alpine-herb Seeds', effect: 'garden',
+    description: 'A low, fragrant paper herb that likes cool open ground.',
+    stageSeconds: [70, 280, 870], spacing: 0.55, visual: 'row', accent: '#778e63',
+    harvest: { resource: 'alpine-herbs', quantity: 3, mode: 'repeat', repeatSeconds: 600 },
+  },
+  'prickly-pear-seeds': {
+    id: 'prickly-pear-seeds', name: 'Prickly-pear Seeds', effect: 'garden',
+    description: 'A patient folded cactus that keeps making bright paper fruit.',
+    stageSeconds: [120, 540, 1620], spacing: 0.9, visual: 'head', accent: '#b75d79',
+    harvest: { resource: 'paper-prickly-pears', quantity: 3, mode: 'repeat', repeatSeconds: 900 },
+  },
   'mend-me-seeds': {
     id: 'mend-me-seeds',
     name: 'Mend-me Seeds',

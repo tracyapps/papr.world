@@ -56,7 +56,8 @@ export type TreeStage = 'flourishing' | 'trimmed' | 'cropped' | 'resting';
 // tools/validate-quests.mjs reads it as text.
 export type TreeSpecies =
   | 'pine' | 'leafy' | 'redwood' | 'palm' | 'banana'
-  | 'vine' | 'mushroom' | 'shrub';
+  | 'cypress' | 'alpine-pine' | 'acacia' | 'baobab' | 'bamboo'
+  | 'vine' | 'mushroom' | 'moss' | 'shrub' | 'flower';
 
 /**
  * What kind of living thing a species is, for wording and for how a cut
@@ -71,9 +72,16 @@ export const SPECIES_FORM: Record<TreeSpecies, GrowthForm> = {
   redwood: 'tree',
   palm: 'tree',
   banana: 'tree',
+  cypress: 'tree',
+  'alpine-pine': 'tree',
+  acacia: 'tree',
+  baobab: 'tree',
+  bamboo: 'plant',
   vine: 'vine',
   mushroom: 'plant',
+  moss: 'plant',
   shrub: 'plant',
+  flower: 'plant',
 };
 
 /** How a species is named in toasts, quests, and critter tips. */
@@ -83,9 +91,16 @@ export const SPECIES_NAMES: Record<TreeSpecies, { one: string; many: string }> =
   redwood: { one: 'redwood', many: 'redwoods' },
   palm: { one: 'palm tree', many: 'palm trees' },
   banana: { one: 'banana tree', many: 'banana trees' },
+  cypress: { one: 'cypress tree', many: 'cypress trees' },
+  'alpine-pine': { one: 'alpine pine', many: 'alpine pines' },
+  acacia: { one: 'acacia tree', many: 'acacia trees' },
+  baobab: { one: 'baobab', many: 'baobabs' },
+  bamboo: { one: 'bamboo cluster', many: 'bamboo clusters' },
   vine: { one: 'hanging vine', many: 'hanging vines' },
   mushroom: { one: 'mushroom cluster', many: 'mushroom clusters' },
+  moss: { one: 'moss patch', many: 'moss patches' },
   shrub: { one: 'shrub', many: 'shrubs' },
+  flower: { one: 'flower', many: 'flowers' },
 };
 
 /** Where a trimmable tree lives, in terms a server could validate. */
@@ -241,6 +256,31 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     secondary: 'palm-fiber',
     variety: 'sunbaked-cardboard',
   },
+  cypress: {
+    primary: 'cypress-bark-folds',
+    secondary: 'mossy-paper-fiber',
+    variety: 'supple-shrub-shoots',
+  },
+  'alpine-pine': {
+    primary: 'alpine-resin-paper',
+    secondary: 'kraft-twigs',
+    variety: 'granite-cardstone',
+  },
+  acacia: {
+    primary: 'acacia-thornwood',
+    secondary: 'supple-shrub-shoots',
+    variety: 'savanna-hardpan',
+  },
+  baobab: {
+    primary: 'baobab-pith-fiber',
+    secondary: 'acacia-thornwood',
+    variety: 'savanna-hardpan',
+  },
+  bamboo: {
+    primary: 'bamboo-strips',
+    secondary: 'mossy-paper-fiber',
+    variety: 'bamboo-loam',
+  },
   vine: {
     // The jungle's own material: long twisted strands, like crepe-paper
     // streamers, that only come off a vine hanging from the canopy. Nothing
@@ -257,12 +297,22 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     secondary: 'mossy-paper-fiber',
     variety: 'blotting-caps',
   },
+  moss: {
+    primary: 'mossy-paper-fiber',
+    secondary: 'bog-peat-paper',
+    variety: 'blotting-caps',
+  },
   shrub: {
     // A bush is a small tree as far as the paper is concerned: twigs and
     // leaves, and now and then a springy ribbonwood shoot.
-    primary: 'kraft-twigs',
+    primary: 'supple-shrub-shoots',
     secondary: 'mossy-paper-fiber',
     variety: 'ribbonwood-sticks',
+  },
+  flower: {
+    primary: 'pressed-petal-confetti',
+    secondary: 'mossy-paper-fiber',
+    variety: 'buttonbloom-seeds',
   },
 };
 

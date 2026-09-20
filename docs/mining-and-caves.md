@@ -1,6 +1,7 @@
 # Mining and Caves
 
-Plan only. Nothing here is implemented. Design settled 2026-08-04.
+Surface mining implemented 2026-09-19. The cave layer remains planned; this
+document now distinguishes the playable surface slice from that larger plan.
 
 ## Why This Is Not Just "Digging, But Sideways"
 
@@ -87,12 +88,13 @@ it.
 
 ## The `mine` Verb
 
-A fourth tool family beside `dig`, `plant`, `trim`. Declared in `ToolVerb`;
-nothing implemented.
+A fourth tool family beside `dig`, `plant`, `trim`. The tier-1 Tin Snips Pick
+is playable against surface rock formations; tiers 2–3 remain part of the cave
+plan.
 
 | Tier | Working name | Access |
 | --- | --- | --- |
-| 1 | Tin Snips Pick | Rock formations — the soft, renewable ones |
+| 1 | Tin Snips Pick | **Built:** surface rock formations — soft and renewable |
 | 2 | Folded Pickaxe | Wall seams, and the rarer materials in them |
 | 3 | Creasebreaker | Landmark deposits and the hardest wall material |
 
@@ -104,7 +106,7 @@ shovel upgrade.
 
 | Surface | Minable? | Behaviour |
 | --- | --- | --- |
-| Rock formations (stalagmites, stalactites) | Yes, tier 1 | **Renewable — behave like trees.** Softest thing down here, regrow over time, accessible from the very first pick. |
+| Rock formations (surface now; cave formations later) | Yes, tier 1 | **Renewable.** They keep their own depletion record and visibly reform over six minutes. |
 | Tunnel and chamber walls | Yes, tier 2+ | Harder, hold the **rarer materials**. Mining barely changes the wall's shape. |
 | Walls carrying carved wayfinding or player murals | **No** | Never change shape, never lose their carving or artwork. |
 | Cave floors | **No** | Too tough to mine. |
@@ -207,8 +209,9 @@ Saved places already persist and would extend naturally to a `layer` field.
 2. `layer` threaded through page addressing, streaming, and the map.
 3. Cave entrances as surface props that transition to an authored test cave —
    one chamber, one tunnel, lit, with a carved sign.
-4. The `mine` verb against rock formations at tier 1, with regrowth reusing the
-   tree-growth model.
+4. **Built on the surface:** the `mine` verb against rock formations at tier
+   1, with a parallel time-derived reformation model. Reuse it for cave
+   formations once underground pages exist.
 5. Wall mining at tier 2, and the rarer material tables behind it.
 6. Generated cave pages: the chamber-and-tunnel rhythm at scale.
 7. Underground building, gardens, and mural surfaces.

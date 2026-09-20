@@ -24,6 +24,12 @@ export const WASH: Record<Biome, string> = {
   dunes: '#e8b35e',
   scrapflats: '#8f93a3',
   tropical: '#1f8a78',
+  swamp: '#485d43',
+  wetland: '#6e8e72',
+  'rocky-highlands': '#7c7d7a',
+  savanna: '#c3a957',
+  badlands: '#b56c4b',
+  'bamboo-forest': '#4d7d45',
 };
 const PARCHMENT = '#efe0b9';
 const INK = '#3b2a1a';
@@ -36,6 +42,12 @@ const HERE_BE: Partial<Record<Biome, string>> = {
   scrapflats: 'here be scraps',
   forest: 'here be tall trees',
   meadow: 'here be tall grass',
+  swamp: 'here be frogs',
+  wetland: 'here be reeds',
+  'rocky-highlands': 'here be high places',
+  savanna: 'here be wide skies',
+  badlands: 'here be red stone',
+  'bamboo-forest': 'here be bamboo',
 };
 
 // ---- A tiny seeded random, so the wobble is the same every time you look ---
@@ -397,4 +409,3 @@ export function drawTreasureMap(
   }
   ctx.restore();
 }
-

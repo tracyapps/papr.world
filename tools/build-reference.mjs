@@ -65,6 +65,8 @@ function describeRoute(route, toolsById) {
       const tool = Object.values(toolsById).find((entry) => entry.verb === 'dig' && entry.tier >= route.layer);
       return `Dug up in ${biomes}${tool ? ` with a ${tool.name} or better` : ''}.`;
     }
+    case 'mined':
+      return `Mined from renewable formations in ${biomes}${route.minimumTier > 1 ? ` with a tier-${route.minimumTier} pick or better` : ''}.`;
     case 'trimmed': {
       const tool = Object.values(toolsById).find((entry) => entry.verb === 'trim' && entry.tier >= route.minimumTier);
       return `Trimmed from ${route.speciesName ?? `${route.species} trees`}${tool ? ` with ${tool.name} or better` : ''}.`;

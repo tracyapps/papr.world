@@ -57,6 +57,10 @@ export function treeSpeciesOf(kind: TreeKind): TreeSpecies {
   if (kind.startsWith('redwood')) return 'redwood';
   if (kind.startsWith('pine')) return 'pine';
   if (kind.startsWith('palm')) return 'palm';
+  if (kind.startsWith('cypress')) return 'cypress';
+  if (kind.startsWith('alpine-pine')) return 'alpine-pine';
+  if (kind.startsWith('acacia')) return 'acacia';
+  if (kind.startsWith('baobab')) return 'baobab';
   // `banana-1` today; the broadleaf jungle trees fall through to `leafy`,
   // which is what they are — big leafy canopies over the same yields.
   if (kind.startsWith('banana')) return 'banana';

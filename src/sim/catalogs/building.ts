@@ -58,6 +58,31 @@ export const BUILD_ASSEMBLY_DEFS = {
     templateKey: 'paper-lamp', minimumToolTier: 1,
     steps: [{ id: 'build', label: 'Building', verb: 'build', durationSeconds: 2.2, materials: [], materialUnits: 3 }],
   },
+  'garden-arbor': {
+    templateKey: 'garden-arbor', minimumToolTier: 2,
+    steps: [
+      { id: 'posts', label: 'Shaping arbor posts', verb: 'build', durationSeconds: 3.2, materials: [], materialUnits: 4, producesPart: 'arbor-posts' },
+      { id: 'lintel', label: 'Folding the arbor top', verb: 'build', durationSeconds: 2.8, materials: [], materialUnits: 3, producesPart: 'arbor-lintel' },
+      { id: 'join', label: 'Binding the arbor', verb: 'assemble', durationSeconds: 3.5, materials: [{ kind: 'exact', resource: 'binding-cord', quantity: 1 }], materialUnits: 1, requiresParts: ['arbor-posts', 'arbor-lintel'], join: 'fastener' },
+    ],
+  },
+  'picnic-table': {
+    templateKey: 'picnic-table', minimumToolTier: 2,
+    steps: [
+      { id: 'top', label: 'Laying out the tabletop', verb: 'build', durationSeconds: 3.4, materials: [], materialUnits: 5, producesPart: 'tabletop' },
+      { id: 'benches', label: 'Making two benches', verb: 'build', durationSeconds: 3.6, materials: [], materialUnits: 5, producesPart: 'benches' },
+      { id: 'assemble', label: 'Assembling the picnic table', verb: 'assemble', durationSeconds: 4, materials: [{ kind: 'exact', resource: 'binding-cord', quantity: 1 }], materialUnits: 2, requiresParts: ['tabletop', 'benches'], join: 'fastener' },
+    ],
+  },
+  'footbridge': {
+    templateKey: 'footbridge', minimumToolTier: 2,
+    steps: [
+      { id: 'supports', label: 'Setting bridge supports', verb: 'build', durationSeconds: 3.5, materials: [{ kind: 'exact', resource: 'stone-aggregate', quantity: 1 }], materialUnits: 4, producesPart: 'bridge-supports' },
+      { id: 'deck', label: 'Folding the bridge deck', verb: 'build', durationSeconds: 4.2, materials: [], materialUnits: 6, producesPart: 'bridge-deck' },
+      { id: 'rails', label: 'Making bridge rails', verb: 'build', durationSeconds: 3.2, materials: [], materialUnits: 3, producesPart: 'bridge-rails' },
+      { id: 'assemble', label: 'Joining the footbridge', verb: 'assemble', durationSeconds: 4.8, materials: [{ kind: 'exact', resource: 'binding-cord', quantity: 2 }], materialUnits: 2, requiresParts: ['bridge-supports', 'bridge-deck', 'bridge-rails'], join: 'fastener' },
+    ],
+  },
 } as const satisfies Record<BuildPieceKey, BuildAssemblyDefinition>;
 
 /** Everything a finished piece costs in its chosen material, across all steps. */
@@ -157,6 +182,9 @@ export const DEFAULT_BUILD_MATERIAL: Record<BuildPieceKey, LegacyBuildMaterial> 
   'planter-box': 'paper.cork',
   'path-plank': 'paper.plaid',
   'paper-lamp': 'paper.brown',
+  'garden-arbor': 'paper.green',
+  'picnic-table': 'paper.brown.warm',
+  'footbridge': 'paper.cork',
 };
 
 /** The material a piece should render/build with: the requested one if it's

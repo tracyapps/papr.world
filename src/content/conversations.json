@@ -251,6 +251,36 @@
         "The long vines on the tallest trees are good for more than hanging off — trim one and you get crepe-paper vine, stretchy and twisty.",
         "If a branch high up seems to be smiling at you, that is a sloth. Say hello early. The reply takes a while.",
         "Monkeys come down to visit anyone who looks interesting, which in their opinion is everyone."
+      ],
+      "swamp": [
+        "Cypress knees poke through the muck like the swamp is raising a hand to ask a question.",
+        "The still ponds keep the sky in small wrinkled pieces.",
+        "Moss grows back patiently after a trim; damp paper is very good at remembering green."
+      ],
+      "wetland": [
+        "The reeds lean together whenever the wind has something private to say.",
+        "A wetland is mostly edges—water becoming ground, ground becoming water, and frogs refusing to choose.",
+        "Lotus folds stay dry on top even while their roots keep their feet in the silt."
+      ],
+      "rocky-highlands": [
+        "Alpine pines keep their branches close because the wind up here borrows everything loose.",
+        "Lichen writes very slowly on stone, one pale letter at a time.",
+        "The scree sounds like a jar of buttons whenever the slope settles."
+      ],
+      "savanna": [
+        "Acacias hold their shade wide and flat, enough for whoever reaches it first.",
+        "The grass turns gold by folding sunlight into every blade.",
+        "A baobab keeps enough water in its paper belly to outwait a very long afternoon."
+      ],
+      "badlands": [
+        "Every red stripe in the cliffs is an older afternoon pressed flat.",
+        "Paintbrush flowers are small, but they use the loudest red they can find.",
+        "The dry gullies only remember rain as a very exciting rumor."
+      ],
+      "bamboo-forest": [
+        "A bamboo grove knocks softly in the wind, like hundreds of polite visitors at one door.",
+        "Fresh shoots can grow between two visits, which is either impressive or showing off.",
+        "The ground stays dim and mossy under all those tall green paper tubes."
       ]
     },
     "selfReplies": {

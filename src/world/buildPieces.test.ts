@@ -31,10 +31,11 @@ describe('build-piece catalog', () => {
     }
   });
 
-  it('lets planks be walked across and keeps everything else solid', () => {
+  it('lets paths and bridges be walked across and keeps furniture solid', () => {
     expect(BUILD_PIECE_DEFS['path-plank'].solid).toBe(false);
+    expect(BUILD_PIECE_DEFS['footbridge'].solid).toBe(false);
     for (const key of Object.keys(BUILD_PIECE_DEFS) as BuildPieceKey[]) {
-      if (key !== 'path-plank') expect(BUILD_PIECE_DEFS[key].solid).toBe(true);
+      if (key !== 'path-plank' && key !== 'footbridge') expect(BUILD_PIECE_DEFS[key].solid).toBe(true);
     }
   });
 

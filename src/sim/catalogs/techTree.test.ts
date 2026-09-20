@@ -179,8 +179,8 @@ describe('tech tree catalog shape', () => {
   it('lists exactly the ready nodes backed by playable tool interactions', () => {
     const readyIds = TECH_NODE_ORDER.filter((id) => TECH_DEFS[id].readiness === 'ready');
     expect(readyIds.sort()).toEqual([
-      'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'trimming-1', 'trimming-2',
-      'building-1', 'building-2', 'building-3',
+      'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'gardening-2', 'trimming-1', 'trimming-2',
+      'mining-1', 'building-1', 'building-2', 'building-3',
     ].sort());
   });
 });
@@ -201,6 +201,7 @@ describe('node status: reads only, never writes', () => {
     expect(techNodeStatus('digging-1', state)).toBe('owned');
     expect(techNodeStatus('gardening-1', state)).toBe('owned');
     expect(techNodeStatus('trimming-1', state)).toBe('owned');
+    expect(techNodeStatus('mining-1', state)).toBe('owned');
     expect(techNodeStatus('building-1', state)).toBe('owned');
   });
 
@@ -230,9 +231,9 @@ describe('node status: reads only, never writes', () => {
 
   it('reads every concept node as not-built, regardless of prerequisites or player state', () => {
     const state = createDefaultGameState(); // owns every tier-1 ready node already
-    expect(techNodeStatus('gardening-2', state)).toBe('not-built');
+    expect(techNodeStatus('soil-mechanics', state)).toBe('not-built');
     expect(techNodeStatus('rocket-science', state)).toBe('not-built');
-    expect(isTechNodeOwned('gardening-2', state)).toBe(false);
+    expect(isTechNodeOwned('soil-mechanics', state)).toBe(false);
   });
 
   it('never lets a concept prerequisite block a ready node\'s status computation', () => {

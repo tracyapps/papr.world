@@ -35,7 +35,7 @@ export type ToolVerb =
  * progression from a string, or renaming a drawing would silently reorder a
  * ladder.
  */
-export type ToolFamilyId = 'shovel' | 'hoe' | 'scissors' | 'hammer';
+export type ToolFamilyId = 'shovel' | 'hoe' | 'scissors' | 'pickaxe' | 'hammer';
 
 export const TOOL_FAMILIES = {
   shovel: {
@@ -56,6 +56,12 @@ export const TOOL_FAMILIES = {
     verb: 'trim',
     summary: 'Cut renewable growth from trees without harming them.',
   },
+  pickaxe: {
+    id: 'pickaxe',
+    label: 'Picks',
+    verb: 'mine',
+    summary: 'Work renewable rock formations without reshaping the ground.',
+  },
   hammer: {
     id: 'hammer',
     label: 'Hammers',
@@ -69,7 +75,7 @@ export const TOOL_FAMILIES = {
   summary: string;
 }>;
 
-export const TOOL_FAMILY_ORDER: ToolFamilyId[] = ['shovel', 'hoe', 'scissors', 'hammer'];
+export const TOOL_FAMILY_ORDER: ToolFamilyId[] = ['shovel', 'hoe', 'scissors', 'pickaxe', 'hammer'];
 
 export const TOOL_DEFS = {
   'flimsy-shovel': {
@@ -120,6 +126,16 @@ export const TOOL_DEFS = {
     tier: 1,
     verb: 'plant',
   },
+  'tending-hoe': {
+    id: 'tending-hoe',
+    name: 'Tending Hoe',
+    description: 'A braced garden blade for shaping taller beds and longer crop rows.',
+    limitation: 'Shapes ground twice as high as the basic hoe; field-scale work still needs later farming knowledge.',
+    iconKey: 'tool.tending-hoe',
+    family: 'hoe',
+    tier: 2,
+    verb: 'plant',
+  },
   'kids-scissors': {
     id: 'kids-scissors',
     name: "Kid's Scissors",
@@ -139,6 +155,16 @@ export const TOOL_DEFS = {
     family: 'scissors',
     tier: 2,
     verb: 'trim',
+  },
+  'tin-snips-pick': {
+    id: 'tin-snips-pick',
+    name: 'Tin Snips Pick',
+    description: 'A small folded pick for teasing useful stone from surface formations.',
+    limitation: 'Works renewable surface rocks. Cave walls and hard seams need later mining tools.',
+    iconKey: 'tool.tin-snips-pick',
+    family: 'pickaxe',
+    tier: 1,
+    verb: 'mine',
   },
   'squeaky-hammer': {
     id: 'squeaky-hammer',

@@ -16,6 +16,10 @@ lane beginning after Critter Knowledge 2.2, not a reward for finishing every
 biome. A small invite-only alpha gate and its in-game feedback system are
 defined below and in `alpha-testing.md`.
 
+**Amended 2026-09-19:** the six-biome living-world expansion, regional trim
+and dig materials, crops, water bodies, building additions, and wildlife
+rollout are tracked in `biome-expansion-plan.md`.
+
 ## How to use this
 
 This is ordered by **dependency**, not by enthusiasm. Each item says what it

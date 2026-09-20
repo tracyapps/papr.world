@@ -8,6 +8,7 @@ import {
   completeQuest,
   hasTurnInReady,
   objectiveMeasure,
+  noteVisitedPage,
   refreshQuest,
   selectQuestFor,
 } from './quests';
@@ -23,6 +24,19 @@ function critter(id: string, species: Critter['species'] = 'raccoon'): Critter {
 }
 
 const QUEST_ID = 'favor-first-shiny';
+
+describe('travel history', () => {
+  it('records a new page once with its biome and discovery time', () => {
+    setGameStateForTests(createDefaultGameState());
+    noteVisitedPage('3,-2', 'swamp');
+    const first = getGameState().player.travelLog[0];
+    expect(first).toMatchObject({ pageId: '3,-2', biome: 'swamp' });
+    expect(first?.at).toEqual(expect.any(Number));
+
+    noteVisitedPage('3,-2', 'swamp');
+    expect(getGameState().player.travelLog).toHaveLength(1);
+  });
+});
 
 describe('quest catalog', () => {
   it('has unique ids and complete definitions', () => {
@@ -92,6 +106,7 @@ describe('reachability — "never out of reach, always the next step"', () => {
       draft.world.pages['0,0'] = {
         terrainEdits: {}, resourceDrops: {},
         treeGrowth: { 'pine-1': { growth: 1, trimmedAt: 0, trims: 2, species: 'pine' } },
+        rockGrowth: {},
         plantedCells: {}, placedEntities: {}, placedPieces: {}, buildSites: {},
       };
     });

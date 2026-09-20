@@ -19,6 +19,12 @@ export type MaterialKey =
   | 'ground.meadow'
   | 'ground.dunes'
   | 'ground.tropical'
+  | 'ground.swamp'
+  | 'ground.wetland'
+  | 'ground.rocky-highlands'
+  | 'ground.savanna'
+  | 'ground.badlands'
+  | 'ground.bamboo-forest'
   | 'paper.brown'
   | 'paper.brown.warm'
   | 'paper.green'
@@ -60,6 +66,12 @@ const MATERIAL_DEFS: Record<MaterialKey, PaperMaterialOptions> = {
   // construction paper, so the tropics read as somewhere the ground itself
   // is growing.
   'ground.tropical': { textureUrl: '/assets/runtime/materials/leaf-canopy-green.png', repeat: [5.5, 5.5] },
+  'ground.swamp': { textureUrl: '/assets/runtime/materials/swamp-muck.png', repeat: [5.5, 5.5] },
+  'ground.wetland': { textureUrl: '/assets/runtime/materials/peat-bog.png', repeat: [5.5, 5.5] },
+  'ground.rocky-highlands': { textureUrl: '/assets/runtime/materials/rock-scree.png', repeat: [5.5, 5.5] },
+  'ground.savanna': { textureUrl: '/assets/runtime/materials/savanna-grass.png', repeat: [5.5, 5.5] },
+  'ground.badlands': { textureUrl: '/assets/runtime/materials/badlands-strata.png', repeat: [5.5, 5.5] },
+  'ground.bamboo-forest': { textureUrl: '/assets/runtime/materials/bamboo-culm.png', repeat: [5.5, 5.5] },
   'paper.brown': { textureUrl: '/assets/runtime/materials/construction-paper-brown-3.png', repeat: [2, 2] },
   'paper.brown.warm': { textureUrl: '/assets/runtime/materials/construction-paper-brown-2.png', repeat: [1.6, 1.6] },
   'paper.green': { textureUrl: '/assets/runtime/materials/construction-paper-green-2.png', repeat: [2, 2] },

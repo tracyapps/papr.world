@@ -306,7 +306,16 @@ export function noteVisitedPage(pageId: string, biome: Biome): void {
   const knowBiome = state.player.visitedBiomes.includes(biome);
   if (knowPage && knowBiome) return;
   updateGameState((draft) => {
-    if (!draft.player.visitedPages.includes(pageId)) draft.player.visitedPages.push(pageId);
+    if (!draft.player.visitedPages.includes(pageId)) {
+      draft.player.visitedPages.push(pageId);
+      draft.player.travelLog.unshift({
+        id: `travel:${pageId}`,
+        pageId,
+        biome,
+        at: Date.now(),
+      });
+      if (draft.player.travelLog.length > 400) draft.player.travelLog.length = 400;
+    }
     if (!draft.player.visitedBiomes.includes(biome)) draft.player.visitedBiomes.push(biome);
   });
 }

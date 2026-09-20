@@ -4,6 +4,7 @@ import { getScreenInteractionAt } from './interactionRouter';
 import { getDigTargetStatusAtScreen } from './toolActions';
 import { gardenActionAtScreen } from './planting';
 import { assessTrimTarget } from './treeInteractions';
+import { assessMineTarget } from './rockInteractions';
 import { placeTargetStatusAtScreen } from './placement';
 import { hasReadyPlantDropAtScreen } from './plantInteractions';
 
@@ -15,7 +16,7 @@ import { hasReadyPlantDropAtScreen } from './plantInteractions';
  * happen is already shown by the ground overlay and the status chip; the
  * cursor's job is the coarser question of what kind of work you are doing.
  */
-type CursorKind = 'attach' | 'build' | 'chop' | 'default' | 'dig' | 'gather' | 'garden' | 'hand';
+type CursorKind = 'attach' | 'build' | 'chop' | 'default' | 'dig' | 'gather' | 'garden' | 'hand' | 'mine';
 
 const CURSOR_ART: Record<CursorKind, string> = {
   attach: new URL('../../assets/ui-art/cursor-attach.svg', import.meta.url).href,
@@ -29,6 +30,7 @@ const CURSOR_ART: Record<CursorKind, string> = {
   gather: new URL('../../assets/ui-art/cursor-hand.svg', import.meta.url).href,
   garden: new URL('../../assets/ui-art/cursor-garden.svg', import.meta.url).href,
   hand: new URL('../../assets/ui-art/cursor-hand.svg', import.meta.url).href,
+  mine: new URL('../../assets/ui-art/cursor-dig.svg', import.meta.url).href,
 };
 
 // Hover picking is capped at one check per animation frame. Pointer events can
@@ -61,6 +63,7 @@ function refreshCursor() {
     && interaction.id !== 'equipped-tool'
     && interaction.id !== 'planting'
     && interaction.id !== 'tree-trim'
+    && interaction.id !== 'rock-mine'
     && interaction.id !== 'build-placement'
   ) {
     // A loose pile on the ground and a plant whose drop is ready are the
@@ -102,6 +105,11 @@ function refreshCursor() {
   // scissors, and swapping art on empty ground reads as a bug.
   if (getActionMode() === 'trim') {
     setCursor('chop', assessTrimTarget(hoverX, hoverY).status === 'valid');
+    return;
+  }
+
+  if (getActionMode() === 'mine') {
+    setCursor('mine', assessMineTarget(hoverX, hoverY).status === 'valid');
     return;
   }
 

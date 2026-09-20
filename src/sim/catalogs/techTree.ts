@@ -219,8 +219,13 @@ export const TECH_DEFS = {
     summary: 'Tend growing plants and learn which crops return for another harvest.',
     branch: 'caring-for-the-land',
     requires: ['gardening-1'],
-    readiness: 'concept',
-    previewGrants: ['Tending bonuses', 'Repeat harvests'],
+    readiness: 'ready',
+    learningHours: 6,
+    tasks: [
+      { kind: 'own-tool', toolId: 'creased-hoe', weight: 1 },
+      { kind: 'make', recipeId: 'creased-hoe', quantity: 1, weight: 1 },
+    ],
+    grants: ['tending-hoe'],
   },
   'soil-mechanics': {
     id: 'soil-mechanics',
@@ -321,6 +326,19 @@ export const TECH_DEFS = {
     branch: 'caring-for-the-land',
     requires: ['advanced-farming'],
     readiness: 'concept',
+  },
+
+  // --- Materials & Refinement: surface mining -----------------------------
+  'mining-1': {
+    id: 'mining-1',
+    name: 'Surface Mining Basics',
+    summary: 'Work renewable rock formations while leaving the ground and landmarks intact.',
+    branch: 'materials',
+    requires: [],
+    readiness: 'ready',
+    learningHours: 1,
+    tasks: [{ kind: 'make', recipeId: 'tin-snips-pick', quantity: 1, weight: 1 }],
+    grants: ['tin-snips-pick'],
   },
 
   // --- Building & Construction: woodworking sub-thread ----------------------

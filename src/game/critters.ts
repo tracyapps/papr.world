@@ -49,6 +49,12 @@ const BIOME_SPECIES: Record<Biome, WeightedSpecies> = {
     ['parrot', 0.22], ['toucan', 0.14], ['monkey', 0.13], ['sloth', 0.1],
     ['butterfly', 0.12], ['bird', 0.1], ['bunny', 0.08], ['raccoon', 0.06], ['squirrel', 0.03], ['cat', 0.02],
   ],
+  swamp: [['raccoon', 0.25], ['bird', 0.2], ['butterfly', 0.18], ['bunny', 0.14], ['squirrel', 0.13], ['cat', 0.1]],
+  wetland: [['bird', 0.28], ['butterfly', 0.22], ['bunny', 0.18], ['raccoon', 0.14], ['squirrel', 0.1], ['cat', 0.08]],
+  'rocky-highlands': [['fox', 0.3], ['bird', 0.25], ['bunny', 0.18], ['squirrel', 0.12], ['meerkat', 0.1], ['cat', 0.05]],
+  savanna: [['meerkat', 0.28], ['fox', 0.24], ['bird', 0.2], ['butterfly', 0.12], ['bunny', 0.1], ['cat', 0.06]],
+  badlands: [['meerkat', 0.35], ['fox', 0.28], ['bird', 0.17], ['raccoon', 0.1], ['cat', 0.1]],
+  'bamboo-forest': [['bunny', 0.24], ['bird', 0.18], ['butterfly', 0.17], ['squirrel', 0.16], ['raccoon', 0.12], ['monkey', 0.08], ['cat', 0.05]],
 };
 
 const BIOME_COUNTS: Record<Biome, [number, number]> = {
@@ -59,6 +65,12 @@ const BIOME_COUNTS: Record<Biome, [number, number]> = {
   scrapflats: [2, 3],
   // Lush and noisy — a jungle page should feel inhabited.
   tropical: [4, 6],
+  swamp: [3, 5],
+  wetland: [3, 5],
+  'rocky-highlands': [2, 4],
+  savanna: [3, 5],
+  badlands: [1, 3],
+  'bamboo-forest': [4, 6],
 };
 
 function pickSpecies(table: WeightedSpecies, roll: number): CritterSpecies {
