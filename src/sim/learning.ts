@@ -43,8 +43,14 @@ function completedOutputCount(state: Readonly<GameState>, recipeId: string): num
   return state.world.thingMaker.completedOutputs.filter((id) => id === recipeId).length;
 }
 
+function refinedCount(state: Readonly<GameState>, resource: string): number {
+  return state.player.refinedCounts[resource] ?? 0;
+}
+
 function taskBaselineCount(state: Readonly<GameState>, task: TechTaskDef): number {
-  return task.kind === 'make' ? completedOutputCount(state, task.recipeId) : 0;
+  if (task.kind === 'make') return completedOutputCount(state, task.recipeId);
+  if (task.kind === 'refine') return refinedCount(state, task.resource);
+  return 0;
 }
 
 function taskProgress(
@@ -65,10 +71,10 @@ function taskProgress(
     };
   }
 
-  const madeSinceStart = Math.max(
-    0,
-    completedOutputCount(state, task.recipeId) - (learning.taskBaselineCounts[index] ?? 0),
-  );
+  const doneNow = task.kind === 'refine'
+    ? refinedCount(state, task.resource)
+    : completedOutputCount(state, task.recipeId);
+  const madeSinceStart = Math.max(0, doneNow - (learning.taskBaselineCounts[index] ?? 0));
   const current = alreadyCompleted ? task.quantity : Math.min(task.quantity, madeSinceStart);
   return {
     completed: current >= task.quantity,

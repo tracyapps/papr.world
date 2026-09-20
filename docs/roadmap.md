@@ -22,7 +22,11 @@ rollout are tracked in `biome-expansion-plan.md`.
 
 **Amended 2026-09-20:** the tree grew from 71 to 93 nodes (14 ready, 79
 concept) inside the existing seven branches, and build-piece plans are now
-real knowledge: see 1.8.
+real knowledge: see 1.8. Tech nodes can now teach **know-how**, and the Wood Mill's
+structural rung is built behind two lessons: see 1.9. Houses you can walk into, and
+the way underground, are planned as **scenes** in `scenes-and-interiors.md`; the
+starter tent, piecemeal upgrades, entry, parties and display cases are sorted in
+`house-and-home.md`.
 
 ## How to use this
 
@@ -242,6 +246,44 @@ have no seam yet. That is the next gap in the grant seam, after recipes.
 **Not yet verified in the running game:** the locked palette state, the
 Professor link, and lotus and reeds rendering in water. Automated tests cover
 the logic only.
+
+### 1.9 Know-how grants and the structural refining rung — ✅ built (2026-09-20)
+
+**Know-how.** A tech node can now teach an *ability*, not only a tool or a
+build piece. It reuses the plan machinery: an ability is a recipe with an
+`ability` output (`catalogs/abilities.ts`), so it lives in `player.plans`, is
+normalised on load, rides the account tech store unchanged, and is read back by
+`techNodeStatus`. `hasAbility(plans, id)` is the one check. It never shows up at
+the Thing Maker. Two rules keep it honest: an ability is added only when
+something in the game reads it, and a lesson teaching one must ask for real
+work, not only tools you already own.
+
+**First consumers.**
+- *Wetland Growing* is now a ready lesson (off Gardening 2) and gates rooting
+  lotus and reeds in shallow water. Ordinary and planter beds never need it.
+- *Materials & Refinement 1 and 2* are ready lessons. Chisel's stage-2 trades
+  (layerboard, red brick) wait on Finer Refining; stage-3 trades (crossbound
+  timber, faced masonry) wait on Heavy Refining. Stage 1 stays open to all.
+  Locked trades show on the counter with the lesson that opens them, and are
+  refused at the counter and by mail.
+
+**Refining catalog.** Mill inputs may now be refined materials, and a tag slot
+can take refined stock ("any brick"). Every input must sit at a strictly lower
+process stage than the output, so no trade can feed itself. New tag: `brick`.
+New task kind: `refine` (pieces refined since the lesson began, from
+`player.refinedCounts`). The mail fee is now one extra of each material a trade
+takes, raw or refined.
+
+**A fix.** The three build-plan lessons from 1.8 held only own-tool tasks, which
+are true the moment you hold the tool, so a player who owned them finished the
+lesson instantly. Each now has a make task, and a test holds that.
+
+**Not built yet.** Nothing consumes layerboard, brick, timber or masonry until
+structural pieces exist (`scenes-and-interiors.md`, step 1). Storybeam,
+foundation block, glass (needs quartz), Cream City and grey brick (need
+sandstone and slate), and the textile path (yarn, cloth, canvas) wait for the
+raw materials or pieces that earn them. Art: `crossbound-timber` moved to `board/` on
+2026-09-20 (see `resource-asset-pipeline.md`, conventions); faced masonry has no tile.
 
 ---
 
@@ -812,12 +854,17 @@ answerable anywhere and retunes itself with the world.
 - **Compass ticks** (`src/ui/directionHints.ts`): a dot per nearby land around
   the compass rose, plus a screen-reader sentence. Nearest *real stretch*, not
   a one-page fleck (`isSubstantial` in `src/world/biomeCompass.ts`).
-- **Treasure map** (`N`, "Map" by the minimap, scrapbook Map tab): inked and
+- **Treasure map** (`M`, "Map" by the minimap, scrapbook Map tab): inked and
   hatched where walked, smoothed watercolour hearsay elsewhere, one "land?"
   guess per land, the red X for home, edge arrows for lands off the sheet,
   and the same content written out as a list. Model and drawing are split
   (`treasureMapModel.ts` / `treasureMapDraw.ts`) so the real map can reuse
   the model.
+- **Keys and the guide (2026-09-20):** `M` opens the map, `G` marks this spot
+  (and points the guide at it); they were `N` and `M`. The guide switches
+  itself off once you stay within `ARRIVE_RADIUS` (6 units) for a couple of
+  seconds (`guideArrival.ts`, tested); the in-game help sheet and every button
+  label say the new keys.
 Still waiting on the design: accurate rendering, pan/zoom, search/filter,
 pins, and layers.
 
@@ -825,7 +872,8 @@ pins, and layers.
    own, independent of caves. — **L**
 2. **`layer` threaded** through page addressing, streaming, terrain sampling,
    and the map. The risk is anywhere that assumes a single global height field.
-   — **L**
+   — **L** *(Reframed 2026-09-20: the layer is one kind of **scene**, and the
+   same transition serves houses. See Phase 5b.)*
 3. **Explored-cell storage keyed by layer**, and landmarks that survive page
    unload. — **M**
 4. **Cave entrances** as subway-style surface props, transitioning to one
@@ -837,6 +885,54 @@ pins, and layers.
 8. **Underground building**, gardens, and protected mural surfaces. — **L**
 
 Steps 1 and 2 are the real work; everything after is content on top of them.
+
+---
+
+## Phase 5b — Scenes: into the house, and under the ground
+
+<!-- site: title: Scenes -->
+<!-- site: summary: Walk into a house you built, that is bigger on the inside, through the same doorway idea that will one day lead underground. The map follows you in. -->
+
+Full design in `scenes-and-interiors.md`; what the house *is* (starter tent,
+piecemeal parts, dwelling projects, entry, parties, display cases) is in
+`house-and-home.md`. Owner request 2026-09-20: entering a
+house is a **scene change**, houses may be **bigger inside**, the same mechanism
+is **how players get underground**, and the map changes with the scene.
+
+The seam is a **scene-qualified page id** (`3,-2` stays the surface;
+`under:3,-2` and `in:<dwelling>:0,0` are new). Every existing id, save and
+piece stays valid, and the server already treats `page` as a free string, so it
+needs no schema change to carry a scene.
+
+1. **Structural pieces** (floor, wall, door, roof, stairs) that consume the
+   refined materials by structural class. Without a house there is nothing to
+   enter, and the new materials have no consumer. Reframed 2026-09-20: these are
+   **dwelling projects** on a starter tent (pay in materials, then a real-time
+   build), starting with a Thing Maker whose look follows its level; see
+   `house-and-home.md`, which can begin before scenes or multiplayer. — **L**
+   *Built 2026-09-20, not yet played:* Maker look by level, the tent, the
+   dwelling record and projects, refunds (100% / 95% / 90%) and five house
+   know-how nodes. Still to do here: entering the tent (step 3), display cases,
+   guests, parties.
+2. **The scene seam:** address type and serializer, surface as the only scene,
+   no behaviour change. — **S**
+   *Built 2026-09-20* (`world/scenes.ts`, `player.scene` in the save).
+3. **Portal and `enterScene`** with one test interior: a door, one flat room,
+   its own light, a spoken announcement, and an always-available Leave.
+   Reduced-motion players get a cut, not a fade. — **M**
+   *Built 2026-09-20, solo:* the home tent is the room. The map is simply hidden
+   indoors until step 4.
+4. **The map reads the active scene:** explored storage keyed by scene, and a
+   floor-plan map for interiors. — **M**
+5. **Player-built interiors:** rooms from walls and floors, furniture inside,
+   stairs as portals to an upper floor. — **L**
+6. **Cave mouths as portals** into the underground layer: Phase 5 step 4 on this
+   mechanism. — **M**
+7. **Guests:** presence by scene, the owner's entry policy (default: friends
+   walk in, others knock; open house and parties), and block checks at the
+   door. Solo comes first. — **L** *Built 2026-09-20 except parties and
+   scheduled open house: friendships, visible homes, visiting, knock, block at
+   the door, open house on/off. See `house-and-home.md`.*
 
 ---
 
@@ -948,6 +1044,15 @@ Small, and each unblocks something specific.
 5. **Whether famous original landmarks become permanent prime real estate**, or
    whether making them reachable-from-anywhere defuses it.
    *See `land-and-dwellings.md`.*
+
+6. **~~How house rooms are made, and who may come in.~~ Settled 2026-09-20:**
+   rooms are built from parts on a starter tent; friends walk in and others
+   knock by default (owner-adjustable); chat stays inside the house. *See
+   `house-and-home.md`.* Also settled: moving pays built parts back as
+   materials (10% loss); a project can be refunded (100% before the build
+   starts, 95% once started, 90% for a finished part); display cases carry an
+   owner-set per-visitor limit per time window. *Still open there:* how long a
+   long build is (needs play), and cooking.
 
 **Settled 2026-08-04, previously listed here:** specialty shops differ by
 **geography** only; the mailbox and base Thing Maker are **given automatically**

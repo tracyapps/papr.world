@@ -1,22 +1,32 @@
 import * as THREE from 'three';
 import type { HomeMarker } from '../../shared/src/index';
+import { buildHouse } from '../game/dwellingExterior';
+import { exteriorPlanFromParts } from '../game/dwellingLook';
 import { camera, scene } from '../render/context';
+import { invalidateFootprintCache } from '../world/footprints';
+import { homeFacing, homePosition } from '../world/homeSite';
+import {
+  clearNeighborHomes,
+  removeNeighborHome,
+  setNeighborHome,
+  signWords,
+  type NeighborHome,
+} from '../world/neighborHomes';
 import { sampleTerrainHeight } from '../world/terrain';
 
-// A neighbor's Home, staked out like a building lot before anything is
-// built on it (avatar-and-identity.md / land-and-dwellings.md). The point
-// isn't the marker itself — it's that a passerby can watch new stakes
-// appear around them as new neighbors sign up, long before anyone has
-// placed a single piece there.
+// A neighbor's home, standing where theirs stands for them: the same tent or
+// house, drawn from the parts they have finished, with scaffolding for the part
+// going up. A sign beside the door says whose it is, and whether the house is
+// open. (land-and-dwellings.md, house-and-home.md.)
 //
-// Deliberately built from primitives, the same convention as the other
-// procedural fallbacks in this codebase (resourceDropVisual.ts) — no new
-// art asset for something this small and this temporary-feeling.
+// The drawing itself is the player's own (`buildHouse`); this file only decides
+// where it stands and what the sign says. Everything the sign says is also said
+// in words when you walk up to it (`game/guestsUi.ts`).
 
-const LOT_HALF = 0.6;
-const STAKE_HEIGHT = 0.3;
 const POST_HEIGHT = 0.92;
 const SIGN_Y = POST_HEIGHT - 0.14;
+/** The sign stands to the side of the door, clear of the doorstep and the annex rooms. */
+const SIGN_LOCAL = { x: -1.3, z: 1.75 } as const;
 
 type HomeVisual = {
   root: THREE.Group;
@@ -29,60 +39,41 @@ const root = new THREE.Group();
 root.name = 'shared-homes';
 const visuals = new Map<string, HomeVisual>();
 
-const stakeGeometry = new THREE.CylinderGeometry(0.012, 0.03, STAKE_HEIGHT, 5);
-const stakeMaterial = new THREE.MeshStandardMaterial({
-  color: '#8a6a45', metalness: 0, roughness: 0.9,
-});
 const postGeometry = new THREE.CylinderGeometry(0.035, 0.045, POST_HEIGHT, 6);
 const postMaterial = new THREE.MeshStandardMaterial({
   color: '#7c5c3a', metalness: 0, roughness: 0.92,
-});
-const stringMaterial = new THREE.LineDashedMaterial({
-  color: '#c9a463', dashSize: 0.08, gapSize: 0.05, linewidth: 1,
 });
 
 export function initializeSharedHomeVisuals(): void {
   if (!root.parent) scene.add(root);
 }
 
-function buildLotOutline(): THREE.LineLoop {
-  const corners = [
-    new THREE.Vector3(-LOT_HALF, STAKE_HEIGHT * 0.62, -LOT_HALF),
-    new THREE.Vector3(LOT_HALF, STAKE_HEIGHT * 0.62, -LOT_HALF),
-    new THREE.Vector3(LOT_HALF, STAKE_HEIGHT * 0.62, LOT_HALF),
-    new THREE.Vector3(-LOT_HALF, STAKE_HEIGHT * 0.62, LOT_HALF),
-  ];
-  const geometry = new THREE.BufferGeometry().setFromPoints(corners);
-  const line = new THREE.LineLoop(geometry, stringMaterial);
-  line.computeLineDistances();
-  return line;
-}
-
-function makeSignSprite(name: string): THREE.Sprite {
+function makeSignSprite(home: NeighborHome): THREE.Sprite {
+  const { heading, line } = signWords(home);
   const canvas = document.createElement('canvas');
   canvas.width = 384;
   canvas.height = 168;
   const context = canvas.getContext('2d');
   if (context) {
-    // Hazard-stripe bands, kept in the game's kraft/gold palette rather than
-    // literal safety yellow so it reads as "papercraft caution", not a real
-    // construction site.
-    const stripeHeight = 16;
+    // Hazard-stripe bands only while nothing is built, kept in the game's
+    // kraft/gold palette rather than literal safety yellow.
+    const stripeHeight = home.parts.length === 0 && !home.open ? 16 : 6;
     context.save();
     context.beginPath();
     context.rect(0, 0, 384, stripeHeight);
     context.rect(0, 168 - stripeHeight, 384, stripeHeight);
     context.clip();
-    context.fillStyle = '#3f3428';
+    context.fillStyle = home.open ? '#5f7d4a' : '#3f3428';
     context.fillRect(0, 0, 384, 168);
-    context.fillStyle = '#d8a03c';
-    const stripeWidth = 22;
-    context.translate(0, 0);
-    for (let x = -168; x < 384 + 168; x += stripeWidth * 2) {
-      context.save();
-      context.transform(1, 0, -0.6, 1, 0, 0);
-      context.fillRect(x, -20, stripeWidth, 210);
-      context.restore();
+    if (stripeHeight > 6) {
+      context.fillStyle = '#d8a03c';
+      const stripeWidth = 22;
+      for (let x = -168; x < 384 + 168; x += stripeWidth * 2) {
+        context.save();
+        context.transform(1, 0, -0.6, 1, 0, 0);
+        context.fillRect(x, -20, stripeWidth, 210);
+        context.restore();
+      }
     }
     context.restore();
 
@@ -95,18 +86,19 @@ function makeSignSprite(name: string): THREE.Sprite {
     context.stroke();
 
     context.textAlign = 'center';
-    context.fillStyle = '#8a5a2a';
+    context.fillStyle = home.open ? '#3f6a2f' : '#8a5a2a';
     context.font = '700 22px Georgia, serif';
-    context.fillText('BUILDING A HOME', 192, stripeHeight + 42);
+    context.fillText(heading, 192, stripeHeight + 42);
 
-    const safeName = name.slice(0, 24);
     context.fillStyle = '#3f3428';
     context.font = '600 30px Georgia, serif';
-    context.fillText(safeName, 192, stripeHeight + 82);
+    context.fillText(home.name.slice(0, 24), 192, stripeHeight + 82);
 
-    context.fillStyle = '#6b5a44';
-    context.font = 'italic 17px Georgia, serif';
-    context.fillText('a new neighbor, papering in', 192, stripeHeight + 112);
+    if (line) {
+      context.fillStyle = '#6b5a44';
+      context.font = 'italic 17px Georgia, serif';
+      context.fillText(line, 192, stripeHeight + 112);
+    }
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -116,51 +108,60 @@ function makeSignSprite(name: string): THREE.Sprite {
   return sprite;
 }
 
-export function addSharedHome(home: HomeMarker): void {
-  removeSharedHome(home.accountId);
+function disposeGroup(group: THREE.Object3D) {
+  group.traverse((node) => {
+    if (node instanceof THREE.Mesh && node.geometry !== postGeometry) node.geometry.dispose();
+  });
+}
+
+/** Draw (or redraw) a neighbor's home from what they published. */
+export function addSharedHome(marker: HomeMarker): void {
+  removeSharedHome(marker.accountId, false);
+  const home = setNeighborHome(marker);
+  if (!home) return;
 
   const host = new THREE.Group();
   host.name = `shared-home:${home.accountId}`;
-
-  const corners: Array<[number, number]> = [
-    [-LOT_HALF, -LOT_HALF], [LOT_HALF, -LOT_HALF], [LOT_HALF, LOT_HALF], [-LOT_HALF, LOT_HALF],
-  ];
-  for (const [x, z] of corners) {
-    const stake = new THREE.Mesh(stakeGeometry, stakeMaterial);
-    stake.position.set(x, STAKE_HEIGHT / 2, z);
-    stake.castShadow = true;
-    host.add(stake);
-  }
-  host.add(buildLotOutline());
+  host.add(buildHouse(exteriorPlanFromParts(home.parts, home.building)));
 
   const post = new THREE.Mesh(postGeometry, postMaterial);
-  post.position.set(-LOT_HALF, POST_HEIGHT / 2, -LOT_HALF);
+  post.position.set(SIGN_LOCAL.x, POST_HEIGHT / 2, SIGN_LOCAL.z);
   post.castShadow = true;
   host.add(post);
-
-  const sign = makeSignSprite(home.name);
-  sign.position.x = -LOT_HALF;
-  sign.position.z = -LOT_HALF;
+  const sign = makeSignSprite(home);
+  sign.position.x = SIGN_LOCAL.x;
+  sign.position.z = SIGN_LOCAL.z;
   host.add(sign);
 
-  const ground = sampleTerrainHeight(home.x, home.z);
-  host.position.set(home.x, ground, home.z);
+  const spot = homePosition(home.place);
+  host.position.set(spot.x, sampleTerrainHeight(spot.x, spot.z), spot.z);
+  host.rotation.y = homeFacing();
 
   root.add(host);
   visuals.set(home.accountId, { root: host, sign, accountId: home.accountId, name: home.name });
+  // The house is solid, and claims its ground against digging and placing.
+  invalidateFootprintCache();
 }
 
-export function removeSharedHome(accountId: string): void {
+export function removeSharedHome(accountId: string, forget = true): void {
   const visual = visuals.get(accountId);
-  if (!visual) return;
-  visual.root.removeFromParent();
-  visual.sign.material.map?.dispose();
-  visual.sign.material.dispose();
-  visuals.delete(accountId);
+  if (visual) {
+    visual.root.removeFromParent();
+    disposeGroup(visual.root);
+    visual.sign.material.map?.dispose();
+    visual.sign.material.dispose();
+    visuals.delete(accountId);
+  }
+  if (forget) {
+    removeNeighborHome(accountId);
+    invalidateFootprintCache();
+  }
 }
 
 export function clearSharedHomeVisuals(): void {
-  for (const accountId of [...visuals.keys()]) removeSharedHome(accountId);
+  for (const accountId of [...visuals.keys()]) removeSharedHome(accountId, false);
+  clearNeighborHomes();
+  invalidateFootprintCache();
 }
 
 export function sharedHomeCount(): number {

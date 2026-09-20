@@ -1,6 +1,7 @@
 import type { GameState } from '../state';
 import { toolRequiredFor } from './obtaining';
-import { RECIPE_DEFS, type RecipeId } from './recipes';
+import type { AbilityId } from './abilities';
+import { RECIPE_DEFS, abilityPlanId, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { TOOL_DEFS, type ToolId } from './tools';
 
@@ -117,7 +118,10 @@ export const TECH_BRANCH_ORDER: TechBranchId[] = [
  */
 export type TechTaskDef =
   | { kind: 'make'; recipeId: RecipeId; quantity: number; weight: number }
-  | { kind: 'own-tool'; toolId: ToolId; weight: number };
+  | { kind: 'own-tool'; toolId: ToolId; weight: number }
+  // Pieces refined at the Wood Mill since the lesson began (a count of pieces,
+  // not batches). Counted from `player.refinedCounts`, like the refine quests.
+  | { kind: 'refine'; resource: ResourceId; quantity: number; weight: number };
 
 type TechNodeBase = {
   id: TechNodeId;
@@ -280,13 +284,22 @@ export const TECH_DEFS = {
     readiness: 'concept',
     previewGrants: ['Food harvests', 'Whole-crop gathering'],
   },
+  // The first node to teach know-how rather than a tool or a build piece.
+  // Ready nodes may depend only on ready nodes, so it hangs off Gardening 2
+  // (tending what already grows) rather than the still-concept seed lessons.
   'wetland-growing': {
     id: 'wetland-growing',
     name: 'Wetland Growing',
-    summary: 'Lotus, marsh reed, and everything else that grows best with wet feet.',
+    summary: 'Lotus, marsh reed, and everything else that grows best with wet feet: plant straight into the shallows.',
     branch: 'caring-for-the-land',
-    requires: ['seeds-planting'],
-    readiness: 'concept',
+    requires: ['gardening-2'],
+    readiness: 'ready',
+    learningHours: 8,
+    tasks: [
+      { kind: 'own-tool', toolId: 'tending-hoe', weight: 1 },
+      { kind: 'make', recipeId: 'tending-hoe', quantity: 1, weight: 1 },
+    ],
+    grants: ['shallow-water-planting'],
   },
   'dryland-growing': {
     id: 'dryland-growing',
@@ -486,6 +499,7 @@ export const TECH_DEFS = {
     tasks: [
       { kind: 'own-tool', toolId: 'tending-hoe', weight: 1 },
       { kind: 'own-tool', toolId: 'basic-mallet', weight: 1 },
+      { kind: 'make', recipeId: 'basic-mallet', quantity: 1, weight: 2 },
     ],
     grants: ['garden-arbor'],
   },
@@ -500,6 +514,7 @@ export const TECH_DEFS = {
     tasks: [
       { kind: 'own-tool', toolId: 'basic-mallet', weight: 1 },
       { kind: 'own-tool', toolId: 'sturdy-scissors', weight: 1 },
+      { kind: 'make', recipeId: 'sturdy-scissors', quantity: 1, weight: 2 },
     ],
     grants: ['picnic-table'],
   },
@@ -514,6 +529,7 @@ export const TECH_DEFS = {
     tasks: [
       { kind: 'own-tool', toolId: 'basic-mallet', weight: 1 },
       { kind: 'own-tool', toolId: 'okayish-shovel', weight: 1 },
+      { kind: 'make', recipeId: 'okayish-shovel', quantity: 1, weight: 2 },
     ],
     grants: ['footbridge'],
   },
@@ -576,16 +592,25 @@ export const TECH_DEFS = {
   },
 
   // --- Materials & Refinement --------------------------------------------
+  // The first materials lessons to teach know-how: Chisel's later trades at the
+  // Wood Mill wait on them (`requiresAbility` in millRefining.ts). The stage-1
+  // rung (cord, pulp, aggregate, mortar, bound lumber) stays open to everyone.
+  // Ready nodes may depend only on ready nodes, so this hangs off Trimming 2
+  // (the species wood a press needs) rather than the still-concept Lumber Types.
   'materials-refinement-1': {
     id: 'materials-refinement-1',
     name: 'Materials & Refinement 1',
-    summary: 'Turning a raw find into something worth building with.',
+    summary: 'Turning a raw find into something worth building with: layerboard and brick.',
     branch: 'materials',
-    requires: ['lumber-types'],
-    readiness: 'concept',
-    // The natural home for build-piece materials as an unlockable set,
-    // rather than every swatch being open from the very first hammer.
-    previewGrants: ['Refined build materials', 'New material swatches'],
+    requires: ['trimming-2'],
+    readiness: 'ready',
+    learningHours: 14,
+    tasks: [
+      { kind: 'refine', resource: 'bound-lumber', quantity: 2, weight: 1 },
+      { kind: 'refine', resource: 'binding-cord', quantity: 2, weight: 1 },
+      { kind: 'refine', resource: 'paper-mortar', quantity: 2, weight: 1 },
+    ],
+    grants: ['finer-refining'],
   },
   'masonry': {
     id: 'masonry',
@@ -608,11 +633,89 @@ export const TECH_DEFS = {
   'materials-refinement-2': {
     id: 'materials-refinement-2',
     name: 'Materials & Refinement 2',
-    summary: 'Finer processing, and more of what it started as.',
+    summary: 'Finer processing, and more of what it started as: structural timber and faced masonry.',
     branch: 'materials',
     requires: ['materials-refinement-1'],
-    readiness: 'concept',
-    previewGrants: ['Finer material grades', 'Better yield per raw find'],
+    readiness: 'ready',
+    learningHours: 28,
+    tasks: [
+      { kind: 'refine', resource: 'layerboard', quantity: 2, weight: 1 },
+      { kind: 'refine', resource: 'red-brick', quantity: 4, weight: 1 },
+    ],
+    grants: ['heavy-refining'],
+  },
+  // --- Building & Construction: the house, a part at a time -----------------
+  // Each lesson teaches one part of your home (catalogs/dwellings.ts), so a
+  // player can floor the tent, wall it, roof it, then go up or out as each
+  // lesson is learned. Every task is real refining work, and every refine task
+  // needs only know-how the lesson's own prerequisites already teach.
+  'house-floors': {
+    id: 'house-floors',
+    name: 'Floors',
+    summary: 'A floor to stand on, in place of bare ground under the tent.',
+    branch: 'building-construction',
+    requires: ['building-3', 'materials-refinement-1'],
+    readiness: 'ready',
+    learningHours: 10,
+    tasks: [
+      { kind: 'refine', resource: 'layerboard', quantity: 3, weight: 2 },
+    ],
+    grants: ['house-floors'],
+  },
+  'house-walls': {
+    id: 'house-walls',
+    name: 'Walls',
+    summary: 'Walls that stand on their own around your floor.',
+    branch: 'building-construction',
+    requires: ['house-floors'],
+    readiness: 'ready',
+    learningHours: 14,
+    tasks: [
+      { kind: 'refine', resource: 'red-brick', quantity: 4, weight: 2 },
+    ],
+    grants: ['house-walls'],
+  },
+  'house-roofing': {
+    id: 'house-roofing',
+    name: 'Roofing',
+    summary: 'A proper roof, and the end of the tent roof.',
+    branch: 'building-construction',
+    requires: ['house-walls'],
+    readiness: 'ready',
+    learningHours: 18,
+    tasks: [
+      { kind: 'refine', resource: 'layerboard', quantity: 4, weight: 1 },
+      { kind: 'refine', resource: 'paper-mortar', quantity: 2, weight: 1 },
+    ],
+    grants: ['house-roofs'],
+  },
+  'extra-rooms': {
+    id: 'extra-rooms',
+    name: 'Extra Rooms',
+    summary: 'One house, more than one room.',
+    branch: 'building-construction',
+    requires: ['house-walls'],
+    readiness: 'ready',
+    learningHours: 16,
+    tasks: [
+      { kind: 'refine', resource: 'layerboard', quantity: 4, weight: 1 },
+      { kind: 'refine', resource: 'red-brick', quantity: 4, weight: 1 },
+    ],
+    grants: ['house-rooms'],
+  },
+  'stairs-and-upper-floors': {
+    id: 'stairs-and-upper-floors',
+    name: 'Stairs & Upper Floors',
+    summary: 'Carrying a floor up into the air, on timber and faced stone.',
+    branch: 'building-construction',
+    requires: ['house-roofing', 'materials-refinement-2'],
+    readiness: 'ready',
+    learningHours: 30,
+    tasks: [
+      { kind: 'refine', resource: 'crossbound-timber', quantity: 2, weight: 1 },
+      { kind: 'refine', resource: 'faced-masonry', quantity: 2, weight: 1 },
+    ],
+    grants: ['house-stairs'],
   },
   'advanced-rare-materials': {
     id: 'advanced-rare-materials',
@@ -681,7 +784,7 @@ export const TECH_DEFS = {
     branch: 'building-construction',
     requires: ['large-furniture-building'],
     readiness: 'concept',
-    previewGrants: ['Walls & simple structures', 'Roofed spaces'],
+    previewGrants: ['Shops, sheds and other standalone structures'],
   },
   'structural-analysis': {
     id: 'structural-analysis',
@@ -1072,6 +1175,12 @@ export function techNodeGrantingRecipe(recipeId: RecipeId): TechNodeId | null {
   }) ?? null;
 }
 
+/** The lesson that teaches an ability, or null when nothing does. */
+export function techNodeTeachingAbility(abilityId: AbilityId): TechNodeId | null {
+  const planId = abilityPlanId(abilityId);
+  return planId ? techNodeGrantingRecipe(planId) : null;
+}
+
 /** Nodes on one branch, in catalog order (which is also dependency order). */
 export function techNodesInBranch(branch: TechBranchId): TechNodeId[] {
   return TECH_NODE_ORDER.filter((id) => TECH_DEFS[id].branch === branch);
@@ -1238,6 +1347,9 @@ export function techNodePreviewGrants(nodeId: TechNodeId): string[] {
 export function describeTechTask(task: TechTaskDef): string {
   if (task.kind === 'own-tool') {
     return `Own a ${TOOL_DEFS[task.toolId].name}`;
+  }
+  if (task.kind === 'refine') {
+    return `Have Chisel refine ${task.quantity} ${RESOURCE_CORE_DEFS[task.resource].shortLabel}`;
   }
   const recipe = RECIPE_DEFS[task.recipeId];
   const label = task.quantity === 1 || recipe.output.label.endsWith('s')

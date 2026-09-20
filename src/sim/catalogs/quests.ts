@@ -496,7 +496,6 @@ function recipeReach(state: GameState, recipeId: RecipeId): ObjectiveReach {
   if (!isRecipeAvailable(recipeId)) return 'far';
   const output = recipe.output;
   if (output.kind === 'tool' && (state.player.tools[output.toolId] ?? 0) > 0) return 'done';
-  if (output.kind === 'resource' && (state.player.inventory[output.resource] ?? 0) > 0) return 'done';
   if (output.kind === 'item' && (state.player.items[output.itemId] ?? 0) > 0) return 'done';
 
   // The plan is the only "hard" gate; materials and a busy maker are ordinary

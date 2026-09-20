@@ -1,4 +1,5 @@
 import './styles.css';
+import * as THREE from 'three';
 import { canvas, clock, renderer, resizeRenderer, scene, camera } from './render/context';
 import { addLighting, updateLighting } from './render/lighting';
 import { buildBackdrop, updateBackdrop } from './render/backdrop';
@@ -12,6 +13,7 @@ import { getCameraDebug, getYaw, updateCamera } from './game/camera';
 import { initializeInput, updateGamepadCamera } from './game/input';
 import {
   isMakerPanelOpen,
+  distanceToThingMaker,
   isNearThingMaker,
   isThingMakerAtScreen,
   isWheelInsideMakerPanel,
@@ -36,7 +38,7 @@ import { hasCozyInteractionAt, initializeCozyInteractions, tryCozyInteractionAt,
 import { initializeInteractionCursor } from './game/interactionCursor';
 import { initializeHarvesting, isHarvestableAtScreen, tryHarvestAt, updateHarvestables } from './game/harvesting';
 import { getCurrentPageId, isPageActive, updateStreaming } from './world/streaming';
-import { pageId } from './world/types';
+import { pageId, pageOfPosition } from './world/types';
 import {
   initializeHudWidgets,
   isHudWidgetInteractionActive,
@@ -56,7 +58,7 @@ import { initializePlaces } from './world/places';
 import { getPage } from './world/pages';
 import { initializeRegionBanner, updateRegionBanner } from './ui/regionBanner';
 import { hasOrbitBlockingInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
-import { initializeGameState } from './sim/state';
+import { getGameState, initializeGameState } from './sim/state';
 import { hasToolActionAt, initializeToolActions, tryToolActionAt } from './game/toolActions';
 import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } from './game/planting';
 import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverlay';
@@ -114,6 +116,38 @@ import {
   setMillPanelOpen,
   updateMillPrompt,
 } from './game/millCounter';
+import {
+  closeHomePanel,
+  distanceToHomeEdge,
+  initializeHomePanel,
+  isHomePanelOpen,
+  isNearHomePanel,
+  isWheelInsideHomePanel,
+  onHomePanelOpened,
+  setHomePanelOpen,
+  updateHome,
+  updateHomePrompt,
+} from './game/homePanel';
+import { isHomeAtScreen } from './game/dwellingExterior';
+import {
+  goOutside,
+  initializeSceneTransition,
+  isIndoors,
+  isNearInteriorExit,
+  isVisiting,
+  outsideDoorstep,
+  restoreSavedScene,
+} from './game/sceneTransition';
+import { closeGuestPanels, isWheelInsideGuestPanel, setClassicPanelsCloser } from './game/panelSlot';
+import {
+  initializeVisitPanel,
+  openVisitPanel,
+  toggleVisitPanelNear,
+  updateVisitPrompt,
+} from './game/visitPanel';
+import { initializeFriendsPanel } from './game/friendsPanel';
+import { initializeKnockNotices } from './game/knockNotices';
+import { interiorScene } from './game/interiorScene';
 import { initializeFeedbackReview } from './ui/feedbackReview';
 import { initializeMultiplayerPanel } from './ui/multiplayerPanel';
 
@@ -153,11 +187,42 @@ wireThingMakerDom();
 renderThingMakerPanel();
 wireSeedStoreDom();
 initializeMillCounter();
+initializeHomePanel();
+initializeVisitPanel();
+initializeFriendsPanel();
+initializeKnockNotices();
+// Opening a neighbor's-door or friends panel clears the older panels from the slot.
+setClassicPanelsCloser(() => {
+  closeSeedStorePanel();
+  closeMillPanel();
+  setMakerPanelOpen(false);
+  closeHomePanel();
+});
 // The mill counter, Pip's shop, and the Thing Maker share the right-hand
 // panel slot: opening one closes the others.
 onMillPanelOpened(() => {
   closeSeedStorePanel();
   setMakerPanelOpen(false);
+  closeHomePanel();
+  closeGuestPanels();
+});
+onHomePanelOpened(() => {
+  closeSeedStorePanel();
+  closeMillPanel();
+  setMakerPanelOpen(false);
+  closeGuestPanels();
+});
+initializeSceneTransition({
+  closePanels: () => {
+    closeSeedStorePanel();
+    closeMillPanel();
+    setMakerPanelOpen(false);
+    closeHomePanel();
+    closeGuestPanels();
+    // A tool half-used, or a tool still selected, does not follow you through a door.
+    cancelTimedAction('changed scene');
+    setActionMode('interact');
+  },
 });
 renderSeedStorePanel();
 initializeScrapbook();
@@ -206,6 +271,19 @@ registerScreenInteraction({
   interact: tryCollectTrayOutput,
 });
 registerScreenInteraction({
+  id: 'home',
+  priority: 88,
+  hitTest: (x, y) => isHomeAtScreen(x, y, camera),
+  interact: () => {
+    if (isNearHomePanel(avatar.position)) {
+      closeSeedStorePanel();
+      closeMillPanel();
+      setHomePanelOpen(true);
+    } else showPetToast('That is your home. Walk closer to plan and build.');
+    return true;
+  },
+});
+registerScreenInteraction({
   id: 'thing-maker',
   priority: 90,
   hitTest: (x, y) => isThingMakerAtScreen(x, y, camera),
@@ -233,8 +311,9 @@ registerScreenInteraction({
     return true;
   },
 });
-// A neighbor's staked-out home lot opens the same card an avatar does — it's
-// the same account, just not standing there right now.
+// A neighbor's home opens their door panel (what it looks like, whether it is
+// open, and the button that goes in or knocks) — the same person as their
+// avatar, just not standing there right now. Their card is one button away.
 registerScreenInteraction({
   id: 'home-marker',
   priority: 82,
@@ -242,7 +321,8 @@ registerScreenInteraction({
   interact: (x, y) => {
     const hit = pickSharedHomeAtScreen(x, y);
     if (!hit) return false;
-    openPlayerCardFor({ accountId: hit.accountId, name: hit.name, drawingKey: '' });
+    if (isIndoors()) return false;
+    openVisitPanel(hit.accountId);
     return true;
   },
 });
@@ -318,9 +398,22 @@ registerScreenInteraction({
 initializeInput({
   onToggleScrapbook: () => setScrapbookOpen(!isScrapbookOpen()),
   onToggleNearby: () => {
+    // Indoors the only things within reach are the way out and the home's own
+    // panel; the surface's shops and machines are somewhere else entirely.
+    if (isIndoors()) {
+      if (isNearInteriorExit(avatar.position)) goOutside();
+      // Somebody else's home has nothing of yours to plan or build in it.
+      else if (!isVisiting()) setHomePanelOpen(!isHomePanelOpen());
+      return;
+    }
     if (isNearSeedStore(avatar.position)) {
       closeMillPanel();
       setSeedStorePanelOpen(!isSeedStorePanelOpen());
+      return;
+    }
+    if (isNearHomePanel(avatar.position) && homeIsNearerThanMaker()) {
+      closeMillPanel();
+      setHomePanelOpen(!isHomePanelOpen());
       return;
     }
     if (isNearMill(avatar.position)) {
@@ -330,11 +423,26 @@ initializeInput({
     if (isNearThingMaker(avatar.position)) {
       closeSeedStorePanel();
       closeMillPanel();
+      closeHomePanel();
       setMakerPanelOpen(!isMakerPanelOpen());
+      return;
     }
+    if (isNearHomePanel(avatar.position)) {
+      setHomePanelOpen(!isHomePanelOpen());
+      return;
+    }
+    toggleVisitPanelNear(avatar.position);
   },
-  onMarkPlace: markCurrentSpot,
-  onToggleMap: toggleTreasureMap,
+  // Saved places and the map are of the outdoors; there is nothing to mark or
+  // chart inside a tent (a floor plan comes with the map-by-scene step).
+  onMarkPlace: () => {
+    if (isIndoors()) showPetToast('You can only mark a spot outdoors.');
+    else markCurrentSpot();
+  },
+  onToggleMap: () => {
+    if (isIndoors()) showPetToast('The map shows the outdoors. Step outside to open it.');
+    else toggleTreasureMap();
+  },
   onSelectToolSlot: selectToolSlot,
   onRotateBuild: rotateSelectedBuildPiece,
   onPrimaryAction: (event) => {
@@ -359,6 +467,8 @@ initializeInput({
     if (closePlayerCard()) return true;
     if (closeSeedStorePanel()) return true;
     if (closeMillPanel()) return true;
+    if (closeHomePanel()) return true;
+    if (closeGuestPanels()) return true;
     if (isMakerPanelOpen()) {
       setMakerPanelOpen(false);
       return true;
@@ -379,6 +489,7 @@ initializeInput({
   },
   isWheelCaptured: (event) => (
     isWheelInsideMakerPanel(event) || isWheelInsideSeedStorePanel(event) || isWheelInsideMillPanel(event)
+    || isWheelInsideHomePanel(event) || isWheelInsideGuestPanel(event)
   ),
   isPointerCaptured: isHudWidgetInteractionActive,
   /**
@@ -419,6 +530,31 @@ let lastMiniMapRevealX = Number.POSITIVE_INFINITY;
 let lastNotedPage = '';
 let lastMiniMapRevealZ = Number.POSITIVE_INFINITY;
 
+/**
+ * The Thing Maker and the home stand close together. When both are within
+ * reach, the nearer one (measured to its edge) gets the E key and the prompt.
+ */
+const MAKER_BODY_RADIUS = 1.3;
+function homeIsNearerThanMaker(): boolean {
+  return distanceToHomeEdge(avatar.position) < distanceToThingMaker(avatar.position) - MAKER_BODY_RADIUS;
+}
+
+/** The frame loop while the player is inside their home. */
+function animateIndoors(delta: number) {
+  updateGamepadCamera(delta);
+  updateAvatar(delta);
+  // If the room cannot place you inside (a guest in their own tent), friends
+  // see you at the door of the home you are in, on the surface page outside it.
+  const step = outsideDoorstep();
+  const at = pageOfPosition(step.x, step.z);
+  updateSharedSession({ position: new THREE.Vector3(step.x, 0, step.z), page: pageId(at.px, at.pz) });
+  updateHomePrompt(avatar.position);
+  updateVisitPrompt(avatar.position, true);
+  updateHome();
+  updateCamera(avatar.position);
+  renderer.render(interiorScene, camera);
+}
+
 function animate(animationTime = 0) {
   requestAnimationFrame(animate);
 
@@ -443,6 +579,14 @@ function animate(animationTime = 0) {
   const delta = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
 
+  // Inside the home, only the room is simulated and drawn: the surface holds
+  // still (plants and builds run on timestamps, so nothing is lost) and none of
+  // its systems ever see the interior's coordinates.
+  if (isIndoors()) {
+    animateIndoors(delta);
+    return;
+  }
+
   updateTimedAction(animationTime);
   updateGamepadCamera(delta);
   updateAvatar(delta);
@@ -466,9 +610,17 @@ function animate(animationTime = 0) {
   const clearingActive = isPageActive(CLEARING_PAGE);
   updateThingMaker(delta, elapsed, avatar.position, clearingActive);
   updateCritters(delta, elapsed, avatar.position);
-  updateMakerPrompt(avatar.position);
+  const homeNearer = isNearHomePanel(avatar.position) && homeIsNearerThanMaker();
+  updateMakerPrompt(avatar.position, homeNearer);
   updateSeedStorePrompt(avatar.position);
   updateMillPrompt(avatar.position);
+  updateHomePrompt(avatar.position, isNearThingMaker(avatar.position) && !homeNearer);
+  updateVisitPrompt(
+    avatar.position,
+    isNearSeedStore(avatar.position) || isNearMill(avatar.position)
+      || isNearThingMaker(avatar.position) || isNearHomePanel(avatar.position),
+  );
+  updateHome();
 
   updateGuidance(avatar.position, elapsed);
   updatePetEffects(delta);
@@ -557,5 +709,7 @@ window.__paperWorld = {
 window.addEventListener('resize', resize);
 
 feedbackReviewActive = initializeFeedbackReview();
+// A save made indoors picks up indoors.
+restoreSavedScene();
 resize();
 requestAnimationFrame(animate);

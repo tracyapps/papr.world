@@ -8,6 +8,8 @@
 // the avatar. Height (y) is derived from page terrain on each client, so it is
 // deliberately NOT synced. `facing` is a yaw angle in radians.
 
+import type { HomePolicy } from './guests';
+
 /** Which drawn body a player is wearing — a reference, never the raw art. */
 export type AvatarRef = {
   /** Gameplay body preset that drives the hidden collision body. */
@@ -38,6 +40,12 @@ export type PlayerState = {
   facing: number;
   /** Page id the player is currently standing on, e.g. "0,0". */
   page: string;
+  /**
+   * Account id of the home this player is inside, or '' when outside. Set only
+   * by the server (EnterHome / LeaveHome), never taken from a move. Two players
+   * see each other only when this matches, and chat stays within it.
+   */
+  inside: string;
 };
 
 export type ChatMessage = {
@@ -98,6 +106,12 @@ export type HomeMarker = {
   x: number;
   z: number;
   page: string;
+  /** Finished parts of the house, so neighbors can draw it. Empty = the tent. */
+  parts: string[];
+  /** The part being built right now, or '' - neighbors see its scaffolding. */
+  building: string;
+  /** Open house: shows a sign anyone can read. The rest of the door settings are private. */
+  open: boolean;
 };
 
 /**
@@ -216,4 +230,10 @@ export type RoomSave = {
    * with `?? []`.
    */
   bannedAccountIds?: string[];
+  /**
+   * Private door settings by account (see `HomePolicy`). Not in synced state:
+   * whether a friend or a stranger gets in is not the neighbors' business.
+   * Absent on saves written before guests existed - read it with `?? {}`.
+   */
+  homePolicies?: Record<string, HomePolicy>;
 };

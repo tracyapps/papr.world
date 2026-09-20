@@ -4,6 +4,7 @@
 export * from './protocol/constants';
 export * from './protocol/state';
 export * from './protocol/messages';
+export * from './protocol/guests';
 export * from './protocol/validate';
 export * from './protocol/avatarDesign';
 export * from './protocol/feedback';

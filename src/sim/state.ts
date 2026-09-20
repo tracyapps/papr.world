@@ -9,6 +9,9 @@ import { LIMITS, type MailItem, type PlacedPiece } from '../../shared/src/index'
 import { BIOME_IDS, type Biome } from './catalogs/biomes';
 import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
+import { createDwelling, sanitizeDwelling } from './dwellingState';
+import type { DwellingPartId } from './catalogs/dwellings';
+import { SURFACE_SCENE, sanitizeScene } from '../world/scenes';
 
 export const SAVE_SCHEMA_VERSION = 1;
 export const SAVE_STORAGE_KEY = 'pencil-and-paper.game-save.v1';
@@ -142,6 +145,22 @@ export type TerrainEditCellState = {
   changedAt: number;
 };
 
+/** One part of the home being paid for (design in docs/house-and-home.md). */
+export type DwellingProjectState = {
+  /** Materials put in so far, by resource. */
+  paid: Partial<Record<ResourceId, number>>;
+  /** Clock time the build began, once every material is in. Null while collecting. */
+  startedAt: number | null;
+  /** Clock time the build finishes; a timestamp, so it runs while away. */
+  completesAt: number | null;
+};
+
+export type DwellingState = {
+  /** Finished parts, in build order. The tent is implicit and never listed. */
+  parts: DwellingPartId[];
+  projects: Partial<Record<DwellingPartId, DwellingProjectState>>;
+};
+
 export type ActivityEntry = {
   id: string;
   kind: 'garden' | 'harvest' | 'gathering' | 'crafting' | 'building';
@@ -245,6 +264,8 @@ export type GameState = {
     friendships: Record<string, number>;
     conversations: Record<string, ConversationMemoryState>;
     places: SavedPlaceState[];
+    /** Which scene the player is in: the surface, or the inside of their home (`world/scenes.ts`). */
+    scene: string;
     nextPlaceNumber: number;
     activeLearning: ActiveLearningState | null;
     /** Newest first; quiet world updates the player can inspect when ready. */
@@ -288,6 +309,8 @@ export type GameState = {
   world: {
     harvestRespawns: Record<string, number>;
     pages: Record<string, PageModificationState>;
+    /** The player's home: what is built, and what is being paid for. */
+    dwelling: DwellingState;
     thingMaker: {
       level: number;
       activeCraft: ActiveCraftState | null;
@@ -342,6 +365,7 @@ export function createDefaultGameState(): GameState {
       friendships: {},
       conversations: {},
       places: [],
+      scene: SURFACE_SCENE,
       nextPlaceNumber: 2,
       activeLearning: null,
       activityLog: [],
@@ -361,6 +385,7 @@ export function createDefaultGameState(): GameState {
     world: {
       harvestRespawns: {},
       pages: {},
+      dwelling: createDwelling(),
       thingMaker: { level: 1, activeCraft: null, completedOutputs: [], trayOutputs: [] },
     },
   };
@@ -684,6 +709,7 @@ function normalizeState(value: unknown): GameState | null {
         && typeof item.z === 'number' && Number.isFinite(item.z);
     }).map((place) => ({ ...place, builtin: Boolean(place.builtin) }))
     : [];
+  state.player.scene = sanitizeScene(player.scene);
   state.player.nextPlaceNumber = typeof player.nextPlaceNumber === 'number'
     ? Math.max(2, Math.floor(player.nextPlaceNumber)) : 2;
   state.player.activityLog = Array.isArray(player.activityLog)
@@ -870,6 +896,7 @@ function normalizeState(value: unknown): GameState | null {
 
   state.world.harvestRespawns = finiteCounts(world.harvestRespawns);
   state.world.pages = normalizePageModifications(world.pages);
+  state.world.dwelling = sanitizeDwelling(world.dwelling);
   state.world.thingMaker.level = typeof maker.level === 'number'
     ? Math.max(1, Math.min(4, Math.floor(maker.level))) : 1;
   state.world.thingMaker.completedOutputs = Array.isArray(maker.completedOutputs)

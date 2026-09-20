@@ -1,10 +1,12 @@
 # Resource Artwork Guide
 
-> **2026-09-04 update:** New tiled resources use the folder-driven generator in
-> `docs/resource-asset-pipeline.md`. It creates both the surface texture and
-> several loose variants from one default-color SVG. The manual one-cutout
-> workflow below remains useful for legacy art and exceptional hand-drawn
-> resources, but it is no longer the default path.
+> **2026-09-20:** This is a history-and-reasoning document. The **only** way
+> resource art reaches the game is the folder-driven generator in
+> `docs/resource-asset-pipeline.md`, which also holds the naming, folder and
+> "never hand-edit generated files" conventions. The manual one-cutout
+> workflow and the `resourcePresentation.ts` hand-written map described below
+> are retired (terracotta pebbles, the last entry, moved onto the pipeline).
+> Read what follows for *why* the ground looked the way it did, not for steps.
 
 Written 2026-09-01, after a playtest report that ground materials were hard
 to tell apart — "sometimes I walk over some stones and they are a certain
@@ -63,15 +65,15 @@ several rows sharing a `Visual` are the exact confusion being reported.
 | Folded-cabbage seeds | Seeds | clearing, forest | seedPile | paper.green | swatch |
 | Paper-tomato seeds | Seeds | meadow, dunes | seedPile | paper.green | swatch |
 | Raspberries … paper-tomato (5 harvests) | Food | (grown only) | harvestedFood | paper.green | swatch |
-| **Bound lumber** *(new, 2026-09-02)* | **Refined** | (crafted only, never scattered) | twigBundle | paper.brown.warm | swatch |
+| **Bound lumber** *(new, 2026-09-02)* | **Refined** | (refined only, never scattered) | twigBundle | paper.brown.warm | swatch |
 
-Bound lumber is the first entry in a new **Refined** category: a resource
-you can never find lying in the world, only make at the Thing Maker from
-other resources (see `recipes.ts`'s `'resource'`-kind `RecipeOutput`, added
-2026-09-02, and the `bound-lumber` recipe — kraft-twigs + redwood-bark-curls
-in, bound lumber out). Once made, it behaves exactly like anything foraged:
-it stacks in the scrapbook's new "Refined Materials" tab and can itself be
-an ingredient in later recipes. Its `visual`/`material` are set the same as
+Bound lumber is the first entry in the **Refined** category: a resource you
+can never find lying in the world, only get from Chisel at the Wood Mill in
+exchange for raw stock (`catalogs/millRefining.ts`; it was a Thing Maker
+recipe when first added, 2026-09-02, and moved to the mill 2026-09-18). Once
+refined, it behaves exactly like anything foraged: it stacks in the
+scrapbook's "Refined Materials" tab and can itself be an input to later
+refinements. Its `visual`/`material` are set the same as
 every other resource for type-completeness (and in case it's ever dropped
 or displayed), even though nothing currently puts it on the ground.
 
@@ -106,13 +108,13 @@ trees. Author art once, register it once, and every consumer that reads
 through the same lookup function updates together:
 
 ```
-assets/source/resources/<id>.svg      (you draw this)
+assets/source/materials/resources/<folder>/<id>.svg   (you draw this)
         │
-        │  same compile step as every other prop
+        │  npm run assets:compile
         ▼
-assets/runtime/resources/<id>.png
+assets/runtime/... PNGs + src/game/resourceArt.generated.ts
         │
-        │  one entry in RESOURCE_ART
+        │  read into RESOURCE_ART
         ▼
 src/game/resourcePresentation.ts  ←── getResourceArt(resourceId)
         │
@@ -121,13 +123,13 @@ src/game/resourcePresentation.ts  ←── getResourceArt(resourceId)
         └─→ tools/build-reference.mjs — the public reference site card
 ```
 
-`resourcePresentation.ts` now has its first real entry — **terracotta
-pebbles** (2026-09-01) — proving the pipeline end to end, alongside a
-placeholder-quality drawing you should feel entirely free to replace. Every
-other resource still keeps its current look (generic primitive cluster on
-the ground, color swatch in the scrapbook, no image on the reference site).
-Nothing breaks by an entry being missing; a resource simply gets
-better-looking the moment its entry lands, with zero changes anywhere else.
+*(Historical.)* `resourcePresentation.ts` once held a hand-written map whose
+first entry was **terracotta pebbles** (2026-09-01), proving the idea end to
+end. That map is gone; the same art is now generated. A resource with no
+compiled art keeps a generic primitive cluster on the ground, a color swatch
+in the scrapbook and no image on the reference site. Nothing breaks by art
+being missing; a resource simply gets better-looking the moment its tile is
+compiled, with zero changes anywhere else.
 This is the identical "ships playable, gets better when the art lands" rule
 `toolPresentation.ts`'s own doc comment states for tools.
 
@@ -162,8 +164,8 @@ for a copy of your one drawing at a random position/rotation/scale. So:
 
 Which one a resource gets is decided by its existing `visual` field in
 `world/resources.ts` (`RESOURCE_WORLD_DEFS`) — that's already set for every
-resource today, so there's nothing new to configure. You only ever touch
-`resourcePresentation.ts`.
+resource today, so there's nothing new to configure. You only ever draw and
+compile the tile.
 
 **On food resources and the ground:** today a harvest never lies loose in
 the world — it only ever comes directly off a plant you grew
@@ -189,55 +191,16 @@ deliberately isn't made here. Worth a conversation before touching it.
 
 ## How to add one resource's real artwork
 
-Exactly the workflow already used for the cactus and marsh-grass props this
-session (`docs/paper-artwork-guide.md` has the full art-direction rules —
-craft-table materials, torn edges, no flat digital gradients), now proven
-end to end by `terracotta-pebbles.svg` — open it alongside this list as a
-worked example, and see the note inside that file for format specifics
-(no `<defs>`/CSS classes needed, plain `fill="#hex"` per `<path>`).
+Follow `docs/resource-asset-pipeline.md`: draw the tile to
+`assets/source/materials/resources/<folder>/<resource-id>.svg`, run
+`npm run art:check`, then `npm run assets:compile`. Nothing is registered by
+hand; the ground pile, scrapbook thumbnail and public reference site all read
+the generated record. `docs/paper-artwork-guide.md` has the art-direction
+rules (craft-table materials, torn edges, no flat digital gradients).
 
-1. **Draw one item**, not a pile — one twig, one pebble, one blade. Sticks
-   and stones are drawn from directly above (top-down, like a little icon,
-   since they'll lie flat on the ground); fiber/seeds/food are drawn from
-   the side (since they'll stand up). Either way: any size, whatever
-   proportion the item actually has — the file's own width÷height *is* the
-   aspect ratio the game will use, nothing to set separately. Save it to
-   `assets/source/resources/<resource-id>.svg` (e.g.
-   `assets/source/resources/kraft-twigs.svg`), matching the resource's own
-   id from `RESOURCE_CORE_DEFS` so the two are never in doubt.
-2. **Compile it.** `npm run assets:compile` (the same pipeline every prop
-   goes through) rasterizes it to
-   `assets/runtime/resources/<resource-id>.png`. If this device's Playwright
-   is network-blocked (it was, this session — see
-   `pencil-and-paper-sandbox-build` project memory), ImageMagick's
-   `rsvg-convert` delegate is a proven fallback with zero network needed —
-   this is how `terracotta-pebbles.png` itself was produced:
-   `convert -background none <src> -resize 4096x4096> <dst>`.
-3. **Register it** in `src/game/resourcePresentation.ts`, following the
-   real `terracotta-pebbles` entry already there:
-   ```ts
-   'kraft-twigs': {
-     sourceUrl: '/assets/runtime/resources/kraft-twigs.png',
-     aspectRatio: 1.4, // width ÷ height, straight from the source SVG
-   },
-   ```
-   (The path is root-relative — `assets/` is the Vite public directory —
-   not the `new URL(...)` form `toolPresentation.ts` uses; that form is for
-   a DOM `<img>` consumer, this one feeds a THREE.js scene texture, same as
-   `TREE_DEFS`/`DECOR_DEFS` already do.) That's the entire change. The
-   ground pile, the scrapbook thumbnail, and the public reference site all
-   pick it up the next time each is built — nothing else to edit, and the
-   "if adding a feature required editing the docs site, the fact went in
-   the wrong place" rule from `docs/single-source-of-truth.md` holds here
-   too.
-4. **Verify**: `npx tsc --noEmit`, `npx vitest run`, `npx vite build` in
-   `~/pp-build` per the usual sandbox routine, plus `npm run docs:build` to
-   confirm the reference site picks up the new art (the terracotta-pebbles
-   card there now has a real thumbnail — search `docs-site/index.html` for
-   `card-art` to see it). None of the visual result (does the ground decal
-   actually sit right, does the thumbnail crop sensibly) can be confirmed
-   from either sandbox — that needs your own `npm run dev` playtest, same
-   as every other art change this project has shipped.
+Verify with `npx tsc --noEmit`, `npx vitest run` and `npm run docs:build`. How
+the ground decal actually sits and whether the thumbnail crops well can only
+be judged in your own `npm run dev` playtest.
 
 ### What "extracted from" means for the chart above
 

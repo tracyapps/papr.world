@@ -112,6 +112,9 @@ and economy design before they become real.
 - The tree can render any recipe grant, using tool artwork where available and
   a labelled fallback for future non-tool outputs.
 - Catalog tests guard source validity, lesson mapping, and self-gating.
+- Know-how is a plan too: a recipe with an `ability` output, learned from a
+  node, read with `hasAbility`. It switches a rule on (rooting in shallow water,
+  Chisel's later trades) instead of making a thing.
 - Build pieces (garden arbor, picnic table, footbridge) are plans too: recipes
   with a `build-piece` output, granted by tree nodes, hidden from every
   crafting surface, and required before a new build site can start.

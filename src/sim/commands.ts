@@ -2,6 +2,8 @@ import {
   MAKER_UPGRADE_INGREDIENTS,
   RECIPE_DEFS,
   getCraftDuration,
+  hasAbility,
+  isKnowledgeOutput,
   isRecipeAvailable,
   previousTierTool,
   unlearnedBuildPlan,
@@ -10,6 +12,8 @@ import {
   type RecipeId,
 } from './catalogs/recipes';
 import type { ToolId } from './catalogs/tools';
+import { applyDwellingCommand, type DwellingCommand } from './dwelling';
+import { applySceneCommand, type SceneCommand } from './scene';
 import { getGameState, updateGameState, type GameState, type ResourceDropState } from './state';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import { TOOL_DEFS } from './catalogs/tools';
@@ -58,6 +62,7 @@ import {
 } from './catalogs/building';
 import { LOCAL_MAKER_ID } from './state';
 import { reconcileTechLearningState } from './learning';
+import { TECH_DEFS, techNodeTeachingAbility } from './catalogs/techTree';
 import { deliverMail, mailAttachment, mailHasArrived } from './mail';
 import {
   MILL_MAIL,
@@ -113,7 +118,11 @@ export type GameCommand =
   | { type: 'mineRock'; target: RockAddress & { x: number; z: number }; now: number }
   | { type: 'updatePlacedPiece'; id: string; x: number; z: number; rotY: number; material?: string; pageId: string }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
-  | { type: 'upgradeThingMaker' };
+  | { type: 'upgradeThingMaker' }
+  // The home's parts and projects: see `dwelling.ts`.
+  | DwellingCommand
+  // Going through a door: see `scene.ts`.
+  | SceneCommand;
 
 export type CommandResult =
   | { ok: true; allocation?: ResourceAllocation; grants?: ResourceAllocation; drops?: ResourceAllocation; message: string }
@@ -480,8 +489,8 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'There is nothing there to pick up.' };
       }
       const recipe = RECIPE_DEFS[recipeId as RecipeId];
-      // A build-piece plan is never crafted, so it can never be on the tray.
-      if (recipe.output.kind === 'build-piece') {
+      // A knowledge-only plan is never crafted, so it can never be on the tray.
+      if (isKnowledgeOutput(recipe.output)) {
         return { ok: false, reason: 'There is nothing there to pick up.' };
       }
       tray.splice(command.index, 1);
@@ -491,15 +500,6 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         // Picking a tool up is the natural moment to start holding it.
         state.player.equippedTool = recipe.output.toolId;
         return { ok: true, message: `Picked up the ${recipe.output.label}. It is in your hands.` };
-      }
-
-      if (recipe.output.kind === 'resource') {
-        // Refined materials stack in the same bag as anything foraged, not
-        // the separate `items` bag — so they show up in the scrapbook's
-        // materials tabs and count toward later recipes' ingredients.
-        state.player.inventory[recipe.output.resource] =
-          (state.player.inventory[recipe.output.resource] ?? 0) + recipe.output.quantity;
-        return { ok: true, message: `Picked up ${recipe.output.quantity}x ${recipe.output.label}.` };
       }
 
       state.player.items[recipe.output.itemId] = (state.player.items[recipe.output.itemId] ?? 0) + 1;
@@ -512,6 +512,12 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       const batches = command.batches;
       if (!Number.isSafeInteger(batches) || batches < 1 || batches > MILL_MAIL.maxBatches) {
         return { ok: false, reason: `Chisel takes between 1 and ${MILL_MAIL.maxBatches} batches at a time.` };
+      }
+      // Later trades wait on know-how from the tree, at the counter and by mail.
+      if (refinement.requiresAbility && !hasAbility(state.player.plans, refinement.requiresAbility)) {
+        const lessonId = techNodeTeachingAbility(refinement.requiresAbility);
+        const lesson = lessonId ? TECH_DEFS[lessonId].name : 'the right lesson';
+        return { ok: false, reason: `Chisel will not run that press for you yet. Learn ${lesson} with the Professor first.` };
       }
       const byMail = command.delivery === 'mail';
       const payment: MillPayment = command.payment ?? 'chips';
@@ -868,6 +874,10 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       // freshly-dug bed from here on (lifting, mending, the free refill once it
       // is empty again).
       const isWetBed = Boolean(command.wetBed) && growsInShallowWater(command.seedId);
+      // Rooting in the shallows is know-how from the tree, not a free action.
+      if (!edit && isWetBed && !hasAbility(state.player.plans, 'shallow-water-planting')) {
+        return { ok: false, reason: 'Learn Wetland Growing with the Professor first.' };
+      }
       // Held back from the page until the plant is actually accepted, so a
       // refusal (crowding, say) never leaves an empty bed behind.
       let pendingBed = false;
@@ -1320,6 +1330,16 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       return { ok: true, message: command.toolId ? 'Tool equipped.' : 'Tool put away.' };
     }
 
+    case 'contributeToProject':
+    case 'refundProject':
+    case 'dismantlePart':
+    case 'dismantleDwelling':
+    case 'settleDwelling':
+      return applyDwellingCommand(state, command, appendActivity);
+    case 'enterScene':
+    case 'leaveScene':
+      return applySceneCommand(state, command);
+
     case 'upgradeThingMaker': {
       const maker = state.world.thingMaker;
       if (maker.activeCraft) return { ok: false, reason: 'Wait for the current thing to finish.' };
@@ -1359,6 +1379,7 @@ export function dispatchGameCommand(command: GameCommand): CommandResult {
 export type CraftBlocker =
   | { kind: 'unimplemented' }
   | { kind: 'build-plan' }
+  | { kind: 'know-how' }
   | { kind: 'no-plan'; source: PlanSource }
   | { kind: 'maker-level'; required: number }
   | { kind: 'previous-tier'; toolId: ToolId }
@@ -1374,6 +1395,8 @@ export function craftBlockers(state: GameState, recipeId: RecipeId): CraftBlocke
   // A build-piece plan is built in place with a hammer; the Thing Maker has
   // nothing to make from it.
   if (recipe.output.kind === 'build-piece') blockers.push({ kind: 'build-plan' });
+  // Know-how is learned, not made.
+  if (recipe.output.kind === 'ability') blockers.push({ kind: 'know-how' });
   if (!state.player.plans.includes(recipeId)) blockers.push({ kind: 'no-plan', source: recipe.planSource });
   if (state.world.thingMaker.level < recipe.minimumMakerLevel) {
     blockers.push({ kind: 'maker-level', required: recipe.minimumMakerLevel });
@@ -1402,6 +1425,7 @@ export function describeCraftBlocker(blocker: CraftBlocker): string {
   switch (blocker.kind) {
     case 'unimplemented': return 'That one is not finished yet.';
     case 'build-plan': return 'Build this one in place with a hammer.';
+    case 'know-how': return 'This is know-how, not something to make.';
     case 'no-plan':
       if (blocker.source === 'knowledge-tree') return 'Learn this plan with the Professor.';
       if (blocker.source === 'starter') return 'This starter plan belongs in your scrapbook.';

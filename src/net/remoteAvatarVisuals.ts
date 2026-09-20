@@ -8,6 +8,8 @@ import {
   type PlayerState,
 } from '../../shared/src/index';
 import { camera, scene, textureLoader } from '../render/context';
+import { interiorScene } from '../game/interiorScene';
+import { isInInteriorSpace } from '../world/homeInterior';
 import { rasterizeAvatarDesignTexture } from '../game/avatarLook';
 import { bridgeDeckHeightAt } from '../world/water';
 import { sampleTerrainHeight } from '../world/terrain';
@@ -29,6 +31,8 @@ type RemoteVisual = {
   /** Durable account id — the player card asks about this, not the session id. */
   accountId: string;
   name: string;
+  /** The home this player is inside (its owner's account id), or '' on the surface. */
+  inside: string;
 };
 
 const root = new THREE.Group();
@@ -131,6 +135,7 @@ export function addRemoteAvatar(player: PlayerState): void {
   const drawingKey = player.avatar.drawingKey;
   visuals.set(player.id, {
     root: host, cutout, label, drawingKey, accountId: player.accountId, name: player.name,
+    inside: player.inside ?? '',
   });
 
   // Phase D: the room already resolved this key against the wearer's account,
@@ -169,20 +174,55 @@ export function clearRemoteAvatars(): void {
   designTextures.clear();
 }
 
+/** A remote player went into a home (its owner's account id) or came out (''). */
+export function setRemoteInside(id: string, inside: string): void {
+  const visual = visuals.get(id);
+  if (visual) visual.inside = inside;
+}
+
+/**
+ * Draw one remote player, if the two of you are in the same place.
+ *
+ * `viewerInside` is the home the room has you in (its owner's account id), or ''
+ * on the surface. Two people see each other only when that matches: on the
+ * surface, drawn on the surface; inside a home, drawn in that home's own scene.
+ * The sample's position is checked as well, because a player's `inside` and
+ * their position change a moment apart when they go through a door.
+ */
 export function updateRemoteAvatar(
   id: string,
   sample: RemoteSample,
   localPosition: THREE.Vector3,
+  viewerInside = '',
 ): void {
   const visual = visuals.get(id);
   if (!visual) return;
+  const together = visual.inside === viewerInside
+    && isInInteriorSpace(sample.x, sample.z) === (viewerInside !== '');
   const distance = Math.hypot(sample.x - localPosition.x, sample.z - localPosition.z);
-  visual.root.visible = distance <= MAX_VISIBLE_DISTANCE;
+  visual.root.visible = together && distance <= MAX_VISIBLE_DISTANCE;
   if (!visual.root.visible) return;
 
-  const ground = bridgeDeckHeightAt(sample.x, sample.z) ?? sampleTerrainHeight(sample.x, sample.z);
+  const target = viewerInside ? interiorScene : root;
+  if (visual.root.parent !== target) target.add(visual.root);
+
+  const ground = viewerInside
+    ? 0
+    : bridgeDeckHeightAt(sample.x, sample.z) ?? sampleTerrainHeight(sample.x, sample.z);
   visual.root.position.set(sample.x, ground, sample.z);
   visual.cutout.lookAt(camera.position.x, ground + CENTER_Y, camera.position.z);
+}
+
+/** Who is inside a given home right now, as far as this client can see (the owner asks about their own). */
+export function remoteAvatarsInside(host: string): Array<{ accountId: string; name: string }> {
+  const seen = new Set<string>();
+  const found: Array<{ accountId: string; name: string }> = [];
+  for (const visual of visuals.values()) {
+    if (visual.inside !== host || seen.has(visual.accountId)) continue;
+    seen.add(visual.accountId);
+    found.push({ accountId: visual.accountId, name: visual.name });
+  }
+  return found;
 }
 
 export function remoteAvatarCount(): number {

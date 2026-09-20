@@ -47,6 +47,8 @@ to lighten a dark ground never comes up.
 
 ## Naming (settled 2026-09-06)
 
+*(Folder and filename rules for the tile itself live in `docs/resource-asset-pipeline.md`; this section is only about names **inside** the SVG.)*
+
 `--background` for the canvas colour, `--foreground-01`, `-02`, `-03`… for
 everything drawn on it, numbered in order of first appearance. A sidecar can
 then target one colour by number without reading the artwork.

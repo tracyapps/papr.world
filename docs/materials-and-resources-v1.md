@@ -295,10 +295,23 @@ player-facing place. This is non-negotiable for reasons of knighthood.
 > paper mortar (`src/sim/catalogs/millRefining.ts`). The tables below are
 > still the plan for later stages; when they land, they are rows in that
 > file, not Thing Maker recipes.
+>
+> **2026-09-20: stage 2 and 3 built** for the structural rung. Layerboard and
+> red brick (behind Finer Refining), crossbound timber and faced masonry
+> (behind Heavy Refining); see roadmap 1.9. Inputs may now be refined, and a tag
+> slot can take refined stock ("any brick"). Still to come: storybeam,
+> foundation block, glass, Cream City and grey brick, and the fiber and paper
+> stages (yarn, cloth, canvas, wallpaper).
 
-Recipes can already output resources and refined resources can already be used
-by later recipes. The missing work is breadth, graph presentation, validation,
-and structural metadata—not a brand-new crafting model.
+Refining is rows in `catalogs/millRefining.ts`, and refined resources are valid
+inputs to later rows. The Thing Maker no longer produces materials (its
+`resource` recipe output kind was removed 2026-09-20; it makes tools and things,
+and the build hammer makes pieces). The missing work is breadth, graph
+presentation, and structural metadata—not a new crafting model. The recipe
+columns below are the original plan; where a row is built, the built row in
+`millRefining.ts` wins (for example, crossbound timber is 2 layerboard + 2
+species wood + 1 binding cord, and layerboard is 2 bound lumber + 2 species wood
++ 1 binding cord).
 
 ### Fiber and paper path
 
@@ -322,8 +335,8 @@ not a stronger kind of paper.
 | Output | Stage | Proposed recipe | Structural class |
 | --- | ---: | --- | ---: |
 | Bound lumber ×2 | 1 | 4 Kraft twigs + 1 any long fiber | 1 |
-| Layerboard ×2 | 2 | 2 Bound lumber + 2 any species wood + 1 Binding cord | 2 |
-| Crossbound timber ×1 | 3 | 2 Layerboard + 2 Pine clippings + 1 Binding cord | 3 |
+| Layerboard ×2 | 2 | 2 Bound lumber + 2 any species wood + 1 Binding cord *(built)* | 2 |
+| Crossbound timber ×1 | 3 | 2 Layerboard + 2 any species wood + 1 Binding cord *(built)* | 3 |
 | Storybeam ×1 | 4 | 2 Crossbound timber + 1 Redwood clippings + 1 Canvas | 4 |
 
 **Layerboard is now the settled replacement for “fancy plywood.”** It describes
@@ -332,11 +345,9 @@ grades without adjective escalation. Alternatives worth keeping in reserve:
 Foldply, Pressboard, Crossply board, Laminated board, Ribbonply, and
 Patchwork ply.
 
-The existing `bound-lumber` save id should be preserved. Its current recipe
-uses redwood bark curls even though the plan is a starter and redwood requires
-upgraded scissors; V1 should either change the ingredients as above or move the
-plan later. Changing the ingredients is the cleaner progression and preserves
-Bound Lumber as the common first rung.
+The `bound-lumber` save id was preserved. It is the common first rung, and its
+mill row (4 Kraft twigs + 1 any long fiber) avoids redwood, which needs
+upgraded scissors (settled 2026-09-18).
 
 ### Stone and masonry path
 
@@ -766,8 +777,8 @@ following rewiring.
 
 ### 5. Recipe graph and Thing Maker
 
-- Keep resource-kind recipe outputs; the live `bound-lumber` path proves
-  multi-step inventory works.
+- Refined materials are mill rows (`millRefining.ts`), not recipe outputs; the
+  recipe `resource` output kind was removed 2026-09-20.
 - Add tags/one-of ingredient matching, maker capabilities, graph validation,
   and recursive ancestors/descendants for “how to make” and “used in.”
 - Keep exact-resource ingredients for regional identity and tags for convenient

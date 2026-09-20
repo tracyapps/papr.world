@@ -1,6 +1,5 @@
 import { BIOME_IDS, type Biome } from './biomes';
 import { DIG_TABLES } from './geology';
-import { RECIPE_DEFS, type RecipeDefinition, type RecipeId } from './recipes';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './resources';
 import { SEED_STORE, SEED_STORE_BARTER, seedStoreSellPrice, type ShopId } from './shops';
 import { TOOL_DEFS, toolsInFamily, type ToolId } from './tools';
@@ -37,8 +36,6 @@ export type ObtainRoute =
   | { kind: 'mined'; biomes: Biome[]; minimumTier: 1 | 2 | 3 }
   /** Grown in a garden bed. */
   | { kind: 'grown'; from: ResourceId }
-  /** Made at the Thing Maker. `recipe` is the one that produces it. */
-  | { kind: 'crafted'; recipe: RecipeId }
   /** Refined from raw stock by Chisel at the Wood Mill — in person or by mail. */
   | { kind: 'refined'; refinement: string; place: string; refiner: string }
   /**
@@ -166,23 +163,8 @@ export function obtainRoutesFor(resource: ResourceId): ObtainRoute[] {
   const grown = GROWN_FROM[resource];
   if (grown) routes.push({ kind: 'grown', from: grown });
 
-  // Crafting and buying were the two routes this table could not describe.
-  // Both existed in the game and neither could be said out loud, which is
-  // how `mend-me-seeds` — sold at Pip's counter since the first shop — read
-  // as a material with no way to get it, and why the reference page needed a
-  // hand-written seed exception to look right. Derived, like the rest.
-  for (const recipeId of Object.keys(RECIPE_DEFS) as RecipeId[]) {
-    // A hidden plan is not a route anyone can take.
-    // Widened on purpose: the catalog's literal types would otherwise let
-    // TypeScript "prove" no ready recipe outputs a resource.
-    const recipe: RecipeDefinition = RECIPE_DEFS[recipeId];
-    if (recipe.status !== 'ready') continue;
-    const output = recipe.output;
-    if (output.kind === 'resource' && output.resource === resource) {
-      routes.push({ kind: 'crafted', recipe: recipeId });
-    }
-  }
-
+  // Buying and refining are the routes below; both are derived from their own
+  // tables, so a route can never be described here and missing there.
   for (const refinement of MILL_REFINEMENTS) {
     if (refinement.output === resource) {
       routes.push({ kind: 'refined', refinement: refinement.id, place: 'the Wood Mill', refiner: 'Chisel' });

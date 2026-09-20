@@ -3,6 +3,11 @@
 Surface mining implemented 2026-09-19. The cave layer remains planned; this
 document now distinguishes the playable surface slice from that larger plan.
 
+> **2026-09-20:** the "layer" below is now one kind of **scene**. Entering a
+> house and entering a cave are the same transition, and the map follows the
+> scene either way. The decision here (a shared, expansive, generated
+> underground) stands. See `scenes-and-interiors.md`.
+
 ## Why This Is Not Just "Digging, But Sideways"
 
 Digging edits a height field. Caves are a second *space* — a place the player

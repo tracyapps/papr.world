@@ -25,11 +25,24 @@ import {
   type AccountInventory,
   type AvatarRef,
   type BlockIntent,
+  type AskToLeaveIntent,
   type BlockList,
   type ChatBroadcast,
   type ChatHistory,
   type ChatIntent,
   type ClaimMailIntent,
+  type EnterHomeIntent,
+  type EntryResult,
+  type FriendAnswerIntent,
+  type FriendNotice,
+  type FriendRemoveIntent,
+  type FriendRequestIntent,
+  type FriendsSnapshot,
+  type HomeExit,
+  type HomePolicy,
+  type KnockAnswerIntent,
+  type KnockCleared,
+  type KnockNotice,
   type GatherIntent,
   type JoinOptions,
   type MoveIntent,
@@ -50,6 +63,7 @@ import {
   type PlayerCardIntent,
   type SetHomeIntent,
   type WearDesignIntent,
+  splitHomeParts,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 
@@ -103,6 +117,22 @@ export type NetCallbacks = {
   onHomeUpdate?: (home: HomeMarker) => void;
   /** A neighbor's home marker was withdrawn (they left the account entirely). */
   onHomeRemove?: (accountId: string) => void;
+  /** A remote player went into a home (its owner's account id) or came out (''). */
+  onPlayerInside?: (id: string, inside: string) => void;
+  /** Your whole friends list, requests included. On join and after every change. */
+  onFriends?: (snapshot: FriendsSnapshot) => void;
+  /** One sentence's worth of news about a friendship. */
+  onFriendNotice?: (notice: FriendNotice) => void;
+  /** Your own door settings, on join and after every change. */
+  onHomePolicy?: (policy: HomePolicy) => void;
+  /** How your request to come in ended. */
+  onEntryResult?: (result: EntryResult) => void;
+  /** Somebody is at your door. */
+  onKnockNotice?: (notice: KnockNotice) => void;
+  /** A knock no longer needs an answer. */
+  onKnockCleared?: (cleared: KnockCleared) => void;
+  /** The owner asked you to leave. */
+  onHomeExit?: (exit: HomeExit) => void;
 };
 
 export type NetConnection = {
@@ -135,6 +165,17 @@ export type NetConnection = {
   sendPlayerCardRequest: (intent: PlayerCardIntent) => void;
   /** Publish where your own Home marker sits, for neighbors to see. */
   sendSetHome: (intent: SetHomeIntent) => void;
+  sendFriendRequest: (accountId: string) => void;
+  sendFriendAnswer: (accountId: string, accept: boolean) => void;
+  sendFriendRemove: (accountId: string) => void;
+  sendSetHomePolicy: (policy: HomePolicy) => void;
+  /** Ask to come into a home (your own included). The answer is an EntryResult. */
+  sendEnterHome: (host: string) => void;
+  sendLeaveHome: () => void;
+  /** Owner: let a knocker in, or not right now. */
+  sendKnockAnswer: (visitor: string, admit: boolean) => void;
+  /** Owner: ask one guest to step out. Not a block. */
+  sendAskToLeave: (accountId: string) => void;
   disconnect: () => void;
 };
 
@@ -269,6 +310,32 @@ export async function connect(
     sendWearDesign: (intent) => room.send(ClientMessage.WearDesign, intent),
     sendPlayerCardRequest: (intent) => room.send(ClientMessage.RequestPlayerCard, intent),
     sendSetHome: (intent) => room.send(ClientMessage.SetHome, intent),
+    sendFriendRequest: (accountId) => {
+      const payload: FriendRequestIntent = { accountId };
+      room.send(ClientMessage.FriendRequest, payload);
+    },
+    sendFriendAnswer: (accountId, accept) => {
+      const payload: FriendAnswerIntent = { accountId, accept };
+      room.send(ClientMessage.FriendAnswer, payload);
+    },
+    sendFriendRemove: (accountId) => {
+      const payload: FriendRemoveIntent = { accountId };
+      room.send(ClientMessage.FriendRemove, payload);
+    },
+    sendSetHomePolicy: (policy) => room.send(ClientMessage.SetHomePolicy, policy),
+    sendEnterHome: (host) => {
+      const payload: EnterHomeIntent = { host };
+      room.send(ClientMessage.EnterHome, payload);
+    },
+    sendLeaveHome: () => room.send(ClientMessage.LeaveHome, {}),
+    sendKnockAnswer: (visitor, admit) => {
+      const payload: KnockAnswerIntent = { visitor, admit };
+      room.send(ClientMessage.KnockAnswer, payload);
+    },
+    sendAskToLeave: (accountId) => {
+      const payload: AskToLeaveIntent = { accountId };
+      room.send(ClientMessage.AskToLeave, payload);
+    },
     disconnect: () => {
       void room.leave();
     },
@@ -293,6 +360,7 @@ function readPlayer(id: string, raw: any): PlayerState {
     z: raw.z,
     facing: raw.facing,
     page: raw.page,
+    inside: raw.inside ?? '',
   };
 }
 
@@ -334,7 +402,15 @@ function wirePlayers(
   $(room.state as any).players.onAdd((raw: any, id: string) => {
     if (id === selfId) return; // don't render ourselves as a remote
     buffer.push(id, raw.x, raw.z, raw.facing);
-    $(raw).onChange(() => buffer.push(id, raw.x, raw.z, raw.facing));
+    let lastInside: string = raw.inside ?? '';
+    $(raw).onChange(() => {
+      buffer.push(id, raw.x, raw.z, raw.facing);
+      const inside: string = raw.inside ?? '';
+      if (inside !== lastInside) {
+        lastInside = inside;
+        callbacks.onPlayerInside?.(id, inside);
+      }
+    });
     callbacks.onPlayerJoin?.(readPlayer(id, raw));
   });
   $(room.state as any).players.onRemove((_raw: any, id: string) => {
@@ -374,6 +450,9 @@ function readHome(accountId: string, raw: any): HomeMarker {
     x: raw.x,
     z: raw.z,
     page: raw.page,
+    parts: splitHomeParts(raw.parts ?? ''),
+    building: raw.building ?? '',
+    open: Boolean(raw.open),
   };
 }
 
@@ -423,4 +502,15 @@ function wireMessages(room: Room, callbacks: NetCallbacks): void {
     callbacks.onRemoved?.(notice));
   room.onMessage(ServerMessage.Rejected, (info: Rejected) => callbacks.onRejected?.(info));
   room.onMessage(ServerMessage.PlayerCard, (info: PlayerCardInfo) => callbacks.onPlayerCard?.(info));
+  room.onMessage(ServerMessage.Friends, (snapshot: FriendsSnapshot) => callbacks.onFriends?.({
+    friends: snapshot.friends ?? [],
+    incoming: snapshot.incoming ?? [],
+    outgoing: snapshot.outgoing ?? [],
+  }));
+  room.onMessage(ServerMessage.FriendNotice, (notice: FriendNotice) => callbacks.onFriendNotice?.(notice));
+  room.onMessage(ServerMessage.HomePolicy, (policy: HomePolicy) => callbacks.onHomePolicy?.(policy));
+  room.onMessage(ServerMessage.EntryResult, (result: EntryResult) => callbacks.onEntryResult?.(result));
+  room.onMessage(ServerMessage.KnockNotice, (notice: KnockNotice) => callbacks.onKnockNotice?.(notice));
+  room.onMessage(ServerMessage.KnockCleared, (cleared: KnockCleared) => callbacks.onKnockCleared?.(cleared));
+  room.onMessage(ServerMessage.HomeExit, (exit: HomeExit) => callbacks.onHomeExit?.(exit));
 }

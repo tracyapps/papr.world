@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 9; // v9: home markers — a friend's home is now visible to neighbors
+export const PROTOCOL_VERSION = 10; // v10: guests — homes carry parts and an open sign, players carry `inside`, friends/entry/knock messages
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -94,7 +94,37 @@ export const LIMITS = {
    * accounts never hit it.
    */
   accountPlansMax: 500,
+
+  // ---- Friends and guests (docs/house-and-home.md, "Who can come in") ----
+
+  /** Friends one account may have. Generous; bounded so the file cannot grow forever. */
+  friendsMax: 200,
+  /** Pending requests, each direction, per account. */
+  friendRequestsMax: 50,
+  /** A request nobody answers lapses quietly after this long. */
+  friendRequestTtlMs: 30 * 24 * 60 * 60 * 1000,
+  /** A knock nobody answers lapses quietly after this long. */
+  knockTtlMs: 5 * 60 * 1000,
+  /** One knock per visitor per door in this window, however it was answered. */
+  knockCooldownMs: 3 * 60 * 1000,
+  /** After "let in", the visitor has this long to step through. */
+  entryPermitTtlMs: 2 * 60 * 1000,
+  /** The most a leave-a-note-for-an-absent-owner knock writes, per visitor per door. */
+  knockNoteIntervalMs: 6 * 60 * 60 * 1000,
+  /** Finished parts a home marker may list (there are six today). */
+  homePartsMax: 12,
 } as const;
+
+/**
+ * Where every home interior is parked in world coordinates. Interiors are a
+ * client-side scene; presence inside one is told apart from presence outside
+ * by `PlayerState.inside`, and the server accepts a jump to or from here only
+ * at the moment `inside` changes (see PaperRoom.handleMove).
+ */
+export const INTERIOR_SPACE = { x: 40000, z: 40000, radius: 100 } as const;
+
+/** How close to the door a player must reappear when leaving a home, in world units. */
+export const HOME_EXIT_RADIUS = 30;
 
 /** Default room name / neighborhood the first slice joins. */
 export const DEFAULT_ROOM = 'neighborhood';

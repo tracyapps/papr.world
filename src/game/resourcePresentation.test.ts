@@ -6,7 +6,7 @@ import {
 } from './resourcePresentation';
 
 describe('resource presentation', () => {
-  test('prefers compiled loose variants after a legacy resource migrates to generated tiles', () => {
+  test('reads compiled loose variants from the generated art', () => {
     const art = getResourceArt('terracotta-pebbles');
     expect(art?.sourceUrl).toBe('/assets/runtime/resources/terracotta-pebbles/loose-01.png');
     expect(art?.variants).toHaveLength(6);

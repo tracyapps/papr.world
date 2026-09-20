@@ -8,6 +8,7 @@ import {
   affordableMillBatches,
   rawResourcesWithTag,
   resolveMillAllocation,
+  resourcesForTagInput,
   type MillRefinement,
 } from './catalogs/millRefining';
 import { obtainRoutesFor } from './catalogs/obtaining';
@@ -25,14 +26,29 @@ function stateWith(inventory: Record<string, number>, chips = 0) {
 }
 
 describe('the refining board', () => {
-  it('only ever turns raw stock into refined material', () => {
+  it('only ever turns lower-stage stock into higher-stage material', () => {
     for (const refinement of REFINEMENTS) {
       const output = RESOURCE_CORE_DEFS[refinement.output];
       expect(output.category, refinement.id).toBe('refined');
       expect(output.processStage, refinement.id).toBeGreaterThan(0);
       for (const input of refinement.inputs) {
-        const candidates = input.kind === 'exact' ? [input.resource] : rawResourcesWithTag(input.tag);
+        const candidates = input.kind === 'exact' ? [input.resource] : resourcesForTagInput(input);
         expect(candidates.length, `${refinement.id} has an input nothing can fill`).toBeGreaterThan(0);
+        // Strictly lower for every candidate, so no trade can be fed its own
+        // output, directly or through a tag slot.
+        for (const id of candidates) {
+          expect(RESOURCE_CORE_DEFS[id].processStage, `${refinement.id} ← ${id}`).toBeLessThan(output.processStage);
+        }
+      }
+    }
+  });
+
+  it('keeps the first rung to raw stock, which is what makes it the first rung', () => {
+    for (const refinement of REFINEMENTS) {
+      if (RESOURCE_CORE_DEFS[refinement.output].processStage !== 1) continue;
+      expect(refinement.requiresAbility, refinement.id).toBeUndefined();
+      for (const input of refinement.inputs) {
+        const candidates = input.kind === 'exact' ? [input.resource] : resourcesForTagInput(input);
         for (const id of candidates) expect(RESOURCE_CORE_DEFS[id].processStage, `${refinement.id} ← ${id}`).toBe(0);
       }
     }
@@ -44,8 +60,6 @@ describe('the refining board', () => {
         expect.objectContaining({ kind: 'refined', refinement: refinement.id }),
       );
     }
-    // The old hidden Thing Maker plan is no longer offered as a route.
-    expect(obtainRoutesFor('bound-lumber').some((route) => route.kind === 'crafted')).toBe(false);
   });
 
   it('fills "any" slots from whatever the player has most of', () => {

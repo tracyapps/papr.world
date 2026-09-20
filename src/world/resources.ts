@@ -173,7 +173,7 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   'young-bamboo': { material: 'paper.green', visual: 'harvestedFood', mapColor: '#759c4b' },
   'alpine-herbs': { material: 'paper.hill', visual: 'harvestedFood', mapColor: '#778e63' },
   'paper-prickly-pears': { material: 'paper.green', visual: 'harvestedFood', mapColor: '#8b9b51' },
-  // Never spawns loose in the world (crafted-only, see recipes.ts) — visual
+  // Never spawns loose in the world (refined at the Wood Mill) — visual
   // is set for type-completeness and in case it's ever dropped/stored. A
   // bundle of finished lumber is closer in shape to twigBundle than any
   // other flat-lying pile, just a tidier, more uniform one.
@@ -193,6 +193,18 @@ const RESOURCE_WORLD_DEFS: Record<ResourceId, ResourceWorldDefinition> = {
   },
   'paper-mortar': {
     material: 'paper.brown.warm', visual: 'stoneCluster', mapColor: '#c29a6c',
+  },
+  'layerboard': {
+    material: 'paper.brown.warm', visual: 'twigBundle', mapColor: '#8a5a34',
+  },
+  'red-brick': {
+    material: 'paper.orangewrap', visual: 'stoneCluster', mapColor: '#b04a3a',
+  },
+  'crossbound-timber': {
+    material: 'paper.brown.warm', visual: 'twigBundle', mapColor: '#5a3a1e',
+  },
+  'faced-masonry': {
+    material: 'paper.grey', visual: 'stoneCluster', mapColor: '#7d7a76',
   },
 };
 

@@ -1,4 +1,6 @@
 import { SEED_DEFS } from '../sim/catalogs/seeds';
+import { ABILITY_DEFS } from '../sim/catalogs/abilities';
+import { TECH_DEFS, techNodeTeachingAbility } from '../sim/catalogs/techTree';
 import { plantName, selectedSeed, type GardenAction } from '../game/gardenActions';
 import { getToastStack } from './hudLayout';
 
@@ -53,6 +55,15 @@ function describe(action: GardenAction): CardContent | null {
         title: 'That ground is occupied',
         body: `There is ${blocker.label} here. Shape the soil on an open patch instead.`,
       };
+
+    case 'needs-know-how': {
+      const lessonId = techNodeTeachingAbility(blocker.ability);
+      const lesson = lessonId ? TECH_DEFS[lessonId].name : 'the right lesson';
+      return {
+        title: `${ABILITY_DEFS[blocker.ability].label} is know-how`,
+        body: `${ABILITY_DEFS[blocker.ability].summary} Learn ${lesson} with the Professor first.`,
+      };
+    }
 
     case 'no-bed':
       return {

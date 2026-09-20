@@ -70,7 +70,7 @@ function renderMapTools() {
   if (mapElement.hidden) return;
   const hints = getDirectionHints();
   mapElement.innerHTML = `
-    <button type="button" class="activity-log-map-button" data-open-log-map>Unfold the map <span aria-hidden="true">(N)</span></button>
+    <button type="button" class="activity-log-map-button" data-open-log-map>Unfold the map <span aria-hidden="true">(M)</span></button>
     ${hints.length === 0
     ? '<p>Walk a little farther and nearby lands will appear here.</p>'
     : `<ul>${hints.map((hint) => `

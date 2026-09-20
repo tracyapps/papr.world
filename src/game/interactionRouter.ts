@@ -2,6 +2,13 @@ export type ScreenInteraction = {
   id: string;
   priority: number;
   /**
+   * Where this can be used. Everything registered so far is a thing on the
+   * surface, so that is the default; an interior only lets through the
+   * interactions that say `'interior'` (or `'any'`), so a click inside your
+   * tent can never reach a shovel-hole on the lawn outside.
+   */
+  scene?: 'surface' | 'interior' | 'any';
+  /**
    * Whether a primary press over this target must reserve the gesture and
    * prevent camera orbit. Broad cozy click volumes opt out so dragging still
    * pans the world while a still click interacts.
@@ -20,8 +27,22 @@ export function registerScreenInteraction(interaction: ScreenInteraction) {
   return () => interactions.delete(interaction.id);
 }
 
+let indoors = false;
+
+/** Tell the router which kind of scene the player is in. */
+export function setInteractionsIndoors(value: boolean) {
+  indoors = value;
+}
+
+function availableHere(interaction: ScreenInteraction) {
+  const scene = interaction.scene ?? 'surface';
+  return scene === 'any' || (scene === 'interior') === indoors;
+}
+
 function orderedInteractions() {
-  return [...interactions.values()].sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
+  return [...interactions.values()]
+    .filter(availableHere)
+    .sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
 }
 
 export function hasScreenInteractionAt(clientX: number, clientY: number) {

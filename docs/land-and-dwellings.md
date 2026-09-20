@@ -143,6 +143,11 @@ A player can be perfectly happy never leaving: expand the starter house, furnish
 it, paint it, landscape around it. The starter house is a real home, not a
 tutorial hut.
 
+**Decided 2026-09-20: the starter house is a tent-like house under
+construction**, with the smallest Thing Maker beside it, standing on the Home
+marker's spot. Every later building tech is a part or a project added to it,
+never a replacement. The full design is in `house-and-home.md`.
+
 ## Moving
 
 The wanted behaviour, taken from Glitch: after a while you know the world, you
@@ -187,6 +192,11 @@ become a dependency.
 
 These are genuinely unresolved and are logged so they are not rediscovered:
 
+**New, 2026-09-20 — what happens to what you built?** Piecemeal upgrades
+    (`house-and-home.md`) make walls, floors and upper storeys an investment.
+    **Decided 2026-09-20:** the old parts are paid back as materials, with a
+    10% loss.
+
 1. **What happens to the old house?** Leading answer: it **reverts to a starter
    house** for a future new player. This avoids abandoned-lot blight — a real
    problem in games of this kind, and one Glitch had — and it is consistent with
@@ -227,7 +237,9 @@ These are genuinely unresolved and are logged so they are not rediscovered:
 
 Settled in principle 2026-08-06: **the world is unbounded.** More players means
 more world, not competition for a fixed amount of it. It is made of paper, so it
-is allowed to be bigger on the inside.
+is allowed to be bigger on the inside. Taken literally from 2026-09-20: a house
+is entered as a scene and may hold more than its outside suggests; see
+`scenes-and-interiors.md`.
 
 ### This is already how it works
 
@@ -301,7 +313,7 @@ that made the size valuable — and reframes travel tech as being about
 going out.
 
 **This is a small build, because the destination list already exists.**
-`world/places.ts` holds saved places, `M` is already bound to "mark this spot as
+`world/places.ts` holds saved places, `G` is already bound to "mark this spot as
 a saved place," and signs, the map, and the places panel already read from it. A
 transporter network is a new use of that registry, not a new registry.
 

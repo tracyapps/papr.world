@@ -7,7 +7,7 @@ import {
 } from '../world/resources';
 import type { ResourceId } from '../world/types';
 import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
-import { RECIPE_DEFS, isRecipeAvailable, type RecipeId } from '../sim/catalogs/recipes';
+import { RECIPE_DEFS, isKnowledgeOutput, isRecipeAvailable, type RecipeId } from '../sim/catalogs/recipes';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { SEED_DEFS, type SeedId } from '../sim/catalogs/seeds';
@@ -194,14 +194,14 @@ function renderPlansTab() {
     return '<p class="scrapbook-empty">Plans you discover will be pressed onto this page.</p>';
   }
   return `
-    <p class="scrapbook-panel-note">Fold tools and materials at the Thing Maker. Build pieces go up in place, with a hammer.</p>
+    <p class="scrapbook-panel-note">Fold tools and materials at the Thing Maker. Build pieces go up in place, with a hammer. Know-how is simply known.</p>
     <ul class="scrapbook-items">${plans.map((planId) => {
     const recipe = RECIPE_DEFS[planId];
     // `completedOutputs` holds recipe ids, not output labels — comparing
     // against the label silently marked every plan as never made.
-    // A build-piece plan is never crafted, so it is never "undiscovered" by
-    // that measure — knowing it is the whole of what it is.
-    const made = recipe.output.kind === 'build-piece'
+    // A build-piece or know-how plan is never crafted, so it is never
+    // "undiscovered" by that measure — knowing it is the whole of what it is.
+    const made = isKnowledgeOutput(recipe.output)
       || state.world.thingMaker.completedOutputs.includes(recipe.id);
     return `
         <li class="scrapbook-item ${made ? '' : 'is-undiscovered'}">

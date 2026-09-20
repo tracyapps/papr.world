@@ -18,8 +18,7 @@ export const RESOURCE_CATEGORIES = {
   soil: { id: 'soil', label: 'Paper Soil & Clay', singularLabel: 'scoop', description: 'Regional paper earth lifted from shallow beds and folded hills.', iconKey: 'resource-category.soil', color: '#8c6748' },
   seeds: { id: 'seeds', label: 'Seeds & Starts', singularLabel: 'seed', description: 'Tiny folded beginnings for gardens and careful ground-mending.', iconKey: 'resource-category.seeds', color: '#778f4d' },
   food: { id: 'food', label: 'Harvests & Food', singularLabel: 'harvest', description: 'Paper fruits and vegetables picked from plants you grew.', iconKey: 'resource-category.food', color: '#c45d4a' },
-  // Crafted, never found loose — see recipes.ts's 'resource'-kind
-  // RecipeOutput. First entry: bound-lumber (2026-09-02).
+  // Refined at the Wood Mill, never found loose — see catalogs/millRefining.ts.
   refined: { id: 'refined', label: 'Refined Materials', singularLabel: 'piece', description: 'Multi-step supplies worked up from raw finds by Chisel at the Wood Mill.', iconKey: 'resource-category.refined', color: '#7a5c3e' },
 } as const satisfies Record<string, ResourceCategoryDefinition>;
 
@@ -109,8 +108,8 @@ export const RESOURCE_CORE_DEFS = {
   'young-bamboo': { id: 'young-bamboo', label: 'Young bamboo shoots', shortLabel: 'Bamboo shoots', category: 'food', iconKey: 'resource.young-bamboo', processStage: 0, structuralClass: 0, tags: ['food'] },
   'alpine-herbs': { id: 'alpine-herbs', label: 'Alpine paper herbs', shortLabel: 'Alpine herbs', category: 'food', iconKey: 'resource.alpine-herbs', processStage: 0, structuralClass: 0, tags: ['food'] },
   'paper-prickly-pears': { id: 'paper-prickly-pears', label: 'Paper prickly pears', shortLabel: 'Prickly pears', category: 'food', iconKey: 'resource.paper-prickly-pears', processStage: 0, structuralClass: 0, tags: ['food'] },
-  // Crafted at the Thing Maker, never found loose in the world — see
-  // recipes.ts's 'resource'-kind RecipeOutput. First refined material.
+  // Refined at the Wood Mill (see catalogs/millRefining.ts), never found loose
+  // in the world. First refined material.
   // Refined at the Wood Mill (see catalogs/millRefining.ts) — the rest of the
   // materials plan's stage-1 rung, 2026-09-18.
   'binding-cord': { id: 'binding-cord', label: 'Binding cord', shortLabel: 'Binding cord', category: 'refined', iconKey: 'resource.binding-cord', processStage: 1, structuralClass: 1, tags: ['long-fiber'] },
@@ -118,6 +117,15 @@ export const RESOURCE_CORE_DEFS = {
   'stone-aggregate': { id: 'stone-aggregate', label: 'Stone aggregate', shortLabel: 'Aggregate', category: 'refined', iconKey: 'resource.stone-aggregate', processStage: 1, structuralClass: 1, tags: ['stone'] },
   'paper-mortar': { id: 'paper-mortar', label: 'Paper mortar', shortLabel: 'Mortar', category: 'refined', iconKey: 'resource.paper-mortar', processStage: 1, structuralClass: 0, tags: ['clay'] },
   'bound-lumber': { id: 'bound-lumber', label: 'Bound lumber', shortLabel: 'Bound lumber', category: 'refined', iconKey: 'resource.bound-lumber', processStage: 1, structuralClass: 2, tags: ['wood', 'board'] },
+  // Stage 2 and 3, refined at the Wood Mill behind the Finer and Heavy Refining
+  // lessons (see catalogs/millRefining.ts). The structural rung: what floors,
+  // walls, and upper storeys are made of.
+  'layerboard': { id: 'layerboard', label: 'Layerboard', shortLabel: 'Layerboard', category: 'refined', iconKey: 'resource.layerboard', processStage: 2, structuralClass: 2, tags: ['wood', 'board'] },
+  'red-brick': { id: 'red-brick', label: 'Red brick', shortLabel: 'Red brick', category: 'refined', iconKey: 'resource.red-brick', processStage: 2, structuralClass: 2, tags: ['brick'] },
+  'crossbound-timber': { id: 'crossbound-timber', label: 'Crossbound timber', shortLabel: 'Crossbound', category: 'refined', iconKey: 'resource.crossbound-timber', processStage: 3, structuralClass: 3, tags: ['wood', 'board'] },
+  // Not tagged `brick`: an "any brick" slot must never be able to take the
+  // thing that brick was refined into.
+  'faced-masonry': { id: 'faced-masonry', label: 'Faced masonry', shortLabel: 'Faced masonry', category: 'refined', iconKey: 'resource.faced-masonry', processStage: 3, structuralClass: 3, tags: ['stone'] },
 } as const satisfies Record<string, ResourceCoreDefinition>;
 
 export type ResourceId = keyof typeof RESOURCE_CORE_DEFS;

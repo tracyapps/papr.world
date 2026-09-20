@@ -1,7 +1,24 @@
 import { sanitizeAvatarDesign, type AvatarDesign, type HomeMarker, type PlacedPiece } from '../../shared/src/index';
+import type { Vector3 } from 'three';
 import { avatar } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
+import {
+  getServerInside,
+  presenceHeld,
+  receiveEntryResult,
+  receiveFriendNotice,
+  receiveFriends,
+  receiveHomeExit,
+  receiveHomePolicy,
+  receiveKnock,
+  receiveKnockCleared,
+  selfIsGuest,
+  setGuestTransport,
+  setSelfAccount,
+} from '../game/guests';
+import { publishedLook } from '../game/dwellingLook';
+import { isInteriorActive } from '../world/activeScene';
 import { getWornDesign } from '../ui/avatarEditor/wardrobe';
 import { initializeSharedChat } from '../ui/sharedChat';
 import { handlePlayerCardResponse, setPlayerCardRequestHandler } from '../ui/playerCard';
@@ -11,7 +28,7 @@ import { connect, type NetConnection } from './client';
 import { describeClose } from './closeReason';
 import { getOrCreatePassport } from './passport';
 import { mergeMailSnapshot } from '../sim/mail';
-import { updateGameState } from '../sim/state';
+import { getGameState, onGameStateChanged, updateGameState } from '../sim/state';
 import {
   clearSharedInventory,
   receiveSharedInventory,
@@ -24,6 +41,7 @@ import {
   initializeRemoteAvatarVisuals,
   remoteAvatarCount,
   removeRemoteAvatar,
+  setRemoteInside,
   updateRemoteAvatar,
 } from './remoteAvatarVisuals';
 import { avatarRefForDesign, readSharedModeConfig } from './sharedConfig';
@@ -343,6 +361,14 @@ export async function initializeSharedSession(): Promise<void> {
             removeRemoteAvatar(id);
             ui.addNotice('A neighbor wandered home.');
           },
+          onPlayerInside: setRemoteInside,
+          onFriends: receiveFriends,
+          onFriendNotice: receiveFriendNotice,
+          onHomePolicy: receiveHomePolicy,
+          onEntryResult: (result) => receiveEntryResult(result),
+          onKnockNotice: (notice) => receiveKnock(notice),
+          onKnockCleared: receiveKnockCleared,
+          onHomeExit: receiveHomeExit,
           onPieceAdd: addSharedPiece,
           onPieceRemove: removeSharedPiece,
           onNodeAdd: upsertSharedResourceNode,
@@ -439,6 +465,7 @@ export async function initializeSharedSession(): Promise<void> {
             clearSharedResourceVisuals();
             clearSharedInventory();
             clearSharedHomeVisuals();
+            setGuestTransport(null);
             connected = false;
             connection = null;
             ui.setStatus('offline');
@@ -464,7 +491,20 @@ export async function initializeSharedSession(): Promise<void> {
       // itself so the server can resolve that key even before any wardrobe
       // import — and so today's look, not last import's, is what neighbors see.
       publishWornDesign(getWornDesign());
+      publishedHomeSignature = '';
+      setSelfAccount(selfAccountId);
       publishHome();
+      const room = liveConnection;
+      setGuestTransport({
+        requestFriend: (accountId) => room.sendFriendRequest(accountId),
+        answerFriend: (accountId, accept) => room.sendFriendAnswer(accountId, accept),
+        removeFriend: (accountId) => room.sendFriendRemove(accountId),
+        setHomePolicy: (policy) => room.sendSetHomePolicy(policy),
+        enterHome: (host) => room.sendEnterHome(host),
+        leaveHome: () => room.sendLeaveHome(),
+        answerKnock: (visitor, admit) => room.sendKnockAnswer(visitor, admit),
+        askToLeave: (accountId) => room.sendAskToLeave(accountId),
+      });
       connected = true;
       ui.setStatus(`online as ${config.name}`, true);
       if (rejoinAttempt === 0) ui.addNotice(`You are visiting ${destination}.`);
@@ -479,6 +519,7 @@ export async function initializeSharedSession(): Promise<void> {
       clearRemoteAvatars();
       clearSharedResourceVisuals();
       clearSharedHomeVisuals();
+      setGuestTransport(null);
       connected = false;
       connection = null;
       ui.setStatus('offline');
@@ -543,9 +584,36 @@ export function publishWornDesign(input: AvatarDesign | null): void {
  */
 export function publishHome(): void {
   const home = getPlace(HOME_PLACE_ID);
-  if (!home) return;
-  connection?.sendSetHome({ x: home.x, z: home.z, page: getCurrentPageId() });
+  // A guest has no account to hold a home, and saying so on every change of
+  // house would be noise, not information.
+  if (!home || !connection || selfIsGuest()) return;
+  const look = publishedLook(getGameState().world.dwelling);
+  publishedHomeSignature = homeSignature(home.x, home.z, look);
+  connection.sendSetHome({
+    x: home.x,
+    z: home.z,
+    page: getCurrentPageId(),
+    parts: look.parts,
+    building: look.building,
+  });
 }
+
+/** What was last sent, so a change of house or spot is sent again and nothing else is. */
+let publishedHomeSignature = '';
+
+function homeSignature(x: number, z: number, look: { parts: string[]; building: string }): string {
+  return `${x.toFixed(2)}|${z.toFixed(2)}|${look.parts.join(',')}|${look.building}`;
+}
+
+/** Neighbors see the house as it is: send it again when a part is finished or started, or Home moves. */
+function republishHomeIfChanged(): void {
+  if (!connection || !connected) return;
+  const home = getPlace(HOME_PLACE_ID);
+  if (!home) return;
+  const look = publishedLook(getGameState().world.dwelling);
+  if (homeSignature(home.x, home.z, look) !== publishedHomeSignature) publishHome();
+}
+onGameStateChanged(republishHomeIfChanged);
 
 /**
  * Ask the server for another player's card (avatar-and-identity.md §3). A
@@ -570,23 +638,40 @@ export function disconnectSharedSession(): void {
   clearSharedResourceVisuals();
   clearSharedInventory();
   clearSharedHomeVisuals();
+  setGuestTransport(null);
   publishStatus({
     phase: 'solo', message: 'Returning to your solo world…', name: playerName,
     inviteCode, intent: null,
   });
 }
 
-export function updateSharedSession(): void {
+/**
+ * Send this player's place and draw everyone else.
+ *
+ * Indoors, where the room hears you depends on whether the room knows you are
+ * inside. If it does (your own home, or a visit), it hears your real place in
+ * the room, and the people inside with you are drawn there. If it does not (a
+ * guest has no home on record), friends see you at your door, on the surface
+ * page outside, which is what the caller passes as `presence`.
+ * (Design: docs/scenes-and-interiors.md.)
+ */
+export function updateSharedSession(presence?: { position: Vector3; page: string }): void {
   if (!connection || !connected) return;
+  const inside = getServerInside();
+  // The room is about to decide, or has decided and the screen has not yet
+  // moved through the door: what it would hear now is the wrong place.
+  if (presenceHeld() || (inside && !isInteriorActive())) return;
+  const real = inside !== '' && isInteriorActive();
+  const at = real ? avatar.position : presence?.position ?? avatar.position;
   connection.sendMove({
-    x: avatar.position.x,
-    z: avatar.position.z,
+    x: at.x,
+    z: at.z,
     facing: getYaw(),
-    page: getCurrentPageId(),
+    page: presence?.page ?? getCurrentPageId(),
   });
   for (const id of connection.remoteIds()) {
     const sample = connection.sampleRemote(id);
-    if (sample) updateRemoteAvatar(id, sample, avatar.position);
+    if (sample) updateRemoteAvatar(id, sample, at, real ? inside : '');
   }
   syncSharedResourceVisibility();
 }

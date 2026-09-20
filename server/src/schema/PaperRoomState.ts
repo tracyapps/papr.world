@@ -38,6 +38,12 @@ export class PlayerSchema extends Schema {
    * owner account itself on every removal.
    */
   @type('boolean') isOwner = false;
+  /**
+   * Account id of the home this player is inside, '' outside. Server-owned:
+   * only EnterHome/LeaveHome change it, never a move. Clients draw a player
+   * only when this matches their own.
+   */
+  @type('string') inside = '';
 }
 
 export class PieceSchema extends Schema {
@@ -61,6 +67,12 @@ export class HomeSchema extends Schema {
   @type('number') x = 0;
   @type('number') z = 0;
   @type('string') page = '0,0';
+  /** Finished house parts, comma-joined ("floor,walls"). Empty = the tent. */
+  @type('string') parts = '';
+  /** The part under construction, or ''. */
+  @type('string') building = '';
+  /** Open house: a public sign. The other door settings are not synced. */
+  @type('boolean') open = false;
 }
 
 export class NodeSchema extends Schema {

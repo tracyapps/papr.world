@@ -29,6 +29,8 @@ import { buildSeedStoreResident } from './critters';
 import { registerCozyObject } from './cozyInteractions';
 import { setMakerPanelOpen } from './thingMaker';
 import { closeMillPanel } from './millCounter';
+import { closeHomePanel } from './homePanel';
+import { closeGuestPanels } from './panelSlot';
 
 const panel = document.querySelector<HTMLElement>('#seed-store-panel');
 const balanceElement = document.querySelector<HTMLElement>('#seed-store-balance');
@@ -389,6 +391,8 @@ export function setSeedStorePanelOpen(open: boolean) {
   if (open) {
     setMakerPanelOpen(false);
     closeMillPanel();
+    closeHomePanel();
+    closeGuestPanels();
   }
   panelOpen = open;
   renderSeedStorePanel();

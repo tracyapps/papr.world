@@ -140,8 +140,9 @@ Multiplayer:
 - `3`: Creased Hoe — sow, lift plants, refill holes
 - `4`: reserved tool slot
 - Left click: interact or use the selected mode
-- `B`: open and close the scrapbook strip
-- `M`: mark this spot as a saved place
+- `I`: open and close the scrapbook
+- `M`: open and close the map
+- `G`: mark this spot as a saved place (and guide you back to it)
 - `Escape`: close the top panel, then return to interaction mode
 
 The full list is in-game behind the **?** icon (`src/ui/hudMenus.ts`). Keep the

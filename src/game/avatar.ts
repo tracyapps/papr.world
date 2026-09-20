@@ -5,7 +5,7 @@ import { sampleTerrainHeight } from '../world/terrain';
 import { updateWading, wadeSinkAt, wadeSpeedMultiplier } from './wading';
 import { getViewCloseness, getYaw } from './camera';
 import { getMovementInput, type MovementInput } from './input';
-import { isSolidAt } from '../world/footprints';
+import { groundHeightAt, solidAt } from '../world/activeScene';
 import { DESIGN_CUTOUT, DESIGN_GROUND_Y, DESIGN_SHEET } from '../../shared/src/index';
 import { slideMove } from '../core/placement';
 import { isTimedActionActive } from './timedAction';
@@ -122,6 +122,23 @@ export function spawnAvatar(x: number, z: number) {
   scene.add(avatar, avatarShadow);
 }
 
+/**
+ * Hand the avatar to another scene's root (the inside of the home has its own),
+ * or back to the surface's. A mesh has one parent, so it moves rather than
+ * being shared.
+ */
+export function moveAvatarToScene(target: THREE.Scene) {
+  target.add(avatar, avatarShadow);
+}
+
+/** Put the avatar down at a spot on the current ground, standing still. */
+export function placeAvatarAt(x: number, z: number) {
+  const floor = groundHeightAt(x, z);
+  avatar.position.set(x, floor + AVATAR_CENTER_Y, z);
+  avatarShadow.position.set(x, floor + 0.006, z);
+  velocity.set(0, 0, 0);
+}
+
 function desiredDirection(movement: MovementInput): THREE.Vector3 {
   const yaw = getYaw();
   const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
@@ -166,7 +183,7 @@ export function updateAvatar(delta: number) {
       avatar.position.z,
       velocity.x * delta * wadeScale,
       velocity.z * delta * wadeScale,
-      (x, z) => isSolidAt(x, z, PLAYER_BODY_RADIUS),
+      (x, z) => solidAt(x, z, PLAYER_BODY_RADIUS),
     );
     avatar.position.x = moved.x;
     avatar.position.z = moved.z;
@@ -177,7 +194,7 @@ export function updateAvatar(delta: number) {
   walkPhase += delta * BOB_FREQUENCY * (0.4 + speedRatio);
   const bob = Math.abs(Math.sin(walkPhase)) * BOB_HEIGHT * speedRatio;
 
-  const terrainHeight = sampleTerrainHeight(avatar.position.x, avatar.position.z);
+  const terrainHeight = groundHeightAt(avatar.position.x, avatar.position.z);
   const platformHeight = bridgeDeckHeightAt(avatar.position.x, avatar.position.z);
   const standingHeight = platformHeight ?? terrainHeight;
   // Standing in water lowers the cutout and flattens its bob — you cannot

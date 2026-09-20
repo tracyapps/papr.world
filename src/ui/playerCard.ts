@@ -17,12 +17,21 @@
 // direction — collapses that second part to one quiet line, never a reason,
 // so opening a card can never be used to test who has blocked whom.
 
-import type { AvatarDesign, PlayerCardInfo } from '../../shared/src/index';
+import { isGuestAccount, type AvatarDesign, type PlayerCardInfo } from '../../shared/src/index';
 import { designToDataUrl } from './avatarEditor/render';
 import { fetchDesignJson } from '../net/remoteAvatarVisuals';
 import { countMakerPiecesOnPage } from '../net/sharedPieceVisuals';
 import { getCurrentPageId } from '../world/streaming';
 import { getTrinkets } from '../game/trinkets';
+import {
+  answerFriend,
+  friendStateOf,
+  getSelfAccount,
+  guestsAvailable,
+  requestFriend,
+  selfIsGuest,
+  subscribeGuests,
+} from '../game/guests';
 import { getTrinketDef, TRINKET_FAMILIES } from '../sim/catalogs/trinkets';
 import type { TrinketInstance } from '../sim/state';
 
@@ -48,6 +57,7 @@ export function setPlayerCardRequestHandler(handler: ((accountId: string) => voi
 }
 
 let close: (() => void) | null = null;
+let stopFriendUpdates: (() => void) | null = null;
 let openAccountId: string | null = null;
 let metaElement: HTMLElement | null = null;
 let sharedElement: HTMLElement | null = null;
@@ -167,6 +177,8 @@ export function openMyPlayerCard(): void {
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('keydown', swallowStrayKeys, true);
     window.removeEventListener('keyup', swallowStrayKeys, true);
+    stopFriendUpdates?.();
+    stopFriendUpdates = null;
     overlay.remove();
     close = null;
     openAccountId = null;
@@ -197,6 +209,45 @@ export function isPlayerCardOpen(): boolean {
   return close !== null;
 }
 
+/**
+ * "Add friend" on a neighbor's card. Friends are the tier a home's door can
+ * let walk straight in (docs/house-and-home.md), so this is where a friendship
+ * starts. Quiet for guests, for yourself, and in solo play.
+ */
+function renderFriendActions(host: HTMLElement, target: PlayerCardTarget): void {
+  const eligible = guestsAvailable() && !selfIsGuest()
+    && !isGuestAccount(target.accountId) && target.accountId !== getSelfAccount();
+  const state = eligible ? friendStateOf(target.accountId) : 'none';
+  const focusedAct = document.activeElement instanceof HTMLElement && host.contains(document.activeElement)
+    ? document.activeElement.dataset.cardFriend
+    : null;
+  host.replaceChildren();
+  host.hidden = !eligible;
+  if (!eligible) return;
+  const say = (text: string) => {
+    const line = document.createElement('p');
+    line.className = 'player-card-meta';
+    line.textContent = text;
+    host.append(line);
+  };
+  const make = (act: string, label: string, quiet = false) => {
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.dataset.cardFriend = act;
+    control.textContent = label;
+    if (quiet) control.classList.add('is-quiet');
+    host.append(control);
+  };
+  if (state === 'friends') say(`You and ${target.name} are friends.`);
+  else if (state === 'outgoing') say(`You asked ${target.name} to be friends. They will see it when they are next around.`);
+  else if (state === 'incoming') {
+    say(`${target.name} asked to be friends.`);
+    make('accept', 'Accept');
+    make('decline', 'Not now', true);
+  } else make('add', 'Add friend');
+  if (focusedAct) host.querySelector<HTMLElement>(`[data-card-friend="${focusedAct}"]`)?.focus();
+}
+
 export function openPlayerCardFor(target: PlayerCardTarget): void {
   if (close) close();
   const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -212,6 +263,7 @@ export function openPlayerCardFor(target: PlayerCardTarget): void {
       <img class="player-card-avatar" alt="" src="${PLACEHOLDER_AVATAR}">
       <h2 id="player-card-name"></h2>
       <p class="player-card-meta">…</p>
+      <div class="player-card-friend" data-card-friend-host hidden></div>
     </div>`;
 
   const nameHeading = overlay.querySelector<HTMLElement>('#player-card-name')!;
@@ -238,6 +290,8 @@ export function openPlayerCardFor(target: PlayerCardTarget): void {
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('keydown', swallowStrayKeys, true);
     window.removeEventListener('keyup', swallowStrayKeys, true);
+    stopFriendUpdates?.();
+    stopFriendUpdates = null;
     overlay.remove();
     close = null;
     openAccountId = null;
@@ -257,6 +311,18 @@ export function openPlayerCardFor(target: PlayerCardTarget): void {
   window.addEventListener('keyup', swallowStrayKeys, true);
 
   document.body.appendChild(overlay);
+
+  const friendHost = overlay.querySelector<HTMLElement>('[data-card-friend-host]');
+  if (friendHost) {
+    friendHost.addEventListener('click', (event) => {
+      const act = (event.target as HTMLElement).closest<HTMLElement>('[data-card-friend]')?.dataset.cardFriend;
+      if (act === 'add') requestFriend(target.accountId);
+      else if (act === 'accept') answerFriend(target.accountId, true);
+      else if (act === 'decline') answerFriend(target.accountId, false);
+    });
+    renderFriendActions(friendHost, target);
+    stopFriendUpdates = subscribeGuests(() => renderFriendActions(friendHost, target));
+  }
 
   // "Made N things" needs no round trip — the pieces list is already synced
   // to every client. Papering-since and shared looks are account-owned, so

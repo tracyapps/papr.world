@@ -4,18 +4,22 @@ import { sampleTerrainHeight } from '../world/terrain';
 import { getPlace, type Place } from '../world/places';
 import { getYaw } from './camera';
 import { RENDER_ORDER } from '../render/renderOrder';
+import { ARRIVE_RADIUS, stepArrival } from './guideArrival';
 
 // Guidance arrow: one flat paper arrow that sits on the ground a step
 // ahead of the avatar — always in front of you, whichever way you face,
 // like a compass you're holding. It rotates to point at the selected
-// place (even if that's behind you) and hides once you arrive.
+// place (even if that's behind you). Once you are within ARRIVE_RADIUS the
+// arrow hides and, after a short linger, the guide switches itself off (see
+// guideArrival.ts).
 
 /** How far ahead of the avatar (in the camera's facing direction) the arrow sits. */
 const ARROW_AHEAD = 2.3;
-export const ARRIVE_DISTANCE = 2.2;
 
 let arrow: THREE.Group | null = null;
 let targetPlaceId: string | null = null;
+/** Clock time the guide first came within range, or null while travelling. */
+let arrivedSince: number | null = null;
 const smoothedPosition = new THREE.Vector3();
 let hasSmoothedPosition = false;
 
@@ -73,6 +77,7 @@ export function initializeGuidance() {
 export function setGuidanceTarget(placeId: string | null) {
   targetPlaceId = placeId;
   hasSmoothedPosition = false;
+  arrivedSince = null;
   if (arrow && !placeId) {
     arrow.visible = false;
   }
@@ -102,7 +107,14 @@ export function updateGuidance(avatarPosition: THREE.Vector3, elapsed: number) {
   const dz = place.z - avatarPosition.z;
   const distance = Math.hypot(dx, dz);
 
-  if (distance < ARRIVE_DISTANCE) {
+  const arrival = stepArrival(arrivedSince, distance, elapsed);
+  arrivedSince = arrival.since;
+  if (arrival.state === 'clear') {
+    // Close enough for long enough: the guide has done its job.
+    setGuidanceTarget(null);
+    return;
+  }
+  if (arrival.state === 'arrived') {
     arrow.visible = false;
     return;
   }

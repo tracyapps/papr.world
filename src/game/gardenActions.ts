@@ -8,6 +8,8 @@ import { planterBoxAt } from '../world/buildPieces';
 import { findDigFootprintBlocker, findNonWaterFootprintBlocker } from '../world/footprints';
 import { isInWater, isShallowWater } from '../world/water';
 import { TERRAIN_CELL_RADIUS } from '../sim/terrainCells';
+import { hasAbility } from '../sim/catalogs/recipes';
+import type { AbilityId } from '../sim/catalogs/abilities';
 
 // What the hoe would do at a given cell, and why it can or cannot.
 //
@@ -35,6 +37,8 @@ export type GardenBlocker =
   | { kind: 'no-seed' }
   | { kind: 'needs-fill'; required: number; available: number }
   | { kind: 'blocked'; label: string }
+  // The action is real but the player has not learned it yet.
+  | { kind: 'needs-know-how'; ability: AbilityId }
   | { kind: 'occupied'; by: SeedId };
 
 export type GardenAction = {
@@ -142,6 +146,9 @@ export function resolveGardenAction(
   const wetBed = !edit && !insidePlanterBox
     && growsInShallowWater(seedId)
     && isShallowWater(target.x, target.z);
+  if (wetBed && !hasAbility(state.player.plans, 'shallow-water-planting')) {
+    return { kind: 'plant', ok: false, blocker: { kind: 'needs-know-how', ability: 'shallow-water-planting' } };
+  }
   if (!edit && !insidePlanterBox && !wetBed) return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
   if (edit?.state === 'filled' || edit?.state === 'raised') {
     return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };

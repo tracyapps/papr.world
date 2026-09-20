@@ -20,8 +20,8 @@ import { GENERATED_RESOURCE_ART } from './resourceArt.generated';
  * `npm run assets:compile` fills several standard loose silhouettes from a
  * tile at `materials/resources/<form>/<resource-id>.svg`, then writes
  * `resourceArt.generated.ts`. Direct seed cutouts are generated from
- * `resources/seeds/<resource-id>.svg`. The legacy map below is only a bridge
- * for art that has not moved into that pipeline yet.
+ * `resources/seeds/<resource-id>.svg`. That is the only route: there is no
+ * hand-written art map.
  *
  * See `docs/resource-asset-pipeline.md` for the artist workflow.
  *
@@ -39,24 +39,6 @@ export type ResourceArt = ResourceArtVariant & {
   variants: readonly ResourceArtVariant[];
 };
 
-const LEGACY_RESOURCE_ART = {
-  // The first real example — see docs/resource-artwork-guide.md for how
-  // this one was made and what's different (nothing, structurally) between
-  // a "sticks" resource and a "stones" one.
-  'terracotta-pebbles': {
-    // Public-path convention, same as TREE_DEFS/DECOR_DEFS in pageRuntime.ts
-    // (assets/ is the Vite public dir, served as-is at /assets/...) — not
-    // the import.meta.url convention TOOL_ART uses, which is for a
-    // different consumer (a DOM <img>, not a THREE.js scene texture).
-    sourceUrl: '/assets/runtime/resources/terracotta-pebbles.png',
-    aspectRatio: 240 / 190,
-    variants: [{
-      sourceUrl: '/assets/runtime/resources/terracotta-pebbles.png',
-      aspectRatio: 240 / 190,
-    }],
-  },
-} as const satisfies Partial<Record<ResourceId, ResourceArt>>;
-
 type GeneratedArtRecord = {
   /** The tiling surface the loose pieces were cut from. Null for seeds,
    *  which are drawn as direct cutouts and have no tiling form. */
@@ -68,12 +50,12 @@ type GeneratedArtRecord = {
 const generatedResourceArt = GENERATED_RESOURCE_ART as Partial<Record<ResourceId, GeneratedArtRecord>>;
 
 /**
- * Generated folder-driven art wins over a legacy hand-authored entry. Keeping
- * the old map as a fallback lets resources migrate one tile at a time without
- * making existing saves or artwork disappear between compiler runs.
+ * The only source of resource art: what `npm run assets:compile` generates
+ * from `assets/source/materials/resources/<folder>/<resource-id>.svg`. There
+ * is no hand-written art map any more (the last legacy entry,
+ * terracotta-pebbles, moved onto the pipeline).
  */
 export const RESOURCE_ART: Partial<Record<ResourceId, ResourceArt>> = {
-  ...LEGACY_RESOURCE_ART,
   ...Object.fromEntries(Object.entries(generatedResourceArt).flatMap(([resource, generated]) => {
     const first = generated?.variants[0];
     if (!first || !generated) return [];

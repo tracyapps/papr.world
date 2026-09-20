@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T01:09:41.041Z",
+  "generatedAt": "2026-09-20T16:05:25.955Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -724,6 +724,156 @@
         "variant": 4
       },
       "sourceSize": "42x23",
+      "size": "520x260"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber.brown",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.brown.png",
+      "type": "texture",
+      "usage": "material",
+      "colorway": {
+        "id": "brown",
+        "label": "Brown",
+        "vars": {
+          "--h": "33",
+          "--s": "59.6"
+        }
+      },
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber.grey",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.grey.png",
+      "type": "texture",
+      "usage": "material",
+      "colorway": {
+        "id": "grey",
+        "label": "Grey",
+        "vars": {
+          "--h": "33",
+          "--s": "9.6"
+        }
+      },
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber.red",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.red.png",
+      "type": "texture",
+      "usage": "material",
+      "colorway": {
+        "id": "red",
+        "label": "Red",
+        "vars": {
+          "--h": "22",
+          "--s": "77.9"
+        }
+      },
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber.blue",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.blue.png",
+      "type": "texture",
+      "usage": "material",
+      "colorway": {
+        "id": "blue",
+        "label": "Blue",
+        "vars": {
+          "--h": "201",
+          "--s": "40.2"
+        }
+      },
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber.cream",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.cream.png",
+      "type": "texture",
+      "usage": "material",
+      "colorway": {
+        "id": "cream",
+        "label": "Cream",
+        "vars": {
+          "--h": "58",
+          "--s": "44.8"
+        }
+      },
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "materials.resources.board.crossbound-timber",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/materials/resources/board/crossbound-timber.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "2000x1000",
+      "size": "2000x1000"
+    },
+    {
+      "key": "resource.crossbound-timber.loose-01",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/resources/crossbound-timber/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "board",
+        "variant": 1
+      },
+      "sourceSize": "2000x1000",
+      "size": "520x260"
+    },
+    {
+      "key": "resource.crossbound-timber.loose-02",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/resources/crossbound-timber/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "board",
+        "variant": 2
+      },
+      "sourceSize": "2000x1000",
+      "size": "520x260"
+    },
+    {
+      "key": "resource.crossbound-timber.loose-03",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/resources/crossbound-timber/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "board",
+        "variant": 3
+      },
+      "sourceSize": "2000x1000",
+      "size": "520x260"
+    },
+    {
+      "key": "resource.crossbound-timber.loose-04",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "runtime": "assets/runtime/resources/crossbound-timber/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "board",
+        "variant": 4
+      },
+      "sourceSize": "2000x1000",
       "size": "520x260"
     },
     {
@@ -3446,184 +3596,6 @@
       "size": "512x192"
     },
     {
-      "key": "materials.resources.wood.crossbound-timber.brown",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.brown.png",
-      "type": "texture",
-      "usage": "material",
-      "colorway": {
-        "id": "brown",
-        "label": "Brown",
-        "vars": {
-          "--h": "33",
-          "--s": "59.6"
-        }
-      },
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "materials.resources.wood.crossbound-timber.grey",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.grey.png",
-      "type": "texture",
-      "usage": "material",
-      "colorway": {
-        "id": "grey",
-        "label": "Grey",
-        "vars": {
-          "--h": "33",
-          "--s": "9.6"
-        }
-      },
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "materials.resources.wood.crossbound-timber.red",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.red.png",
-      "type": "texture",
-      "usage": "material",
-      "colorway": {
-        "id": "red",
-        "label": "Red",
-        "vars": {
-          "--h": "22",
-          "--s": "77.9"
-        }
-      },
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "materials.resources.wood.crossbound-timber.blue",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.blue.png",
-      "type": "texture",
-      "usage": "material",
-      "colorway": {
-        "id": "blue",
-        "label": "Blue",
-        "vars": {
-          "--h": "201",
-          "--s": "40.2"
-        }
-      },
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "materials.resources.wood.crossbound-timber.cream",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.cream.png",
-      "type": "texture",
-      "usage": "material",
-      "colorway": {
-        "id": "cream",
-        "label": "Cream",
-        "vars": {
-          "--h": "58",
-          "--s": "44.8"
-        }
-      },
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "materials.resources.wood.crossbound-timber",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.png",
-      "type": "texture",
-      "usage": "material",
-      "sourceSize": "2000x1000",
-      "size": "2000x1000"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-01",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-01.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 1
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-02",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-02.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 2
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-03",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-03.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 3
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-04",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-04.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 4
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-05",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-05.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 5
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
-      "key": "resource.crossbound-timber.loose-06",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "runtime": "assets/runtime/resources/crossbound-timber/loose-06.png",
-      "type": "texture",
-      "usage": "resource",
-      "generated": {
-        "kind": "loose-resource",
-        "looseTemplate": "wood",
-        "variant": 6
-      },
-      "sourceSize": "2000x1000",
-      "size": "512x192"
-    },
-    {
       "key": "materials.resources.wood.kraft-twigs.terracotta",
       "source": "assets/source/materials/resources/wood/kraft-twigs.svg",
       "runtime": "assets/runtime/materials/resources/wood/kraft-twigs.terracotta.png",
@@ -6147,6 +6119,61 @@
       ]
     },
     {
+      "resourceId": "crossbound-timber",
+      "source": "assets/source/materials/resources/board/crossbound-timber.svg",
+      "surface": "assets/runtime/materials/resources/board/crossbound-timber.png",
+      "surfaceColorways": [
+        {
+          "id": "brown",
+          "label": "Brown",
+          "runtime": "assets/runtime/materials/resources/board/crossbound-timber.brown.png"
+        },
+        {
+          "id": "grey",
+          "label": "Grey",
+          "runtime": "assets/runtime/materials/resources/board/crossbound-timber.grey.png"
+        },
+        {
+          "id": "red",
+          "label": "Red",
+          "runtime": "assets/runtime/materials/resources/board/crossbound-timber.red.png"
+        },
+        {
+          "id": "blue",
+          "label": "Blue",
+          "runtime": "assets/runtime/materials/resources/board/crossbound-timber.blue.png"
+        },
+        {
+          "id": "cream",
+          "label": "Cream",
+          "runtime": "assets/runtime/materials/resources/board/crossbound-timber.cream.png"
+        }
+      ],
+      "looseTemplate": "board",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/crossbound-timber/loose-01.png",
+          "size": "520x260",
+          "aspectRatio": 2
+        },
+        {
+          "runtime": "assets/runtime/resources/crossbound-timber/loose-02.png",
+          "size": "520x260",
+          "aspectRatio": 2
+        },
+        {
+          "runtime": "assets/runtime/resources/crossbound-timber/loose-03.png",
+          "size": "520x260",
+          "aspectRatio": 2
+        },
+        {
+          "runtime": "assets/runtime/resources/crossbound-timber/loose-04.png",
+          "size": "520x260",
+          "aspectRatio": 2
+        }
+      ]
+    },
+    {
       "resourceId": "graphite-cardstock",
       "source": "assets/source/materials/resources/board/graphite-cardstock.svg",
       "surface": "assets/runtime/materials/resources/board/graphite-cardstock.png",
@@ -7242,71 +7269,6 @@
         },
         {
           "runtime": "assets/runtime/resources/column-cactus/loose-06.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        }
-      ]
-    },
-    {
-      "resourceId": "crossbound-timber",
-      "source": "assets/source/materials/resources/wood/crossbound-timber.svg",
-      "surface": "assets/runtime/materials/resources/wood/crossbound-timber.png",
-      "surfaceColorways": [
-        {
-          "id": "brown",
-          "label": "Brown",
-          "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.brown.png"
-        },
-        {
-          "id": "grey",
-          "label": "Grey",
-          "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.grey.png"
-        },
-        {
-          "id": "red",
-          "label": "Red",
-          "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.red.png"
-        },
-        {
-          "id": "blue",
-          "label": "Blue",
-          "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.blue.png"
-        },
-        {
-          "id": "cream",
-          "label": "Cream",
-          "runtime": "assets/runtime/materials/resources/wood/crossbound-timber.cream.png"
-        }
-      ],
-      "looseTemplate": "wood",
-      "loose": [
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-01.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        },
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-02.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        },
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-03.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        },
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-04.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        },
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-05.png",
-          "size": "512x192",
-          "aspectRatio": 2.6666666666666665
-        },
-        {
-          "runtime": "assets/runtime/resources/crossbound-timber/loose-06.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         }

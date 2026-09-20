@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { RECIPE_DEFS, recipeForTool, type RecipeId } from './recipes';
 import { toolRequiredFor } from './obtaining';
+import { millRefinementFor } from './millRefining';
 import { TOOL_DEFS, type ToolId } from './tools';
 import {
   TECH_BRANCHES,
@@ -152,6 +153,18 @@ describe('tech tree catalog shape', () => {
           }
           continue;
         }
+        if (task.kind === 'refine') {
+          // A refine task must not need the very know-how the lesson grants.
+          const gate = millRefinementFor(task.resource)?.requiresAbility;
+          const grantedAbilities = node.grants.flatMap((recipeId) => {
+            const output = RECIPE_DEFS[recipeId].output;
+            return output.kind === 'ability' ? [output.abilityId] : [];
+          });
+          if (gate && grantedAbilities.includes(gate)) {
+            offenders.push(`${nodeId} asks Chisel for ${task.resource}, gated behind its own grant: ${gate}`);
+          }
+          continue;
+        }
 
         const taskRecipe = RECIPE_DEFS[task.recipeId];
         if (taskRecipe.output.kind === 'tool'
@@ -182,7 +195,9 @@ describe('tech tree catalog shape', () => {
     expect(readyIds.sort()).toEqual([
       'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'gardening-2', 'trimming-1', 'trimming-2',
       'mining-1', 'building-1', 'building-2', 'building-3',
-      'garden-structures', 'outdoor-furniture', 'simple-crossings',
+      'garden-structures', 'outdoor-furniture', 'simple-crossings', 'wetland-growing',
+      'materials-refinement-1', 'materials-refinement-2',
+      'house-floors', 'house-walls', 'house-roofing', 'extra-rooms', 'stairs-and-upper-floors',
     ].sort());
   });
 });
@@ -250,12 +265,12 @@ describe('node status: reads only, never writes', () => {
 
 describe('cross-branch prerequisites', () => {
   it('lets a node in one branch require a node from a different branch', () => {
-    // materials-refinement-1 (materials) requires lumber-types
+    // materials-refinement-1 (materials) requires trimming-2
     // (building-construction).
     const node = TECH_DEFS['materials-refinement-1'];
     expect(node.branch).toBe('materials');
-    expect(node.requires).toContain('lumber-types');
-    expect(TECH_DEFS['lumber-types'].branch).toBe('building-construction');
+    expect(node.requires).toContain('trimming-2');
+    expect(TECH_DEFS['trimming-2'].branch).toBe('building-construction');
   });
 
   it('converges two branches into cooking, and cooking back into farming automation', () => {

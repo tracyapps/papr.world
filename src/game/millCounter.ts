@@ -2,12 +2,14 @@ import type * as THREE from 'three';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
+import { hasAbility } from '../sim/catalogs/recipes';
+import { TECH_DEFS, techNodeTeachingAbility } from '../sim/catalogs/techTree';
 import {
   MILL_MAIL,
   MILL_REFINEMENTS,
   affordableMillBatches,
   describeMillInputs,
-  rawResourcesWithTag,
+  resourcesForTagInput,
   scaledMillInputs,
   type MillPayment,
   type MillRefinement,
@@ -69,12 +71,39 @@ function holdingsLine(refinement: MillRefinement) {
     if (input.kind === 'exact') {
       return `${RESOURCE_CORE_DEFS[input.resource].shortLabel}: ${inventory[input.resource] ?? 0}`;
     }
-    const total = rawResourcesWithTag(input.tag).reduce((sum, id) => sum + (inventory[id] ?? 0), 0);
+    const total = resourcesForTagInput(input).reduce((sum, id) => sum + (inventory[id] ?? 0), 0);
     return `${input.label}: ${total}`;
   }).join(' · ');
 }
 
+/** The lesson a locked trade waits on, or null when the trade is open. */
+function lockedBy(refinement: MillRefinement): string | null {
+  const ability = refinement.requiresAbility;
+  if (!ability || hasAbility(getGameState().player.plans, ability)) return null;
+  const lessonId = techNodeTeachingAbility(ability);
+  return lessonId ? TECH_DEFS[lessonId].name : 'the right lesson';
+}
+
+function renderLockedCard(refinement: MillRefinement, lesson: string) {
+  const output = RESOURCE_CORE_DEFS[refinement.output];
+  const titleId = `mill-card-${refinement.id}`;
+  // No controls at all: a row of disabled buttons is a row of dead ends for a
+  // keyboard or screen-reader user. The card says what unlocks it instead.
+  return `
+    <article class="seed-shop-card mill-card is-locked" aria-labelledby="${titleId}">
+      <span class="seed-shop-swatch" style="--seed-color: ${escapeHtml(mapColorFor(refinement))}" aria-hidden="true"></span>
+      <div class="seed-shop-card-copy">
+        <div class="seed-shop-card-title"><strong id="${titleId}">${escapeHtml(output.label)}</strong><span>Locked</span></div>
+        <p>${escapeHtml(refinement.blurb)}</p>
+        <p class="mill-card-trade"><span>Takes ${escapeHtml(describeMillInputs(refinement.inputs))}</span> <span aria-hidden="true">→</span> <span>gives ${refinement.quantity} ${escapeHtml(output.shortLabel)}</span></p>
+        <p class="mill-card-holdings">Learn ${escapeHtml(lesson)} with the Professor to unlock this trade.</p>
+      </div>
+    </article>`;
+}
+
 function renderCard(refinement: MillRefinement) {
+  const lockedLesson = lockedBy(refinement);
+  if (lockedLesson) return renderLockedCard(refinement, lockedLesson);
   const state = getGameState();
   const byMail = mode === 'mail';
   const materialsFee = byMail && payment === 'materials';
@@ -118,6 +147,10 @@ function mapColorFor(refinement: MillRefinement) {
     'soft-pulp': '#cfd9cf',
     'stone-aggregate': '#8a8f91',
     'paper-mortar': '#c29a6c',
+    layerboard: '#8a5a34',
+    'red-brick': '#b04a3a',
+    'crossbound-timber': '#5a3a1e',
+    'faced-masonry': '#7d7a76',
   };
   return colors[refinement.output] ?? '#9a7a55';
 }
@@ -139,7 +172,7 @@ function render() {
   if (ledger) {
     ledger.innerHTML = byMail
       ? `<strong>Your pouch · ₡${state.player.chips}</strong><span>Parcels arrive about ${Math.round(MILL_MAIL.deliveryMs / 60_000 * 10) / 10} min after you order.</span>`
-      : `<strong>Your pouch · ₡${state.player.chips}</strong><span>Bring raw stock, take home refined. No charge at the counter.</span>`;
+      : `<strong>Your pouch · ₡${state.player.chips}</strong><span>Bring stock, take home refined. No charge at the counter.</span>`;
   }
   if (messageElement) messageElement.textContent = message;
   if (paymentElement) {
@@ -202,12 +235,12 @@ export function initializeMillCounter() {
     <fieldset class="mill-payment" data-mill-payment hidden>
       <legend>Pay the delivery fee with</legend>
       <label><input type="radio" name="mill-payment" value="chips"> ₡${MILL_MAIL.feeChips} per order</label>
-      <label><input type="radio" name="mill-payment" value="materials"> ${MILL_MAIL.extraPerInputLine} extra of each raw material</label>
+      <label><input type="radio" name="mill-payment" value="materials"> ${MILL_MAIL.extraPerInputLine} extra of each material it takes</label>
     </fieldset>
     <section class="seed-store-section">
       <div class="seed-store-section-heading">
         <h2>Refining board</h2>
-        <span>Raw stock in, refined material out</span>
+        <span>Stock in, refined material out</span>
       </div>
       <div class="seed-store-stock" data-mill-cards></div>
     </section>`;

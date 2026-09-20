@@ -36,6 +36,15 @@ import {
   sanitizeSendMail,
   sanitizeAvatarDesign,
   sanitizeSetHome,
+  sanitizeHomePolicy,
+  sanitizeAccountRef,
+  isGuestAccount,
+  joinHomeParts,
+  splitHomeParts,
+  homePolicyOrDefault,
+  DEFAULT_HOME_POLICY,
+  INTERIOR_SPACE,
+  HOME_EXIT_RADIUS,
   isFiniteNumber,
   type BlockIntent,
   type ChatBroadcast,
@@ -57,8 +66,19 @@ import {
   type ResourceNode,
   type RoomSave,
   type SendMailIntent,
+  type HomePolicy,
+  type FriendRequestIntent,
+  type FriendAnswerIntent,
+  type FriendRemoveIntent,
+  type FriendsSnapshot,
+  type FriendNoticeKind,
+  type EnterHomeIntent,
+  type KnockAnswerIntent,
+  type AskToLeaveIntent,
+  type EntryOutcome,
 } from '../../../shared/src/index';
-import { accounts, avatarDesigns, blocks, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { accounts, avatarDesigns, blocks, friends, isOwner, mail, moderation, OWNER_ACCOUNT, roomStore } from '../stores';
+import { KnockBook, decideAccess } from '../homeAccess';
 import { readAdminConfig, verifyClerkSessionToken } from '../admin';
 import { database } from '../runtime';
 import { authorizeManagedWorldEntry } from '../worldAuthorization';
@@ -75,7 +95,20 @@ type Session = {
   lastMoveAt: number;
   lastChatAt: number;
   lastMailAt: number;
+  lastEntryAt: number;
+  /**
+   * Set when `player.inside` changes. The next move may jump between the
+   * surface and the interior space (the anti-teleport clamp would otherwise
+   * crawl a player 56,000 units), and is checked against where that jump may
+   * land.
+   */
+  jump: 'enter' | 'exit' | null;
+  /** The home just left, so an exit can be checked against its door. */
+  exitHost: string;
 };
+
+/** Never let a burst of door requests through: at most about four a second. */
+const ENTRY_INTERVAL_MS = 250;
 
 const DEFAULT_PERSISTENCE_ID = 'neighborhood';
 
@@ -115,6 +148,13 @@ export class PaperRoom extends Room<PaperRoomOptions> {
 
   /** Accounts refused entry to this neighborhood. Restored from the save. */
   private banned = new Set<string>();
+
+  /** Private door settings by account. Only `open` is mirrored into synced state. */
+  private policies = new Map<string, HomePolicy>();
+  /** Knocks and "let in" permits for the doors in this neighborhood. */
+  private knocks = new KnockBook();
+  /** Chat line id -> the home it was said in ('' outdoors), so history keeps to its room. */
+  private chatScopes = new Map<string, string>();
   private unsubscribeMail: (() => void) | null = null;
   private unsubscribeInventory: (() => void) | null = null;
 
@@ -221,6 +261,28 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.onMessage(ClientMessage.SetHome, (client, msg: SetHomeIntent) =>
       this.handleSetHome(client, msg),
     );
+    this.onMessage(ClientMessage.FriendRequest, (client, msg: FriendRequestIntent) =>
+      this.handleFriendRequest(client, msg),
+    );
+    this.onMessage(ClientMessage.FriendAnswer, (client, msg: FriendAnswerIntent) =>
+      this.handleFriendAnswer(client, msg),
+    );
+    this.onMessage(ClientMessage.FriendRemove, (client, msg: FriendRemoveIntent) =>
+      this.handleFriendRemove(client, msg),
+    );
+    this.onMessage(ClientMessage.SetHomePolicy, (client, msg: HomePolicy) =>
+      this.handleSetHomePolicy(client, msg),
+    );
+    this.onMessage(ClientMessage.EnterHome, (client, msg: EnterHomeIntent) =>
+      this.handleEnterHome(client, msg),
+    );
+    this.onMessage(ClientMessage.LeaveHome, (client) => this.handleLeaveHome(client));
+    this.onMessage(ClientMessage.KnockAnswer, (client, msg: KnockAnswerIntent) =>
+      this.handleKnockAnswer(client, msg),
+    );
+    this.onMessage(ClientMessage.AskToLeave, (client, msg: AskToLeaveIntent) =>
+      this.handleAskToLeave(client, msg),
+    );
 
     // Mail belongs to accounts, not rooms. Every live room listens so a
     // recipient sees a delivery immediately even when sender and recipient
@@ -230,7 +292,10 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       this.sendInventoryToAccount(accountId));
 
     // Light housekeeping tick: refill spent resource nodes.
-    this.setSimulationInterval(() => this.refillNodes(), 1000);
+    this.setSimulationInterval(() => {
+      this.refillNodes();
+      this.expireKnocks();
+    }, 1000);
   }
 
   override onJoin(client: Client, options: JoinOptions, auth?: string): void {
@@ -257,24 +322,30 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     player.z = 0;
     player.facing = 0;
     player.page = '0,0';
+    player.inside = '';
 
     player.isOwner = isOwner(player.accountId);
 
     this.state.players.set(client.sessionId, player);
-    this.sessions.set(client.sessionId, { lastMoveAt: Date.now(), lastChatAt: 0, lastMailAt: 0 });
+    this.sessions.set(client.sessionId, {
+      lastMoveAt: Date.now(), lastChatAt: 0, lastMailAt: 0, lastEntryAt: 0, jump: null, exitHost: '',
+    });
 
     // The backlog, filtered the same way live chat is — otherwise a block
     // would hold for new lines and then hand you everything you blocked the
     // moment you reconnected.
-    client.send(ServerMessage.ChatHistory, {
-      lines: this.chatLog.filter((line) => !blocks.isBlocked(player.accountId, line.accountId)),
-    });
+    client.send(ServerMessage.ChatHistory, { lines: this.historyFor(player) });
 
     // Echo their own block list so the client can label people correctly
     // without keeping its own copy that could drift.
     client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
     this.sendMailbox(client, player.accountId);
     this.sendInventory(client, player.accountId);
+    this.briefOnGuests(client, player);
+    if (!isGuestAccount(player.accountId)) {
+      friends.rename(player.accountId, player.name);
+      this.pushFriendsAround(player.accountId);
+    }
   }
 
   /**
@@ -282,8 +353,13 @@ export class PaperRoom extends Room<PaperRoomOptions> {
    * removed by the owner. Their paper self is put away.
    */
   override onLeave(client: Client): void {
+    const player = this.state.players.get(client.sessionId);
     this.state.players.delete(client.sessionId);
     this.sessions.delete(client.sessionId);
+    if (!player) return;
+    // A knock from somebody who has gone needs no answer.
+    for (const knock of this.knocks.withdraw(player.accountId)) this.clearKnockNotice(knock.host, knock.visitor);
+    if (!isGuestAccount(player.accountId)) this.pushFriendsAround(player.accountId);
   }
 
   /**
@@ -351,12 +427,11 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       return;
     }
 
-    client.send(ServerMessage.ChatHistory, {
-      lines: this.chatLog.filter((line) => !blocks.isBlocked(player.accountId, line.accountId)),
-    });
+    client.send(ServerMessage.ChatHistory, { lines: this.historyFor(player) });
     client.send(ServerMessage.Blocks, { accountIds: blocks.list(player.accountId) });
     this.sendMailbox(client, player.accountId);
     this.sendInventory(client, player.accountId);
+    this.briefOnGuests(client, player);
   }
 
   // ---- Handlers -------------------------------------------------------------
@@ -368,6 +443,22 @@ export class PaperRoom extends Room<PaperRoomOptions> {
 
     const now = Date.now();
     const dt = (now - session.lastMoveAt) / 1000;
+
+    // The first move after going in or out is a jump between the surface and
+    // the interior space. It is accepted only if it lands where that door
+    // leads; anything else is put at the door instead of crawling there.
+    if (session.jump && isFiniteNumber(msg.x) && isFiniteNumber(msg.z)) {
+      const landing = this.landingFor(player, session);
+      const near = Math.hypot(msg.x - landing.x, msg.z - landing.z) <= landing.radius;
+      player.x = near ? msg.x : landing.x;
+      player.z = near ? msg.z : landing.z;
+      if (isFiniteNumber(msg.facing)) player.facing = msg.facing;
+      if (typeof msg.page === 'string') player.page = msg.page;
+      session.lastMoveAt = now;
+      session.jump = null;
+      return;
+    }
+
     const { point, ok } = clampMove({ x: player.x, z: player.z }, msg, dt);
     player.x = point.x;
     player.z = point.z;
@@ -407,7 +498,11 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     };
 
     this.chatLog.push(line);
-    while (this.chatLog.length > LIMITS.chatHistory) this.chatLog.shift();
+    this.chatScopes.set(line.id, player.inside);
+    while (this.chatLog.length > LIMITS.chatHistory) {
+      const dropped = this.chatLog.shift();
+      if (dropped) this.chatScopes.delete(dropped.id);
+    }
 
     // Delivered person by person rather than broadcast, because that is the
     // whole point: someone who blocked this speaker simply never receives it.
@@ -416,6 +511,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     for (const recipient of this.clients) {
       const listener = this.state.players.get(recipient.sessionId);
       if (!listener) continue;
+      // A house keeps its chat to those inside it, and the lawn does not hear it.
+      if (listener.inside !== player.inside) continue;
       if (listener.accountId !== player.accountId
         && blocks.isBlocked(listener.accountId, player.accountId)) continue;
       recipient.send(ServerMessage.Chat, line);
@@ -506,6 +603,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         this.reject(client, ClientMessage.Block, 'not-allowed');
         return;
       }
+      this.applyBlockAtTheDoor(player.accountId, target);
     } else {
       blocks.remove(player.accountId, target);
     }
@@ -777,7 +875,392 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     home.x = intent.x;
     home.z = intent.z;
     home.page = intent.page;
+    home.parts = joinHomeParts(intent.parts ?? []);
+    home.building = intent.building ?? '';
+    home.open = this.policyOf(player.accountId).open;
     this.persist();
+  }
+
+  // ---- Friends and guests ---------------------------------------------------
+  //
+  // Design: docs/house-and-home.md ("Who can come in"). The client asks; every
+  // decision below is made here, and a blocked account is always told exactly
+  // what a closed door would tell them.
+
+  private policyOf(accountId: string): HomePolicy {
+    return this.policies.get(accountId) ?? { ...DEFAULT_HOME_POLICY };
+  }
+
+  /** Every live session belonging to an account (they may have two tabs open). */
+  private clientsOf(accountId: string): Client[] {
+    return this.clients.filter((c) => this.state.players.get(c.sessionId)?.accountId === accountId);
+  }
+
+  private playerByAccount(accountId: string): PlayerSchema | undefined {
+    for (const player of this.state.players.values()) if (player.accountId === accountId) return player;
+    return undefined;
+  }
+
+  /** What a joining or returning player needs to know about their own doors and friends. */
+  private briefOnGuests(client: Client, player: PlayerSchema): void {
+    client.send(ServerMessage.HomePolicy, this.policyOf(player.accountId));
+    this.sendFriends(client, player.accountId);
+    for (const knock of this.knocks.waiting(player.accountId)) {
+      client.send(ServerMessage.KnockNotice, {
+        visitor: knock.visitor, name: knock.visitorName, at: knock.at, expiresAt: knock.expiresAt,
+      });
+    }
+  }
+
+  /** Chat a player is entitled to read: their own room's, minus anyone they blocked. */
+  private historyFor(player: PlayerSchema): ChatBroadcast[] {
+    return this.chatLog.filter((line) =>
+      (this.chatScopes.get(line.id) ?? '') === player.inside
+      && !blocks.isBlocked(player.accountId, line.accountId));
+  }
+
+  private friendsSnapshot(accountId: string): FriendsSnapshot {
+    if (isGuestAccount(accountId)) return { friends: [], incoming: [], outgoing: [] };
+    return {
+      friends: friends.list(accountId).map((friend) => {
+        const live = this.playerByAccount(friend.accountId);
+        return { accountId: friend.accountId, name: live?.name ?? friend.name, online: Boolean(live) };
+      }),
+      incoming: friends.incoming(accountId),
+      outgoing: friends.outgoing(accountId),
+    };
+  }
+
+  private sendFriends(client: Client, accountId: string): void {
+    client.send(ServerMessage.Friends, this.friendsSnapshot(accountId));
+  }
+
+  private pushFriends(accountId: string): void {
+    for (const client of this.clientsOf(accountId)) this.sendFriends(client, accountId);
+  }
+
+  /** Tell an account's friends the room around them changed (someone came or went). */
+  private pushFriendsAround(accountId: string): void {
+    for (const friend of friends.list(accountId)) this.pushFriends(friend.accountId);
+  }
+
+  private notifyFriend(accountId: string, kind: FriendNoticeKind, otherId: string, otherName: string): void {
+    for (const client of this.clientsOf(accountId)) {
+      client.send(ServerMessage.FriendNotice, { kind, accountId: otherId, name: otherName });
+    }
+  }
+
+  private handleFriendRequest(client: Client, msg: FriendRequestIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const target = sanitizeAccountRef(msg?.accountId);
+    if (!target) {
+      this.reject(client, ClientMessage.FriendRequest, 'invalid');
+      return;
+    }
+    if (isGuestAccount(player.accountId) || isGuestAccount(target)) {
+      this.reject(client, ClientMessage.FriendRequest, 'guest-not-allowed');
+      return;
+    }
+    if (!accounts.has(target)) {
+      this.reject(client, ClientMessage.FriendRequest, 'invalid');
+      return;
+    }
+    const other = this.playerByAccount(target);
+    const otherName = other?.name ?? 'paper friend';
+    const status = friends.request(player.accountId, player.name, target, otherName);
+    switch (status) {
+      case 'invalid':
+        this.reject(client, ClientMessage.FriendRequest, 'invalid');
+        return;
+      case 'you-blocked':
+        this.reject(client, ClientMessage.FriendRequest, 'not-allowed');
+        return;
+      case 'full':
+        this.notifyFriend(player.accountId, 'full', target, otherName);
+        return;
+      case 'already-friends':
+        this.notifyFriend(player.accountId, 'already-friends', target, otherName);
+        return;
+      case 'already-sent':
+        this.notifyFriend(player.accountId, 'already-requested', target, otherName);
+        return;
+      case 'accepted':
+        this.notifyFriend(player.accountId, 'accepted', target, otherName);
+        this.notifyFriend(target, 'accepted', player.accountId, player.name);
+        break;
+      case 'sent':
+        this.notifyFriend(player.accountId, 'requested', target, otherName);
+        this.notifyFriend(target, 'incoming', player.accountId, player.name);
+        break;
+      case 'silently-dropped':
+        // Looks exactly like 'sent'. The other side hears nothing.
+        this.notifyFriend(player.accountId, 'requested', target, otherName);
+        break;
+    }
+    this.pushFriends(player.accountId);
+    this.pushFriends(target);
+  }
+
+  private handleFriendAnswer(client: Client, msg: FriendAnswerIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const from = sanitizeAccountRef(msg?.accountId);
+    if (!from || isGuestAccount(player.accountId)) {
+      this.reject(client, ClientMessage.FriendAnswer, 'invalid');
+      return;
+    }
+    const result = friends.answer(player.accountId, from, msg.accept === true);
+    if (result === 'accepted') {
+      const other = this.playerByAccount(from);
+      const name = other?.name ?? friends.list(player.accountId).find((f) => f.accountId === from)?.name ?? 'paper friend';
+      this.notifyFriend(player.accountId, 'accepted', from, name);
+      this.notifyFriend(from, 'accepted', player.accountId, player.name);
+    } else if (result === 'full') {
+      this.notifyFriend(player.accountId, 'full', from, 'paper friend');
+    }
+    // A "no" is quiet: the asker is never told.
+    this.pushFriends(player.accountId);
+    this.pushFriends(from);
+  }
+
+  private handleFriendRemove(client: Client, msg: FriendRemoveIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const other = sanitizeAccountRef(msg?.accountId);
+    if (!other) {
+      this.reject(client, ClientMessage.FriendRemove, 'invalid');
+      return;
+    }
+    const result = friends.remove(player.accountId, other);
+    if (result !== 'none') this.notifyFriend(player.accountId, 'removed', other, this.playerByAccount(other)?.name ?? 'paper friend');
+    // The other person's list updates without a message: nobody is told they
+    // were removed, they simply are not on the list any more.
+    this.pushFriends(player.accountId);
+    this.pushFriends(other);
+  }
+
+  private handleSetHomePolicy(client: Client, msg: HomePolicy): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    if (isGuestAccount(player.accountId)) {
+      this.reject(client, ClientMessage.SetHomePolicy, 'guest-not-allowed');
+      return;
+    }
+    const policy = sanitizeHomePolicy(msg);
+    if (!policy) {
+      this.reject(client, ClientMessage.SetHomePolicy, 'invalid');
+      return;
+    }
+    this.policies.set(player.accountId, policy);
+    const home = this.state.homes.get(player.accountId);
+    if (home) home.open = policy.open;
+    this.persist();
+    for (const own of this.clientsOf(player.accountId)) own.send(ServerMessage.HomePolicy, policy);
+  }
+
+  private tellEntry(client: Client, host: string, hostName: string, outcome: EntryOutcome): void {
+    client.send(ServerMessage.EntryResult, { host, hostName, outcome });
+  }
+
+  /** Put a player inside a home. The next move is allowed to jump into the interior space. */
+  private placeInside(player: PlayerSchema, session: Session, host: string): void {
+    if (player.inside === host) return;
+    if (player.inside) session.exitHost = player.inside;
+    player.inside = host;
+    session.jump = 'enter';
+  }
+
+  /** Put a player back outside. The next move is allowed to jump back to the door. */
+  private placeOutside(player: PlayerSchema, session: Session): void {
+    if (!player.inside) return;
+    session.exitHost = player.inside;
+    player.inside = '';
+    session.jump = 'exit';
+  }
+
+  /** Where the next jump may land: the interior space, or the door of the home just left. */
+  private landingFor(player: PlayerSchema, session: Session): { x: number; z: number; radius: number } {
+    if (session.jump === 'enter') {
+      return { x: INTERIOR_SPACE.x, z: INTERIOR_SPACE.z, radius: INTERIOR_SPACE.radius };
+    }
+    const home = this.state.homes.get(session.exitHost);
+    if (home) return { x: home.x, z: home.z, radius: HOME_EXIT_RADIUS };
+    // The home is gone from the record; stay where the last surface position was.
+    return { x: player.x, z: player.z, radius: Infinity };
+  }
+
+  private handleEnterHome(client: Client, msg: EnterHomeIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    const session = this.sessions.get(client.sessionId);
+    if (!player || !session) return;
+    const host = sanitizeAccountRef(msg?.host);
+    if (!host) {
+      this.reject(client, ClientMessage.EnterHome, 'invalid');
+      return;
+    }
+    const now = Date.now();
+    const home = this.state.homes.get(host);
+    const hostName = home?.name ?? 'someone';
+    if (now - session.lastEntryAt < ENTRY_INTERVAL_MS) {
+      this.tellEntry(client, host, hostName, 'busy');
+      return;
+    }
+    session.lastEntryAt = now;
+
+    if (player.inside === host) {
+      this.tellEntry(client, host, hostName, 'admitted');
+      return;
+    }
+
+    const decision = decideAccess({
+      host,
+      visitor: player.accountId,
+      hostHasHome: Boolean(home),
+      policy: this.policyOf(host),
+      isFriend: friends.areFriends(host, player.accountId),
+      blockedEitherWay: blocks.isBlocked(host, player.accountId) || blocks.isBlocked(player.accountId, host),
+      banned: this.banned.has(player.accountId),
+      hasPermit: this.knocks.hasPermit(host, player.accountId),
+    });
+
+    if (decision === 'closed') {
+      this.tellEntry(client, host, hostName, 'closed');
+      return;
+    }
+    if (decision === 'admit') {
+      this.knocks.consumePermit(host, player.accountId);
+      // Coming in answers any knock the visitor still had waiting.
+      for (const knock of this.knocks.withdraw(player.accountId)) this.clearKnockNotice(knock.host, knock.visitor);
+      this.placeInside(player, session, host);
+      this.tellEntry(client, host, hostName, 'admitted');
+      return;
+    }
+
+    // Knock.
+    const knocked = this.knocks.knock(host, player.accountId, player.name);
+    if (knocked === 'cooldown') {
+      this.tellEntry(client, host, hostName, 'busy');
+      return;
+    }
+    if (knocked === 'pending') {
+      this.tellEntry(client, host, hostName, 'knocked');
+      return;
+    }
+    const hostClients = this.clientsOf(host);
+    if (hostClients.length === 0) {
+      // Nobody home. Leave one short note, at most once in a while, and take
+      // the knock back down: there is nobody to answer it.
+      this.knocks.revoke(host, player.accountId);
+      if (this.knocks.noteDue(host, player.accountId)) {
+        mail.deliver({
+          fromAccountId: 'world',
+          fromName: 'Your front door',
+          toAccountId: host,
+          text: `${player.name} knocked while you were away.`,
+          at: now,
+        });
+      }
+      this.tellEntry(client, host, hostName, 'no-answer');
+      return;
+    }
+    const knock = this.knocks.waiting(host).find((entry) => entry.visitor === player.accountId);
+    for (const own of hostClients) {
+      own.send(ServerMessage.KnockNotice, {
+        visitor: player.accountId,
+        name: player.name,
+        at: knock?.at ?? now,
+        expiresAt: knock?.expiresAt ?? now + LIMITS.knockTtlMs,
+      });
+    }
+    this.tellEntry(client, host, hostName, 'knocked');
+  }
+
+  private handleLeaveHome(client: Client): void {
+    const player = this.state.players.get(client.sessionId);
+    const session = this.sessions.get(client.sessionId);
+    if (!player || !session) return;
+    this.placeOutside(player, session);
+  }
+
+  private clearKnockNotice(host: string, visitor: string): void {
+    for (const own of this.clientsOf(host)) own.send(ServerMessage.KnockCleared, { visitor });
+  }
+
+  private handleKnockAnswer(client: Client, msg: KnockAnswerIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const visitor = sanitizeAccountRef(msg?.visitor);
+    if (!visitor) {
+      this.reject(client, ClientMessage.KnockAnswer, 'invalid');
+      return;
+    }
+    const blocked = blocks.isBlocked(player.accountId, visitor) || blocks.isBlocked(visitor, player.accountId);
+    const knock = this.knocks.answer(player.accountId, visitor, msg.admit === true && !blocked);
+    // Either way the notice comes down, on every tab the owner has open.
+    this.clearKnockNotice(player.accountId, visitor);
+    if (!knock) return;
+    const outcome: EntryOutcome = msg.admit === true && !blocked ? 'admitted' : 'declined';
+    for (const guest of this.clientsOf(visitor)) {
+      // Being let in must not be slowed by the pause that guards knocking.
+      const guestSession = this.sessions.get(guest.sessionId);
+      if (guestSession) guestSession.lastEntryAt = 0;
+      this.tellEntry(guest, player.accountId, player.name, outcome);
+    }
+  }
+
+  private handleAskToLeave(client: Client, msg: AskToLeaveIntent): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+    const target = sanitizeAccountRef(msg?.accountId);
+    if (!target || target === player.accountId) {
+      this.reject(client, ClientMessage.AskToLeave, 'invalid');
+      return;
+    }
+    // Only the home's owner may ask somebody to leave it.
+    for (const other of this.clients) {
+      const guest = this.state.players.get(other.sessionId);
+      if (!guest || guest.accountId !== target || guest.inside !== player.accountId) continue;
+      this.ejectFromHome(other, guest);
+    }
+    this.knocks.revoke(player.accountId, target);
+  }
+
+  private ejectFromHome(client: Client, guest: PlayerSchema): void {
+    const session = this.sessions.get(client.sessionId);
+    if (!session || !guest.inside) return;
+    const host = guest.inside;
+    this.placeOutside(guest, session);
+    client.send(ServerMessage.HomeExit, { host, reason: 'asked-to-leave' });
+  }
+
+  /**
+   * A block lands at the door as well as in chat: friendship and knocks between
+   * the two end, and if the blocked person is standing in the blocker's home
+   * they are asked to leave. Nobody is told it was a block.
+   */
+  private applyBlockAtTheDoor(blocker: string, blocked: string): void {
+    friends.purge(blocker, blocked);
+    this.pushFriends(blocker);
+    this.pushFriends(blocked);
+    for (const [host, visitor] of [[blocker, blocked], [blocked, blocker]] as const) {
+      if (this.knocks.revoke(host, visitor)) this.clearKnockNotice(host, visitor);
+    }
+    for (const other of this.clients) {
+      const guest = this.state.players.get(other.sessionId);
+      if (guest?.accountId === blocked && guest.inside === blocker) this.ejectFromHome(other, guest);
+    }
+  }
+
+  /** Knocks nobody answered: take the notice down and tell the visitor, kindly, nobody came. */
+  private expireKnocks(): void {
+    for (const knock of this.knocks.expire()) {
+      this.clearKnockNotice(knock.host, knock.visitor);
+      const home = this.state.homes.get(knock.host);
+      for (const guest of this.clientsOf(knock.visitor)) {
+        this.tellEntry(guest, knock.host, home?.name ?? 'someone', 'no-answer');
+      }
+    }
   }
 
   // ---- Helpers --------------------------------------------------------------
@@ -896,9 +1379,19 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         x: h.x,
         z: h.z,
         page: h.page,
+        parts: splitHomeParts(h.parts),
+        building: h.building,
+        open: h.open,
       });
     });
-    return { pieces, nodes, bannedAccountIds, homes };
+    const homePolicies: Record<string, HomePolicy> = {};
+    for (const [accountId, policy] of this.policies) {
+      // Only what differs from the default is worth keeping.
+      if (policy.friends !== DEFAULT_HOME_POLICY.friends
+        || policy.others !== DEFAULT_HOME_POLICY.others
+        || policy.open !== DEFAULT_HOME_POLICY.open) homePolicies[accountId] = policy;
+    }
+    return { pieces, nodes, bannedAccountIds, homes, homePolicies };
   }
 
   private hydrate(save: RoomSave): void {
@@ -937,7 +1430,14 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       home.x = h.x;
       home.z = h.z;
       home.page = h.page;
+      // Absent on saves written before guests existed.
+      home.parts = joinHomeParts(h.parts ?? []);
+      home.building = h.building ?? '';
+      home.open = h.open === true;
       this.state.homes.set(home.accountId, home);
+    }
+    for (const [accountId, raw] of Object.entries(save.homePolicies ?? {})) {
+      this.policies.set(accountId, homePolicyOrDefault(raw));
     }
   }
 }

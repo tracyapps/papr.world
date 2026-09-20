@@ -29,6 +29,8 @@ function hoeWith(seed: 'lotus-fold-seeds' | 'marsh-reed-seeds' | 'buttonbloom-se
   state.player.equippedTool = 'creased-hoe';
   state.player.inventory[seed] = 3;
   state.player.selectedSeed = seed;
+  // Rooting in the shallows is know-how; the gate has its own test below.
+  state.player.plans.push('shallow-water-planting');
   return state;
 }
 
@@ -97,5 +99,18 @@ describe('the hoe over shallow water', () => {
     } as never;
     const action = resolveGardenAction(target, { inReach: true, state });
     expect(action).toMatchObject({ kind: 'lift', ok: true });
+  });
+});
+
+describe('the hoe over shallow water without the know-how', () => {
+  it('explains that the lesson is missing instead of pretending there is no bed', () => {
+    pond('p', 0, SHALLOW_WATER_DEPTH);
+    const state = hoeWith('lotus-fold-seeds');
+    state.player.plans = state.player.plans.filter((id) => id !== 'shallow-water-planting');
+    const action = resolveGardenAction(at(0, 0), { inReach: true, state });
+    expect(action).toMatchObject({
+      kind: 'plant', ok: false,
+      blocker: { kind: 'needs-know-how', ability: 'shallow-water-planting' },
+    });
   });
 });

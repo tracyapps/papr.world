@@ -2,6 +2,8 @@ import { getPage, peekPage } from './pages';
 import { pageId, pageOfPosition, type PageData, type PropData } from './types';
 import { getGameState } from '../sim/state';
 import { placedPieceFootprint } from './buildPieces';
+import { HOME_FALLBACK_PLACE, homeSolids } from './homeSite';
+import { allNeighborHomes, neighborHomeSolids } from './neighborHomes';
 import {
   GREENHOUSE_COUNTER,
   GREENHOUSE_LENGTH,
@@ -159,6 +161,56 @@ export function invalidateFootprintCache(pageIds?: Iterable<string>) {
   for (const id of pageIds) footprintCache.delete(id);
 }
 
+/**
+ * The player's home: solid, so nobody walks through the tent, and it claims
+ * its ground against digging and placing. Rebuilt when a room is added
+ * (`dwellingExterior.ts` invalidates the cache).
+ */
+function homeFootprints(page: PageData): DigFootprint[] {
+  const state = getGameState();
+  const saved = state.player.places.find((place) => place.id === 'home');
+  const place = saved ? { x: saved.x, z: saved.z } : HOME_FALLBACK_PLACE;
+  const parts = state.world.dwelling?.parts ?? [];
+  return homeSolids(place, { first: parts.includes('room-1'), second: parts.includes('room-2') })
+    .filter((solid) => {
+      const at = pageOfPosition(solid.x, solid.z);
+      return pageId(at.px, at.pz) === page.id;
+    })
+    .map((solid) => ({
+      id: solid.id,
+      label: 'your home',
+      x: solid.x,
+      z: solid.z,
+      radiusX: solid.radius,
+      radiusZ: solid.radius,
+      solid: true,
+    }));
+}
+
+/**
+ * Other players' homes are just as solid as ours. Rebuilt when a home appears,
+ * changes or goes (`net/sharedHomeVisuals.ts` invalidates the cache).
+ */
+function neighborHomeFootprints(page: PageData): DigFootprint[] {
+  const footprints: DigFootprint[] = [];
+  for (const home of allNeighborHomes()) {
+    for (const solid of neighborHomeSolids(home)) {
+      const at = pageOfPosition(solid.x, solid.z);
+      if (pageId(at.px, at.pz) !== page.id) continue;
+      footprints.push({
+        id: solid.id,
+        label: `${home.name}'s home`,
+        x: solid.x,
+        z: solid.z,
+        radiusX: solid.radius,
+        radiusZ: solid.radius,
+        solid: true,
+      });
+    }
+  }
+  return footprints;
+}
+
 function buildPageFootprints(page: PageData): DigFootprint[] {
   const footprints = page.props
     .map((prop, index) => propFootprint(page, prop, index))
@@ -189,6 +241,9 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
     if (piece.page !== page.id) continue;
     footprints.push(placedPieceFootprint(piece));
   }
+
+  footprints.push(...homeFootprints(page));
+  footprints.push(...neighborHomeFootprints(page));
 
   if (page.id === '0,0') {
     footprints.push(...CLEARING_DETAIL_FOOTPRINTS);

@@ -73,8 +73,6 @@ function describeRoute(route, toolsById) {
     }
     case 'grown':
       return 'Gathered from a plant you grew.';
-    case 'crafted':
-      return 'Made at the Thing Maker.';
     case 'refined':
       return `Refined by ${route.refiner} at ${route.place} — trade raw stock at the counter, or order it by mail.`;
     case 'bought': {
@@ -133,6 +131,14 @@ function toolCard(tool) {
 function recipeCard(recipe) {
   // A build-piece plan is built in place with a hammer, not made at the Thing
   // Maker, so it has no ingredients, timer, or maker level to show.
+  if (recipe.output.kind === 'ability') {
+    return `
+  <article class="card" data-name="${esc(recipe.name.toLowerCase())}">
+    <header><h3>${esc(recipe.name)}</h3><span class="tag">Know-how</span></header>
+    <p>${esc(recipe.description)}</p>
+    <p class="meta">Learned from the Professor, nothing to make · ${esc(recipe.planName)}</p>
+  </article>`;
+  }
   if (recipe.output.kind === 'build-piece') {
     return `
   <article class="card" data-name="${esc(recipe.name.toLowerCase())}">

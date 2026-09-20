@@ -1,5 +1,6 @@
 import type { ResourceCategoryId, ResourceId } from './resources';
 import type { BuildPieceKey } from '../../world/buildPieces';
+import type { AbilityId } from './abilities';
 import { TOOL_DEFS, toolsInFamily, type ToolFamilyId, type ToolId } from './tools';
 
 export type IngredientRequirement =
@@ -9,19 +10,17 @@ export type IngredientRequirement =
 export type RecipeOutput =
   | { kind: 'item'; itemId: string; label: string }
   | { kind: 'tool'; toolId: ToolId; label: string }
-  // A recipe that hands back raw material rather than a tool or a one-off
-  // item — grants into `player.inventory`, stacks like anything gathered
-  // in the world. This is how multi-step "refined" materials work: gather
-  // → craft → the result sits in the scrapbook as its own resource, usable
-  // as an ingredient in later recipes just like anything foraged.
-  | { kind: 'resource'; resource: ResourceId; quantity: number; label: string }
   // A plan for a piece put together in place with a hammer (its steps,
   // materials and hammer tier live in `BUILD_ASSEMBLY_DEFS`), not something
   // the Thing Maker crafts. It is a recipe so the plan is knowledge like any
   // other: learned from a tree node, kept in `player.plans`, carried by the
   // account tech store. `isCraftableRecipe` keeps it out of every crafting
   // surface, and `buildPlanForPiece` is how the build code finds it.
-  | { kind: 'build-piece'; templateKey: BuildPieceKey; label: string };
+  | { kind: 'build-piece'; templateKey: BuildPieceKey; label: string }
+  // Know-how: a plan that switches a rule on instead of making a thing (see
+  // `abilities.ts`). Same plumbing as a build-piece plan — learned from a
+  // tree node, kept in `player.plans` — and equally never craftable.
+  | { kind: 'ability'; abilityId: AbilityId; label: string };
 
 /**
  * Whether a recipe is playable yet.
@@ -230,29 +229,6 @@ export const RECIPE_DEFS = {
     ],
     output: { kind: 'tool', toolId: 'standard-hammer', label: 'Standard Hammer' },
   },
-  // --- Refined materials ----------------------------------------------------
-  // Output is a resource, not a tool or item — see the `resource` variant of
-  // `RecipeOutput` above. First entry in what should grow into its own
-  // multi-step-materials tier (twigs + bark curls -> lumber; more later).
-  'bound-lumber': {
-    id: 'bound-lumber',
-    name: 'Bound Lumber',
-    planName: 'Plan: twigs and bark, bound and squared',
-    planSource: 'starter',
-    description: 'Twigs and bark curls, bundled and pressed flat into a sturdier building material.',
-    // Refining moved to the Wood Mill (2026-09-18): Chisel trades bound
-    // lumber for raw stock at the counter or by mail — see
-    // catalogs/millRefining.ts. Kept as a hidden plan so saves that learned it
-    // still load; `planned` hides it everywhere a player can see.
-    status: 'planned',
-    durationSeconds: 8,
-    minimumMakerLevel: 1,
-    ingredients: [
-      { kind: 'exact', resource: 'kraft-twigs', quantity: 4 },
-      { kind: 'exact', resource: 'redwood-bark-curls', quantity: 2 },
-    ],
-    output: { kind: 'resource', resource: 'bound-lumber', quantity: 2, label: 'Bound Lumber' },
-  },
   // --- Build-piece plans ----------------------------------------------------
   // Knowing how to put a piece together. Never crafted: `ingredients` is empty
   // and `durationSeconds` is unused because the build steps own both. Each is
@@ -292,6 +268,107 @@ export const RECIPE_DEFS = {
     minimumMakerLevel: 1,
     ingredients: [],
     output: { kind: 'build-piece', templateKey: 'footbridge', label: 'Footbridge' },
+  },
+  // Know-how plans: taught by a tree node like any other plan, but they switch
+  // a rule on rather than make anything. `abilityPlanId` and `hasAbility` are
+  // how the game checks them.
+  'shallow-water-planting': {
+    id: 'shallow-water-planting',
+    name: 'Shallow-Water Planting',
+    planName: 'Know-how: how a root holds in still water',
+    planSource: 'knowledge-tree',
+    description: 'Lotus and marsh reeds take root straight in shallow water, with no bed dug first.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'shallow-water-planting', label: 'Shallow-Water Planting' },
+  },
+  // The Wood Mill's later trades (see millRefining.ts `requiresAbility`).
+  'finer-refining': {
+    id: 'finer-refining',
+    name: 'Finer Refining',
+    planName: 'Know-how: the big press, and what to feed it',
+    planSource: 'knowledge-tree',
+    description: 'Chisel presses bound lumber into layerboard and packs terracotta into red brick.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'finer-refining', label: 'Finer Refining' },
+  },
+  'heavy-refining': {
+    id: 'heavy-refining',
+    name: 'Heavy Refining',
+    planName: 'Know-how: crossgrain, facing, and what a floor has to carry',
+    planSource: 'knowledge-tree',
+    description: 'Chisel cross-binds layerboard into structural timber and faces brick into masonry.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'heavy-refining', label: 'Heavy Refining' },
+  },
+  // What a home's parts wait on (see catalogs/dwellings.ts).
+  'house-floors': {
+    id: 'house-floors',
+    name: 'House Floors',
+    planName: 'Know-how: what a floor is laid on',
+    planSource: 'knowledge-tree',
+    description: 'Lay a real floor under your home, in place of bare ground.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'house-floors', label: 'House Floors' },
+  },
+  'house-walls': {
+    id: 'house-walls',
+    name: 'House Walls',
+    planName: 'Know-how: walls that stand up on their own',
+    planSource: 'knowledge-tree',
+    description: 'Raise walls around your floor.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'house-walls', label: 'House Walls' },
+  },
+  'house-roofs': {
+    id: 'house-roofs',
+    name: 'House Roofs',
+    planName: 'Know-how: a roof that sheds the rain',
+    planSource: 'knowledge-tree',
+    description: 'Put a proper roof on your home, in place of the tent roof.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'house-roofs', label: 'House Roofs' },
+  },
+  'house-stairs': {
+    id: 'house-stairs',
+    name: 'Stairs and Upper Floors',
+    planName: 'Know-how: carrying a floor up in the air',
+    planSource: 'knowledge-tree',
+    description: 'Build a stair and a second storey.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'house-stairs', label: 'Stairs and Upper Floors' },
+  },
+  'house-rooms': {
+    id: 'house-rooms',
+    name: 'Extra Rooms',
+    planName: 'Know-how: one house, more than one room',
+    planSource: 'knowledge-tree',
+    description: 'Add more rooms to your home.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'ability', abilityId: 'house-rooms', label: 'Extra Rooms' },
   },
   // --- Not playable yet ----------------------------------------------------
   // Kept for their costs and artwork; hidden everywhere by `status`.
@@ -341,13 +418,39 @@ export function isRecipeAvailable(recipeId: RecipeId): boolean {
 }
 
 /**
- * Whether the Thing Maker can actually make this. A build-piece plan is
+ * A plan that is knowledge and nothing else: a build piece (put up in place)
+ * or an ability (a rule switched on). Knowing it is the whole of what it is.
+ */
+export type KnowledgeOutput = Extract<RecipeOutput, { kind: 'build-piece' | 'ability' }>;
+export function isKnowledgeOutput(output: RecipeOutput): output is KnowledgeOutput {
+  return output.kind === 'build-piece' || output.kind === 'ability';
+}
+
+/**
+ * Whether the Thing Maker can actually make this. A knowledge-only plan is
  * known, not crafted, so it is available without being craftable — every
  * crafting surface asks this rather than `isRecipeAvailable` alone.
  */
 export function isCraftableRecipe(recipeId: RecipeId): boolean {
   const recipe = RECIPE_DEFS[recipeId];
-  return recipe?.status === 'ready' && recipe.output.kind !== 'build-piece';
+  return recipe?.status === 'ready' && !isKnowledgeOutput(recipe.output);
+}
+
+/** The plan that teaches an ability. */
+export function abilityPlanId(abilityId: AbilityId): RecipeId | null {
+  return (Object.keys(RECIPE_DEFS) as RecipeId[]).find((recipeId) => {
+    const output = RECIPE_DEFS[recipeId].output;
+    return output.kind === 'ability' && output.abilityId === abilityId;
+  }) ?? null;
+}
+
+/**
+ * Whether the player has learned an ability. Takes the plan list rather than
+ * game state so the catalog stays free of the state module.
+ */
+export function hasAbility(plans: readonly string[], abilityId: AbilityId): boolean {
+  const planId = abilityPlanId(abilityId);
+  return planId !== null && plans.includes(planId);
 }
 
 /** The plan a build piece needs, or null for pieces anyone can build. */

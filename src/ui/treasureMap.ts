@@ -167,7 +167,7 @@ export function openTreasureMap(): void {
     element.addEventListener(eventName, (event) => event.stopPropagation());
   }
   swallowKeys = (event: KeyboardEvent) => {
-    if (event.type === 'keydown' && (event.key === 'Escape' || event.code === 'KeyN')) {
+    if (event.type === 'keydown' && (event.key === 'Escape' || event.code === 'KeyM')) {
       const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
       if (event.key === 'Escape' || !typing) {
         event.preventDefault();
@@ -195,7 +195,7 @@ export function toggleTreasureMap(): void {
   else openTreasureMap();
 }
 
-/** A "Map (N)" button beside the minimap's place controls. */
+/** A "Map (M)" button beside the minimap's place controls. */
 export function installTreasureMapButton(): void {
   const row = document.querySelector<HTMLElement>('#mini-map-goto .places-buttons');
   if (!row || row.querySelector('[data-open-treasure-map]')) return;
@@ -203,7 +203,7 @@ export function installTreasureMapButton(): void {
   button.type = 'button';
   button.className = 'places-button';
   button.dataset.openTreasureMap = '';
-  button.textContent = 'Map (N)';
+  button.textContent = 'Map (M)';
   button.addEventListener('click', () => openTreasureMap());
   row.prepend(button);
 }

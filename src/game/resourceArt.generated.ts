@@ -56,6 +56,56 @@ export const GENERATED_RESOURCE_ART = {
       }
     ]
   },
+  "crossbound-timber": {
+    "surfaceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.png",
+    "colorways": [
+      {
+        "id": "brown",
+        "label": "Brown",
+        "sourceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.brown.png"
+      },
+      {
+        "id": "grey",
+        "label": "Grey",
+        "sourceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.grey.png"
+      },
+      {
+        "id": "red",
+        "label": "Red",
+        "sourceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.red.png"
+      },
+      {
+        "id": "blue",
+        "label": "Blue",
+        "sourceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.blue.png"
+      },
+      {
+        "id": "cream",
+        "label": "Cream",
+        "sourceUrl": "/assets/runtime/materials/resources/board/crossbound-timber.cream.png"
+      }
+    ],
+    "looseTemplate": "board",
+    "orientation": "flat",
+    "variants": [
+      {
+        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-01.png",
+        "aspectRatio": 2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-02.png",
+        "aspectRatio": 2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-03.png",
+        "aspectRatio": 2
+      },
+      {
+        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-04.png",
+        "aspectRatio": 2
+      }
+    ]
+  },
   "graphite-cardstock": {
     "surfaceUrl": "/assets/runtime/materials/resources/board/graphite-cardstock.png",
     "colorways": [],
@@ -980,64 +1030,6 @@ export const GENERATED_RESOURCE_ART = {
       },
       {
         "sourceUrl": "/assets/runtime/resources/column-cactus/loose-06.png",
-        "aspectRatio": 2.6666666666666665
-      }
-    ]
-  },
-  "crossbound-timber": {
-    "surfaceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.png",
-    "colorways": [
-      {
-        "id": "brown",
-        "label": "Brown",
-        "sourceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.brown.png"
-      },
-      {
-        "id": "grey",
-        "label": "Grey",
-        "sourceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.grey.png"
-      },
-      {
-        "id": "red",
-        "label": "Red",
-        "sourceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.red.png"
-      },
-      {
-        "id": "blue",
-        "label": "Blue",
-        "sourceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.blue.png"
-      },
-      {
-        "id": "cream",
-        "label": "Cream",
-        "sourceUrl": "/assets/runtime/materials/resources/wood/crossbound-timber.cream.png"
-      }
-    ],
-    "looseTemplate": "wood",
-    "orientation": "flat",
-    "variants": [
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-01.png",
-        "aspectRatio": 2.6666666666666665
-      },
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-02.png",
-        "aspectRatio": 2.6666666666666665
-      },
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-03.png",
-        "aspectRatio": 2.6666666666666665
-      },
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-04.png",
-        "aspectRatio": 2.6666666666666665
-      },
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-05.png",
-        "aspectRatio": 2.6666666666666665
-      },
-      {
-        "sourceUrl": "/assets/runtime/resources/crossbound-timber/loose-06.png",
         "aspectRatio": 2.6666666666666665
       }
     ]

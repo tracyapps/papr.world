@@ -5945,10 +5945,41 @@ body.is-feedback-reviewing { overflow: hidden; }
   gap: 4px;
 }
 
+.mill-card.is-locked {
+  background: rgb(255 252 240 / 0.4);
+  border-style: dashed;
+}
+
 .mill-card .mill-card-holdings {
   color: #7a6a58;
   font-size: 11px;
   font-style: italic;
+}
+
+/* Home panel (src/game/homePanel.ts). Its cards have no swatch, so the card
+   is one column (the shop's two-column grid would squeeze the words into the
+   swatch's 26px). A project's cost list reads as plain lines, not bullets. */
+.home-panel .seed-shop-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Taking something back is the quieter, brown button; giving is the green one. */
+.home-panel .seed-shop-actions button[data-home-refund],
+.home-panel .seed-shop-actions button[data-home-down] {
+  background: #8a683d;
+}
+
+.home-panel ul.mill-card-holdings {
+  color: #4d3f31;
+  font-size: 12.5px;
+  font-style: normal;
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+.home-panel ul.mill-card-holdings li {
+  padding: 1px 0;
 }
 
 .seed-shop-quantity output {
@@ -6204,7 +6235,7 @@ body.studio-page {
   body.studio-page .hud-overlay { transition: none; }
 }
 
-/* ── The treasure map (N) ─────────────────────────────────────────────────
+/* ── The treasure map (M) ─────────────────────────────────────────────────
    A rough inked sheet with its directions written out beside it. The map is
    a picture; the list is the same knowledge as words, for everyone. */
 .treasure-map-card {
@@ -6313,4 +6344,253 @@ body.studio-page {
 
 @media (prefers-reduced-motion: reduce) {
   .treasure-map .hud-overlay-card { transition: none; }
+}
+
+/* ---------------------------------------------------------------------
+   Going through the door (src/game/sceneTransition.ts)
+   --------------------------------------------------------------------- */
+.scene-fade {
+  background: #efe7d3;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity 170ms ease;
+  z-index: 40;
+}
+
+.scene-fade.is-on {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-fade {
+    transition: none;
+  }
+}
+
+/* Leave is a real button, in the same flow as the prompts, visible the whole
+   time you are indoors. */
+.scene-leave {
+  /* First in the row, so if the row ever runs under the Professor it is the
+     transient prompt that gets covered, not the way out. */
+  order: -1;
+  background: #4f6e42;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgb(52 41 31 / 0.16);
+  color: #fffdf2;
+  cursor: pointer;
+  font: 800 13px/1.2 system-ui, sans-serif;
+  min-height: 40px;
+  padding: 8px 16px;
+  pointer-events: auto;
+}
+
+.scene-leave[hidden] {
+  display: none;
+}
+
+/* The map and its compass are of the outdoors; nothing to chart in a tent. */
+.is-indoors #mini-map-widget {
+  visibility: hidden;
+}
+
+/* ── Guests: knocks, the neighbor's-door panel, friends, door settings ────────
+   (src/game/knockNotices.ts, visitPanel.ts, friendsPanel.ts, homePanel.ts.)
+   Buttons are 40px tall so they are easy to hit, and nothing here animates. */
+
+.knock-notices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  left: 50%;
+  pointer-events: none;
+  position: fixed;
+  top: calc(var(--hud-top, 16px) + 64px);
+  transform: translateX(-50%);
+  width: min(360px, calc(100vw - 32px));
+  z-index: 14;
+}
+
+.knock-notices[hidden] {
+  display: none;
+}
+
+.knock-notice {
+  background: rgb(255 249 226 / 0.97) url('/assets/runtime/materials/paper_notebook_blue_lined_01.png') center / 260px auto;
+  border: 1px solid rgb(72 54 36 / 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgb(54 39 27 / 0.22);
+  color: #34291f;
+  padding: 10px 12px;
+  pointer-events: auto;
+}
+
+.knock-notice p {
+  font: 700 14px/1.35 system-ui, sans-serif;
+  margin: 0 0 8px;
+}
+
+.knock-notice-actions,
+.guest-row,
+.friends-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.knock-notice-actions button,
+.guest-row button,
+.friends-row-actions button,
+.visit-actions button,
+.player-card-friend button {
+  background: #4f6e42;
+  border: 0;
+  border-radius: 999px;
+  color: #fffdf2;
+  cursor: pointer;
+  font: 800 13px/1.2 system-ui, sans-serif;
+  min-height: 40px;
+  padding: 8px 14px;
+}
+
+.knock-notice-actions button.is-quiet,
+.guest-row button.is-quiet,
+.friends-row-actions button.is-quiet,
+.visit-actions button.is-quiet,
+.player-card-friend button.is-quiet {
+  background: #7a5a33;
+}
+
+.visit-actions button[aria-disabled='true'] {
+  background: #6f675a;
+  cursor: not-allowed;
+}
+
+.knock-notice-actions button:focus-visible,
+.guest-row button:focus-visible,
+.friends-row-actions button:focus-visible,
+.visit-actions button:focus-visible,
+.player-card-friend button:focus-visible,
+.guest-settings select:focus-visible,
+.guest-check input:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.9);
+  outline-offset: 2px;
+}
+
+.visit-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guest-settings {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.guest-settings label {
+  align-items: center;
+  color: #34291f;
+  display: flex;
+  font: 700 13px/1.3 system-ui, sans-serif;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.guest-settings select {
+  background: #fffdf2;
+  border: 1px solid rgb(62 49 35 / 0.35);
+  border-radius: 8px;
+  color: #34291f;
+  font: 600 13px/1.2 system-ui, sans-serif;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+
+.guest-check {
+  justify-content: flex-start !important;
+}
+
+.guest-check input {
+  height: 20px;
+  width: 20px;
+}
+
+.guest-list h3 {
+  color: #34291f;
+  font: 800 12px/1.2 system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  margin: 10px 0 6px;
+  text-transform: uppercase;
+}
+
+.guest-row {
+  align-items: center;
+  color: #34291f;
+  font: 600 13px/1.3 system-ui, sans-serif;
+  justify-content: space-between;
+  margin: 0 0 6px;
+}
+
+.friends-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friends-row {
+  align-items: center;
+  border-bottom: 1px solid rgb(62 49 35 / 0.14);
+  color: #34291f;
+  display: flex;
+  flex-wrap: wrap;
+  font: 600 14px/1.3 system-ui, sans-serif;
+  gap: 4px 12px;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.friends-row-name {
+  font-weight: 800;
+}
+
+.friends-row-meta {
+  color: #5c4d3c;
+  flex: 1 1 auto;
+  font-size: 12.5px;
+}
+
+.friends-button {
+  position: relative;
+}
+
+.friends-button[data-count]:not([data-count=''])::after {
+  align-items: center;
+  background: #b65345;
+  border-radius: 999px;
+  color: #fffdf2;
+  content: attr(data-count);
+  display: flex;
+  font: 800 11px/1 system-ui, sans-serif;
+  height: 16px;
+  justify-content: center;
+  min-width: 16px;
+  padding: 0 3px;
+  position: absolute;
+  right: -4px;
+  top: -4px;
+}
+
+.player-card-friend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.player-card-friend[hidden] {
+  display: none;
 }

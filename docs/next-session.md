@@ -6,6 +6,61 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Guests, friends and visiting (2026-09-20, fourth pass).** Protocol **v10**.
+  Friendships (account-global, `server/src/friends.ts`), per-home door settings
+  (friends walk / knock / closed, others knock / closed, open house), knock with
+  Let in / Not right now, blocks at the door (a blocked visitor hears the same
+  `closed` as a shut door), ask-to-leave, an offline owner's mailbox note.
+  Neighbors' homes are drawn and solid, with a name sign that says OPEN HOUSE.
+  Visiting works in `sceneTransition.ts`; presence is by scene (`inside` is
+  server-owned). Client: `game/guests.ts` (state), `visitPanel.ts`,
+  `knockNotices.ts`, `friendsPanel.ts`, `homePanel.ts` (Who can come in),
+  `world/neighborHomes.ts`, `net/sharedHomeVisuals.ts`. Server and shared tests
+  pass, including a real-socket room test. **Not proven yet:** two real browsers
+  in one room. Not built: parties, invites, scheduled open house, mailbox
+  balloons. **Before deploying:** back up `/data` (new `friends.json` and
+  `homePolicies` in the room save). Next: display cases (slice 7).
+- **Housekeeping, key swap, and the house design (2026-09-20, third pass).**
+  (1) Art: crossbound-timber moved to `board/`; `LEGACY_RESOURCE_ART` retired
+  (the last legacy entry was already generated); the dead Thing Maker
+  `bound-lumber` recipe, the recipe `resource` output kind and the `crafted`
+  obtain route are gone. The art conventions now live in one place, the top of
+  `resource-asset-pipeline.md`. (2) `M` opens the map, `G` marks this spot
+  (were `N` / `M`); the guide switches itself off inside `ARRIVE_RADIUS`
+  (`guideArrival.ts`). (3) New doc `house-and-home.md`: starter tent, dwelling
+  projects, Thing Maker look by level, entry, parties, display cases. **Slices 1
+  to 5 are now built** (same day): `thingMakerLook.ts`, `dwellingLook.ts`,
+  `dwellingExterior.ts`, `homePanel.ts`, `sim/dwelling.ts` and
+  `catalogs/dwellings.ts`, plus five house know-how nodes in the tree. Refunds:
+  100% before the build starts, 95% once started, 90% for a finished part or a
+  move. Display cases will carry an owner-set per-visitor limit per time window.
+  **Seen once in the game:** the panel's cards were squeezed into a 26px column
+  (fixed) and the avatar stood inside the tent (the tent now moved to the
+  doorstep and is solid, `world/homeSite.ts`). **The black-roofed test house stays** (owner's call; see `house-and-home.md`). **Maker look revised (owner's mockups):** same height at every level, parts
+  added by level (a bell on all three), seen working at levels 1, 2 and 3.
+  `dismantleDwelling` (move payback) has no caller until moving
+  exists. **Slice 6 is built too:** you can go inside the tent (panel button or E
+  at the door), walk its room, and leave (Leave button or E at the door);
+  `player.scene` is saved, so a reload inside picks up inside. Files:
+  `world/scenes.ts`, `world/homeInterior.ts`, `world/activeScene.ts`,
+  `sim/scene.ts`, `game/sceneTransition.ts`, `game/interiorScene.ts`; the surface
+  is skipped in the frame loop while inside. Seen working in the browser. Next:
+  display cases (slice 7), then the map by scene (step 4) or guests.
+  **After pulling:** run `npm run assets:compile` on the Mac to regenerate
+  from the moved source (it should match what is there), and `npm run art:check`.
+- **Know-how grants, the structural refining rung, and the scene plan
+  (2026-09-20, second pass).** See 1.9 and Phase 5b in `roadmap.md`. New:
+  `catalogs/abilities.ts`, `isKnowledgeOutput`/`hasAbility` in `recipes.ts`,
+  mill stage 2/3 in `millRefining.ts` (refined inputs, `requiresAbility`), the
+  `refine` task kind in `learning.ts`, locked trades on Chisel's counter. Ready
+  nodes: Wetland Growing, Materials & Refinement 1 and 2. Fixed the three
+  earlier build-plan lessons that paid out instantly. New tests: `abilities`,
+  `refiningLadder`. New doc: `scenes-and-interiors.md` (nothing built yet; six
+  decisions owed). Not played in the running game; art for faced masonry is
+  undrawn. The crossbound-timber tile was moved `wood/` → `board/` on 2026-09-20
+  (source, runtime PNGs, generated TS and manifest edited to match; the next
+  `npm run assets:compile` on the Mac will rewrite them identically).
+
 - **Tree growth, build-piece plans, shallow-water planting (2026-09-20).** See
   1.8 in `roadmap.md`. 22 new tree nodes (19 concept, 3 ready). Build pieces
   are learned plans now (`unlearnedBuildPlan` in `recipes.ts`; gated in
@@ -100,8 +155,9 @@ top of home markers and the quests-and-trinkets system. Start here.
   extra of each raw input, and the parcel arrives ~90 s later (the button
   reads "On its way · …" until then). New command `refineAtMill`, new
   `player.refinedCounts`, new quest objective `refine` (the two bound-lumber
-  quests use it), new obtain route `refined`. The Thing Maker's bound-lumber
-  plan is kept but `planned` (hidden) so old saves load. Chisel's and the
+  quests use it), new obtain route `refined`. The Thing Maker's old bound-lumber
+  plan was removed 2026-09-20 (saves drop unknown plan ids on load), along
+  with the `resource` recipe-output kind and the `crafted` obtain route. Chisel's and the
   lumber storylets were rewritten to point at the mill. Four new materials
   show in `npm run art:check` as TO DRAW.
 - **Conversation fixes (same pass).** (1) Openings are a weighted, seeded

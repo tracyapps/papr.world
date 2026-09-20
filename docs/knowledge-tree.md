@@ -455,6 +455,25 @@ Recorded rather than deleted, because each was a real fork:
   depend only on ready nodes, which is why the three new build-plan lessons
   hang off ready roots rather than the deeper concept chains.
 
+- **2026-09-20 (later):** three concept nodes became ready, each teaching
+  know-how: Wetland Growing (off Gardening 2), Materials & Refinement 1 (off
+  Trimming 2) and 2. To stay legal they were re-parented off ready nodes, so
+  Seeds & Planting no longer precedes Wetland Growing, and Lumber Types no
+  longer precedes Refinement 1. Put those edges back when the concept nodes
+  become real. A new task kind, `refine`, counts pieces refined at the Wood
+  Mill since the lesson began.
+
+- **2026-09-20 (house pass):** five ready nodes in the building branch, each
+  teaching know-how for a house part: Floors (off Building 3 and Materials &
+  Refinement 1; refine layerboard), Walls (off Floors; refine red brick),
+  Roofing (off Walls; layerboard and paper mortar), Extra rooms (off Walls) and
+  Stairs and upper floors (off Roofing and Materials & Refinement 2; crossbound
+  timber and faced masonry). Their abilities are `house-floors`, `house-walls`,
+  `house-roofs`, `house-rooms`, `house-stairs`. Introduction to Structures now
+  previews only shops, sheds and standalone structures. Per the owner, biome
+  techs such as Wetland Growing stay early, because neighborhoods in other
+  biomes are a later goal.
+
 ## Still open
 
 1. **How long is "long"?** The deep end of the tree wants a wait that reads as

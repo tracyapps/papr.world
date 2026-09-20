@@ -3,6 +3,28 @@
 Implemented 2026-09-04. This is the artist-facing workflow for creating a
 material tile and its loose-on-the-ground artwork from one SVG.
 
+## The conventions (this is the one place they live)
+
+Other docs point here rather than restating them.
+
+1. **One route.** Resource art reaches the game only by being compiled from
+   `assets/source/materials/resources/<folder>/<resource-id>.svg` (seeds:
+   `assets/source/resources/seeds/<resource-id>.svg`) into
+   `src/game/resourceArt.generated.ts`. There is no hand-written art map; the
+   old `LEGACY_RESOURCE_ART` bridge was retired 2026-09-20.
+2. **The filename is the save id**, exactly. Not the everyday name, not a
+   shortened one. `npm run art:check` reports every mismatch.
+3. **The folder is the loose shape**, not the recipe family (see *Choose
+   folders by loose form*). Refined materials follow the same rule: layerboard
+   and crossbound timber are `board/`, red brick is `brick/`, faced masonry is
+   `stone/`. A drawing in the wrong folder is reported as *misfiled*.
+4. **Never hand-edit generated files** (`resourceArt.generated.ts`,
+   `assets/runtime/asset-manifest.json`, anything under `assets/runtime/`).
+   Move or rename the *source*, then run `npm run assets:compile`.
+5. **Colors** follow `docs/colorway-guide.md` (`--background`, `--foreground-NN`).
+6. **A drawing with no matching resource id** is kept, not deleted (it is
+   probably a planned material); `art:check` lists it under *not a material yet*.
+
 ## What still needs drawing
 
 ```text
@@ -17,7 +39,7 @@ Reads the live catalog and the live folders and prints, every time:
   PNGs but nothing in the game reads them, and where the name is one dash away
   from a real material it says so ("is this `terracotta-pebbles`?");
 - drawings sitting loose in `assets/source/resources/`, which the resource
-  pipeline never looks at; and
+  pipeline never looks at (the game never shows them); and
 - materials the pipeline has no silhouette for yet.
 
 Run it before `assets:compile` to see what compiling will and will not
@@ -87,7 +109,9 @@ continues to create surface colorways but never multiplies the loose artwork.
 The folder describes the generated silhouette, not the recipe family.
 
 - Raw tree/cactus trimmings go in `wood`.
-- Layerboard goes in `board`, even though it belongs to the wood recipe path.
+- Layerboard and crossbound timber go in `board`, even though they belong to
+  the wood refining path.
+- Faced masonry goes in `stone`.
 - Red brick and Cream City brick go in `brick`.
 - Canvas and woven cloth go in `textile`.
 - Stone, fiber, and soil use their matching folders.
@@ -181,6 +205,7 @@ presentation eligibility in the simulation catalogs before it becomes usable.
 Until then the compiler can generate its files safely, but the game will not
 place or grant it.
 
-Legacy manually drawn resource art remains as a fallback. A generated tile with
-the same resource id automatically wins, which lets the existing library move
-into this layout one resource at a time.
+There is no legacy fallback any more: every resource with art is on this
+pipeline (terracotta pebbles was the last to move). A resource with no compiled
+art simply keeps its primitive cluster on the ground and a color swatch in the
+scrapbook until its tile lands.

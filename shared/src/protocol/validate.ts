@@ -5,6 +5,7 @@
 // trip. Because the logic lives here once, both sides always agree.
 
 import { LIMITS } from './constants';
+import { sanitizeHomeBuilding, sanitizeHomeParts } from './guests';
 import type { AccountInventory, AccountTech, AvatarRef, MailItem, SoloMigrationSnapshot } from './state';
 import type {
   AccountCredentials,
@@ -315,6 +316,8 @@ export function sanitizeSetHome(raw: unknown): SetHomeIntent | null {
     x: value.x,
     z: value.z,
     page: typeof value.page === 'string' ? value.page.slice(0, 32) : '',
+    parts: sanitizeHomeParts(value.parts),
+    building: sanitizeHomeBuilding(value.building),
   };
 }
 

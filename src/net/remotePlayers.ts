@@ -17,6 +17,13 @@ const INTERP_DELAY_MS = 100;
 /** Drop snapshots older than this to keep the buffers tiny. */
 const HISTORY_MS = 1000;
 
+/**
+ * A jump this long is a door, not a walk (the surface to a home's interior is
+ * tens of thousands of units). Blending across it would slide the player over
+ * the whole distance in a tenth of a second, so the old history is dropped.
+ */
+export const TELEPORT_DISTANCE = 500;
+
 type Snapshot = { t: number; x: number; z: number; facing: number };
 
 export type RemoteSample = { x: number; z: number; facing: number };
@@ -31,6 +38,8 @@ export class RemotePlayerBuffer {
       buf = [];
       this.history.set(id, buf);
     }
+    const previous = buf[buf.length - 1];
+    if (previous && Math.hypot(x - previous.x, z - previous.z) > TELEPORT_DISTANCE) buf.length = 0;
     buf.push({ t: now, x, z, facing });
     const cutoff = now - HISTORY_MS;
     while (buf.length > 2 && buf[0].t < cutoff) buf.shift();

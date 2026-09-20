@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { camera } from '../render/context';
 import { clamp } from '../core/math';
-import { sampleTerrainHeight } from '../world/terrain';
+import { groundHeightAt } from '../world/activeScene';
 
 // Follow camera as a pitch orbit around the avatar.
 // High pitch = the old overhead craft-table view.
@@ -155,10 +155,15 @@ export function updateCamera(target: THREE.Vector3) {
   camera.position.lerp(desiredPosition, 0.12);
 
   // Never let the camera dip under the paper terrain.
-  const floor = sampleTerrainHeight(camera.position.x, camera.position.z) + 0.42;
+  const floor = groundHeightAt(camera.position.x, camera.position.z) + 0.42;
   if (camera.position.y < floor) {
     camera.position.y = floor;
   }
 
   camera.lookAt(lookPoint);
+}
+
+/** Frame `target` at once, for a change of scene. Normally the camera eases toward it. */
+export function snapCamera(target: THREE.Vector3) {
+  for (let step = 0; step < 90; step += 1) updateCamera(target);
 }

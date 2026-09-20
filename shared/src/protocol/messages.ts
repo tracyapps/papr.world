@@ -11,6 +11,21 @@
 
 import type { AccountInventory, AvatarRef, MailItem } from './state';
 import type { AvatarDesign } from './avatarDesign';
+import type {
+  AskToLeaveIntent,
+  EnterHomeIntent,
+  EntryResult,
+  FriendAnswerIntent,
+  FriendNotice,
+  FriendRemoveIntent,
+  FriendRequestIntent,
+  FriendsSnapshot,
+  HomeExit,
+  HomePolicy,
+  KnockAnswerIntent,
+  KnockCleared,
+  KnockNotice,
+} from './guests';
 
 /** Credentials for a durable "paper passport" account (see server /account). */
 export type AccountCredentials = {
@@ -75,6 +90,22 @@ export const ClientMessage = {
    * one. See `HomeMarker` in state.ts.
    */
   SetHome: 'set-home',
+  /** Ask another account to be friends. Mutual once they say yes. */
+  FriendRequest: 'friend-request',
+  /** Answer a friend request that was made to me. */
+  FriendAnswer: 'friend-answer',
+  /** Remove a friend, or withdraw a request I made. */
+  FriendRemove: 'friend-remove',
+  /** Set who may come through my front door. */
+  SetHomePolicy: 'set-home-policy',
+  /** Go in, or knock: the server decides which. My own home always works. */
+  EnterHome: 'enter-home',
+  /** Step back out of the home I am inside. */
+  LeaveHome: 'leave-home',
+  /** Answer a knock: let them in, or not right now. */
+  KnockAnswer: 'knock-answer',
+  /** Ask a guest to leave my home. */
+  AskToLeave: 'ask-to-leave',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -171,6 +202,10 @@ export type SetHomeIntent = {
   x: number;
   z: number;
   page: string;
+  /** Finished house parts, for neighbors to draw. Older clients omit it. */
+  parts?: string[];
+  /** The part under construction, or ''. */
+  building?: string;
 };
 
 export type ClientPayloads = {
@@ -187,6 +222,14 @@ export type ClientPayloads = {
   [ClientMessage.WearDesign]: WearDesignIntent;
   [ClientMessage.RequestPlayerCard]: PlayerCardIntent;
   [ClientMessage.SetHome]: SetHomeIntent;
+  [ClientMessage.FriendRequest]: FriendRequestIntent;
+  [ClientMessage.FriendAnswer]: FriendAnswerIntent;
+  [ClientMessage.FriendRemove]: FriendRemoveIntent;
+  [ClientMessage.SetHomePolicy]: HomePolicy;
+  [ClientMessage.EnterHome]: EnterHomeIntent;
+  [ClientMessage.LeaveHome]: Record<string, never>;
+  [ClientMessage.KnockAnswer]: KnockAnswerIntent;
+  [ClientMessage.AskToLeave]: AskToLeaveIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------
@@ -225,6 +268,20 @@ export const ServerMessage = {
    * "nothing to show", not "blocked you", which invites testing).
    */
   PlayerCard: 'player-card',
+  /** My friends and pending requests, whole, on join and after every change. */
+  Friends: 'friends',
+  /** One-off news about a friendship, for a toast: asked, accepted, removed. */
+  FriendNotice: 'friend-notice',
+  /** My own door settings, echoed on join and after every change. Private. */
+  HomePolicy: 'home-policy',
+  /** How a request to go in ended. See `EntryOutcome`. */
+  EntryResult: 'entry-result',
+  /** Somebody is at my door. */
+  KnockNotice: 'knock-notice',
+  /** That knock no longer needs an answer. */
+  KnockCleared: 'knock-cleared',
+  /** The server has taken me out of a home. */
+  HomeExit: 'home-exit',
 } as const;
 export type ServerMessageType = (typeof ServerMessage)[keyof typeof ServerMessage];
 
@@ -309,4 +366,11 @@ export type ServerPayloads = {
   [ServerMessage.MailSent]: MailSent;
   [ServerMessage.Inventory]: AccountInventory;
   [ServerMessage.PlayerCard]: PlayerCardInfo;
+  [ServerMessage.Friends]: FriendsSnapshot;
+  [ServerMessage.FriendNotice]: FriendNotice;
+  [ServerMessage.HomePolicy]: HomePolicy;
+  [ServerMessage.EntryResult]: EntryResult;
+  [ServerMessage.KnockNotice]: KnockNotice;
+  [ServerMessage.KnockCleared]: KnockCleared;
+  [ServerMessage.HomeExit]: HomeExit;
 };

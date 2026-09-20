@@ -140,9 +140,8 @@ function likelyMatchFor(entry) {
 
 /**
  * SVGs sitting directly in assets/source/resources/ rather than in a
- * subfolder. The resource pipeline does not look at them — they compile as
- * ordinary one-off assets and reach the game only through the hand-written
- * LEGACY_RESOURCE_ART bridge in src/game/resourcePresentation.ts.
+ * subfolder. The resource pipeline does not look at them, so the game never
+ * shows them. Move each into a form folder (or seeds/) under its resource id.
  */
 const strays = listSvgs(DIRECT_ROOT).map((file) => relative(ROOT, file));
 
@@ -214,8 +213,8 @@ if (unclaimed.length) {
 if (strays.length) {
   line();
   line(`OUTSIDE THE PIPELINE — ${plural(strays.length, 'drawing sits', 'drawings sit')} loose in assets/source/resources/`);
-  line('  Not in a subfolder, so the resource pipeline never sees these. They reach');
-  line('  the game only via LEGACY_RESOURCE_ART in src/game/resourcePresentation.ts.');
+  line('  Not in a subfolder, so the resource pipeline never sees these and the game');
+  line('  never shows them. Move each into its form folder, named by resource id.');
   for (const path of strays.sort()) line(`      ${path}`);
 }
 

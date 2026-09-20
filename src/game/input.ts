@@ -223,16 +223,17 @@ export function initializeInput(callbacks: InputCallbacks) {
       return;
     }
 
+    // M is the universal "open the map"; G marks this spot (and points the
+    // guide at it). Swapped from N / M on 2026-09-20.
     if (event.code === 'KeyM') {
       event.preventDefault();
-      callbacks.onMarkPlace();
+      callbacks.onToggleMap?.();
       return;
     }
 
-    // N for north: the treasure map. (M was already "mark this spot".)
-    if (event.code === 'KeyN') {
+    if (event.code === 'KeyG') {
       event.preventDefault();
-      callbacks.onToggleMap?.();
+      callbacks.onMarkPlace();
       return;
     }
 

@@ -1,5 +1,6 @@
 import { avatar } from '../game/avatar';
-import { getGuidanceDistance, getGuidanceTarget, setGuidanceTarget, ARRIVE_DISTANCE } from '../game/guidance';
+import { getGuidanceDistance, getGuidanceTarget, setGuidanceTarget } from '../game/guidance';
+import { isArrived } from '../game/guideArrival';
 import {
   addPlace,
   getPlace,
@@ -28,14 +29,6 @@ let renameButton: HTMLButtonElement | null = null;
 let removeButton: HTMLButtonElement | null = null;
 let statusElement: HTMLParagraphElement | null = null;
 let lastAnnouncedDistance = -1;
-/** Clears the guide a moment after arrival — see updatePlacesPanel(). */
-let arrivalClearTimer: number | undefined;
-
-function cancelArrivalClear() {
-  window.clearTimeout(arrivalClearTimer);
-  arrivalClearTimer = undefined;
-}
-
 function stopGameEvents(element: HTMLElement) {
   element.addEventListener('pointerdown', (event) => event.stopPropagation());
   element.addEventListener('pointerup', (event) => event.stopPropagation());
@@ -82,7 +75,6 @@ export function markCurrentSpot() {
   // Select the new place. You're standing on it, so no arrows appear —
   // the status line just confirms "You're at <name>."
   if (selectElement) {
-    cancelArrivalClear();
     selectElement.value = place.id;
     setGuidanceTarget(place.id);
     lastAnnouncedDistance = -1;
@@ -108,7 +100,6 @@ export function buildPlacesControls(): HTMLElement {
   selectElement.id = 'places-select';
   selectElement.className = 'places-select';
   selectElement.addEventListener('change', () => {
-    cancelArrivalClear();
     setGuidanceTarget(selectElement?.value || null);
     lastAnnouncedDistance = -1;
     updateActionButtons();
@@ -125,7 +116,7 @@ export function buildPlacesControls(): HTMLElement {
     return button;
   };
 
-  const markButton = makeButton('Mark spot (M)');
+  const markButton = makeButton('Mark spot (G)');
   markButton.addEventListener('click', markCurrentSpot);
 
   renameButton = makeButton('Rename');
@@ -176,7 +167,6 @@ export function updatePlacesPanel() {
 
   const distance = getGuidanceDistance(avatar.position);
   if (distance === null) {
-    cancelArrivalClear();
     if (lastAnnouncedDistance !== -1) {
       statusElement.textContent = '';
       lastAnnouncedDistance = -1;
@@ -184,22 +174,15 @@ export function updatePlacesPanel() {
     return;
   }
 
-  if (distance < ARRIVE_DISTANCE) {
+  if (isArrived(distance)) {
+    // The guide itself switches off a moment after arrival (guidance.ts); the
+    // panel only says so, once, so the live region is not flooded.
     if (lastAnnouncedDistance !== 0) {
-      statusElement.textContent = `You’re at ${getGuidanceTarget()?.name ?? 'your place'}.`;
+      statusElement.textContent = `You’re at ${getGuidanceTarget()?.name ?? 'your place'}. The guide will switch off.`;
       lastAnnouncedDistance = 0;
-      // Give the arrival message a moment to be read, then clear the guide
-      // automatically — "Go to:" is about reaching a place, not leaving it
-      // parked as your destination once you're standing on it.
-      cancelArrivalClear();
-      arrivalClearTimer = window.setTimeout(() => setGuidanceTarget(null), 2200);
     }
     return;
   }
-
-  // Back outside arrival range (a quick overshoot, a turn to look around):
-  // a pending auto-clear from a moment ago no longer applies.
-  cancelArrivalClear();
 
   // Announce tenths of a page and only rewrite when that value changes,
   // so screen readers aren't flooded.

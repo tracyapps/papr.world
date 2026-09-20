@@ -40,6 +40,8 @@ let orbitOnPrimary: boolean;
 let onWorld: boolean;
 let rotateBuildHandled: boolean;
 let rotateBuildCalls: number;
+let markCalls: number;
+let mapCalls: number;
 
 beforeEach(() => {
   listeners.clear();
@@ -48,6 +50,8 @@ beforeEach(() => {
   onWorld = true;
   rotateBuildHandled = false;
   rotateBuildCalls = 0;
+  markCalls = 0;
+  mapCalls = 0;
   cameraSpies.adjustCameraPitch.mockClear();
 
   const stub = {
@@ -68,7 +72,12 @@ beforeEach(() => {
   initializeInput({
     onToggleScrapbook: () => {},
     onToggleNearby: () => {},
-    onMarkPlace: () => {},
+    onMarkPlace: () => {
+      markCalls += 1;
+    },
+    onToggleMap: () => {
+      mapCalls += 1;
+    },
     onEscape: () => false,
     onPrimaryAction: (event) => primaryActions.push({ x: event.clientX, y: event.clientY }),
     shouldOrbitWithPrimary: () => orbitOnPrimary,
@@ -98,6 +107,24 @@ describe('build rotation key', () => {
 
     expect(rotateBuildCalls).toBe(1);
     expect(cameraSpies.adjustCameraPitch).toHaveBeenCalledWith(0.14);
+  });
+});
+
+describe('map and mark keys', () => {
+  it('opens the map with M and marks this spot with G', () => {
+    fire('keydown', { code: 'KeyM' });
+    expect(mapCalls).toBe(1);
+    expect(markCalls).toBe(0);
+
+    fire('keydown', { code: 'KeyG' });
+    expect(markCalls).toBe(1);
+    expect(mapCalls).toBe(1);
+  });
+
+  it('leaves N unbound now that M opens the map', () => {
+    fire('keydown', { code: 'KeyN' });
+    expect(mapCalls).toBe(0);
+    expect(markCalls).toBe(0);
   });
 });
 

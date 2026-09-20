@@ -116,3 +116,16 @@ describe('save normalization — hostile input must not crash a conversation', (
     ]);
   });
 });
+
+describe('save normalization — the scene you were in', () => {
+  it('puts you back inside your home when you saved there', () => {
+    expect(initializeGameState(storageHolding(baseSave({ scene: 'in:home' }))).player.scene).toBe('in:home');
+  });
+
+  it('starts on the surface for old saves, and for scenes that are unknown or not built yet', () => {
+    for (const scene of [undefined, 'under', 'in:someone-else', 7, null, { id: 'in:home' }]) {
+      setGameStateForTests(null);
+      expect(initializeGameState(storageHolding(baseSave({ scene }))).player.scene).toBe('surface');
+    }
+  });
+});

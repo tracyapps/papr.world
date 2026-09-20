@@ -109,6 +109,7 @@ export const MATERIAL_TAGS = {
   clay: { id: 'clay', label: 'Clay', meaning: 'Plastic earth that holds a shape and can be fired.' },
   soil: { id: 'soil', label: 'Soil', meaning: 'Loose earth for landscaping, filling, and growing.' },
   board: { id: 'board', label: 'Board', meaning: 'Flat layered stock — the ancestor of every panel.' },
+  brick: { id: 'brick', label: 'Brick', meaning: 'Fired or pressed masonry units that a wall can be laid from. Peers, not grades: any brick will do unless the look matters.' },
   seed: { id: 'seed', label: 'Seed', meaning: 'Plantable; belongs to the garden loop, not the workshop.' },
   food: { id: 'food', label: 'Food', meaning: 'Grown and picked; eaten or given, not built with.' },
 } as const satisfies Record<string, MaterialTagDefinition>;

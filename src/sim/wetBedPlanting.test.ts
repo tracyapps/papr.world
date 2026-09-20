@@ -14,6 +14,9 @@ function cell(x: number, z: number) {
 
 function stocked(...seeds: SeedId[]) {
   const state = createDefaultGameState();
+  // Rooting in the shallows is know-how; these tests are mostly about the
+  // planting itself, so the lesson is already learned. The gate has its own tests.
+  state.player.plans.push('shallow-water-planting');
   for (const seed of seeds) state.player.inventory[seed] = 5;
   return state;
 }
@@ -100,5 +103,39 @@ describe('planting into shallow water', () => {
 
     expect(applyGameCommand(state, { type: 'refillTerrain', target, now: 1200 }).ok).toBe(true);
     expect(state.world.pages['0,0'].terrainEdits[target.cellKey]).toBeUndefined();
+  });
+});
+
+describe('the shallow-water know-how', () => {
+  it('refuses a wet bed until Wetland Growing is learned, and keeps the seed', () => {
+    const state = createDefaultGameState();
+    state.player.inventory['lotus-fold-seeds'] = 5;
+    const target = cell(6, 6);
+
+    const result = applyGameCommand(state, {
+      type: 'plantTerrain', target, seedId: 'lotus-fold-seeds', now: 1000, wetBed: true,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toMatch(/Wetland Growing/);
+    expect(state.player.inventory['lotus-fold-seeds']).toBe(5);
+    expect(state.world.pages['0,0']?.terrainEdits[target.cellKey]).toBeUndefined();
+  });
+
+  it('never gates an ordinary dug bed, whatever is planted in it', () => {
+    // Plant and lift a wet bed to leave an ordinary dug cell behind, then
+    // forget the lesson: a bed that already exists needs no know-how.
+    const state = stocked('lotus-fold-seeds');
+    const target = cell(6, 6);
+    state.player.tools['creased-hoe'] = 1;
+    state.player.equippedTool = 'creased-hoe';
+    applyGameCommand(state, { type: 'plantTerrain', target, seedId: 'lotus-fold-seeds', now: 1000, wetBed: true });
+    applyGameCommand(state, { type: 'liftPlant', target, now: 1100 });
+    state.player.plans = state.player.plans.filter((id) => id !== 'shallow-water-planting');
+
+    const result = applyGameCommand(state, {
+      type: 'plantTerrain', target, seedId: 'lotus-fold-seeds', now: 1200,
+    });
+    expect(result.ok).toBe(true);
   });
 });
