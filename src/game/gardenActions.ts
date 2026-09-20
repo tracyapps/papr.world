@@ -1,12 +1,12 @@
-import { SEED_DEFS, plantStageAt, type SeedId } from '../sim/catalogs/seeds';
+import { SEED_DEFS, growsInShallowWater, plantStageAt, type SeedId } from '../sim/catalogs/seeds';
 import { TOOL_DEFS } from '../sim/catalogs/tools';
 import { findCrowdingPlant, refillCost } from '../sim/commands';
 import { getGameState, type GameState, type TerrainEditCellState } from '../sim/state';
 import type { TerrainCellAddress } from '../sim/terrainCells';
 import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
 import { planterBoxAt } from '../world/buildPieces';
-import { findDigFootprintBlocker } from '../world/footprints';
-import { isInWater } from '../world/water';
+import { findDigFootprintBlocker, findNonWaterFootprintBlocker } from '../world/footprints';
+import { isInWater, isShallowWater } from '../world/water';
 import { TERRAIN_CELL_RADIUS } from '../sim/terrainCells';
 
 // What the hoe would do at a given cell, and why it can or cannot.
@@ -42,6 +42,8 @@ export type GardenAction = {
   ok: boolean;
   /** Present when `ok` is false. */
   blocker?: GardenBlocker;
+  /** A plant action rooting straight into shallow water, no dug bed needed. */
+  wetBed?: boolean;
   /** The plant already in this cell, if any. */
   existing?: { seedId: SeedId; stage: ReturnType<typeof plantStageAt> };
   /** Fill cost for a refill action. */
@@ -134,9 +136,19 @@ export function resolveGardenAction(
     return { kind: 'refill', ok: true, cost };
   }
 
-  if (!edit && !insidePlanterBox) return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
+  // Lotus and reeds root in shallow water with no bed dug first, like a planter
+  // box. Anything else standing in that water (a stone, a placed piece) still
+  // blocks it — only the water itself is allowed to be there.
+  const wetBed = !edit && !insidePlanterBox
+    && growsInShallowWater(seedId)
+    && isShallowWater(target.x, target.z);
+  if (!edit && !insidePlanterBox && !wetBed) return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
   if (edit?.state === 'filled' || edit?.state === 'raised') {
     return { kind: 'plant', ok: false, blocker: { kind: 'no-bed' } };
+  }
+  if (wetBed) {
+    const obstruction = findNonWaterFootprintBlocker(target.x, target.z, TERRAIN_CELL_RADIUS);
+    if (obstruction) return { kind: 'plant', ok: false, blocker: { kind: 'blocked', label: obstruction.label } };
   }
 
   const crowding = findCrowdingPlant(state, target, seedId);
@@ -152,7 +164,7 @@ export function resolveGardenAction(
       },
     };
   }
-  return { kind: 'plant', ok: true };
+  return wetBed ? { kind: 'plant', ok: true, wetBed: true } : { kind: 'plant', ok: true };
 }
 
 /** Short plant name without the trailing "Seeds". */

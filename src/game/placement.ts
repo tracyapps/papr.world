@@ -11,6 +11,7 @@ import {
 } from '../sim/catalogs/building';
 import { canAffordBuildMaterial, defaultBuildMaterial } from './buildMaterials';
 import { TOOL_DEFS } from '../sim/catalogs/tools';
+import { RECIPE_DEFS, unlearnedBuildPlan } from '../sim/catalogs/recipes';
 import {
   BUILD_PIECE_DEFS,
   buildPieceDef,
@@ -378,6 +379,12 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
       site: buildSite,
       rotY: buildSite.rotY,
     };
+  }
+  // Knowing the plan gates starting a piece; a build already underway (handled
+  // above) is finished whatever you know.
+  const missingPlan = unlearnedBuildPlan(state.player.plans, key);
+  if (missingPlan) {
+    return { status: 'blocked', def, point, message: `Learn the ${RECIPE_DEFS[missingPlan].name} plan with the Professor first` };
   }
   if (crowdingPiece(point.x, point.z, key, rotY)) {
     return { status: 'too-close', def, point, message: 'That is too close to something you have already placed' };

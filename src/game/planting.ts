@@ -67,7 +67,9 @@ export function tryPlantAt(clientX: number, clientY: number) {
       startTimedAction({
         steps: [{ kind: 'plant', durationMs: 1_500 }],
         onComplete: () => {
-          const result = dispatchGameCommand({ type: 'plantTerrain', target, seedId, now: Date.now() });
+          const result = dispatchGameCommand({
+            type: 'plantTerrain', target, seedId, now: Date.now(), wetBed: action.wetBed,
+          });
           if (!result.ok) {
             showPetToast(result.reason);
             return;

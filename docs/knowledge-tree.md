@@ -447,6 +447,14 @@ Recorded rather than deleted, because each was a real fork:
 - **Every HUD widget is collapsible**, for players who want the world without
   the furniture.
 
+## Growth log
+
+- **2026-09-20:** 71 to 93 nodes (14 ready, 79 concept). Per branch, ready and
+  concept: caring for the land 6/19, materials 1/5, building 7/19, interior
+  0/8, fine arts 0/13, cooking 0/9, transportation 0/6. Ready nodes may still
+  depend only on ready nodes, which is why the three new build-plan lessons
+  hang off ready roots rather than the deeper concept chains.
+
 ## Still open
 
 1. **How long is "long"?** The deep end of the tree wants a wait that reads as

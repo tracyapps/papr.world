@@ -131,6 +131,16 @@ function toolCard(tool) {
 }
 
 function recipeCard(recipe) {
+  // A build-piece plan is built in place with a hammer, not made at the Thing
+  // Maker, so it has no ingredients, timer, or maker level to show.
+  if (recipe.output.kind === 'build-piece') {
+    return `
+  <article class="card" data-name="${esc(recipe.name.toLowerCase())}">
+    <header><h3>${esc(recipe.name)}</h3><span class="tag">Built in place</span></header>
+    <p>${esc(recipe.description)}</p>
+    <p class="meta">Built with a hammer, not at the Thing Maker · ${esc(recipe.planName)}</p>
+  </article>`;
+  }
   const ingredients = recipe.ingredients
     .map((ingredient) => (ingredient.kind === 'exact'
       ? `${ingredient.quantity} ${ingredient.resource}`

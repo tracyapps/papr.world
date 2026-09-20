@@ -30,6 +30,12 @@ export type DigFootprint = {
    */
   solid?: boolean;
   /**
+   * Standing or running water. Blocks digging like anything else, but a
+   * water-loving seed is allowed to root *in* it, so it has to be told apart
+   * from a tree or a stone.
+   */
+  water?: boolean;
+  /**
    * How much room the object takes up *physically*, when that is smaller
    * than the ground it claims.
    *
@@ -54,7 +60,7 @@ const CLEARING_DETAIL_FOOTPRINTS: DigFootprint[] = [
   { id: 'trail-sign', label: 'the trail sign', x: -4.05, z: -4.7, radiusX: 0.48, radiusZ: 0.48, solid: true },
   // Not solid: the pond is walkable, and land critters avoid it through the
   // water registry instead (they wade rather than bounce off a wall).
-  { id: 'paper-pond', label: 'the paper pond', x: -5.2, z: 4.7, radiusX: 1.5, radiusZ: 1.05 },
+  { id: 'paper-pond', label: 'the paper pond', x: -5.2, z: 4.7, radiusX: 1.5, radiusZ: 1.05, water: true },
   { id: 'listening-tree', label: 'the listening tree', x: -1.7, z: -6.8, radiusX: 0.62, radiusZ: 0.62, solid: true, solidRadiusX: 0.3, solidRadiusZ: 0.3 },
   { id: 'porch-mobile', label: 'the porch mobile', x: 5.2, z: -1.9, radiusX: 0.72, radiusZ: 0.72, solid: true },
 ];
@@ -101,7 +107,7 @@ function propFootprint(page: PageData, prop: PropData, index: number): DigFootpr
         : null;
     case 'water':
       // You cannot dig a hole in a pond. Water claims its full footprint.
-      return { id, label: 'water', x: prop.x, z: prop.z, radiusX: prop.width / 2, radiusZ: prop.depth / 2 };
+      return { id, label: 'water', x: prop.x, z: prop.z, radiusX: prop.width / 2, radiusZ: prop.depth / 2, water: true };
     case 'waterChannel':
       // Expanded into one short rotated footprint per segment below. A single
       // ellipse here would block acres of dry land between bends.
@@ -167,6 +173,7 @@ function buildPageFootprints(page: PageData): DigFootprint[] {
       footprints.push({
         id: `page:${page.id}:prop:${prop.id ?? propIndex}:segment:${segment}`,
         label: 'running water',
+        water: true,
         x: (ax + bx) / 2,
         z: (az + bz) / 2,
         radiusX: Math.hypot(bx - ax, bz - az) / 2 + 0.15,
@@ -272,6 +279,15 @@ function overlaps(footprint: DigFootprint, x: number, z: number, radius: number,
  */
 export function findDigFootprintBlocker(x: number, z: number, radius: number): DigFootprint | null {
   return findFootprint(x, z, radius, () => true, getPage);
+}
+
+/**
+ * Everything that would stop a bed at a point *except* the water itself — the
+ * question a water-loving seed asks before it roots in a pond or a shallow.
+ * A stone in the pond, a placed piece, or a tree still blocks it.
+ */
+export function findNonWaterFootprintBlocker(x: number, z: number, radius: number): DigFootprint | null {
+  return findFootprint(x, z, radius, (footprint) => !footprint.water, getPage);
 }
 
 /**

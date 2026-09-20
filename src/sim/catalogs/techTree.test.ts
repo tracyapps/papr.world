@@ -16,6 +16,7 @@ import {
   techBranchLabel,
   techNodeColumn,
   techNodeGrantingRecipe,
+  techNodePreviewGrants,
   techNodeStatus,
   techNodeUnlocks,
   techNodesInBranch,
@@ -176,11 +177,12 @@ describe('tech tree catalog shape', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('lists exactly the ready nodes backed by playable tool interactions', () => {
+  it('lists exactly the ready nodes backed by playable tool and build-piece interactions', () => {
     const readyIds = TECH_NODE_ORDER.filter((id) => TECH_DEFS[id].readiness === 'ready');
     expect(readyIds.sort()).toEqual([
       'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'gardening-2', 'trimming-1', 'trimming-2',
       'mining-1', 'building-1', 'building-2', 'building-3',
+      'garden-structures', 'outdoor-furniture', 'simple-crossings',
     ].sort());
   });
 });
@@ -366,5 +368,44 @@ describe('presentation text', () => {
     expect(formatLearningDuration(6)).toMatch(/^about \d+ hours$/);
     expect(formatLearningDuration(30)).toBe('about a day');
     expect(formatLearningDuration(96)).toMatch(/^about \d+ days$/);
+  });
+});
+
+describe('biome-expansion nodes', () => {
+  it('ties the new crops into the branches that use them', () => {
+    expect(TECH_DEFS['basketry'].requires).toEqual(['weaving', 'wetland-growing']);
+    expect(TECH_DEFS['regional-cuisine'].requires).toEqual(
+      expect.arrayContaining(['wetland-growing', 'dryland-growing']),
+    );
+    expect(TECH_DEFS['bamboo-working'].requires).toEqual(
+      expect.arrayContaining(['bamboo-cultivation', 'lumber-types']),
+    );
+    // A cross-branch edge in each case — a crop skill feeding a craft or a kitchen.
+    expect(TECH_DEFS['basketry'].branch).toBe('fine-arts-textiles');
+    expect(TECH_DEFS['wetland-growing'].branch).toBe('caring-for-the-land');
+  });
+
+  it('climbs the mining ladder from the built rung, one placeholder at a time', () => {
+    expect(TECH_DEFS['mining-2'].requires).toEqual(['mining-1']);
+    expect(TECH_DEFS['mining-3'].requires).toContain('mining-2');
+    expect(TECH_DEFS['mining-2'].readiness).toBe('concept');
+    expect(techNodeColumn('mining-3')).toBeGreaterThan(techNodeColumn('mining-2'));
+  });
+
+  it('keeps the water ladder in one chain: tending, then fishing, wells, and boats', () => {
+    expect(TECH_DEFS['fishing'].requires).toEqual(['water-tending']);
+    expect(TECH_DEFS['wells-and-springs'].requires).toEqual(['water-tending']);
+    expect(TECH_DEFS['boats'].requires).toContain('water-tending');
+    expect(TECH_DEFS['boats'].branch).toBe('transportation');
+  });
+
+  it('never previews something that already exists as a real plan', () => {
+    const realPlanLabels = (Object.keys(RECIPE_DEFS) as RecipeId[])
+      .map((id) => RECIPE_DEFS[id].output.label.toLowerCase());
+    for (const nodeId of TECH_NODE_ORDER) {
+      for (const preview of techNodePreviewGrants(nodeId)) {
+        expect(realPlanLabels).not.toContain(preview.toLowerCase());
+      }
+    }
   });
 });

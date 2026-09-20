@@ -1,4 +1,8 @@
 import { BUILD_PIECE_DEFS, type BuildPieceKey } from '../world/buildPieces';
+import { unlearnedBuildPlan, type RecipeId } from '../sim/catalogs/recipes';
+import { TECH_DEFS, techNodeGrantingRecipe } from '../sim/catalogs/techTree';
+import { getGameState } from '../sim/state';
+import { openTechTreeView } from './techTreeView';
 import { buildMaterialUnits, type BuildMaterialId } from '../sim/catalogs/building';
 import { buildMaterialOffers } from '../game/buildMaterials';
 import { getActionMode, onActionModeChanged } from '../game/actionMode';
@@ -36,6 +40,13 @@ export function initializeBuildPalette() {
   // click in flight, so the handler lives on the container, not the buttons.
   palette.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
+    // A piece whose plan is not learned yet points at the lesson instead.
+    const lessonButton = target.closest<HTMLButtonElement>('[data-open-plan-lesson]');
+    if (lessonButton?.dataset.openPlanLesson) {
+      const nodeId = techNodeGrantingRecipe(lessonButton.dataset.openPlanLesson as RecipeId);
+      if (nodeId) openTechTreeView(nodeId);
+      return;
+    }
     const pieceButton = target.closest<HTMLButtonElement>('[data-build-piece]');
     if (pieceButton?.dataset.buildPiece) {
       setSelectedBuildPiece(pieceButton.dataset.buildPiece as BuildPieceKey);
@@ -67,6 +78,7 @@ function renderPalette() {
   const selected = getSelectedBuildPiece();
   const selectedMaterial = getSelectedBuildMaterial();
   const carrying = isCarryingPlacedPiece();
+  const plans = getGameState().player.plans;
   const degrees = Math.round(getSelectedBuildRotation() * 180 / Math.PI) % 360;
   const heading = carrying
     ? 'Carrying — click ground to set down · R rotate · a material re-builds it · Esc cancel'
@@ -76,6 +88,19 @@ function renderPalette() {
     <div class="build-palette-list" role="listbox" aria-label="Choose a piece to build">
       ${(Object.keys(BUILD_PIECE_DEFS) as BuildPieceKey[]).map((key) => {
     const def = BUILD_PIECE_DEFS[key];
+    const missingPlan = unlearnedBuildPlan(plans, key);
+    if (missingPlan) {
+      const lesson = techNodeGrantingRecipe(missingPlan);
+      const lessonName = lesson ? TECH_DEFS[lesson].name : 'the Professor\'s lessons';
+      // Shown, not hidden: the whole tree is visible, and so is what it teaches.
+      // Not colour alone — the dashed border and the word "Locked" both say it.
+      return `
+          <button type="button" role="option" aria-selected="false" aria-disabled="true"
+            class="build-palette-item is-locked" data-open-plan-lesson="${missingPlan}">
+            <span class="build-piece-name">${def.label}</span>
+            <span class="build-piece-summary">Locked. Learn ${lessonName} with the Professor — press to see the lesson.</span>
+          </button>`;
+    }
     return `
           <button type="button" role="option" aria-selected="${selected === key}"
             class="build-palette-item${selected === key ? ' is-selected' : ''}"

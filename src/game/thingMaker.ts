@@ -322,15 +322,23 @@ function renderPlanSlot(recipe: RecipeDefinition): string {
  */
 let confirmingRemake: RecipeId | null = null;
 
+/** How many of a recipe's output the player already holds. */
+function ownedOutputCount(output: RecipeDefinition['output']): number {
+  const state = getGameState();
+  switch (output.kind) {
+    case 'tool': return state.player.tools[output.toolId] ?? 0;
+    case 'resource': return state.player.inventory[output.resource] ?? 0;
+    case 'item': return state.player.items[output.itemId] ?? 0;
+    // Built in place, never held in the bag.
+    case 'build-piece': return 0;
+  }
+}
+
 function renderRecipeRung(recipeId: RecipeId, makerLevel: number, activeCraft: RecipeId | null): string {
   const recipe = RECIPE_DEFS[recipeId];
   const state = getGameState();
   const blockers = craftBlockersFor(recipeId);
-  const owned = recipe.output.kind === 'tool'
-    ? state.player.tools[recipe.output.toolId] ?? 0
-    : recipe.output.kind === 'resource'
-      ? state.player.inventory[recipe.output.resource] ?? 0
-      : state.player.items[recipe.output.itemId] ?? 0;
+  const owned = ownedOutputCount(recipe.output);
   const tool = recipe.output.kind === 'tool' ? TOOL_DEFS[recipe.output.toolId] : null;
   const duration = getCraftDuration(recipe, makerLevel).toFixed(1);
   const working = activeCraft === recipeId;
@@ -746,11 +754,7 @@ export function wireThingMakerDom() {
       if (!(recipeId in RECIPE_DEFS)) return;
       const output = RECIPE_DEFS[recipeId].output;
       const state = getGameState();
-      const owned = output.kind === 'tool'
-        ? state.player.tools[output.toolId] ?? 0
-        : output.kind === 'resource'
-          ? state.player.inventory[output.resource] ?? 0
-          : state.player.items[output.itemId] ?? 0;
+      const owned = ownedOutputCount(output);
       // A spare to give away is a fair thing to want; losing a full set of
       // materials to a misread row is not. Owning one turns the first press
       // into a question.

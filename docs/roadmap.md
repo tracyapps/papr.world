@@ -20,6 +20,10 @@ defined below and in `alpha-testing.md`.
 and dig materials, crops, water bodies, building additions, and wildlife
 rollout are tracked in `biome-expansion-plan.md`.
 
+**Amended 2026-09-20:** the tree grew from 71 to 93 nodes (14 ready, 79
+concept) inside the existing seven branches, and build-piece plans are now
+real knowledge: see 1.8.
+
 ## How to use this
 
 This is ordered by **dependency**, not by enthusiasm. Each item says what it
@@ -211,6 +215,33 @@ rather than manufacturing two extra copies, so the Okayish Shovel and Sturdy
 Scissors can be reached in an ordinary play-test session without weakening the
 real-world learning-clock alternative. Concept-only nodes remain visibly on the
 roadmap and do not pretend to grant systems that have not been built.
+
+### 1.8 Build-piece plans and the biome-pass nodes — ✅ built (2026-09-20)
+
+**Nodes.** 19 concept nodes were added across the existing seven branches
+(wetland, dryland and bamboo growing; water tending, fishing, wells; wall
+mining 2 and 3; foraging; scaffolding; masonry; bamboo working; living decor;
+regional cuisine; wildlife observation; natural dyes; papermaking; basketry;
+boats). Three cross-branch edges join them to weaving, spices, and lumber.
+Three ready nodes carry the first build plans: `garden-structures` (garden
+arbor), `outdoor-furniture` (picnic table), and `simple-crossings` (footbridge).
+
+**Seam.** Build-piece plans are ordinary recipes with a `build-piece` output
+and `planSource: 'knowledge-tree'`, so they ride the existing `player.plans`,
+save normalization, and account store. They never appear in any crafting
+surface. The build palette shows unlearned pieces as locked, with a link to the
+lesson; placing or advancing a new build site without the plan is refused in
+both the client preview and the sim. A site already started is never stranded.
+The hammer-tier gate is kept on top of the plan gate.
+
+**Shallow-water planting.** Lotus and marsh reed can be planted in shallow
+water without a dug bed (client sends `wetBed`; the sim checks the seed's
+`shallowWater` flag). It is not tied to a tree node, because ability grants
+have no seam yet. That is the next gap in the grant seam, after recipes.
+
+**Not yet verified in the running game:** the locked palette state, the
+Professor link, and lotus and reeds rendering in water. Automated tests cover
+the logic only.
 
 ---
 

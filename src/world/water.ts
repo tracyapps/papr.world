@@ -315,6 +315,14 @@ export function bridgeDeckHeightAt(x: number, z: number): number | null {
   return deckHeight;
 }
 
+/**
+ * Wet ground a person could stand in: in water, not a bridge deck, not deep.
+ * The rule for planting lotus and reeds straight into a pond or a shallow.
+ */
+export function isShallowWater(x: number, z: number): boolean {
+  return isInWater(x, z) && !isWaterCrossingAt(x, z, 0.08) && !isDeepWater(x, z);
+}
+
 /** Land critters treat only genuinely deep reaches as obstacles. */
 export function isDeepWater(x: number, z: number): boolean {
   return !isWaterCrossingAt(x, z, 0.08) && waterSampleAt(x, z).depth >= 0.46;

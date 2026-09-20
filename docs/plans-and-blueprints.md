@@ -112,10 +112,15 @@ and economy design before they become real.
 - The tree can render any recipe grant, using tool artwork where available and
   a labelled fallback for future non-tool outputs.
 - Catalog tests guard source validity, lesson mapping, and self-gating.
+- Build pieces (garden arbor, picnic table, footbridge) are plans too: recipes
+  with a `build-piece` output, granted by tree nodes, hidden from every
+  crafting surface, and required before a new build site can start.
 
 ## Next additions
 
-Add concrete non-tool recipes only with their gameplay slice. The first useful
+Add further non-tool recipes only with their gameplay slice. Build pieces have
+now proved the route; new ones follow the same pattern (recipe, ready node,
+palette entry). The first useful
 examples should arrive with building/creating work, then be assigned to several
 appropriately spaced ready nodes rather than collected into a single “plans”
 lesson.

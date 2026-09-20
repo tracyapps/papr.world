@@ -194,12 +194,15 @@ function renderPlansTab() {
     return '<p class="scrapbook-empty">Plans you discover will be pressed onto this page.</p>';
   }
   return `
-    <p class="scrapbook-panel-note">Fold these at the Thing Maker.</p>
+    <p class="scrapbook-panel-note">Fold tools and materials at the Thing Maker. Build pieces go up in place, with a hammer.</p>
     <ul class="scrapbook-items">${plans.map((planId) => {
     const recipe = RECIPE_DEFS[planId];
     // `completedOutputs` holds recipe ids, not output labels — comparing
     // against the label silently marked every plan as never made.
-    const made = state.world.thingMaker.completedOutputs.includes(recipe.id);
+    // A build-piece plan is never crafted, so it is never "undiscovered" by
+    // that measure — knowing it is the whole of what it is.
+    const made = recipe.output.kind === 'build-piece'
+      || state.world.thingMaker.completedOutputs.includes(recipe.id);
     return `
         <li class="scrapbook-item ${made ? '' : 'is-undiscovered'}">
           <span class="scrapbook-item-icon" style="--material-color:#a98455" aria-hidden="true"></span>

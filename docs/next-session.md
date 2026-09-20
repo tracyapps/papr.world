@@ -6,6 +6,15 @@ top of home markers and the quests-and-trinkets system. Start here.
 
 ## What landed
 
+- **Tree growth, build-piece plans, shallow-water planting (2026-09-20).** See
+  1.8 in `roadmap.md`. 22 new tree nodes (19 concept, 3 ready). Build pieces
+  are learned plans now (`unlearnedBuildPlan` in `recipes.ts`; gated in
+  `commands.ts`, `placement.ts`, and the build palette). Lotus and reeds plant
+  in shallow water (`wetBed` through `gardenActions.ts`, `planting.ts`,
+  `plantTerrain`). New tests: `buildPlans`, `wetBedPlanting`,
+  `gardenActions.wetBed`. Not yet played in the running game. Open decision:
+  should shallow-water planting get a tree node (needs an ability-grant seam)?
+
 - **Treasure map + sense of direction (2026-09-18, eighth pass).** See the
   "Landed early" note under Phase 5 in `roadmap.md`. New files:
   `src/world/explored.ts`, `src/world/biomeCompass.ts`,

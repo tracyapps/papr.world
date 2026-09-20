@@ -1,4 +1,5 @@
 import type { ResourceCategoryId, ResourceId } from './resources';
+import type { BuildPieceKey } from '../../world/buildPieces';
 import { TOOL_DEFS, toolsInFamily, type ToolFamilyId, type ToolId } from './tools';
 
 export type IngredientRequirement =
@@ -13,7 +14,14 @@ export type RecipeOutput =
   // in the world. This is how multi-step "refined" materials work: gather
   // → craft → the result sits in the scrapbook as its own resource, usable
   // as an ingredient in later recipes just like anything foraged.
-  | { kind: 'resource'; resource: ResourceId; quantity: number; label: string };
+  | { kind: 'resource'; resource: ResourceId; quantity: number; label: string }
+  // A plan for a piece put together in place with a hammer (its steps,
+  // materials and hammer tier live in `BUILD_ASSEMBLY_DEFS`), not something
+  // the Thing Maker crafts. It is a recipe so the plan is knowledge like any
+  // other: learned from a tree node, kept in `player.plans`, carried by the
+  // account tech store. `isCraftableRecipe` keeps it out of every crafting
+  // surface, and `buildPlanForPiece` is how the build code finds it.
+  | { kind: 'build-piece'; templateKey: BuildPieceKey; label: string };
 
 /**
  * Whether a recipe is playable yet.
@@ -245,6 +253,46 @@ export const RECIPE_DEFS = {
     ],
     output: { kind: 'resource', resource: 'bound-lumber', quantity: 2, label: 'Bound Lumber' },
   },
+  // --- Build-piece plans ----------------------------------------------------
+  // Knowing how to put a piece together. Never crafted: `ingredients` is empty
+  // and `durationSeconds` is unused because the build steps own both. Each is
+  // taught by a different ready node (see techTree.ts) rather than bundled.
+  'garden-arbor': {
+    id: 'garden-arbor',
+    name: 'Garden Arbor',
+    planName: 'Plan: two posts and a folded top, bound together',
+    planSource: 'knowledge-tree',
+    description: 'An arch for climbing plants, built in place from posts, a folded top, and a binding.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'build-piece', templateKey: 'garden-arbor', label: 'Garden Arbor' },
+  },
+  'picnic-table': {
+    id: 'picnic-table',
+    name: 'Picnic Table',
+    planName: 'Plan: a flat top, two benches, and a very good knot',
+    planSource: 'knowledge-tree',
+    description: 'A table with benches, built in place for as many people as the meadow will hold.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'build-piece', templateKey: 'picnic-table', label: 'Picnic Table' },
+  },
+  'footbridge': {
+    id: 'footbridge',
+    name: 'Footbridge',
+    planName: 'Plan: supports, a deck, and rails that mean it',
+    planSource: 'knowledge-tree',
+    description: 'A walkable arch over a stream or pond, built in place from supports, a deck, and rails.',
+    status: 'ready',
+    durationSeconds: 0,
+    minimumMakerLevel: 1,
+    ingredients: [],
+    output: { kind: 'build-piece', templateKey: 'footbridge', label: 'Footbridge' },
+  },
   // --- Not playable yet ----------------------------------------------------
   // Kept for their costs and artwork; hidden everywhere by `status`.
   // `folding-hook` was deleted outright — nobody could say what it did, and a
@@ -293,6 +341,34 @@ export function isRecipeAvailable(recipeId: RecipeId): boolean {
 }
 
 /**
+ * Whether the Thing Maker can actually make this. A build-piece plan is
+ * known, not crafted, so it is available without being craftable — every
+ * crafting surface asks this rather than `isRecipeAvailable` alone.
+ */
+export function isCraftableRecipe(recipeId: RecipeId): boolean {
+  const recipe = RECIPE_DEFS[recipeId];
+  return recipe?.status === 'ready' && recipe.output.kind !== 'build-piece';
+}
+
+/** The plan a build piece needs, or null for pieces anyone can build. */
+export function buildPlanForPiece(templateKey: string): RecipeId | null {
+  return (Object.keys(RECIPE_DEFS) as RecipeId[]).find((recipeId) => {
+    const output = RECIPE_DEFS[recipeId].output;
+    return output.kind === 'build-piece' && output.templateKey === templateKey;
+  }) ?? null;
+}
+
+/**
+ * The plan still standing between this player and starting a piece, or null
+ * when they can. Takes the plan list rather than game state so the catalog
+ * stays free of the state module.
+ */
+export function unlearnedBuildPlan(plans: readonly string[], templateKey: string): RecipeId | null {
+  const planId = buildPlanForPiece(templateKey);
+  return planId && !plans.includes(planId) ? planId : null;
+}
+
+/**
  * Plans you begin with: the explicitly authored starter set, nothing more.
  *
  * The source lives on each recipe so a future furniture or structure plan
@@ -320,7 +396,7 @@ export function recipesInFamily(family: ToolFamilyId): RecipeId[] {
 /** Ready recipes that are not part of a tool ladder. */
 export function looseRecipes(): RecipeId[] {
   return (Object.keys(RECIPE_DEFS) as RecipeId[])
-    .filter((recipeId) => isRecipeAvailable(recipeId) && RECIPE_DEFS[recipeId].output.kind !== 'tool');
+    .filter((recipeId) => isCraftableRecipe(recipeId) && RECIPE_DEFS[recipeId].output.kind !== 'tool');
 }
 
 /**

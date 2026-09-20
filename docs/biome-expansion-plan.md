@@ -46,11 +46,13 @@ llamas (prove new ground silhouettes), pandas (bamboo browsing), turtles
    Snips Pick works all generated rock artwork, drops biome-specific stone,
    and each formation reforms in six real-world minutes. Cave walls remain a
    later, stronger-tool target.
-2. Add shallow-water planting rules for lotus and reeds; they currently grow
-   in ordinary prepared beds so the crop loop is playable immediately.
-3. Place the new build plans deeper in the knowledge tree once build-template
-   grants are represented directly (plans are knowledge, never inventory
-   items). Keep the current hammer-tier gates in the meantime.
+2. **Built (2026-09-20):** shallow-water planting for lotus and reeds. They
+   root in shallow water without a dug bed; deep water, crossings, and other
+   footprints still block. Ordinary and planter beds keep working.
+3. **Built (2026-09-20):** build plans are recipe knowledge granted by three
+   ready tree nodes (garden structures, outdoor furniture, simple crossings).
+   Deeper placement waits on ready nodes being allowed to depend on concept
+   nodes, or on those concept nodes becoming ready. Hammer-tier gates stay.
 4. Add larger structures only after partial assemblies gain visible in-world
    scaffolds; the current multi-step jobs persist progress but show the final
    model only when complete.

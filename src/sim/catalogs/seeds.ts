@@ -106,13 +106,15 @@ export const SEED_DEFS = {
   },
   'lotus-fold-seeds': {
     id: 'lotus-fold-seeds', name: 'Lotus-fold Seeds', effect: 'garden',
-    description: 'Unfolds into pink paper lotus blossoms in a damp bed.',
+    description: 'Unfolds into pink paper lotus blossoms — happiest with its roots in shallow water.',
+    shallowWater: true,
     stageSeconds: [75, 300, 960], spacing: 0.9, visual: 'flower', accent: '#d77e9d',
     harvest: { resource: 'lotus-blossoms', quantity: 2, mode: 'repeat', repeatSeconds: 720 },
   },
   'marsh-reed-seeds': {
     id: 'marsh-reed-seeds', name: 'Marsh-reed Seeds', effect: 'garden',
-    description: 'Grows a close row of long paper reeds for weaving.',
+    description: 'Grows a close row of long paper reeds for weaving — at home in a bed or at the water\'s edge.',
+    shallowWater: true,
     stageSeconds: [60, 260, 810], spacing: 0.5, visual: 'stalk', accent: '#718557',
     harvest: { resource: 'marsh-reed-stalks', quantity: 4, mode: 'whole' },
   },
@@ -160,6 +162,12 @@ export const SEED_DEFS = {
   stageSeconds: readonly [number, number, number];
   spacing: number;
   visual: PlantVisualFamily;
+  /**
+   * Also takes root in shallow water with no bed dug first — the way a placed
+   * planter box is a bed the instant it exists. Unset for everything that
+   * needs opened soil; a dug bed still works for these seeds too.
+   */
+  shallowWater?: boolean;
   /** The accent colour the plant's bloom and produce use, where it has one. */
   accent?: string;
   /**
@@ -188,6 +196,12 @@ export const SEED_DEFS = {
 }>>;
 
 export type SeedId = keyof typeof SEED_DEFS;
+
+/** Whether a seed can root straight into shallow water, no bed dug first. */
+export function growsInShallowWater(seedId: SeedId): boolean {
+  const seed = SEED_DEFS[seedId];
+  return 'shallowWater' in seed && seed.shallowWater === true;
+}
 
 /** Flat harvest time every plant used before `harvestSeconds` existed. */
 export const DEFAULT_HARVEST_SECONDS = 1.35;

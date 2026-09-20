@@ -4,6 +4,7 @@ import {
   getCraftDuration,
   isRecipeAvailable,
   previousTierTool,
+  unlearnedBuildPlan,
   type IngredientRequirement,
   type PlanSource,
   type RecipeId,
@@ -18,6 +19,7 @@ import {
   SEED_DEFS,
   availableSeedSelection,
   bloomSeconds,
+  growsInShallowWater,
   plantHarvest,
   plantProduce,
   plantStageAt,
@@ -84,7 +86,10 @@ export type GameCommand =
   | { type: 'liftPlant'; target: TerrainCellAddress; now: number }
   | { type: 'observePlantGrowth'; target: TerrainCellAddress; now: number }
   | { type: 'placePiece'; templateKey: string; x: number; z: number; rotY: number; pageId: string; now: number; material?: string }
-  | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number }
+  // `wetBed` is the client's claim that the cell is shallow water (the sim has no
+  // water registry). Only a seed marked `shallowWater` can use it, and the
+  // command refuses it for everything else.
+  | { type: 'plantTerrain'; target: TerrainCellAddress; seedId: SeedId; now: number; wetBed?: boolean }
   | { type: 'refillTerrain'; target: TerrainCellAddress; now: number }
   | { type: 'raiseTerrain'; target: TerrainCellAddress; now: number }
   /**
@@ -475,6 +480,10 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         return { ok: false, reason: 'There is nothing there to pick up.' };
       }
       const recipe = RECIPE_DEFS[recipeId as RecipeId];
+      // A build-piece plan is never crafted, so it can never be on the tray.
+      if (recipe.output.kind === 'build-piece') {
+        return { ok: false, reason: 'There is nothing there to pick up.' };
+      }
       tray.splice(command.index, 1);
 
       if (recipe.output.kind === 'tool') {
@@ -710,6 +719,17 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       if (tool.tier < definition.minimumToolTier) {
         return { ok: false, reason: `That plan needs a level ${definition.minimumToolTier} hammer.` };
       }
+      // Knowing the plan gates *starting* a piece, not finishing one: a build
+      // already underway is completed whatever you know, so nothing is ever
+      // stranded half-built. Checked before the page is touched, so a refusal
+      // leaves no trace in the world.
+      const startedSite = Object.values(state.world.pages[command.pageId]?.buildSites ?? {}).find((candidate) => (
+        candidate.templateKey === command.templateKey
+        && Math.hypot(candidate.x - command.x, candidate.z - command.z) < 0.2
+      ));
+      if (!startedSite && unlearnedBuildPlan(state.player.plans, command.templateKey)) {
+        return { ok: false, reason: 'Learn this plan with the Professor first.' };
+      }
 
       const page = state.world.pages[command.pageId] ??= emptyPageState();
       const site = Object.values(page.buildSites).find((candidate) => (
@@ -842,12 +862,18 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       }
       const page = state.world.pages[command.target.pageId] ??= emptyPageState();
       let edit = page.terrainEdits[command.target.cellKey];
-      if (!edit && planterBoxAt(page.placedPieces, command.target.x, command.target.z)) {
-        // A placed planter box is a raised bed the instant it exists — no
-        // shovel dig needed first. Its ground behaves exactly like a
-        // shallow, freshly-dug bed from here on (lifting, mending, the
-        // free refill once it is empty again).
-        edit = page.terrainEdits[command.target.cellKey] = {
+      // Two kinds of ground are a bed the instant they exist, with no shovel
+      // dig first: inside a placed planter box, and — for a seed that says it
+      // likes wet feet — shallow water. Either behaves exactly like a shallow,
+      // freshly-dug bed from here on (lifting, mending, the free refill once it
+      // is empty again).
+      const isWetBed = Boolean(command.wetBed) && growsInShallowWater(command.seedId);
+      // Held back from the page until the plant is actually accepted, so a
+      // refusal (crowding, say) never leaves an empty bed behind.
+      let pendingBed = false;
+      if (!edit && (planterBoxAt(page.placedPieces, command.target.x, command.target.z) || isWetBed)) {
+        pendingBed = true;
+        edit = {
           kind: 'dug',
           state: 'dug',
           x: command.target.x,
@@ -870,6 +896,7 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
           reason: `${SEED_DEFS[crowding.seedId].name.replace(/ Seeds$/, '')} is growing too close — ${seed.name.replace(/ Seeds$/, '')} needs a little more room.`,
         };
       }
+      if (pendingBed) page.terrainEdits[command.target.cellKey] = edit;
       state.player.inventory[command.seedId] = (state.player.inventory[command.seedId] ?? 0) - 1;
       state.player.selectedSeed = availableSeedSelection(command.seedId, state.player.inventory);
       edit.state = seed.effect === 'mending' ? 'mending' : 'planted';
@@ -889,7 +916,9 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         ok: true,
         message: seed.effect === 'mending'
           ? 'The Mend-me seed begins stitching the paper ground together.'
-          : `A ${gardenPlantName(command.seedId)} settles into its new garden bed.`,
+          : isWetBed
+            ? `A ${gardenPlantName(command.seedId)} takes root in the shallows.`
+            : `A ${gardenPlantName(command.seedId)} settles into its new garden bed.`,
       };
     }
 
@@ -1329,6 +1358,7 @@ export function dispatchGameCommand(command: GameCommand): CommandResult {
  */
 export type CraftBlocker =
   | { kind: 'unimplemented' }
+  | { kind: 'build-plan' }
   | { kind: 'no-plan'; source: PlanSource }
   | { kind: 'maker-level'; required: number }
   | { kind: 'previous-tier'; toolId: ToolId }
@@ -1341,6 +1371,9 @@ export function craftBlockers(state: GameState, recipeId: RecipeId): CraftBlocke
   const blockers: CraftBlocker[] = [];
 
   if (!isRecipeAvailable(recipeId)) blockers.push({ kind: 'unimplemented' });
+  // A build-piece plan is built in place with a hammer; the Thing Maker has
+  // nothing to make from it.
+  if (recipe.output.kind === 'build-piece') blockers.push({ kind: 'build-plan' });
   if (!state.player.plans.includes(recipeId)) blockers.push({ kind: 'no-plan', source: recipe.planSource });
   if (state.world.thingMaker.level < recipe.minimumMakerLevel) {
     blockers.push({ kind: 'maker-level', required: recipe.minimumMakerLevel });
@@ -1368,6 +1401,7 @@ export function craftBlockersFor(recipeId: RecipeId): CraftBlocker[] {
 export function describeCraftBlocker(blocker: CraftBlocker): string {
   switch (blocker.kind) {
     case 'unimplemented': return 'That one is not finished yet.';
+    case 'build-plan': return 'Build this one in place with a hammer.';
     case 'no-plan':
       if (blocker.source === 'knowledge-tree') return 'Learn this plan with the Professor.';
       if (blocker.source === 'starter') return 'This starter plan belongs in your scrapbook.';

@@ -1199,6 +1199,11 @@ body {
   border-color: rgb(67 91 45 / 0.4);
 }
 
+.build-palette-item.is-locked {
+  background: rgb(255 252 240 / 0.4);
+  border-style: dashed;
+}
+
 .build-piece-name {
   font: 700 14px/1.2 Georgia, serif;
 }
