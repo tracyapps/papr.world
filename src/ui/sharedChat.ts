@@ -52,6 +52,24 @@ export type SharedChatUi = {
   focus: () => void;
 };
 
+/**
+ * The folded chat's unread count, mirrored at module scope.
+ *
+ * The count itself lives in `initializeSharedChat`'s closure, which is right —
+ * it is that panel's business. But one thing outside the panel needs it: the
+ * Logs badge counts "messages from neighbours" as a notification category, and
+ * it must clear at exactly the moment the chat panel clears, or the two
+ * disagree and one of them lies. Reading the rendered `[data-role="unread"]`
+ * text would have worked too, and did, but it is a coupling that breaks
+ * silently the day somebody rewords the line. This is the same value, said out
+ * loud.
+ */
+let chatUnreadCount = 0;
+
+export function getChatUnreadCount(): number {
+  return chatUnreadCount;
+}
+
 export function initializeSharedChat(
   handlers: SharedChatHandlers | ((text: string) => void),
 ): SharedChatUi {
@@ -247,6 +265,7 @@ export function initializeSharedChat(
     collapseButton.setAttribute('aria-label', collapsed ? 'Show chat' : 'Hide chat');
     collapseButton.title = collapsed ? 'Show chat' : 'Hide chat';
     if (!collapsed) unreadCount = 0;
+    chatUnreadCount = unreadCount;
     unread.textContent = collapsed && unreadCount > 0
       ? `${unreadCount} new ${unreadCount === 1 ? 'message' : 'messages'}`
       : '';

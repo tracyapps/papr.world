@@ -892,6 +892,19 @@ export function refreshPageTerrain(pageId: string, group: THREE.Group) {
   buildPlacedPieceVisuals(pageId, group);
 }
 
+/**
+ * The loose resource drops alone, for one page.
+ *
+ * Split out because trimming a tree and mining a rock scatter new drops and
+ * touch nothing else on the page — no terrain edit, no placed piece, and no
+ * terrain height. Running the other three builders for those two actions was
+ * pure cost; see `refreshBuiltPageDrops` in world/streaming.ts for the
+ * measurement that made it worth splitting.
+ */
+export function refreshPageDrops(pageId: string, group: THREE.Group) {
+  buildResourceDropVisuals(pageId, group);
+}
+
 export function getGroundMapColor(biome: string) {
   return GROUND_MAP_COLORS[biome] ?? '#c5b482';
 }

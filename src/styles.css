@@ -2228,6 +2228,13 @@ body {
 
 .activity-log-count[hidden] { display: none; }
 
+/* The Logs button is the notification bubble: on a fingertip pointer it takes
+   the 44px tap target the rest of the interface honours, which the 34px
+   desktop circle otherwise misses. */
+@media (pointer: coarse) {
+  .hud-log-button { min-height: 44px; min-width: 44px; }
+}
+
 .activity-log-filters {
   display: flex;
   flex: none;

@@ -5,7 +5,7 @@ import { dispatchGameCommand } from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { TERRAIN_CELL_RADIUS, terrainCellAt } from '../sim/terrainCells';
 import { findDigFootprintBlocker } from '../world/footprints';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageTerrain } from '../world/streaming';
 import { pageId, pageOfPosition } from '../world/types';
 import { sampleTerrainHeight } from '../world/terrain';
 import { avatar } from './avatar';
@@ -160,7 +160,7 @@ export function tryToolActionAt(clientX: number, clientY: number) {
     showPetToast(result.reason);
     return true;
   }
-  refreshBuiltTerrainNear(target.x, target.z);
+  refreshBuiltPageTerrain(target.pageId);
   playCozySound('rustle');
   showPetToast(result.message);
   return true;

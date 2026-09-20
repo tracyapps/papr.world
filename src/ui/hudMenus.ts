@@ -11,6 +11,7 @@ import {
   setSetting,
 } from '../game/settings';
 import { openAvatarLookEditor, wearDesign } from '../game/avatarLook';
+import { NOTIFY_CATEGORIES, sanitizeNotifyCategories, type NotifyCategory } from './notifications';
 import { openWardrobePanel } from './avatarEditor/wardrobePanel';
 import { openFeedbackPanel } from './feedbackPanel';
 import { openMultiplayerPanel } from './multiplayerPanel';
@@ -219,6 +220,20 @@ function buildSettingsOverlay(): HTMLElement {
         </button>
         <small>Open an invite-only neighborhood, enter a friend's code, or return safely to solo play.</small>
       </div>
+      <h3 class="hud-overlay-subhead">Notifications</h3>
+      ${NOTIFY_CATEGORIES.map((category) => `
+      <label class="hud-setting">
+        <input type="checkbox" id="setting-notify-${category.id}" data-notify-category="${category.id}">
+        <span>
+          <strong>${category.label}</strong>
+          <small>${category.blurb}</small>
+        </span>
+      </label>`).join('')}
+      <p class="hud-overlay-note">
+        The Logs bubble shows what is new since you last looked, not everything
+        ever recorded. It starts with other people, because a badge that counts
+        your own journal is a running total nobody can clear.
+      </p>
       <h3 class="hud-overlay-subhead">Leaving</h3>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="setting-return-to-desk">
@@ -358,6 +373,20 @@ function buildSettingsOverlay(): HTMLElement {
     learningTimer.checked = getSetting('showLearningTimer');
     learningTimer.addEventListener('change', () => {
       setSetting('showLearningTimer', learningTimer.checked);
+    });
+  }
+
+  // Notification categories are a set, not six booleans, so one switch's change
+  // rewrites the whole array. The sanitiser re-sorts it into canonical order, so
+  // the Settings list and the badge's spoken summary always agree.
+  const notifyEnabled = new Set<NotifyCategory>(getSetting('notifyCategories'));
+  for (const checkbox of overlay.querySelectorAll<HTMLInputElement>('[data-notify-category]')) {
+    const category = checkbox.dataset.notifyCategory as NotifyCategory;
+    checkbox.checked = notifyEnabled.has(category);
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) notifyEnabled.add(category);
+      else notifyEnabled.delete(category);
+      setSetting('notifyCategories', sanitizeNotifyCategories([...notifyEnabled]));
     });
   }
   wireSaveBackup(overlay);

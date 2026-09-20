@@ -16,7 +16,7 @@ import { TOOL_DEFS } from '../sim/catalogs/tools';
 import { applyTreeStageVisual } from '../world/treeRuntime';
 import { getActionMode } from './actionMode';
 import { avatar } from './avatar';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageDrops } from '../world/streaming';
 import { playCozySound } from './cozyAudio';
 import { showPetToast } from './petting';
 
@@ -251,7 +251,7 @@ export function tryTrimAt(clientX: number, clientY: number): boolean {
 
   recovering.add(entry.id);
   restage(entry, Date.now());
-  refreshBuiltTerrainNear(entry.x, entry.z);
+  refreshBuiltPageDrops(entry.pageId);
   playCozySound('rustle');
   showPetToast(result.message);
   return true;

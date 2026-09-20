@@ -6,6 +6,48 @@ fix, and one-command data backups. Start here.
 
 ## What landed
 
+- **Trim/dig lag, and the notification badge (2026-09-20).** Two reports, one of
+them a real bug with a measurable cause.
+
+  **The lag was `refreshBuiltTerrainNear`.** Every trim, dig, plant and placement
+  rebuilt the terrain of a 3×3 block of pages: nine pages, eight of them with
+  nothing changed. A page's ground is an 80×80 grid (~6,500 vertices) plus a base
+  sheet, up to three biome overlays and the hill patches — every one carrying
+  `userData.terrainSurface` — and a rebuild walks every vertex through
+  `sampleTerrainHeight` and recomputes normals and bounds. One click was well over
+  200,000 height samples. Worse: **trimming and mining change no terrain at all**
+  (`trimTree`/`mineRock` only write `treeGrowth`/`rockGrowth` and scatter drops),
+  so the whole ground pass was wasted for exactly the two actions reported. And
+  digging was worse than a click — a dug bed mends over time, and the once-a-second
+  mend sweep in `game/planting.ts` refreshed **per cell**, so a twelve-cell bed
+  rebuilt nine pages twelve times a second, for the whole mend. Now:
+  `refreshBuiltPageTerrain(pageId)` refreshes one page and takes the id every
+  caller already had rather than re-deriving it from coordinates;
+  `refreshBuiltPageDrops(pageId)` is the trim/mine path (drops only, no ground
+  pass); the mend sweep collects dirty pages and refreshes each once.
+  `refreshBuiltTerrainNear` is gone. Files: `world/streaming.ts`,
+  `world/pageRuntime.ts`, `game/{treeInteractions,rockInteractions,toolActions,planting,plantInteractions,placement}.ts`.
+
+  **The badge counted everything ever recorded.** `totalLogCount()` summed
+  `activityLog + travelLog + diaryEntries`, so after an hour the bubble read
+  "99+" and meant nothing — a badge you cannot clear is worse than none. It is
+  now a real notification badge: **new, unseen** items only, in the categories the
+  player switches on, defaulting to other people (`messages`, `mail`, `social`
+  ON; `activity`, `travel`, `conversations` OFF). Opening the Logs drawer / mail
+  tab / friends list marks the relevant kind seen, so it always means "something
+  you have not looked at". New `src/ui/notifications.ts` (pure model + a local
+  seen store — never the save shape) + 25 tests, `notifyCategories` in
+  `game/settings.ts`, a Notifications section in Settings, and an accessible name
+  that says what is new in words (`Logs, 3 new — 2 messages, 1 letter`).
+  `getChatUnreadCount()` was exported from `ui/sharedChat.ts` so the badge reads
+  the chat panel's own counter rather than scraping its rendered text.
+
+  **Verified:** `npx tsc --noEmit` clean, root suite **1,265 pass**, server suite
+  **179 pass**, `npm run styles:check` clean (1,058 rules), `npx vite build`
+  completes, and `npm run hud:check` passes in a real headless browser across 7
+  viewports × 2 dock states. **Not measured:** the frame-time improvement was not
+  profiled on a device — the reduction is structural (9 pages → 1, and no ground
+  pass at all for trim/mine). Worth a real feel-check on the target hardware.
 - **Data backups, one command (2026-09-20).** Answering "is backing up `/data`
   easy, and does a deploy need a re-import?": it is now one command, and **no
   deploy ever needs a re-import** — `/data` is a Railway volume that survives

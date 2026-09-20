@@ -30,6 +30,8 @@ export type ToolbarStyle = 'full' | 'compact';
  */
 export type TouchControlsMode = 'auto' | 'on' | 'off';
 
+import { DEFAULT_NOTIFY_CATEGORIES, sanitizeNotifyCategories, type NotifyCategory } from '../ui/notifications';
+
 export type Settings = {
   /**
    * What a camera drag means:
@@ -89,6 +91,13 @@ export type Settings = {
   touchControls: TouchControlsMode;
   /** The first-run "this is an early alpha" card has been read. */
   alphaNoticeSeen: boolean;
+  /**
+   * Which kinds of news the Logs badge speaks up about. The default is other
+   * people — messages, mail, and people waiting on you — because a badge that
+   * counts your own journal is a running total nobody can clear. See
+   * `ui/notifications.ts` for the model and the seen-marks it counts against.
+   */
+  notifyCategories: NotifyCategory[];
 };
 
 /** Slider bounds. Wide enough to matter at both ends, never zero. */
@@ -113,6 +122,7 @@ const DEFAULTS: Settings = {
   toolbarStyle: 'full',
   touchControls: 'auto',
   alphaNoticeSeen: false,
+  notifyCategories: [...DEFAULT_NOTIFY_CATEGORIES],
 };
 
 const STORAGE_KEY = 'pencil-and-paper.settings.v1';
@@ -164,6 +174,10 @@ function load(): Settings {
         settings.touchControls = parsed.touchControls;
       }
       if (typeof parsed.alphaNoticeSeen === 'boolean') settings.alphaNoticeSeen = parsed.alphaNoticeSeen;
+      // Always through the sanitiser: a missing key (older save), a non-array,
+      // or ids that no longer exist all land on the defaults, while an honest
+      // empty array — the player switched everything off — is kept.
+      settings.notifyCategories = sanitizeNotifyCategories(parsed.notifyCategories);
     }
   } catch {
     // Defaults are fine.

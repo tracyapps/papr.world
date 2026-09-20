@@ -24,7 +24,7 @@ import {
 import type { PlacedPiece } from '../../shared/src/index';
 import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
 import { findBuildFootprintBlocker, invalidateFootprintCache } from '../world/footprints';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageTerrain } from '../world/streaming';
 import { sampleTerrainHeight } from '../world/terrain';
 import { pageId, pageOfPosition } from '../world/types';
 import { avatar } from './avatar';
@@ -277,7 +277,7 @@ function dropCarriedPiece(point: THREE.Vector3, material: BuildMaterialId) {
       return;
     }
     invalidateFootprintCache();
-    refreshBuiltTerrainNear(dropPoint.x, dropPoint.z);
+    refreshBuiltPageTerrain(pageId);
     playCozySound('rustle');
     showPetToast(result.message);
   };
@@ -493,7 +493,7 @@ export function tryPlaceAt(clientX: number, clientY: number) {
       // A finished piece or a newly persisted assembly site both change the
       // space the world reserves. The same refresh works for each outcome.
       invalidateFootprintCache();
-      refreshBuiltTerrainNear(x, z);
+      refreshBuiltPageTerrain(buildPageId);
       playCozySound('rustle');
       showPetToast(result.message);
       const finishedPiece = Object.values(

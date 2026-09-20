@@ -10,7 +10,7 @@ import {
 import type { Biome } from '../sim/catalogs/biomes';
 import { TOOL_DEFS } from '../sim/catalogs/tools';
 import { getGameState } from '../sim/state';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageDrops } from '../world/streaming';
 import { getActionMode } from './actionMode';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
@@ -173,7 +173,7 @@ export function tryMineAt(clientX: number, clientY: number): boolean {
 
   recovering.add(entry.id);
   restage(entry, Date.now());
-  refreshBuiltTerrainNear(entry.x, entry.z);
+  refreshBuiltPageDrops(entry.pageId);
   playCozySound('tap');
   showPetToast(result.message);
   return true;

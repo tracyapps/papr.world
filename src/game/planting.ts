@@ -2,7 +2,7 @@ import { SEED_DEFS, plantStageAt } from '../sim/catalogs/seeds';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState } from '../sim/state';
 import { terrainCellAt, type TerrainCellAddress } from '../sim/terrainCells';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageTerrain } from '../world/streaming';
 import { pageId, pageOfPosition } from '../world/types';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
@@ -74,7 +74,7 @@ export function tryPlantAt(clientX: number, clientY: number) {
             showPetToast(result.reason);
             return;
           }
-          refreshBuiltTerrainNear(target.x, target.z);
+          refreshBuiltPageTerrain(target.pageId);
           playCozySound(SEED_DEFS[seedId].effect === 'mending' ? 'rustle' : 'chime');
           showPetToast(result.message);
         },
@@ -91,7 +91,7 @@ export function tryPlantAt(clientX: number, clientY: number) {
             showPetToast(result.reason);
             return;
           }
-          refreshBuiltTerrainNear(target.x, target.z);
+          refreshBuiltPageTerrain(target.pageId);
           playCozySound('rustle');
           showPetToast(result.message);
         },
@@ -108,7 +108,7 @@ export function tryPlantAt(clientX: number, clientY: number) {
             showPetToast(result.reason);
             return;
           }
-          refreshBuiltTerrainNear(target.x, target.z);
+          refreshBuiltPageTerrain(target.pageId);
           playCozySound('plop');
           showPetToast(result.message);
         },
@@ -125,7 +125,7 @@ export function tryPlantAt(clientX: number, clientY: number) {
             showPetToast(result.reason);
             return;
           }
-          refreshBuiltTerrainNear(target.x, target.z);
+          refreshBuiltPageTerrain(target.pageId);
           playCozySound('plop');
           showPetToast(result.message);
         },
@@ -156,6 +156,14 @@ export function updatePlanting() {
   if (now < nextMendingRefresh) return;
   nextMendingRefresh = now + 1000;
   const pages = getGameState().world.pages;
+  // One refresh per PAGE per sweep, however many cells on it changed.
+  //
+  // This sweep runs every second while anything is mending, and a dug bed is
+  // a dozen cells on a single page — so refreshing inside the inner loop
+  // rebuilt that page once per cell, every second, for the whole mend. It is
+  // the same page each time and the same final state either way, so the work
+  // is collected here and done once at the end.
+  const dirtyPages = new Set<string>();
 
   for (const [pageIdValue, page] of Object.entries(pages)) {
     for (const [cellKey, edit] of Object.entries(page.terrainEdits)) {
@@ -167,7 +175,7 @@ export function updatePlanting() {
           dispatchGameCommand({ type: 'completeMending', target, now });
           builtStages.delete(id);
         }
-        refreshBuiltTerrainNear(edit.x, edit.z);
+        dirtyPages.add(pageIdValue);
         continue;
       }
 
@@ -175,7 +183,7 @@ export function updatePlanting() {
         if (now >= edit.surfaceRestoresAt) {
           dispatchGameCommand({ type: 'completeTerrainRecovery', target, now });
         }
-        refreshBuiltTerrainNear(edit.x, edit.z);
+        dirtyPages.add(pageIdValue);
         continue;
       }
 
@@ -188,11 +196,13 @@ export function updatePlanting() {
       if (builtStages.get(id) === stage) continue;
       const previous = builtStages.get(id);
       builtStages.set(id, stage);
-      refreshBuiltTerrainNear(edit.x, edit.z);
+      dirtyPages.add(pageIdValue);
       // Passive growth belongs in the scrapbook's Activity page. The command
       // records each stage once in persistent state; no chime or toast pulls
       // the player away from what they are doing.
       if (previous !== stage) dispatchGameCommand({ type: 'observePlantGrowth', target, now });
     }
   }
+
+  for (const dirtyPageId of dirtyPages) refreshBuiltPageTerrain(dirtyPageId);
 }

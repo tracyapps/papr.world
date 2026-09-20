@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { scene } from '../render/context';
-import { buildPageGroup, refreshPageTerrain } from './pageRuntime';
+import { buildPageGroup, refreshPageDrops, refreshPageTerrain } from './pageRuntime';
 import { getPage } from './pages';
 import { pageId, pageOfPosition } from './types';
 import { buildHorizonPageGroup, disposeHorizonPageGroup } from './horizonRuntime';
@@ -30,18 +30,52 @@ export function isPageActive(id: string) {
   return Boolean(built?.group.visible);
 }
 
+/**
+ * Refresh everything drawn for ONE built page: ground heights, dug patches and
+ * their plants, loose drops, and placed pieces.
+ *
+ * This is the single-page refresh, and it should be the only one the gameplay
+ * paths use. It replaces `refreshBuiltTerrainNear`, which rebuilt a 3x3 block
+ * of pages — nine times the work, on every trim, dig, plant and placement,
+ * including the eight pages nothing had changed on.
+ *
+ * WHY THAT MATTERED ENOUGH TO CHANGE. A page's ground is an 80x80 grid —
+ * about 6,500 vertices each — and there is one base sheet plus up to three
+ * biome overlays laid over it, before the hill and mound patches (each a
+ * radial mesh of its own). Every one of those carries `userData.terrainSurface`,
+ * and `refreshTerrainSurfaceMeshes` walks EVERY vertex of EVERY one of them
+ * through `sampleTerrainHeight`, then recomputes the normals and the bounding
+ * sphere. Times nine pages, that is well over 200,000 height samples and
+ * dozens of normal/bounds recomputes for a single click — which is what
+ * "trimming a shrub makes the game hitch a little" turned out to be.
+ *
+ * The eight neighbouring pages were being rebuilt for nothing: `trimTree`
+ * writes `treeGrowth` on one page, `mineRock` writes `rockGrowth` on one page,
+ * and a placed piece belongs to the page it was placed on. Nothing in this
+ * game edits two pages at once.
+ *
+ * Pass the page id the CHANGE belongs to, not a world position: every caller
+ * already knows it (the tree's page, the rock's page, the placed piece's
+ * page), and deriving it from coordinates again would be both slower and a
+ * chance to disagree with the command that made the edit.
+ */
 export function refreshBuiltPageTerrain(id: string) {
   const built = builtPages.get(id);
   if (built) refreshPageTerrain(id, built.group);
 }
 
-export function refreshBuiltTerrainNear(x: number, z: number) {
-  const center = pageOfPosition(x, z);
-  for (let px = center.px - 1; px <= center.px + 1; px += 1) {
-    for (let pz = center.pz - 1; pz <= center.pz + 1; pz += 1) {
-      refreshBuiltPageTerrain(pageId(px, pz));
-    }
-  }
+/**
+ * The cheap half: only the loose resource drops of one page.
+ *
+ * Trimming a tree and mining a rock both scatter new drops into the world and
+ * change nothing else about the page — `trimTree` and `mineRock` only write
+ * `treeGrowth` / `rockGrowth` and call `addWorldDrop`. So the drop visuals are
+ * the only group with anything to rebuild, and the ground does not need
+ * re-sampling at all.
+ */
+export function refreshBuiltPageDrops(id: string) {
+  const built = builtPages.get(id);
+  if (built) refreshPageDrops(id, built.group);
 }
 
 export function updateStreaming(avatarPosition: THREE.Vector3) {

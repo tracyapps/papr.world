@@ -2,10 +2,30 @@ import { flushWardrobeSync } from '../net/accountWardrobe';
 import { accountDeskUrl } from '../net/accountDesk';
 import { disconnectSharedSession } from '../net/sharedSession';
 import { getGameState, onGameStateChanged } from '../sim/state';
+import { getFriends, getKnocks, subscribeGuests } from '../game/guests';
+import { isFriendsPanelOpen } from '../game/friendsPanel';
+import { getSetting, onSettingsChanged } from '../game/settings';
 import { BIOME_MAP_NAMES, compassArrow, compassPoint, distanceWords } from '../world/biomeCompass';
 import { getGroundMapColor } from '../world/pageRuntime';
 import { buildActivityFeed, type LogFilter } from './activityFeed';
 import { getDirectionHints, onDirectionHintsChanged } from './directionHints';
+import { getChatUnreadCount } from './sharedChat';
+import {
+  buildCounts,
+  collectNotificationSources,
+  describeNotify,
+  getNotificationSeen,
+  logsSeenAfter,
+  mailSeenAfter,
+  markLogsSeen,
+  markMailSeen,
+  markRequestsSeen,
+  socialNew,
+  subscribeNotifications,
+  totalNew,
+  type NotifyCategory,
+  type NotifyCounts,
+} from './notifications';
 import { openTreasureMap } from './treasureMap';
 
 const FILTERS: Array<{ id: LogFilter; label: string }> = [
@@ -40,18 +60,58 @@ export function relativeActivityTime(at: number, now = Date.now()): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function totalLogCount() {
-  const player = getGameState().player;
-  return player.activityLog.length + player.travelLog.length + player.diaryEntries.length;
+function readChatUnread(): number {
+  // The chat panel owns its unread counter and zeroes it when the panel is
+  // expanded, which is exactly when a "messages" notification stops being new.
+  // Asking the panel for the number keeps the badge and the panel in agreement
+  // without a second copy of the state — and, unlike reading the element it
+  // renders, cannot be broken by rewording that line.
+  return getChatUnreadCount();
 }
 
-function renderToggleCount() {
-  const count = totalLogCount();
+function mailTabOpen(): boolean {
+  // The mailbox is a tab in the scrapbook, which fires no change we can hear
+  // from here, so the selected tab on the DOM is the signal. The dock's own
+  // `is-open` class matters: a tab left selected from last time is not "open".
+  if (!document.querySelector('#scrapbook-dock.is-open')) return false;
+  return document.querySelector('#scrapbook-tab-mail')?.getAttribute('aria-selected') === 'true';
+}
+
+let lastBadgeKey = '';
+
+function renderBadge(enabled: readonly NotifyCategory[], counts: NotifyCounts) {
+  const total = totalNew(counts);
+  const label = describeNotify(enabled, counts);
+  const key = `${total}\u0000${label}`;
+  if (key === lastBadgeKey) return;
+  lastBadgeKey = key;
   if (countElement) {
-    countElement.textContent = count > 99 ? '99+' : String(count);
-    countElement.hidden = count === 0;
+    countElement.textContent = total > 99 ? '99+' : String(total);
+    countElement.hidden = total === 0;
   }
-  toggleButton?.setAttribute('aria-label', count > 0 ? `Logs, ${count} entries` : 'Logs');
+  toggleButton?.setAttribute('aria-label', label);
+}
+
+/**
+ * Rebuild the badge from what is new since the player last looked, in the
+ * categories they switched on. Also the one place that acknowledges what is on
+ * screen: opening the drawer, the mailbox tab, or the friends list marks that
+ * kind seen, so the badge always means "something you have not looked at yet".
+ */
+function refreshBadge() {
+  const incoming = getFriends().incoming;
+  if (isFriendsPanelOpen()) markRequestsSeen(incoming.map((request) => request.accountId));
+
+  const sources = collectNotificationSources(getGameState(), { messages: readChatUnread(), social: 0 });
+  if (open) markLogsSeen(logsSeenAfter(sources));
+  if (mailTabOpen()) markMailSeen(mailSeenAfter(sources));
+
+  const seen = getNotificationSeen();
+  // Filled in last, because it is measured against the seen-marks set just above.
+  sources.social = socialNew(incoming, getKnocks().length, seen);
+
+  const enabled = getSetting('notifyCategories');
+  renderBadge(enabled, buildCounts(enabled, sources, seen));
 }
 
 function renderFilters() {
@@ -103,7 +163,7 @@ function renderList() {
 }
 
 function render() {
-  renderToggleCount();
+  refreshBadge();
   if (!open) return;
   renderFilters();
   renderMapTools();
@@ -204,5 +264,13 @@ export function initializeActivityLog() {
   window.setInterval(() => {
     if (open) renderList();
   }, 30_000);
-  renderToggleCount();
+  // Chat unread, an open friends list, and an open mailbox tab have no change
+  // event we can subscribe to from here (that state belongs to other panels),
+  // so a cheap poll is how the badge hears about them. Guests, though, do
+  // announce themselves, and settings do too, so those refresh on the spot.
+  window.setInterval(refreshBadge, 1000);
+  subscribeGuests(refreshBadge);
+  subscribeNotifications(refreshBadge);
+  onSettingsChanged(refreshBadge);
+  refreshBadge();
 }

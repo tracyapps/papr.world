@@ -8,7 +8,7 @@ import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
 import { showResourceGain } from './harvesting';
 import { showPetToast } from './petting';
-import { refreshBuiltTerrainNear } from '../world/streaming';
+import { refreshBuiltPageTerrain } from '../world/streaming';
 import { startTimedAction } from './timedAction';
 
 type PlantEntry = TerrainCellAddress & {
@@ -130,7 +130,7 @@ function collectDrop(entry: PlantEntry) {
   playCozySound('rustle');
   const produced = seedId ? plantProduce(seedId) : null;
   showResourceGain(produced ?? 'buttonbloom-seeds', harvest?.quantity ?? 1);
-  refreshBuiltTerrainNear(entry.x, entry.z);
+  refreshBuiltPageTerrain(entry.pageId);
   return true;
 }
 
