@@ -1,0 +1,2736 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk artwork — review</title>
+<style>
+  /* Token values copied from site/src/styles/_theme.scss (daylight) and the
+     theme-night mixin in _tokens.scss (night). Nothing here is invented. */
+  :root { --font-body: Karla, "Trebuchet MS", sans-serif; --font-mono: "Courier Prime", "Courier New", monospace; }
+  :root, .panel[data-theme="light"] { 
+    --paper: #fffdf6; --paper-2: #f6edcb; --paper-3: #efe4c4;
+    --kraft: #d9c18f; --kraft-2: #e9d6a6; --kraft-3: #c2a875;
+    --ink: #2d261e; --ink-soft: #63492f; --ink-faint: #695a46;
+    --edge: rgba(72,54,36,.30); --edge-soft: rgba(72,54,36,.14);
+    --sh-1: rgba(54,39,27,.16); --sh-2: rgba(54,39,27,.26);
+    --green: #3d5c34; --crayon: #a9351f; --crayon-2: #265f92; --crayon-3: #8a5c0c;
+    --tape: rgba(255,253,240,.55);
+   color-scheme: light; }
+  .panel[data-theme="dark"] { 
+    --paper: #2b241d; --paper-2: #342b22; --paper-3: #241d17;
+    --kraft: #4a3a29; --kraft-2: #5a462f; --kraft-3: #6b543a;
+    --ink: #f3ead4; --ink-soft: #cbb896; --ink-faint: #a49379;
+    --edge: rgba(255,240,205,.22); --edge-soft: rgba(255,240,205,.10);
+    --sh-1: rgba(0,0,0,.35); --sh-2: rgba(0,0,0,.5);
+    --green: #8fbc7f; --crayon: #e88f78; --crayon-2: #7fb6e0; --crayon-3: #e8c069;
+    --tape: rgba(255,240,205,.10);
+   color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 15px/1.6 var(--font-body);
+  }
+  header { max-width: 1100px; margin: 0 auto 26px; }
+  h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0; color: var(--ink-soft); max-width: 68ch; }
+  .panel { max-width: 1100px; margin: 0 auto 34px; padding: 20px 22px 24px; }
+  .panel[data-theme="dark"] { background: var(--paper); }
+  .panel > h2 { margin: 0; font: 700 12px/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint); }
+  .panel > .note { margin: 8px 0 18px; color: var(--ink-soft); }
+  .row { display: flex; flex-wrap: wrap; gap: 26px; align-items: flex-end; padding: 22px 18px; border: 1px solid var(--edge-soft); margin-bottom: 14px; }
+  .ground--paper { background: var(--paper); }
+  .ground--paper-2 { background: var(--paper-2); }
+  figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  figcaption { font: 700 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+
+  .deskart { display: block; filter: drop-shadow(3px 5px 0 var(--sh-1)); }
+  .art-sway {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: deskart-sway 9s cubic-bezier(.2,.7,.3,1) infinite;
+    animation-delay: var(--sway-delay, 0s);
+  }
+  @keyframes deskart-sway {
+    0%, 100% { transform: rotate(-.8deg); }
+    50%      { transform: rotate(.8deg); }
+  }
+
+</style>
+</head>
+<body>
+<header>
+  <h1>Desk artwork</h1>
+  <p>Four illustrations from <code>site/src/components/DeskArt.astro</code>, inlined straight out of the
+  component. Each is drawn once per theme — the drawings name no colours of their own, so the only thing
+  that changes between the two panels is the tokens underneath them. Rows: 110px on paper, 44px on a
+  kraft-adjacent sheet, then the same 110px caught halfway through the sway.</p>
+</header>
+
+  <section class="panel" data-theme="light">
+    <h2>light</h2>
+    <p class="note">At the size the desk asks for, at the size a label column would need, and with the
+    sewing-room sway caught at the far end of its swing rather than at rest.</p>
+    <div class="row ground--paper">
+    <figure><svg class="deskart deskart--scrapbook" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · 110px</figcaption></figure><figure><svg class="deskart deskart--learning" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · 110px</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:0s">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-3.1s">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-6.4s">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · 110px</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · 110px</figcaption></figure>
+  </div>
+    <div class="row ground--paper-2">
+    <figure><svg class="deskart deskart--scrapbook" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · 44px</figcaption></figure><figure><svg class="deskart deskart--learning" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · 44px</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:0s">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-3.1s">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-6.4s">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · 44px</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · 44px</figcaption></figure>
+  </div>
+    <div class="row ground--paper">
+    <figure><svg class="deskart deskart--scrapbook" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · mid-sway</figcaption></figure><figure><svg class="deskart deskart--learning" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · mid-sway</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · mid-sway</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · mid-sway</figcaption></figure>
+  </div>
+  </section>
+
+  <section class="panel" data-theme="dark">
+    <h2>dark</h2>
+    <p class="note">At the size the desk asks for, at the size a label column would need, and with the
+    sewing-room sway caught at the far end of its swing rather than at rest.</p>
+    <div class="row ground--paper">
+    <figure><svg class="deskart deskart--scrapbook" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · 110px</figcaption></figure><figure><svg class="deskart deskart--learning" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · 110px</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:0s">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-3.1s">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-6.4s">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · 110px</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · 110px</figcaption></figure>
+  </div>
+    <div class="row ground--paper-2">
+    <figure><svg class="deskart deskart--scrapbook" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · 44px</figcaption></figure><figure><svg class="deskart deskart--learning" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · 44px</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:0s">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-3.1s">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-6.4s">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · 44px</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="44" height="44"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · 44px</figcaption></figure>
+  </div>
+    <div class="row ground--paper">
+    <figure><svg class="deskart deskart--scrapbook" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The cover, and the cover's own copy a few units down-right. */}
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        transform="translate(4 5)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M27.5 27 C44 25.4 68 26.6 86 25.2 C95.5 24.4 101.5 27 101.2 36 C100.8 49 102.4 74 101.6 86.5 C101 94.6 95.5 97.2 86.5 96.6 C68 95.4 44 97.4 30 96.4 C22.8 95.9 19.6 92.4 20.2 84 C21 72 19.8 44 20.6 33 C21 27.8 21.8 27.4 27.5 27 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* Spine and stitching. Kraft, so the album reads as a bound object and
+          not as a poster lying on the desk. */}
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        transform="translate(2.5 2.5)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M22.6 30.8 C25.6 28.8 29 28.4 31.2 29.6 C32.4 40 32 70 31 94.4 C28 95.8 23.8 95.6 21.4 94.2 C20.8 72 20.8 48 22.6 30.8 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M26.8 54 C26.4 64 26.4 74 26.8 84 C27 87 26.6 90 26.8 92"
+        stroke="var(--ink-faint)"
+        stroke-width="1.1"
+        stroke-dasharray="2.4 2.8"
+        fill="none"
+        opacity=".7"
+      />
+
+      {/* One strip of tape. The dashed sides are the torn edge where it came
+          off the roll — the CSS @include tape does the same with borders. */}
+      <rect
+        x="16.4"
+        y="39"
+        width="17.4"
+        height="12.6"
+        rx="2"
+        transform="rotate(-2.5 25 45)"
+        fill="var(--tape)"
+      />
+      <path
+        d="M16.8 41 L16.4 49.6 M33.6 39.4 L33.2 48"
+        stroke="var(--edge-soft)"
+        stroke-width="1.1"
+        stroke-dasharray="3 3"
+      />
+
+      {/* The corner mount that holds the first photograph. */}
+      <path
+        d="M100.9 68.5 C100.4 78 101.4 88 100.6 95.8 C92 95.4 85 95.8 78.6 96.1 C86.5 88.5 94.5 78 100.9 68.5 Z"
+        fill="var(--kraft-2)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.6 76.2 C95.2 83 95.8 89 95.4 93.2"
+        stroke="var(--ink-faint)"
+        stroke-width=".9"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The little title label, typewritten in ink like every other label on
+          the site. Its own sheet-underneath is one unit — any more and the
+          label starts to look embossed. */}
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        transform="translate(1.6 2)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M36 34.5 C48 33.6 60 34.4 70 33.6 C72 33.4 72.6 38 72.2 41.6 C72 43.6 71 44.6 69 44.8 C58 45.6 46 44.8 37 45.4 C35 45.5 34.4 40 34.6 37.2 C34.8 35.4 35.2 34.7 36 34.5 Z"
+        fill="var(--paper)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M40.6 38.4 C45.6 38 50.6 38.8 54.4 38.2"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".8"
+      />
+      <path
+        d="M40.2 42 C48.6 41.4 58.6 42.2 66.4 41.4"
+        stroke="var(--ink-soft)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none"
+        opacity=".55"
+      />
+
+      {/* The only colour on the page-side of this drawing: one flower, pressed
+          under the cover and gone the colour of old newsprint. Kept small on
+          purpose — a bigger flower stops reading as pressed and starts
+          reading as a logo. */}
+      <path
+        d="M57.6 72.6 C58.4 79.4 56 85.6 51.6 90.6"
+        stroke="var(--ink-soft)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <g transform="translate(58 71)">
+        <ellipse cx="0" cy="-8.2" rx="3.7" ry="5.6" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8" rx="3.5" ry="5.8" transform="rotate(69)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.4" rx="3.9" ry="5.3" transform="rotate(146)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.1" rx="3.6" ry="5.7" transform="rotate(214)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <ellipse cx="0" cy="-8.3" rx="3.8" ry="5.4" transform="rotate(288)" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1" />
+        <circle cx="0" cy="0" r="2.9" fill="var(--ink-soft)" />
+      </g></svg><figcaption>scrapbook · mid-sway</figcaption></figure><figure><svg class="deskart deskart--learning" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Two cards behind, then the one being worked on. The back pair is cut
+          from kraft because the desk is; they carry no under-sheet of their
+          own — only the top sheet sits on something. The fan is wide enough
+          that the back pair can be counted: at 44px a stack of cards showing
+          three corners still reads, and a stack showing one reads as a card. */}
+      <g transform="translate(-4.5 2) rotate(10.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+      <g transform="translate(-1.5 1) rotate(3.5 60 62)">
+        <path
+          d="M20.4 30.2 C38 28.6 66 30 84 28.6 C92 27.8 95.4 30.4 95 38.6 C94.6 52 96 72 95 84.6 C94.4 91.4 90 93.8 82 93.2 C64 92 40 94 27 92.8 C20.4 92.2 17.6 89 18.2 81.6 C19 67 18.2 46 19 36 C19.6 30.8 17.4 30.6 20.4 30.2 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+      </g>
+
+      <g transform="rotate(-4.5 62 64)">
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          transform="translate(4 5)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M22.4 32.2 C40 30.6 68 32 86 30.6 C94 29.8 97.4 32.4 97 40.6 C96.6 54 98 74 97 86.6 C96.4 93.4 92 95.8 84 95.2 C66 94 42 96 29 94.8 C22.4 94.2 19.6 91 20.2 83.6 C21 69 20.2 48 21 38 C21.6 32.8 19.4 32.6 22.4 32.2 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.4"
+        />
+
+        {/* Ruled by hand, so the lines drift and stop short of the edge. */}
+        <path
+          d="M34 46.6 C48 46 66 47 88 46.2 M33.6 54.6 C48 54 66 55 88.4 54.2 M34.2 62.4 C48 61.8 66 62.8 84 62"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".45"
+        />
+
+        {/* The diagram, with an annotation hanging off it. */}
+        <path
+          d="M31.4 85.6 C31.2 78 31 72 31.6 66.4 C38 67.2 44 70.6 49.4 75.6 C43.6 79 37.4 82.6 31.4 85.6 Z"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
+        <circle cx="38.6" cy="72.4" r="2.6" fill="var(--ink-soft)" />
+        <path
+          d="M50.6 76.6 C56 74.6 62 73.6 68.4 72.4"
+          stroke="var(--ink-soft)"
+          stroke-width="1.1"
+          stroke-dasharray="2.6 2.8"
+          fill="none"
+        />
+        <path
+          d="M71.6 71.4 C74 69.6 76.4 70.8 78.6 69.6 C80.6 68.6 82.4 70 82.6 71.8"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          fill="none"
+          opacity=".75"
+        />
+      </g>
+
+      {/* The clip, straddling the top edge of the top card. Drawn as wire —
+          stroke only, no fill — because a fill at this size reads as a blob. */}
+      <g transform="rotate(-11 40 30)">
+        <path
+          d="M33.6 19.4 L33.6 40.6 C33.6 46.2 45.6 46.2 45.6 40.6 L45.6 21.4 C45.6 16.4 35 16.4 35 21.4 L35 37.4"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="2.1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      {/* The pencil, lying across the bottom of the stack with its point
+          hanging off the paper. The one coloured thing here. */}
+      <g transform="rotate(-8 62 90)">
+        <rect x="34" y="86.4" width="54" height="8" rx="3.2" fill="var(--crayon-3)" stroke="var(--edge)" stroke-width="1.2" />
+        <path d="M36 90.4 L86 90.4" stroke="var(--ink)" stroke-width=".7" opacity=".25" />
+        <rect x="34" y="86.4" width="9.4" height="8" rx="3" fill="var(--kraft-3)" stroke="var(--edge)" stroke-width="1.1" />
+        <path
+          d="M88 86.4 L101.4 90.4 L88 94.4 Z"
+          fill="var(--kraft)"
+          stroke="var(--edge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <path d="M97.4 89.2 L101.4 90.4 L97.4 91.6 Z" fill="var(--ink)" />
+      </g></svg><figcaption>learning · mid-sway</figcaption></figure><figure><svg class="deskart deskart--wardrobe" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* Frame: two uprights, and the rail they hold up. The rail is cut a
+          shade darker than the uprights — not decoration: the jumper hanging
+          from it is kraft too, and when both were --kraft-2 the sweater read
+          as part of the rail. A rod carries no under-sheet; only sheets do. */}
+      <path
+        d="M22.4 32.4 C25.6 30.8 27.6 31.2 29 32.6 C29.6 54 29.2 82 28.2 104.6 C25 106 21.8 105.6 20 104.2 C19.4 78 19.6 52 22.4 32.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M91.2 32 C94.6 30.6 96.6 31 97.8 32.2 C99.4 54 99.2 82 98.4 104.4 C95.2 105.8 92 105.4 90.2 104 C89.8 78 90.2 52 91.2 32 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M17.6 26.6 C45 25.2 72 26.6 101.4 25.6 C104.6 25.4 105 29.4 104.6 31.2 C104.2 33 102.6 33.8 100 34 C72 35 45 33.8 18.4 34.4 C15.6 34.6 14.6 30.8 15 29 C15.4 27.4 16.2 26.8 17.6 26.6 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* Hanger the first: the dress. Hooks drawn as wire over the rail. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M43.6 39.6 L43.6 31 C43.6 25 49.4 25 49.4 30.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M33.6 49.6 L43.6 39.6 L53.8 49" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M33.4 50 C35 49.4 38 49.8 41 49.6 C45 49.4 51 49.6 54 50.2 C54.6 54.2 52.6 57.6 53.2 60.6 C56.6 68.6 59.8 77.4 60.6 84.6 C54.2 86.2 46 86.2 38.4 85.4 C31.2 84.6 27.2 84.4 28.6 82.4 C31.4 74.6 34.4 67.4 35.6 60.6 C36.2 57.2 32.8 53.6 33.4 50 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M35.6 61.4 C41 62.2 48 62 52.6 61"
+          stroke="var(--ink-soft)"
+          stroke-width=".9"
+          fill="none"
+          opacity=".45"
+        />
+        <circle cx="43.8" cy="67.6" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="73.4" r="1" fill="var(--ink-soft)" opacity=".6" />
+        <circle cx="43.8" cy="79.2" r="1" fill="var(--ink-soft)" opacity=".6" />
+      </g>
+
+      {/* Hanger the second: a jumper, a size too wide, with the one colour on
+          it — a patch sewn on over the chest. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M63.6 40.6 L63.6 32 C63.6 26 69.4 26 69.4 31.6"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M53.6 50.6 L63.6 40.6 L73.8 50" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M55.6 51.4 C58.2 50.2 61.6 50.4 63.6 50.4 C66 50.4 69.4 50.2 72 51.4 C74.2 52.4 76 53 77.4 52.8 C79 52.6 79.8 54.4 79.4 56.4 L78 79.6 C71.6 81 63.6 81 57.4 79.8 L49.6 57.2 C49 55.2 49.6 53.2 51.2 53 C52.6 52.8 53.4 52.2 55.6 51.4 Z"
+          fill="var(--kraft-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M61.6 60.6 C64.6 60.2 67.2 60.4 69.4 60.2 L69 66.4 C66.2 66.8 63.6 66.6 61.8 66.6 Z"
+          fill="var(--crayon-2)"
+          stroke="var(--edge)"
+          stroke-width=".8"
+        />
+      </g>
+
+      {/* Hanger the third: a shirt, short enough that it reads as the last
+          thing on the rail rather than a fourth colour. */}
+      <g class="art-sway" style="animation-delay:-4.5s;animation-play-state:paused">
+        <path
+          d="M84.1 43.4 L84.1 34.4 C84.1 28.4 89.9 28.4 89.9 34"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.9"
+          stroke-linecap="round"
+        />
+        <path d="M74.6 53 L84.1 43.4 L94.2 52.6" fill="none" stroke="var(--ink-soft)" stroke-width="1.7" stroke-linejoin="round" />
+        <path
+          d="M76 53.4 C79 52 82 52.2 84.2 52.2 C86.6 52.2 89.6 52 92.2 53.2 C93.8 54 94.4 55.6 94 57.6 L92.4 79.4 C89.4 80.6 84.6 80.8 80.6 80.2 C77.8 79.8 75.6 79.2 74.8 78.2 L74.4 57.6 C74.2 55.4 74.4 53.8 76 53.4 Z"
+          fill="var(--paper-3)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M80.2 53 L84.2 58.6 L88.4 52.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          opacity=".8"
+        />
+      </g>
+
+      {/* The drawer the whole thing stands on. It carries an under-sheet too,
+          because it is the piece the frame is resting on. */}
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        transform="translate(3 4)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M23.6 95.4 C46 94.2 74 95.4 96.4 94.4 C99.4 94.2 100.4 96 100 99.4 C99.6 104 99.4 108 98.6 110.2 C94 111.6 84 111.8 66 111.6 C50 111.4 30 111.6 24.4 110.6 C22.4 110.2 21.6 108.6 21.8 105.6 C22.2 101 22.8 97.4 23.6 95.4 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+      <path
+        d="M50.6 103.4 C54.4 102.8 59.4 103 63.6 102.8 C65.4 102.7 66 103.6 65.8 105 C65.6 106.2 65 106.8 63.4 106.8 C59.2 107 54 106.8 51 106.9 C49.6 106.9 49 106 49.2 104.8 C49.4 103.9 49.6 103.5 50.6 103.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".75"
+      /></svg><figcaption>wardrobe · mid-sway</figcaption></figure><figure><svg class="deskart deskart--mailbox" width="110" height="110"
+    viewBox="0 0 120 120" role="presentation" aria-hidden="true" focusable="false">{/* The post first: everything else stands in front of it. */}
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        transform="translate(2.6 3.6)"
+        fill="var(--kraft-3)"
+      />
+      <path
+        d="M57.4 62 C60.4 60.6 63.6 60.8 66.2 62.2 C66.6 80 66 96 65.4 110.6 C62.4 112 59 111.6 56.8 110.2 C56.6 94 56.8 78 57.4 62 Z"
+        fill="var(--kraft)"
+        stroke="var(--edge)"
+        stroke-width="1.3"
+      />
+
+      {/* The box, with the rounded top a mailbox has and no straight line
+          anywhere to remind you it is a drawing. */}
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        transform="translate(3.4 4.6)"
+        fill="var(--paper-3)"
+      />
+      <path
+        d="M24.6 72.4 C24.2 62 26.6 46 32 39.6 C40 32.6 52 31.4 60.6 31.2 C72 31 84 33.4 90.6 40.4 C95.4 45.4 96.6 58 95.8 68.6 C95.4 73.4 92.6 75.6 87.6 76 C70 77 40 77.4 31.4 76.6 C26.4 76.2 24.8 75.4 24.6 72.4 Z"
+        fill="var(--paper-2)"
+        stroke="var(--edge)"
+        stroke-width="1.4"
+      />
+
+      {/* The door is a separate piece of paper, so it gets its own outline and
+          its own stock — one step darker than the box in BOTH themes, which
+          is the point: --paper would have matched the .paper-card this
+          drawing sits on and turned the door into a hole. */}
+      <path
+        d="M30 47.6 C40 46.2 60 46.2 88 47.2 C90 47.3 90.6 48.6 90.4 51.2 L89.6 71.4 C89.4 74 88 75 85.6 75 C66 75.8 42 75.8 31 75.2 C29 75.1 28.4 73.8 28.6 71.4 C29 63 29.4 55 30 47.6 Z"
+        fill="var(--paper-3)"
+        stroke="var(--edge)"
+        stroke-width="1.2"
+      />
+      {/* The slot. No paper token goes dark enough in both themes to be a
+          hole in the paper, so this is cut from the shadow colour itself. */}
+      <rect x="34" y="51.6" width="23" height="3.6" rx="1.8" fill="var(--sh-2)" />
+      <path
+        d="M77.6 57.6 C79.6 57 81.8 57.2 83.6 57.6 L83 62.4 C81 62.8 79 62.6 77.4 62.4 Z"
+        fill="var(--ink-soft)"
+        opacity=".7"
+      />
+
+      {/* The flag: up, and the only warm colour in the drawing. */}
+      <path d="M96.4 58 L104.6 33" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round" />
+      <path
+        d="M103.4 31 C107.6 31.6 110.6 33.8 111.4 37.6 C108.2 38.6 104.8 38 102.6 36.2 Z"
+        fill="var(--crayon)"
+        stroke="var(--edge)"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M95.4 53.4 C96.4 53 98 53.2 99 53.6 L98.6 61.4 C97.4 61.8 96 61.6 95 61.2 Z"
+        fill="var(--kraft-3)"
+        stroke="var(--edge)"
+        stroke-width="1"
+      />
+
+      {/* A letter on its way out, cut from the same stock as the box. It is
+          deliberately NOT --paper: this drawing ends up sitting on a
+          .paper-card, which is already --paper, and a sheet that matches the
+          page it lies on is a hole rather than a letter. Lifted 5 units so
+          the tilted corner stays inside the 120 box — a drawing that bleeds
+          has to be checked against whatever it is lying next to. */}
+      <g transform="translate(0 -5) rotate(-9 40 96)">
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          transform="translate(3 4)"
+          fill="var(--paper-3)"
+        />
+        <path
+          d="M19.6 87.4 C31 86.4 47 87 60 86.4 C62.6 86.2 63.4 87.8 63 90.4 C62.4 99 62.6 108 61.8 111.4 C60.8 114 58 114.4 54 114.6 C42 115.2 28 114.6 21.4 114.8 C18.4 114.9 17.4 113 17.6 110 C18 102 18.6 92 19.6 87.4 Z"
+          fill="var(--paper-2)"
+          stroke="var(--edge)"
+          stroke-width="1.3"
+        />
+        <path
+          d="M20.4 89.4 L40.4 100.6 L61.4 88.8"
+          fill="none"
+          stroke="var(--ink-soft)"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          opacity=".75"
+        />
+        {/* A stamp, drawn with a dashed edge because a stamp has one. */}
+        <rect
+          x="50.6"
+          y="103.6"
+          width="8"
+          height="6.4"
+          fill="var(--paper)"
+          stroke="var(--edge-soft)"
+          stroke-width="1"
+          stroke-dasharray="1.6 1.8"
+        />
+      </g></svg><figcaption>mailbox · mid-sway</figcaption></figure>
+  </div>
+  </section>
+</body>
+</html>

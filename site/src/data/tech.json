@@ -1,0 +1,728 @@
+{
+  "generatedAt": "2026-09-21T00:22:39.037Z",
+  "groups": [
+    {
+      "id": "caring-for-the-land",
+      "label": "Caring for the Land"
+    },
+    {
+      "id": "materials",
+      "label": "Materials & Refinement"
+    },
+    {
+      "id": "building-construction",
+      "label": "Building & Construction"
+    },
+    {
+      "id": "interior-design",
+      "label": "Interior Design"
+    },
+    {
+      "id": "fine-arts-textiles",
+      "label": "Fine Arts & Textiles"
+    },
+    {
+      "id": "cooking",
+      "label": "Cooking"
+    },
+    {
+      "id": "transportation",
+      "label": "Transportation"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "digging-1",
+      "label": "Digging 1",
+      "durationMs": 3600000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "digging-2",
+      "label": "Digging 2",
+      "durationMs": 21600000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "digging-3",
+      "label": "Digging 3",
+      "durationMs": 64800000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "water-tending",
+      "label": "Water Tending",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "fishing",
+      "label": "Fishing",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "wells-and-springs",
+      "label": "Wells & Springs",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "gardening-1",
+      "label": "Gardening 1",
+      "durationMs": 3600000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "gardening-2",
+      "label": "Gardening 2",
+      "durationMs": 21600000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "soil-mechanics",
+      "label": "Soil Mechanics",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "seeds-planting",
+      "label": "Seeds & Planting",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "growing-food",
+      "label": "Growing Food",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "wetland-growing",
+      "label": "Wetland Growing",
+      "durationMs": 28800000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "dryland-growing",
+      "label": "Dryland Growing",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "bamboo-cultivation",
+      "label": "Bamboo Cultivation",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "organic-gardening",
+      "label": "Organic Gardening",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-gardening",
+      "label": "Advanced Gardening",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "basic-farming-techniques",
+      "label": "Basic Farming Techniques",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "irrigation-systems",
+      "label": "Irrigation Systems",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "harvesting-tech",
+      "label": "Harvesting Tech",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "farming-equipment-automation",
+      "label": "Farming Equipment & Automation",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-farming",
+      "label": "Advanced Farming",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "animal-husbandry",
+      "label": "Animal Husbandry",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "mining-1",
+      "label": "Surface Mining Basics",
+      "durationMs": 3600000,
+      "group": "materials",
+      "readiness": "ready"
+    },
+    {
+      "id": "mining-2",
+      "label": "Wall Mining",
+      "durationMs": null,
+      "group": "materials",
+      "readiness": "concept"
+    },
+    {
+      "id": "mining-3",
+      "label": "Deep Wall Mining",
+      "durationMs": null,
+      "group": "materials",
+      "readiness": "concept"
+    },
+    {
+      "id": "trimming-1",
+      "label": "Tree Trimming Basics",
+      "durationMs": 3600000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "trimming-2",
+      "label": "Advanced Tree Trimming",
+      "durationMs": 28800000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "foraging",
+      "label": "Foraging",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "building-1",
+      "label": "Building 1",
+      "durationMs": 3600000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "building-2",
+      "label": "Building 2",
+      "durationMs": 25200000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "garden-structures",
+      "label": "Garden Structures",
+      "durationMs": 32400000,
+      "group": "caring-for-the-land",
+      "readiness": "ready"
+    },
+    {
+      "id": "outdoor-furniture",
+      "label": "Outdoor Furniture",
+      "durationMs": 36000000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "display-cases",
+      "label": "Display Cases",
+      "durationMs": 43200000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "simple-crossings",
+      "label": "Simple Crossings",
+      "durationMs": 50400000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "building-3",
+      "label": "Building 3",
+      "durationMs": 72000000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "scaffolding",
+      "label": "Scaffolding",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "lumber-types",
+      "label": "Lumber Types",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "woodworking-safety",
+      "label": "Woodworking Safety",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "basic-woodworking",
+      "label": "Basic Woodworking",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-woodworking",
+      "label": "Advanced Woodworking",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "materials-refinement-1",
+      "label": "Materials & Refinement 1",
+      "durationMs": 50400000,
+      "group": "materials",
+      "readiness": "ready"
+    },
+    {
+      "id": "masonry",
+      "label": "Masonry",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "bamboo-working",
+      "label": "Bamboo Working",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "materials-refinement-2",
+      "label": "Materials & Refinement 2",
+      "durationMs": 100800000,
+      "group": "materials",
+      "readiness": "ready"
+    },
+    {
+      "id": "house-floors",
+      "label": "Floors",
+      "durationMs": 36000000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "house-walls",
+      "label": "Walls",
+      "durationMs": 50400000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "house-roofing",
+      "label": "Roofing",
+      "durationMs": 64800000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "extra-rooms",
+      "label": "Extra Rooms",
+      "durationMs": 57600000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "stairs-and-upper-floors",
+      "label": "Stairs & Upper Floors",
+      "durationMs": 108000000,
+      "group": "building-construction",
+      "readiness": "ready"
+    },
+    {
+      "id": "advanced-rare-materials",
+      "label": "Advanced & Rare Materials",
+      "durationMs": null,
+      "group": "materials",
+      "readiness": "concept"
+    },
+    {
+      "id": "building-tinkering-basics",
+      "label": "Building & Tinkering",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "fixing-improvements",
+      "label": "Fixing & Improvements",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "small-furniture-building",
+      "label": "Small Furniture Building",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "large-furniture-building",
+      "label": "Large Furniture Building",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "painting-and-staining",
+      "label": "Painting & Staining",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "intro-to-structures",
+      "label": "Intro to Structures",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "structural-analysis",
+      "label": "Structural Analysis",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "foundation-design",
+      "label": "Foundation Design",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "structural-dynamics",
+      "label": "Structural Dynamics",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-structures",
+      "label": "Advanced Structures",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "blueprint-making",
+      "label": "Blueprint Making",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "auto-cad",
+      "label": "Auto CAD",
+      "durationMs": null,
+      "group": "building-construction",
+      "readiness": "concept"
+    },
+    {
+      "id": "interior-design-concepts",
+      "label": "Interior Design Concepts",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "living-decor",
+      "label": "Living Decor",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "color-theory-basics",
+      "label": "Color Theory Basics",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "balance-and-flow",
+      "label": "Balance & Flow",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "interior-lighting",
+      "label": "Interior Lighting",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "creating-spaces",
+      "label": "Creating Spaces",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "organization-techniques",
+      "label": "Organization Techniques",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "elevating-space-with-decoration",
+      "label": "Elevating Space with Decoration",
+      "durationMs": null,
+      "group": "interior-design",
+      "readiness": "concept"
+    },
+    {
+      "id": "intro-to-fibers",
+      "label": "Intro to Fibers",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "sewing",
+      "label": "Sewing",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "weaving",
+      "label": "Weaving",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "basketry",
+      "label": "Basketry",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "mending",
+      "label": "Mending",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "clothing-from-patterns",
+      "label": "Clothing from Patterns",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "clothing-pattern-creation",
+      "label": "Clothing Pattern Creation",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "cooking-basics",
+      "label": "Cooking Basics",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "knife-skills",
+      "label": "Knife Skills",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "food-prep-and-care",
+      "label": "Food Prep & Care",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "spices-and-flavor",
+      "label": "Spices & Flavor",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "regional-cuisine",
+      "label": "Regional Cuisine",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "grilling",
+      "label": "Grilling",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-cooking",
+      "label": "Advanced Cooking",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "cooking-for-others",
+      "label": "Cooking for Others",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-cooking-at-scale",
+      "label": "Advanced Cooking at Scale",
+      "durationMs": null,
+      "group": "cooking",
+      "readiness": "concept"
+    },
+    {
+      "id": "art-and-design-basics",
+      "label": "Art & Design Basics",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "wildlife-observation",
+      "label": "Wildlife Observation",
+      "durationMs": null,
+      "group": "caring-for-the-land",
+      "readiness": "concept"
+    },
+    {
+      "id": "natural-dyes",
+      "label": "Natural Dyes",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "papermaking",
+      "label": "Papermaking",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "painting-and-drawing-1",
+      "label": "Painting & Drawing 1",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "painting-and-drawing-2",
+      "label": "Painting & Drawing 2",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "advanced-art-concepts",
+      "label": "Advanced Art Concepts",
+      "durationMs": null,
+      "group": "fine-arts-textiles",
+      "readiness": "concept"
+    },
+    {
+      "id": "transportation-basics",
+      "label": "Transportation Basics",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    },
+    {
+      "id": "boats",
+      "label": "Boats",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    },
+    {
+      "id": "personal-transport",
+      "label": "Personal Transport",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    },
+    {
+      "id": "small-engines",
+      "label": "Small Engines",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    },
+    {
+      "id": "automotive",
+      "label": "Automotive",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    },
+    {
+      "id": "rocket-science",
+      "label": "Rocket Science",
+      "durationMs": null,
+      "group": "transportation",
+      "readiness": "concept"
+    }
+  ]
+}

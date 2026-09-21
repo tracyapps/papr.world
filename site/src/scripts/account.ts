@@ -4,6 +4,11 @@ import {
   saveDevicePassport,
   type DevicePassport,
 } from './passportBridge';
+// The generated technique catalog, written beside the roadmap by
+// `tools/build-tech.mjs`. Imported exactly the way the site's pages import
+// `roadmap.json`: a build-time JSON file, not a runtime fetch. It is what
+// turns a learned node id into a name and a length for the glance line.
+import techData from '../data/tech.json';
 
 type Account = {
   id: string;
@@ -47,6 +52,19 @@ type AccountTech = {
   plans: string[];
 };
 
+/**
+ * The lesson a solo save was part-way through. Hand-synced with
+ * `ActiveLearningState` in `src/sim/state.ts` (and the sanitiser beside it),
+ * the same way the rest of the save shapes in this file are kept in step by
+ * hand: this Astro site does not build against the game package.
+ */
+type ActiveLearningSnapshot = {
+  nodeId: string;
+  startedAt: number;
+  completedTaskIndexes: number[];
+  taskBaselineCounts: number[];
+};
+
 /** What this browser reports finding in the game's own local solo save. */
 type SoloSaveSnapshot = {
   chips: number;
@@ -54,6 +72,12 @@ type SoloSaveSnapshot = {
   tools: Record<string, number>;
   items: Record<string, number>;
   plans: string[];
+  /**
+   * The lesson the save is part-way through, when there is one. The server's
+   * snapshot sanitiser reads only the fields it knows, so this rides along
+   * harmlessly with an import and exists here for the desk's glance line.
+   */
+  activeLearning?: ActiveLearningSnapshot | null;
 };
 
 /** The durable, one-time record `/account/import-solo-save` returns once granted. */
@@ -95,6 +119,12 @@ type AccountDesign = {
   name: string;
   sharedOnCard: boolean;
   updatedAt: number;
+  /**
+   * The whole design arrives on the wire; only these two are read, and only
+   * for a look's colour swatch. Anything unexpected is simply ignored.
+   */
+  strokes?: { color?: unknown }[];
+  stamps?: { color?: unknown }[];
 };
 
 type WardrobeImportReceipt = { at: number; imported: number; skipped: number };
@@ -170,6 +200,29 @@ const PROFILE_VISIBILITY_LEVELS: readonly ProfileVisibility[] = [
   'friends-of-friends',
 ];
 
+/**
+ * The card's own words for a link, kept in step with the in-game player card
+ * (`src/ui/playerCard.ts` → `LINK_KIND_LABELS`), which is the source of truth
+ * for what a card shows. `SOCIAL_LINK_LABELS` above is the editor's picker
+ * voice ("Something else"); these are what a visitor reads on the card.
+ */
+const CARD_LINK_LABELS: Record<SocialLinkKind, string> = {
+  website: 'Website',
+  instagram: 'Instagram',
+  x: 'X',
+  youtube: 'YouTube',
+  twitch: 'Twitch',
+  discord: 'Discord',
+  other: 'A link',
+};
+
+/** How the card's quiet audience line names each visibility level. */
+const AUDIENCE_WORDS: Record<ProfileVisibility, string> = {
+  everyone: 'anyone who finds you',
+  friends: 'friends you have both agreed with',
+  'friends-of-friends': 'your friends and their friends',
+};
+
 /** Hand-synced with `LIMITS` in `shared/src/protocol/constants.ts`. */
 const PROFILE_LIMITS = { bioMax: 280, socialLinksMax: 6, socialUrlMax: 200 } as const;
 
@@ -195,6 +248,49 @@ function nonEmptyCounts(value: unknown): Record<string, number> {
 }
 
 /**
+ * The save's lesson-in-progress, read the way `state.ts` sanitizes it: a shape
+ * the desk does not recognise is simply "not learning anything", never a
+ * thrown error. The bounds match the sanitiser's (sixteen baselines and
+ * indexes, whole non-negative counts).
+ */
+function readActiveLearning(raw: unknown): ActiveLearningSnapshot | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const learning = raw as {
+    nodeId?: unknown;
+    startedAt?: unknown;
+    completedTaskIndexes?: unknown;
+    taskBaselineCounts?: unknown;
+  };
+  if (
+    typeof learning.nodeId !== 'string'
+    || learning.nodeId.length === 0
+    || typeof learning.startedAt !== 'number'
+    || !Number.isFinite(learning.startedAt)
+    || learning.startedAt < 0
+  ) {
+    return null;
+  }
+  const baselines = Array.isArray(learning.taskBaselineCounts)
+    ? learning.taskBaselineCounts.slice(0, 16).map((value) => (
+      typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
+    ))
+    : [];
+  const completed = Array.isArray(learning.completedTaskIndexes)
+    ? [...new Set(learning.completedTaskIndexes.flatMap((value) => (
+      typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 16
+        ? [Math.floor(value)]
+        : []
+    )))]
+    : [];
+  return {
+    nodeId: learning.nodeId,
+    startedAt: learning.startedAt,
+    taskBaselineCounts: baselines,
+    completedTaskIndexes: completed,
+  };
+}
+
+/**
  * Read whatever solo save this browser has, defensively — a parse failure
  * or an unexpected shape just means "nothing to offer," never a thrown
  * error on desk load. Returns null when there is no save at all, which is
@@ -211,7 +307,14 @@ function readLocalSoloSave(): SoloSaveSnapshot | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as {
-      player?: { chips?: unknown; inventory?: unknown; tools?: unknown; items?: unknown; plans?: unknown };
+      player?: {
+        chips?: unknown;
+        inventory?: unknown;
+        tools?: unknown;
+        items?: unknown;
+        plans?: unknown;
+        activeLearning?: unknown;
+      };
     };
     const player = parsed.player ?? {};
     const plans = Array.isArray(player.plans)
@@ -226,6 +329,7 @@ function readLocalSoloSave(): SoloSaveSnapshot | null {
       tools: nonEmptyCounts(player.tools),
       items: nonEmptyCounts(player.items),
       plans,
+      activeLearning: readActiveLearning(player.activeLearning),
     };
   } catch {
     return null;
@@ -244,6 +348,122 @@ function describeSnapshot(snapshot: SoloSaveSnapshot): string {
     parts.push(`${snapshot.plans.length} learned technique${snapshot.plans.length === 1 ? '' : 's'}`);
   }
   return parts.length > 0 ? parts.join(', ') : 'nothing worth bringing over yet';
+}
+
+/**
+ * The generated technique catalog, keyed by node id. Read defensively rather
+ * than trusted: a missing or malformed file simply means no label for a node,
+ * which the glance line reads as "not learning anything" instead of throwing.
+ */
+type TechNode = { id: string; label: string; durationMs: number };
+
+const TECH_NODES_BY_ID = (() => {
+  const byId = new Map<string, TechNode>();
+  const nodes: unknown = techData.nodes;
+  if (!Array.isArray(nodes)) return byId;
+  for (const raw of nodes) {
+    if (!raw || typeof raw !== 'object') continue;
+    const node = raw as { id?: unknown; label?: unknown; durationMs?: unknown };
+    if (typeof node.id !== 'string' || typeof node.label !== 'string') continue;
+    const durationMs = typeof node.durationMs === 'number' && Number.isFinite(node.durationMs)
+      ? Math.max(0, node.durationMs)
+      : 0;
+    byId.set(node.id, { id: node.id, label: node.label, durationMs });
+  }
+  return byId;
+})();
+
+/** The desk's own words for a stretch of time — plain, never a stopwatch. */
+function describeTimeLeft(ms: number): string {
+  const minutes = Math.round(ms / 60_000);
+  if (minutes < 1) return 'under a minute';
+  if (minutes < 90) return `about ${minutes} minute${minutes === 1 ? '' : 's'}`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 36) return `about ${hours} hour${hours === 1 ? '' : 's'}`;
+  const days = Math.round(hours / 24);
+  return `about ${days} day${days === 1 ? '' : 's'}`;
+}
+
+/**
+ * The learning glance: what the local solo save is part-way through, in one
+ * sentence. The save carries only the node id, so the name and how long the
+ * lesson runs come from the generated catalog; no save, no lesson, or a node
+ * the catalog does not know all read the same quiet way.
+ */
+function learningLine(now: number): string {
+  const learning = readLocalSoloSave()?.activeLearning ?? null;
+  if (!learning) return 'Not learning anything right now.';
+  const node = TECH_NODES_BY_ID.get(learning.nodeId);
+  if (!node) return 'Not learning anything right now.';
+  const stepsDone = learning.completedTaskIndexes.length;
+  const steps = Math.max(learning.taskBaselineCounts.length, stepsDone);
+  const remainingMs = Math.max(0, learning.startedAt + node.durationMs - now);
+  if (node.durationMs > 0 && remainingMs > 0) {
+    return `Learning ${node.label} — ${describeTimeLeft(remainingMs)} left`;
+  }
+  if (steps > 0) {
+    return `Learning ${node.label} — ${stepsDone} of ${steps} steps done`;
+  }
+  return `Learning ${node.label}`;
+}
+
+/** One bag of the pouch, ready to render as a stack. */
+type InventoryBucket = { id: string; name: string; counts: [string, number][] };
+
+const bucketTotal = (bucket: InventoryBucket): number => (
+  bucket.counts.reduce((sum, [, quantity]) => sum + quantity, 0)
+);
+
+/** One `<details class="stack">` for a bucket: name + roll-up over its rows. */
+function buildStack(bucket: InventoryBucket, open: boolean): HTMLDetailsElement {
+  const details = document.createElement('details');
+  details.className = 'stack';
+  details.dataset.stack = bucket.id;
+  details.open = open;
+
+  const summary = document.createElement('summary');
+  const name = document.createElement('span');
+  name.className = 'stack__name';
+  name.textContent = bucket.name;
+  const roll = document.createElement('span');
+  roll.className = 'stack__roll';
+  roll.textContent = `${bucket.counts.length} kind${bucket.counts.length === 1 ? '' : 's'} · ${bucketTotal(bucket)}`;
+  summary.append(name, roll);
+
+  const list = document.createElement('ul');
+  list.className = 'stack__list';
+  for (const [rawLabel, quantity] of bucket.counts) {
+    const item = document.createElement('li');
+    const label = document.createElement('span');
+    label.textContent = String(rawLabel).replaceAll(/[-_.]+/g, ' ');
+    const count = document.createElement('strong');
+    count.textContent = String(quantity);
+    item.append(label, count);
+    list.append(item);
+  }
+
+  details.append(summary, list);
+  return details;
+}
+
+/**
+ * The one colour a look really carries as a hex: the ink of its first stroke,
+ * or failing that its first stamp. Its paper stock is a catalog key rather
+ * than a colour, so it is left alone rather than guessed at.
+ */
+function edgeColourOf(design: AccountDesign): string | null {
+  const hex = (value: unknown): string | null => (
+    typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value : null
+  );
+  for (const stroke of Array.isArray(design.strokes) ? design.strokes : []) {
+    const colour = hex(stroke?.color);
+    if (colour) return colour;
+  }
+  for (const stamp of Array.isArray(design.stamps) ? design.stamps : []) {
+    const colour = hex(stamp?.color);
+    if (colour) return colour;
+  }
+  return null;
 }
 
 const shell = document.querySelector<HTMLElement>('[data-account-shell]');
@@ -286,11 +506,111 @@ if (shell) {
   const profileAddLink = shell.querySelector<HTMLButtonElement>('[data-profile-add-link]');
   const profileSave = shell.querySelector<HTMLButtonElement>('[data-profile-save]');
   const profileNote = shell.querySelector<HTMLElement>('[data-profile-note]');
+  const cardPreview = shell.querySelector<HTMLElement>('[data-card-preview]');
+  const glanceLearning = shell.querySelector<HTMLElement>('[data-glance-learning]');
+  const glanceLetters = shell.querySelector<HTMLElement>('[data-glance-letters]');
+  const glanceLooks = shell.querySelector<HTMLElement>('[data-glance-looks]');
+  // The one-time-bridge buttons keep whatever label the page gives them, so
+  // the copy lives in the markup and this file only swaps it while working.
+  const migrationButtonLabel = migrationButton?.textContent?.trim() || 'Copy my solo save in';
+  const wardrobeImportButtonLabel = wardrobeImportButton?.textContent?.trim() || 'Copy my looks in';
+  let cardName = '';
+  let cardProfile: PlayerProfile | null = null;
 
   const tell = (text: string, kind: 'info' | 'error' = 'info') => {
     if (!message) return;
     message.textContent = text;
     message.dataset.kind = kind;
+  };
+
+  /**
+   * `hidden` alone does not hide a `.btn`: the site's chunky button rule sets
+   * `display: inline-flex`, and an author `display` outbids the user agent's
+   * `[hidden] { display: none }`. That is exactly how both one-time-bridge
+   * buttons stayed on screen after the bridge had been walked (the owner's
+   * screenshot). Setting the attribute and the property is what puts it away
+   * for real.
+   */
+  const setButtonGone = (button: HTMLButtonElement | null, gone: boolean) => {
+    if (!button) return;
+    button.hidden = gone;
+    button.style.display = gone ? 'none' : '';
+  };
+
+  /** The desk's own words for who may read the card they are looking at. */
+  const audienceWord = (value: ProfileVisibility | undefined): string => (
+    value && AUDIENCE_WORDS[value] ? AUDIENCE_WORDS[value] : 'friends you have both agreed with'
+  );
+
+  const cardVisibilityLine = (): string => {
+    const visibility = cardProfile?.visibility;
+    if (!visibility) return 'Nobody sees more than your settings allow.';
+    if (visibility.bio === visibility.links) {
+      return `Your bio and links are visible to ${audienceWord(visibility.bio)}.`;
+    }
+    return `Your bio is visible to ${audienceWord(visibility.bio)}, your links to ${audienceWord(visibility.links)}.`;
+  };
+
+  /**
+   * The desk's echo of the in-game player card (`src/ui/playerCard.ts`) — the
+   * same name, the same bio, the same words on each link. That file stays the
+   * source of truth for what a card shows; this mirrors it so an owner can see
+   * their own card the way a visitor does, and adds only the one line the game
+   * does not need to say: who is allowed to read it.
+   */
+  const renderCardPreview = () => {
+    if (!cardPreview) return;
+    const sheet = document.createElement('div');
+    sheet.className = 'card-preview__sheet';
+
+    const name = document.createElement('p');
+    name.className = 'card-preview__name';
+    name.textContent = cardName || 'A paper friend';
+
+    const bio = (cardProfile?.bio ?? '').trim();
+    const bioLine = document.createElement('p');
+    bioLine.className = bio ? 'card-preview__bio' : 'card-preview__empty';
+    bioLine.textContent = bio || 'Nothing written here yet.';
+
+    sheet.append(name, bioLine);
+
+    const links = (cardProfile?.links ?? []).filter((link) => /^https?:\/\//i.test(link.url));
+    if (links.length > 0) {
+      const list = document.createElement('ul');
+      list.className = 'card-preview__links';
+      for (const link of links) {
+        const item = document.createElement('li');
+        item.textContent = CARD_LINK_LABELS[link.kind] ?? 'A link';
+        list.append(item);
+      }
+      sheet.append(list);
+    }
+
+    const who = document.createElement('p');
+    who.className = 'card-preview__who';
+    who.textContent = cardVisibilityLine();
+    sheet.append(who);
+
+    cardPreview.replaceChildren(sheet);
+  };
+
+  const renderGlanceLearning = () => {
+    if (!glanceLearning) return;
+    glanceLearning.textContent = learningLine(Date.now());
+  };
+
+  const renderGlanceLetters = (count: number) => {
+    if (!glanceLetters) return;
+    glanceLetters.textContent = count > 0
+      ? `${count} letter${count === 1 ? '' : 's'} waiting`
+      : 'No letters yet.';
+  };
+
+  const renderGlanceLooks = (count: number) => {
+    if (!glanceLooks) return;
+    glanceLooks.textContent = count > 0
+      ? `${count} saved look${count === 1 ? '' : 's'}`
+      : 'No looks saved yet.';
   };
 
   const renderWorlds = (
@@ -362,27 +682,40 @@ if (shell) {
 
   const renderInventory = (inventory?: AccountInventory) => {
     if (!inventorySummary) return;
-    const rows = inventory
+    // One stack per bag the desk already keeps — chips, resources, tools,
+    // items — each with a roll-up of how many kinds it holds and how many
+    // things that is. Nothing new is invented here; these are the four the
+    // flat list used to run together.
+    const buckets: InventoryBucket[] = inventory
       ? [
-          ['Shiny chips', inventory.chips],
-          ...Object.entries(inventory.resources),
-          ...Object.entries(inventory.tools),
-          ...Object.entries(inventory.items),
-        ].filter(([, quantity]) => Number(quantity) > 0)
+          {
+            id: 'chips',
+            name: 'Shiny chips',
+            counts: inventory.chips > 0 ? [['Shiny chips', inventory.chips] as [string, number]] : [],
+          },
+          { id: 'resources', name: 'Resources', counts: Object.entries(inventory.resources) },
+          { id: 'tools', name: 'Tools', counts: Object.entries(inventory.tools) },
+          { id: 'items', name: 'Items', counts: Object.entries(inventory.items) },
+        ].map((bucket) => ({
+          ...bucket,
+          counts: bucket.counts.filter(([, quantity]) => Number(quantity) > 0),
+        }))
       : [];
-    if (rows.length === 0) {
+    const filled = buckets.filter((bucket) => bucket.counts.length > 0);
+    if (filled.length === 0) {
       inventorySummary.textContent = 'Your server-owned neighborhood pouch is empty.';
       return;
     }
-    const list = document.createElement('ul');
-    list.className = 'desk-list';
-    for (const [rawLabel, quantity] of rows) {
-      const item = document.createElement('li');
-      const label = String(rawLabel).replaceAll(/[-_.]+/g, ' ');
-      item.textContent = `${label} · ${quantity}`;
-      list.append(item);
+    // The biggest bag opens, so the one thing you came for is never a click
+    // away; the rest wait as quiet headings rather than twenty-six rows.
+    const biggest = filled.reduce((largest, bucket) => (
+      bucketTotal(bucket) > bucketTotal(largest) ? bucket : largest
+    ));
+    const fragment = document.createDocumentFragment();
+    for (const bucket of filled) {
+      fragment.append(buildStack(bucket, bucket === biggest));
     }
-    inventorySummary.replaceChildren(list);
+    inventorySummary.replaceChildren(fragment);
   };
 
   /**
@@ -448,9 +781,11 @@ if (shell) {
     claimedIds: string[] = [],
     getToken: () => Promise<string | null> = () => Promise.resolve(null),
   ) => {
+    renderGlanceLetters(mailbox.length);
     if (!mailboxSummary) return;
     if (mailbox.length === 0) {
-      mailboxSummary.textContent = 'No letters yet. The mailbox is listening.';
+      mailboxSummary.textContent =
+        'No letters yet. Letters and parcels wait here for you, whether or not you were around when they arrived.';
       return;
     }
     const claimed = new Set(claimedIds);
@@ -564,24 +899,40 @@ if (shell) {
   };
 
   const renderWardrobe = (designs: AccountDesign[] = []) => {
+    renderGlanceLooks(designs.length);
     if (!wardrobeSummary) return;
     if (designs.length === 0) {
       wardrobeSummary.textContent = 'No looks in your account wardrobe yet.';
       return;
     }
-    const intro = document.createElement('p');
-    intro.className = 'soft';
-    intro.textContent = `${designs.length} saved look${designs.length === 1 ? '' : 's'} travel with your account.`;
     const list = document.createElement('ul');
-    list.className = 'tech-list';
+    list.className = 'looks';
     for (const design of designs) {
       const item = document.createElement('li');
-      item.textContent = design.sharedOnCard
-        ? `${design.name} · shared`
-        : design.name;
+      item.className = 'look';
+      // A swatch only when the look really carries a colour; otherwise the
+      // name stands alone rather than showing a colour we made up.
+      const colour = edgeColourOf(design);
+      if (colour) {
+        const swatch = document.createElement('span');
+        swatch.className = 'look__swatch';
+        swatch.style.background = colour;
+        swatch.setAttribute('aria-hidden', 'true');
+        item.append(swatch);
+      }
+      const name = document.createElement('span');
+      name.className = 'look__name';
+      name.textContent = design.name || 'An unnamed look';
+      item.append(name);
+      if (design.sharedOnCard) {
+        const chip = document.createElement('span');
+        chip.className = 'look__chip';
+        chip.textContent = 'Shared on card';
+        item.append(chip);
+      }
       list.append(item);
     }
-    wardrobeSummary.replaceChildren(intro, list);
+    wardrobeSummary.replaceChildren(list);
   };
 
   const renderWardrobeImport = (
@@ -596,7 +947,9 @@ if (shell) {
           `Wardrobe brought home on ${new Date(receipt.at).toLocaleDateString()}: `
           + `${receipt.imported} look${receipt.imported === 1 ? '' : 's'} imported.`;
       }
-      if (wardrobeImportButton) wardrobeImportButton.hidden = true;
+      // One-time bridge, already walked: the button goes away for real, and
+      // the receipt above it is all that is left to say.
+      setButtonGone(wardrobeImportButton, true);
       return;
     }
     const local = readLocalWardrobe();
@@ -607,18 +960,19 @@ if (shell) {
     wardrobeImport.hidden = false;
     if (wardrobeImportDescription) {
       wardrobeImportDescription.textContent =
-        `This browser has ${local.length} saved look${local.length === 1 ? '' : 's'}. `
-        + 'Bring them into your account? Wearing one in a shared world then shows your actual drawing. '
-        + 'This can only be done once.';
+        `This browser is still holding ${local.length} saved look${local.length === 1 ? '' : 's'} `
+        + 'from before you had an account. Copying them in is a one-time bridge — the looks then '
+        + 'travel with your account, and wearing one in a shared world shows your actual drawing. '
+        + 'If you started drawing after accounts existed, there is nothing to do here.';
     }
     if (wardrobeImportNote) wardrobeImportNote.textContent = '';
     if (!wardrobeImportButton) return;
-    wardrobeImportButton.hidden = false;
+    setButtonGone(wardrobeImportButton, false);
     wardrobeImportButton.disabled = false;
-    wardrobeImportButton.textContent = 'Bring it into your account';
+    wardrobeImportButton.textContent = wardrobeImportButtonLabel;
     wardrobeImportButton.onclick = async () => {
       wardrobeImportButton.disabled = true;
-      wardrobeImportButton.textContent = 'Bringing it in…';
+      wardrobeImportButton.textContent = 'Copying it in…';
       if (wardrobeImportNote) wardrobeImportNote.textContent = '';
       try {
         const token = await getToken();
@@ -644,7 +998,7 @@ if (shell) {
           wardrobeImportNote.textContent = error instanceof Error ? error.message : 'That wardrobe could not be brought in.';
         }
         wardrobeImportButton.disabled = false;
-        wardrobeImportButton.textContent = 'Bring it into your account';
+        wardrobeImportButton.textContent = wardrobeImportButtonLabel;
       }
     };
   };
@@ -791,6 +1145,10 @@ if (shell) {
   };
 
   const renderProfile = (profile: PlayerProfile) => {
+    // The card preview is drawn from the same read as the editor, so the two
+    // can never disagree about what is written on your card.
+    cardProfile = profile;
+    renderCardPreview();
     if (!profileForm || !profileBio) return;
     profileBio.value = profile.bio ?? '';
     updateBioCount();
@@ -967,7 +1325,9 @@ if (shell) {
         migrationDescription.textContent =
           `Solo save brought in on ${new Date(receipt.at).toLocaleDateString()}: ${describeSnapshot(receipt)}.`;
       }
-      if (migrationButton) migrationButton.hidden = true;
+      // One-time bridge, already walked: the button goes away for real, and
+      // the receipt above it is all that is left to say.
+      setButtonGone(migrationButton, true);
       return;
     }
     const snapshot = readLocalSoloSave();
@@ -978,17 +1338,18 @@ if (shell) {
     migration.hidden = false;
     if (migrationDescription) {
       migrationDescription.textContent =
-        `This browser has a solo save: ${describeSnapshot(snapshot)}. Bring it into your account? `
-        + 'This can only be done once, so check it looks right first.';
+        `This browser is still holding a solo save from before you had an account: ${describeSnapshot(snapshot)}. `
+        + 'Copying it in is a one-time bridge — your account takes it over, and it will never ask twice. '
+        + 'If you started playing after accounts existed, there is nothing to do here.';
     }
     if (migrationNote) migrationNote.textContent = '';
     if (!migrationButton) return;
-    migrationButton.hidden = false;
+    setButtonGone(migrationButton, false);
     migrationButton.disabled = false;
-    migrationButton.textContent = 'Bring it into your account';
+    migrationButton.textContent = migrationButtonLabel;
     migrationButton.onclick = async () => {
       migrationButton.disabled = true;
-      migrationButton.textContent = 'Bringing it in…';
+      migrationButton.textContent = 'Copying it in…';
       if (migrationNote) migrationNote.textContent = '';
       try {
         const token = await getToken();
@@ -1015,7 +1376,7 @@ if (shell) {
           migrationNote.textContent = error instanceof Error ? error.message : 'That solo save could not be brought in.';
         }
         migrationButton.disabled = false;
-        migrationButton.textContent = 'Bring it into your account';
+        migrationButton.textContent = migrationButtonLabel;
       }
     };
   };
@@ -1034,6 +1395,13 @@ if (shell) {
     renderTech(carry?.tech);
     renderMailbox(carry?.mailbox, carry?.claimedMailIds, getToken);
     renderMigration(carry?.soloMigration, getToken);
+    // The glance lines and the card fill from what the desk already holds:
+    // the local save for learning, the mailbox for letters, the wardrobe for
+    // looks (both of those fill themselves as their counts arrive).
+    renderGlanceLearning();
+    cardName = account.displayName;
+    cardProfile = null;
+    renderCardPreview();
     wireProfile(getToken);
     void loadProfile(getToken);
     void loadWardrobe(getToken);

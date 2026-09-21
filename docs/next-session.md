@@ -2,10 +2,39 @@
 
 Updated 2026-09-20 after the touch/tablet pass, the neighbourhood clump and
 address plates, profiles and visibility, friend-request notes, the safety reach
-fix, and one-command data backups. Start here.
+fix, one-command data backups, the trim/dig lag, the notification badge, and the
+desk layout restructure. Start here.
 
 ## What landed
 
+- **The desk, restructured (2026-09-20).** `Layout Restructure` on
+  `site/src/pages/account.astro` + `site/src/scripts/account.ts`. The page had no
+  hierarchy — every area was a card of equal weight in a fixed grid, so doors and
+  letters sat under a 26-row inventory list and a duplicated settings form, and
+  the grid *stretched* its items so the empty columns were guaranteed rather than
+  accidental. Now: **doors first and full width**, then an **uneven two-up**
+  (a new player-card preview beside a "While you were away" panel carrying
+  learning / letters / looks status lines), a slim signed-in strip, then
+  **tabs** — Scrapbook · Letters · Looks · Profile · Account — with the profile
+  editor moved off the top into its own tab and the account id demoted to small
+  monospace inside Account. The scrapbook is grouped `<details>` stacks with
+  roll-ups (largest open); looks are a grid; letters get a real empty state. New
+  `site/src/components/DeskArt.astro` draws four paper-craft illustrations in the
+  site's token idiom (scrapbook, learning/Professor, wardrobe, mailbox) and
+  `tools/build-tech.mjs` generates `site/src/data/tech.json` from the tech
+  catalog so the learning line names the technique and its remaining time.
+  **A real bug fixed:** both one-time import buttons stayed on screen after the
+  import had happened — the shared button recipe's `display: inline-flex` beats
+  the browser's `[hidden]` rule, so `hidden = true` did nothing to a button.
+  Worth grepping for that pattern: `hidden` on anything that carries a display
+  rule is a no-op. Also fixed: my own scoped-CSS rules for runtime-built markup were dead
+  (no `data-astro-cid` on elements account.ts creates), including a pre-existing
+  one for `.mailbox__heading`. **Verified** in Chromium at 1440/900/390 in both
+  themes (no overflow, no console errors, all tabs open), contrast AA on all 16
+  new text styles, `astro build` clean, `astro check` clean for our files.
+  **Not verified by eye** — the vision model 400s in this environment, so the
+  renders were read back through image recognition, not seen. Details and
+  follow-ups in `DELIVERY/desk-redesign.md`.
 - **Trim/dig lag, and the notification badge (2026-09-20).** Two reports, one of
 them a real bug with a measurable cause.
 
