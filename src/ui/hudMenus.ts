@@ -242,6 +242,12 @@ function buildSettingsOverlay(): HTMLElement {
         <small>Leaves this world cleanly and takes you back to your account — you will not still look present here.</small>
       </div>
       <h3 class="hud-overlay-subhead">Your save</h3>
+      <p class="hud-overlay-note save-scope-note">
+        <strong>Saved on this browser:</strong> your tech tree, crafted tools,
+        gathered resources, quests, gardens, and house upgrades do not follow
+        your account to another browser yet. Home locations, shared placed
+        builds, mail, friends, saved looks, and the Neighborhood Pouch are server-kept.
+      </p>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="setting-export-save">
           Download a backup

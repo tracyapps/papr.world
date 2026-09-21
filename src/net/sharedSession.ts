@@ -531,7 +531,12 @@ export async function initializeSharedSession(): Promise<void> {
       });
       connected = true;
       ui.setStatus(`online as ${config.name}`, true);
-      if (rejoinAttempt === 0) ui.addNotice(`You are visiting ${destination}.`);
+      if (rejoinAttempt === 0) {
+        ui.addNotice(`You are visiting ${destination}.`);
+        ui.addNotice(
+          'Save status: home locations and shared placed builds are server-kept. Your tech tree, crafted tools, resources, quests, gardens, and house upgrades still stay in this browser.',
+        );
+      }
       publishStatus({
         phase: 'online',
         message: `Online in ${destination}.`,

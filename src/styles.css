@@ -2601,6 +2601,29 @@ body {
 .multiplayer-state p[data-phase='offline'],
 .multiplayer-state p[data-phase='setup-error'] { color: #9c493b; }
 
+.multiplayer-save-state {
+  background: rgb(255 247 218 / 0.86);
+  border: 1px solid rgb(138 90 42 / 0.24);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.multiplayer-save-state h3 {
+  color: #7b6856;
+  font: 800 10px/1 system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.multiplayer-save-state strong { color: #8a5a2a; font: 800 12px/1.3 system-ui, sans-serif; }
+.multiplayer-save-state p { color: #5b4939; font: 700 11px/1.35 system-ui, sans-serif; margin: 0; }
+.multiplayer-save-state small { color: #75624f; display: block; font: 600 10px/1.35 system-ui, sans-serif; }
+.save-scope-note strong { color: #8a5a2a; }
+
 .multiplayer-connect { display: grid; gap: 11px; margin-top: 15px; }
 .multiplayer-connect[hidden],
 .multiplayer-visit[hidden] { display: none; }

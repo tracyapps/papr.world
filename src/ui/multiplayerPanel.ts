@@ -10,6 +10,7 @@ import {
   buildSoloUrl,
   generateInviteCode,
 } from '../net/sharedConfig';
+import { progressPersistenceCopy } from '../net/progressPersistence';
 import { revealMultiplayerPanel } from './multiplayerPanelState';
 
 let overlay: HTMLElement | null = null;
@@ -30,6 +31,13 @@ function buildOverlay(): HTMLElement {
       <section class="multiplayer-state" aria-labelledby="multiplayer-state-title">
         <h3 id="multiplayer-state-title">Connection</h3>
         <p data-multiplayer-state role="status" aria-live="polite">Playing in your solo world.</p>
+      </section>
+      <section class="multiplayer-save-state" aria-labelledby="multiplayer-save-title">
+        <h3 id="multiplayer-save-title">Save status</h3>
+        <strong data-progress-save-label>Saved on this browser</strong>
+        <p data-progress-save-summary></p>
+        <small data-progress-save-server></small>
+        <small data-progress-save-local></small>
       </section>
       <form class="multiplayer-connect" data-multiplayer-connect>
         <label>
@@ -148,6 +156,15 @@ function reflectStatus(next: SharedSessionStatus): void {
     state.textContent = next.message;
     state.dataset.phase = next.phase;
   }
+  const persistence = progressPersistenceCopy(next.phase);
+  const saveLabel = overlay.querySelector<HTMLElement>('[data-progress-save-label]');
+  const saveSummary = overlay.querySelector<HTMLElement>('[data-progress-save-summary]');
+  const saveServer = overlay.querySelector<HTMLElement>('[data-progress-save-server]');
+  const saveLocal = overlay.querySelector<HTMLElement>('[data-progress-save-local]');
+  if (saveLabel) saveLabel.textContent = persistence.label;
+  if (saveSummary) saveSummary.textContent = persistence.summary;
+  if (saveServer) saveServer.textContent = persistence.server;
+  if (saveLocal) saveLocal.textContent = persistence.local;
   const hasInvite = Boolean(next.inviteCode);
   if (connect) connect.hidden = hasInvite;
   if (visit) visit.hidden = !hasInvite;
