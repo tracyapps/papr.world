@@ -61,6 +61,67 @@ function box(width: number, height: number, depth: number, material: THREE.Mater
 const scaffoldMaterial = createColorMaterial('#b58a4a', 0.9);
 const doorMaterial = createColorMaterial('#3b2c22', 0.95);
 
+/** The owner's own house is intentionally omitted from `sharedHomeVisuals`,
+ * so give it a small, friendlier placard of its own. Neighbors still see the
+ * larger status/address signs published with the shared home marker. */
+function buildOwnerSign(): THREE.Group {
+  const host = new THREE.Group();
+  host.name = 'my-home-sign';
+  const x = -1.3;
+  const z = 1.75;
+  const height = 0.9;
+  const post = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.045, height, 6),
+    createColorMaterial('#7c5c3a', 0.92),
+  );
+  post.position.set(x, height / 2, z);
+  post.castShadow = true;
+  host.add(post);
+
+  // Vitest's renderer-free scene checks have no document; the post is enough
+  // there. In a browser, the canvas becomes the paper board itself.
+  if (typeof document === 'undefined') return host;
+  const canvas = document.createElement('canvas');
+  canvas.width = 384;
+  canvas.height = 152;
+  const context = canvas.getContext('2d');
+  if (context) {
+    context.fillStyle = 'rgba(238, 244, 220, 0.98)';
+    context.strokeStyle = '#5e7046';
+    context.lineWidth = 7;
+    context.beginPath();
+    context.roundRect(7, 7, 370, 138, 18);
+    context.fill();
+    context.stroke();
+
+    // A loose pencil roof makes this read as a personal place marker rather
+    // than the construction/open-house noticeboard used for neighbors.
+    context.strokeStyle = '#b06f45';
+    context.lineWidth = 7;
+    context.lineCap = 'round';
+    context.beginPath();
+    context.moveTo(128, 55);
+    context.lineTo(192, 24);
+    context.lineTo(256, 55);
+    context.stroke();
+
+    context.textAlign = 'center';
+    context.fillStyle = '#445237';
+    context.font = '700 32px Georgia, serif';
+    context.fillText('MY HOME', 192, 94);
+    context.fillStyle = '#74624d';
+    context.font = 'italic 19px Georgia, serif';
+    context.fillText('welcome back', 192, 124);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const board = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthWrite: false }));
+  board.position.set(x, height - 0.12, z);
+  board.scale.set(1.42, 0.56, 1);
+  host.add(board);
+  return host;
+}
+
 function addScaffolding(host: THREE.Group, width: number, depth: number, height: number, x = 0, z = 0) {
   const corners: Array<[number, number]> = [
     [-width / 2 - 0.15, -depth / 2 - 0.15], [width / 2 + 0.15, -depth / 2 - 0.15],
@@ -160,9 +221,13 @@ function redraw() {
     root.remove(child);
     child.traverse((node) => {
       if (node instanceof THREE.Mesh) node.geometry.dispose();
+      if (node instanceof THREE.Sprite) {
+        node.material.map?.dispose();
+        node.material.dispose();
+      }
     });
   }
-  root.add(buildHouse(plan));
+  root.add(buildHouse(plan), buildOwnerSign());
 }
 
 /** The saved Home place this house stands beside. */

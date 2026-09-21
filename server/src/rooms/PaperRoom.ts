@@ -565,6 +565,15 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       this.reject(client, ClientMessage.PlacePiece, 'invalid');
       return;
     }
+    const isInteriorPiece = intent.page.startsWith('in:');
+    // Interior furniture belongs to the home, not merely to a generic
+    // `in:home:0,0` page shared by every account. Only the owner may furnish
+    // that room; a visitor's client is intentionally read-only there.
+    if ((isInteriorPiece && player.inside !== player.accountId)
+      || (!isInteriorPiece && player.inside !== '')) {
+      this.reject(client, ClientMessage.PlacePiece, 'not-allowed');
+      return;
+    }
     const isCase = intent.templateKey === DISPLAY_CASE_TEMPLATE && !isGuestAccount(player.accountId);
     if (isCase) {
       let cases = 0;
@@ -586,6 +595,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     piece.material = intent.material;
     piece.makerId = player.accountId; // durable credit, never the session id
     piece.page = intent.page || player.page;
+    piece.home = isInteriorPiece ? player.accountId : '';
 
     this.state.pieces.set(piece.id, piece);
     // A display case is a piece with a held stock; its record is made with it.
@@ -1605,6 +1615,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         material: p.material,
         makerId: p.makerId,
         page: p.page,
+        ...(p.home ? { home: p.home } : {}),
       });
     });
     const nodes: ResourceNode[] = [];
@@ -1658,6 +1669,10 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       piece.material = p.material ?? '';
       piece.makerId = p.makerId;
       piece.page = p.page;
+      // Before protocol 12 the client already prevented visitors from
+      // building, but the save had no explicit home scope. Those pieces can
+      // therefore be attributed to their maker without ambiguity.
+      piece.home = p.home ?? (p.page.startsWith('in:home:') ? p.makerId : '');
       this.state.pieces.set(piece.id, piece);
     }
     // Display cases live in the mail store (goods must move atomically with

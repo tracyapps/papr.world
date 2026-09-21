@@ -95,6 +95,7 @@ const lastEntry = (guest: Guest) => guest.entries[guest.entries.length - 1]?.out
 type SyncedState = {
   players?: Map<string, { accountId: string; inside: string; x: number; z: number }>;
   homes?: Map<string, { parts: string; building: string; open: boolean; name: string }>;
+  pieces?: Map<string, { id: string; templateKey: string; makerId: string; page: string; home: string }>;
 };
 const playerOf = (viewer: Guest, target: Guest) =>
   [...((viewer.room.state as SyncedState | undefined)?.players?.values() ?? [])]
@@ -187,6 +188,37 @@ describe('player cards', () => {
       accountId: tapps.accountId,
       found: true,
       drawingKey: design.id,
+    });
+  });
+});
+
+describe('furniture inside a home', () => {
+  it('stamps the owner home on furniture so every visitor can route it to that room', async () => {
+    const tapps = await join('Furniture owner');
+    const visitor = await join('Furniture visitor');
+    publishHome(tapps);
+    await until(() => Boolean(homeOf(visitor, tapps)), 'the home is visible');
+    enter(tapps, tapps);
+    await until(() => playerOf(visitor, tapps)?.inside === tapps.accountId, 'the owner is inside');
+
+    tapps.room.send(ClientMessage.PlacePiece, {
+      templateKey: 'paper-bench',
+      x: 40_002,
+      z: 40_001,
+      rotY: 0,
+      page: 'in:home:0,0',
+      material: 'kraft-twigs',
+    });
+    let furniture: SyncedState['pieces'] extends Map<string, infer P> | undefined ? P | undefined : never;
+    await until(() => {
+      furniture = [...((visitor.room.state as SyncedState | undefined)?.pieces?.values() ?? [])]
+        .find((piece) => piece.makerId === tapps.accountId && piece.page === 'in:home:0,0');
+      return Boolean(furniture);
+    }, 'the furniture reaches the visitor');
+
+    expect(furniture).toMatchObject({
+      templateKey: 'paper-bench',
+      home: tapps.accountId,
     });
   });
 });

@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 11; // v11: display cases — a synced `cases` map and the case messages. (v10: guests — homes carry parts and an open sign, players carry `inside`, friends/entry/knock messages)
+export const PROTOCOL_VERSION = 12; // v12: placed pieces carry their home scope so furniture renders only in that interior. (v11: display cases)
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;

@@ -18,6 +18,7 @@ import { snapCamera } from './camera';
 import {
   announceLeftHome,
   announceOwnHome,
+  getSelfAccount,
   guestsAvailable,
   setGuestHandlers,
   subscribeGuests,
@@ -26,6 +27,7 @@ import { setInteractionsIndoors } from './interactionRouter';
 import { interiorGround, interiorScene, refreshInterior, setInteriorBuildsVisible } from './interiorScene';
 import { showPetToast } from './petting';
 import { setPlacementOverlayScene } from './placement';
+import { setSharedPieceInteriorOwner } from '../net/sharedPieceVisuals';
 
 /**
  * Stepping through the home's door, and back out (design in
@@ -109,6 +111,7 @@ function enterInterior() {
   setSceneGround(interiorGround(parts()));
   setInteractionsIndoors(true);
   setInteriorBuildsVisible(!visiting);
+  setSharedPieceInteriorOwner(visiting?.accountId ?? getSelfAccount());
   setPlacementOverlayScene(interiorScene);
   moveAvatarToScene(interiorScene);
   placeAvatarAt(layout.entry.x, layout.entry.z);
@@ -125,6 +128,7 @@ function enterSurface() {
   const step = outsideDoorstep();
   setSceneGround(null);
   setInteractionsIndoors(false);
+  setSharedPieceInteriorOwner(null);
   setPlacementOverlayScene(surfaceScene);
   moveAvatarToScene(surfaceScene);
   placeAvatarAt(step.x, step.z);

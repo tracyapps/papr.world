@@ -2,23 +2,30 @@ import * as THREE from 'three';
 import type { PlacedPiece } from '../../shared/src/index';
 import { scene } from '../render/context';
 import { registerCasePiece, unregisterCasePiece } from '../game/cases';
+import { getSelfAccount } from '../game/guests';
+import { interiorScene } from '../game/interiorScene';
 import { getGameState } from '../sim/state';
 import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
 import { sampleTerrainHeight } from '../world/terrain';
 
 const root = new THREE.Group();
-root.name = 'shared-pieces';
+root.name = 'shared-surface-pieces';
+const interiorRoot = new THREE.Group();
+interiorRoot.name = 'shared-interior-pieces';
 const visuals = new Map<string, { piece: PlacedPiece; group: THREE.Group }>();
+let interiorOwner: string | null = null;
 
 export function initializeSharedPieceVisuals(): void {
   if (!root.parent) scene.add(root);
+  if (!interiorRoot.parent) interiorScene.add(interiorRoot);
 }
 
 export function addSharedPiece(piece: PlacedPiece): void {
   removeSharedPiece(piece.id);
   const group = buildPlacedPieceVisual(piece);
-  group.position.set(piece.x, sampleTerrainHeight(piece.x, piece.z) + 0.01, piece.z);
-  root.add(group);
+  const indoors = Boolean(piece.home);
+  group.position.set(piece.x, indoors ? 0.01 : sampleTerrainHeight(piece.x, piece.z) + 0.01, piece.z);
+  (indoors ? interiorRoot : root).add(group);
   visuals.set(piece.id, { piece, group });
   registerCasePiece(piece);
   syncSharedPieceVisibility();
@@ -35,8 +42,16 @@ export function removeSharedPiece(id: string): void {
 /** Hide the server echo of a piece already represented by this device's solo save. */
 export function syncSharedPieceVisibility(): void {
   for (const { piece, group } of visuals.values()) {
-    group.visible = !hasLocalEquivalent(piece);
+    const inVisibleScene = piece.home ? piece.home === interiorOwner : interiorOwner === null;
+    group.visible = inVisibleScene && !hasLocalEquivalent(piece);
   }
+}
+
+/** Select which home's server-owned furniture the interior scene draws.
+ * `null` means the player is back outside. */
+export function setSharedPieceInteriorOwner(accountId: string | null): void {
+  interiorOwner = accountId;
+  syncSharedPieceVisibility();
 }
 
 /** The group drawing a piece the neighborhood knows about (hidden when this device draws its own copy). */
@@ -64,6 +79,9 @@ export function countMakerPiecesOnPage(accountId: string, page: string): number 
 }
 
 function hasLocalEquivalent(target: PlacedPiece): boolean {
+  // A visitor's own save also uses `in:home:0,0`; it must never hide a host's
+  // chair merely because both people put the same chair at the same coordinates.
+  if (target.makerId !== getSelfAccount()) return false;
   for (const page of Object.values(getGameState().world.pages)) {
     for (const piece of Object.values(page.placedPieces)) {
       if (

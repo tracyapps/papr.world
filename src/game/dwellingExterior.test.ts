@@ -23,6 +23,7 @@ describe('the local home exterior', () => {
     const page = new THREE.Group();
     buildDwellingExterior(page);
     const exterior = page.getObjectByName('home-exterior');
+    expect(exterior?.getObjectByName('my-home-sign')).toBeTruthy();
     expect(exterior?.position.x).toBeCloseTo(homePosition({ x: -1.5, z: -2.2 }).x);
 
     expect(setHomePlace(6.5, -2.2)).toBe(true);

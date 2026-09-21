@@ -407,6 +407,7 @@ function readPiece(id: string, raw: any): PlacedPiece {
     material: raw.material ?? '',
     makerId: raw.makerId,
     page: raw.page,
+    home: raw.home ?? '',
   };
 }
 

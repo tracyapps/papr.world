@@ -88,6 +88,9 @@ export type PlacedPiece = {
    */
   makerId: string;
   page: string;
+  /** Account id of the home containing this piece; absent/empty on the surface.
+   * Optional only so v1 room saves written before interior sharing still load. */
+  home?: string;
 };
 
 /**

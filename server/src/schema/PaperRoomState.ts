@@ -59,6 +59,8 @@ export class PieceSchema extends Schema {
   /** Durable ACCOUNT id of the maker — stamped server-side, never client-sent. */
   @type('string') makerId = '';
   @type('string') page = '0,0';
+  /** Account id of the home this furniture belongs to; empty on the surface. */
+  @type('string') home = '';
 }
 
 export class HomeSchema extends Schema {
