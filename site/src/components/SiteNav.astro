@@ -16,7 +16,6 @@ const links = [
   { href: '/how-it-works/', label: 'How it works' },
   { href: '/roadmap/',      label: 'Roadmap' },
   { href: '/reference/',    label: 'Reference' },
-  { href: '/account/',      label: 'My desk' },
 ];
 
 const here = Astro.url.pathname;
@@ -64,7 +63,13 @@ const isCurrent = (href: string) =>
       </svg>
     </button>
 
-    <a class="nav__cta" href="/enter/">I have a code</a>
+    <a
+      class="nav__cta"
+      href="/account/"
+      aria-current={isCurrent('/account/') ? 'page' : undefined}
+    >
+      My desk
+    </a>
   </div>
 </nav>
 
@@ -184,6 +189,10 @@ const isCurrent = (href: string) =>
     white-space: nowrap;
 
     &:hover { background: var(--kraft); color: var(--ink); }
+
+    &[aria-current="page"] {
+      box-shadow: inset 0 -3px 0 var(--crayon), 0 6px 14px var(--sh-1);
+    }
   }
 
   // ── Wide screens: one row, pinned to the top of the viewport ────────────
