@@ -436,6 +436,7 @@ registerScreenInteraction({
 registerScreenInteraction({
   id: 'build-placement',
   priority: 15,
+  scene: 'any',
   hitTest: (x, y) => getActionMode() === 'place' && pickTerrainAtScreen(x, y) !== null,
   interact: tryPlaceAt,
 });
@@ -626,7 +627,8 @@ function homeIsNearerThanMaker(): boolean {
 }
 
 /** The frame loop while the player is inside their home. */
-function animateIndoors(delta: number) {
+function animateIndoors(delta: number, elapsed: number, animationTime: number) {
+  updateTimedAction(animationTime);
   updateGamepadCamera(delta);
   updateAvatar(delta);
   // If the room cannot place you inside (a guest in their own tent), friends
@@ -638,6 +640,8 @@ function animateIndoors(delta: number) {
   updateVisitPrompt(avatar.position, true);
   updateCasePrompt(avatar.position, getCurrentPageId(), true);
   updateHome();
+  const hovered = getActionMode() === 'place' ? pickTerrainAtScreen(pointerX, pointerY) : null;
+  updateBuildOverlay(delta, elapsed, avatar.position, hovered);
   // Act stays live indoors: it is the way out, and the home's own panel.
   refreshTouchControls();
   updateCamera(avatar.position);
@@ -673,7 +677,7 @@ function animate(animationTime = 0) {
   // still (plants and builds run on timestamps, so nothing is lost) and none of
   // its systems ever see the interior's coordinates.
   if (isIndoors()) {
-    animateIndoors(delta);
+    animateIndoors(delta, elapsed, animationTime);
     return;
   }
 

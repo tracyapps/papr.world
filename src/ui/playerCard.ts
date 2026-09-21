@@ -26,6 +26,7 @@ import {
   type SocialLinkKind,
 } from '../../shared/src/index';
 import { designToDataUrl } from './avatarEditor/render';
+import { getWornDesign } from './avatarEditor/wardrobe';
 import { fetchDesignJson } from '../net/remoteAvatarVisuals';
 import { countMakerPiecesOnPage } from '../net/sharedPieceVisuals';
 import { getCurrentPageId } from '../world/streaming';
@@ -269,6 +270,10 @@ export function openMyPlayerCard(): void {
   window.addEventListener('keydown', swallowStrayKeys, true);
   window.addEventListener('keyup', swallowStrayKeys, true);
   document.body.appendChild(overlay);
+
+  const worn = getWornDesign();
+  const avatarImage = overlay.querySelector<HTMLImageElement>('.player-card-avatar');
+  if (worn && avatarImage) avatarImage.src = designToDataUrl(worn, { shadow: true });
 
   const heading = overlay.querySelector<HTMLElement>('#player-card-name');
   if (heading && !overlay.contains(document.activeElement)) heading.focus();
@@ -651,6 +656,17 @@ export function handlePlayerCardResponse(info: PlayerCardInfo): void {
   const creations = openAccountId ? creationsLine(openAccountId) : '';
   const since = info.papersSince ? `Papering since ${monthYear(info.papersSince)}.` : '';
   metaElement.textContent = [creations, since].filter(Boolean).join(' ');
+
+  // Cards opened from a home or address do not begin with a live-avatar hit,
+  // so their target has no drawing key. The room response supplies the
+  // account's current public look and also corrects a stale join-time key.
+  const avatarImage = sharedElement?.querySelector<HTMLImageElement>('.player-card-avatar') ?? null;
+  if (avatarImage && typeof info.drawingKey === 'string'
+    && avatarImage.dataset.drawingKey !== info.drawingKey) {
+    avatarImage.dataset.drawingKey = info.drawingKey;
+    avatarImage.src = PLACEHOLDER_AVATAR;
+    void renderAvatarPreview(avatarImage, info.drawingKey);
+  }
 
   if (profileHost) renderProfile(profileHost, info);
 

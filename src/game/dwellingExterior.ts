@@ -3,8 +3,8 @@ import { shadowed } from '../render/builders';
 import { createColorMaterial, getMaterial } from '../render/materials';
 import { invalidateFootprintCache } from '../world/footprints';
 import { homeFacing } from '../world/homeSite';
-import { registerMapFeature } from '../world/mapFeatures';
-import { getPlace, HOME_PLACE_ID } from '../world/places';
+import { registerMapFeature, updateMapFeaturePosition } from '../world/mapFeatures';
+import { getPlace, HOME_PLACE_ID, onPlacesChanged } from '../world/places';
 import { sampleTerrainHeight } from '../world/terrain';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import {
@@ -171,6 +171,17 @@ function homePlace(): { x: number; z: number } {
   return place ? { x: place.x, z: place.z } : { x: -1.5, z: -2.2 };
 }
 
+/** A lot move changes no boards, walls, or roof, so it must not depend on the
+ * exterior's appearance signature. Keep the drawn house, its map footprint,
+ * and collision cache on the saved Home place whenever allocation moves it. */
+function syncPosition() {
+  if (!root) return;
+  const spot = homePosition(homePlace());
+  root.position.set(spot.x, sampleTerrainHeight(spot.x, spot.z), spot.z);
+  updateMapFeaturePosition('home-tent', spot.x, spot.z);
+  invalidateFootprintCache();
+}
+
 export function buildDwellingExterior(parent: THREE.Group) {
   const spot = homePosition(homePlace());
   root = new THREE.Group();
@@ -190,7 +201,9 @@ export function buildDwellingExterior(parent: THREE.Group) {
   });
   rendered = '';
   redraw();
+  syncPosition();
   onGameStateChanged(redraw);
+  onPlacesChanged(syncPosition);
 }
 
 export function isNearHomeExterior(position: { x: number; z: number }): boolean {

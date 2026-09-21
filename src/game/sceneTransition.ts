@@ -23,8 +23,9 @@ import {
   subscribeGuests,
 } from './guests';
 import { setInteractionsIndoors } from './interactionRouter';
-import { interiorGround, interiorScene, refreshInterior } from './interiorScene';
+import { interiorGround, interiorScene, refreshInterior, setInteriorBuildsVisible } from './interiorScene';
 import { showPetToast } from './petting';
+import { setPlacementOverlayScene } from './placement';
 
 /**
  * Stepping through the home's door, and back out (design in
@@ -107,6 +108,8 @@ function enterInterior() {
   refreshInterior(parts());
   setSceneGround(interiorGround(parts()));
   setInteractionsIndoors(true);
+  setInteriorBuildsVisible(!visiting);
+  setPlacementOverlayScene(interiorScene);
   moveAvatarToScene(interiorScene);
   placeAvatarAt(layout.entry.x, layout.entry.z);
   snapCamera(avatar.position);
@@ -122,6 +125,7 @@ function enterSurface() {
   const step = outsideDoorstep();
   setSceneGround(null);
   setInteractionsIndoors(false);
+  setPlacementOverlayScene(surfaceScene);
   moveAvatarToScene(surfaceScene);
   placeAvatarAt(step.x, step.z);
   snapCamera(avatar.position);

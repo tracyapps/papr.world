@@ -1007,8 +1007,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
   /**
    * The player card (avatar-and-identity.md §3). A live avatar already tells
    * a viewer someone's name and current look through room state; this fills
-   * in what only the account itself holds: the papering-since date and any
-   * wardrobe designs opted into `sharedOnCard`.
+   * in the current room look plus what only the account itself holds: the
+   * papering-since date and any wardrobe designs opted into `sharedOnCard`.
    *
    * `found: false` is the one answer for every reason to say no — no such
    * account, a guest with nothing account-owned to show, or the target has
@@ -1042,6 +1042,8 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     const sharedDesignIds = avatarDesigns.listFor(accountId)
       .filter((design) => design.sharedOnCard)
       .map((design) => design.id);
+    const liveTarget = [...this.state.players.values()]
+      .find((candidate) => candidate.accountId === accountId);
 
     // The profile half is viewer-filtered: the relationship decides which
     // fields the owner's per-field visibility lets this particular viewer see.
@@ -1064,6 +1066,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     client.send(ServerMessage.PlayerCard, {
       accountId,
       found: true,
+      drawingKey: liveTarget?.avatar.drawingKey ?? '',
       papersSince: account.createdAt,
       sharedDesignIds,
       relationship,

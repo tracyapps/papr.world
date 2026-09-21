@@ -26,6 +26,8 @@ import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
 import { findBuildFootprintBlocker, invalidateFootprintCache } from '../world/footprints';
 import { refreshBuiltPageTerrain } from '../world/streaming';
 import { sampleTerrainHeight } from '../world/terrain';
+import { groundHeightAt, isInteriorActive, solidAt } from '../world/activeScene';
+import { HOME_INTERIOR_PAGE_ID, HOME_INTERIOR_SCENE, sceneOfPageId } from '../world/scenes';
 import { pageId, pageOfPosition } from '../world/types';
 import { avatar } from './avatar';
 import { pickTerrainAtScreen } from './toolActions';
@@ -37,6 +39,7 @@ import { createGroundRing, setGhostAppearance } from './gardenOverlay';
 import { startTimedAction } from './timedAction';
 import { publishSharedPlacedPiece } from '../net/sharedSession';
 import { setPlacedPieceVisualVisible } from './placedPieceInteractions';
+import { refreshInteriorBuilds } from './interiorScene';
 
 // Build-mode placement: choosing a piece, aiming it at the ground, seeing a
 // translucent ghost plus the footprints it respects, and putting it down.
@@ -70,6 +73,7 @@ type PlaceAssessment = {
   message?: string;
   site?: BuildSiteState;
   rotY?: number;
+  pageId?: string;
 };
 
 type ActiveBuildPreview = {
@@ -190,16 +194,17 @@ export function isCarryingPlacedPiece() {
 
 /** The piece standing at this ground point that the local player made, if any. */
 function ownedPieceAtPoint(x: number, z: number): { piece: PlacedPiece; pageId: string } | null {
-  for (const page of Object.values(getGameState().world.pages)) {
-    for (const piece of Object.values(page.placedPieces)) {
-      if (piece.makerId !== LOCAL_MAKER_ID) continue;
-      const def = buildPieceDef(piece.templateKey);
-      if (buildPieceDefsConflict(
-        PICKUP_POINT_DEF, { x, z, rotY: 0 },
-        def, { x: piece.x, z: piece.z, rotY: piece.rotY },
-      )) {
-        return { piece, pageId: piece.page };
-      }
+  const activePageId = currentBuildPageId(x, z);
+  if (!activePageId) return null;
+  const page = getGameState().world.pages[activePageId];
+  for (const piece of Object.values(page?.placedPieces ?? {})) {
+    if (piece.makerId !== LOCAL_MAKER_ID) continue;
+    const def = buildPieceDef(piece.templateKey);
+    if (buildPieceDefsConflict(
+      PICKUP_POINT_DEF, { x, z, rotY: 0 },
+      def, { x: piece.x, z: piece.z, rotY: piece.rotY },
+    )) {
+      return { piece, pageId: piece.page };
     }
   }
   return null;
@@ -230,19 +235,22 @@ function assessCarryDropAtPoint(point: THREE.Vector3): PlaceAssessment {
   if (!withinPlaceReach(point)) {
     return { status: 'out-of-reach', message: 'That spot is out of reach — walk a little closer' };
   }
-  if (pageIdAt(point.x, point.z) !== pageId) {
+  if (currentBuildPageId(point.x, point.z) !== pageId) {
     return { status: 'blocked', message: 'Keep it somewhere in its own neighborhood for now' };
   }
   const radius = Math.max(def.radiusX, def.radiusZ);
-  const blocker = findBuildFootprintBlocker(point.x, point.z, radius);
+  const blocker = isInteriorActive() ? null : findBuildFootprintBlocker(point.x, point.z, radius);
+  if (isInteriorActive() && solidAt(point.x, point.z, radius)) {
+    return { status: 'blocked', message: 'That would crowd the wall or doorway' };
+  }
   if (blocker) {
     return { status: 'blocked', message: `There is ${blocker.label} tucked into that spot` };
   }
-  const critter = getCritterNearGroundPoint(point.x, point.z, radius + 0.35);
+  const critter = isInteriorActive() ? null : getCritterNearGroundPoint(point.x, point.z, radius + 0.35);
   if (critter) {
     return { status: 'occupied', message: `${critter.params.name} is right there — best not set it down on a neighbor` };
   }
-  if (crowdingPiece(point.x, point.z, piece.templateKey as BuildPieceKey, rotY, piece.id)) {
+  if (crowdingPiece(pageId, point.x, point.z, piece.templateKey as BuildPieceKey, rotY, piece.id)) {
     return { status: 'too-close', message: 'That is too close to something else you have placed' };
   }
   return { status: 'valid', def: def as BuildPieceDef, point, rotY };
@@ -277,7 +285,8 @@ function dropCarriedPiece(point: THREE.Vector3, material: BuildMaterialId) {
       return;
     }
     invalidateFootprintCache();
-    refreshBuiltPageTerrain(pageId);
+    if (sceneOfPageId(pageId) === HOME_INTERIOR_SCENE) refreshInteriorBuilds();
+    else refreshBuiltPageTerrain(pageId);
     playCozySound('rustle');
     showPetToast(result.message);
   };
@@ -314,23 +323,21 @@ function withinPlaceReach(point: THREE.Vector3) {
 
 /** The first existing piece whose real rotated footprint conflicts.
  * `excludeId` leaves a piece's own old footprint out of its own move check. */
-function crowdingPiece(x: number, z: number, key: BuildPieceKey, rotY: number, excludeId?: string) {
+function crowdingPiece(pageId: string, x: number, z: number, key: BuildPieceKey, rotY: number, excludeId?: string) {
   const target = { templateKey: key, x, z, rotY };
-  for (const page of Object.values(getGameState().world.pages)) {
-    for (const piece of Object.values(page.placedPieces)) {
-      if (piece.id === excludeId) continue;
-      if (buildPiecesConflict(target, piece)) return piece;
-    }
+  const page = getGameState().world.pages[pageId];
+  for (const piece of Object.values(page?.placedPieces ?? {})) {
+    if (piece.id === excludeId) continue;
+    if (buildPiecesConflict(target, piece)) return piece;
   }
   return null;
 }
 
-function crowdingBuildSite(x: number, z: number, key: BuildPieceKey, rotY: number) {
+function crowdingBuildSite(pageId: string, x: number, z: number, key: BuildPieceKey, rotY: number) {
   const target = { templateKey: key, x, z, rotY };
-  for (const page of Object.values(getGameState().world.pages)) {
-    for (const site of Object.values(page.buildSites)) {
-      if (buildPiecesConflict(target, site)) return site;
-    }
+  const page = getGameState().world.pages[pageId];
+  for (const site of Object.values(page?.buildSites ?? {})) {
+    if (buildPiecesConflict(target, site)) return site;
   }
   return null;
 }
@@ -340,6 +347,10 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
   const key = selectedKey;
   if (!key) return { status: 'no-piece' };
   const def = BUILD_PIECE_DEFS[key];
+  const buildPageId = currentBuildPageId(point.x, point.z);
+  if (!buildPageId) {
+    return { status: 'blocked', def, point, message: 'You can only decorate your own home' };
+  }
   const definition = buildAssemblyDef(key);
   const state = getGameState();
   const equipped = state.player.equippedTool;
@@ -354,15 +365,18 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
     return { status: 'out-of-reach', def, message: 'That spot is out of reach — walk a little closer' };
   }
   const radius = Math.max(def.radiusX, def.radiusZ);
-  const blocker = findBuildFootprintBlocker(point.x, point.z, radius);
+  const blocker = isInteriorActive() ? null : findBuildFootprintBlocker(point.x, point.z, radius);
+  if (isInteriorActive() && solidAt(point.x, point.z, radius)) {
+    return { status: 'blocked', def, point, message: 'That would crowd the wall or doorway' };
+  }
   if (blocker) {
     return { status: 'blocked', def, point, message: `There is ${blocker.label} tucked into that spot` };
   }
-  const critter = getCritterNearGroundPoint(point.x, point.z, radius + 0.35);
+  const critter = isInteriorActive() ? null : getCritterNearGroundPoint(point.x, point.z, radius + 0.35);
   if (critter) {
     return { status: 'occupied', def, point, message: `${critter.params.name} is right there — best not build on a neighbor` };
   }
-  const buildSite = crowdingBuildSite(point.x, point.z, key, rotY);
+  const buildSite = crowdingBuildSite(buildPageId, point.x, point.z, key, rotY);
   if (buildSite) {
     if (buildSite.templateKey !== key) {
       return { status: 'too-close', def, point, message: 'That space belongs to another unfinished build' };
@@ -378,6 +392,7 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
       point: new THREE.Vector3(buildSite.x, point.y, buildSite.z),
       site: buildSite,
       rotY: buildSite.rotY,
+      pageId: buildPageId,
     };
   }
   // Knowing the plan gates starting a piece; a build already underway (handled
@@ -386,7 +401,7 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
   if (missingPlan) {
     return { status: 'blocked', def, point, message: `Learn the ${RECIPE_DEFS[missingPlan].name} plan with the Professor first` };
   }
-  if (crowdingPiece(point.x, point.z, key, rotY)) {
+  if (crowdingPiece(buildPageId, point.x, point.z, key, rotY)) {
     return { status: 'too-close', def, point, message: 'That is too close to something you have already placed' };
   }
   const firstStep = nextBuildStep(definition, []);
@@ -394,7 +409,7 @@ export function assessPlaceAtPoint(point: THREE.Vector3, rotY = selectedRotY): P
   if (!resolveIngredientAllocation(state.player.inventory, firstStep.materials)) {
     return { status: 'blocked', def, point, message: `More materials are needed for ${firstStep.label.toLowerCase()}` };
   }
-  return { status: 'valid', def, point, rotY };
+  return { status: 'valid', def, point, rotY, pageId: buildPageId };
 }
 
 /** Screen-space wrapper: pick the ground under the pointer, then assess. */
@@ -411,6 +426,14 @@ export function placeTargetStatusAtScreen(clientX: number, clientY: number): Pla
 function pageIdAt(x: number, z: number) {
   const page = pageOfPosition(x, z);
   return pageId(page.px, page.pz);
+}
+
+/** The save page receiving a build in the active scene. A guest's saved
+ * scene remains `surface`, which intentionally makes their host's room read
+ * only instead of writing the guest's furniture into it. */
+export function currentBuildPageId(x: number, z: number): string | null {
+  if (!isInteriorActive()) return pageIdAt(x, z);
+  return getGameState().player.scene === HOME_INTERIOR_SCENE ? HOME_INTERIOR_PAGE_ID : null;
 }
 
 // ---- Placement -----------------------------------------------------------
@@ -470,7 +493,7 @@ export function tryPlaceAt(clientX: number, clientY: number) {
       durationMs: step.durationSeconds * 1000,
     }],
     onComplete: () => {
-      const buildPageId = assessment.site?.page || pageIdAt(x, z);
+      const buildPageId = assessment.site?.page || assessment.pageId || pageIdAt(x, z);
       const piecesBefore = new Set(
         Object.keys(getGameState().world.pages[buildPageId]?.placedPieces ?? {}),
       );
@@ -493,7 +516,8 @@ export function tryPlaceAt(clientX: number, clientY: number) {
       // A finished piece or a newly persisted assembly site both change the
       // space the world reserves. The same refresh works for each outcome.
       invalidateFootprintCache();
-      refreshBuiltPageTerrain(buildPageId);
+      if (sceneOfPageId(buildPageId) === HOME_INTERIOR_SCENE) refreshInteriorBuilds();
+      else refreshBuiltPageTerrain(buildPageId);
       playCozySound('rustle');
       showPetToast(result.message);
       const finishedPiece = Object.values(
@@ -559,6 +583,13 @@ export function initializePlacement() {
   }
 }
 
+/** Keep the ghost and claimed-space rings in the scene currently being drawn. */
+export function setPlacementOverlayScene(nextScene: THREE.Scene) {
+  if (!overlayRoot || overlayRoot.parent === nextScene) return;
+  overlayRoot.removeFromParent();
+  nextScene.add(overlayRoot);
+}
+
 export function hideBuildOverlay() {
   if (overlayRoot) overlayRoot.visible = false;
 }
@@ -592,13 +623,15 @@ function syncGhost(key: BuildPieceKey | null, material: BuildMaterialId | null) 
 function syncClaimedRings(avatarPosition: THREE.Vector3) {
   if (!claimedRings) return;
   claimedRings.clear();
-  for (const page of Object.values(getGameState().world.pages)) {
+  const activePageId = currentBuildPageId(avatarPosition.x, avatarPosition.z);
+  const page = activePageId ? getGameState().world.pages[activePageId] : null;
+  if (page) {
     for (const piece of Object.values(page.placedPieces)) {
       const distance = Math.hypot(piece.x - avatarPosition.x, piece.z - avatarPosition.z);
       if (distance > RING_VIEW_RADIUS) continue;
       const def = buildPieceDef(piece.templateKey);
       const ring = createGroundRing(Math.max(0.3, def.radiusX, def.radiusZ), CLAIMED_COLOR, 0.4);
-      ring.position.set(piece.x, sampleTerrainHeight(piece.x, piece.z) + 0.03, piece.z);
+      ring.position.set(piece.x, groundHeightAt(piece.x, piece.z) + 0.03, piece.z);
       claimedRings.add(ring);
     }
     for (const site of Object.values(page.buildSites)) {
@@ -606,7 +639,7 @@ function syncClaimedRings(avatarPosition: THREE.Vector3) {
       if (distance > RING_VIEW_RADIUS) continue;
       const def = buildPieceDef(site.templateKey);
       const ring = createGroundRing(Math.max(0.3, def.radiusX, def.radiusZ), CLAIMED_COLOR, 0.32);
-      ring.position.set(site.x, sampleTerrainHeight(site.x, site.z) + 0.03, site.z);
+      ring.position.set(site.x, groundHeightAt(site.x, site.z) + 0.03, site.z);
       claimedRings.add(ring);
     }
   }
@@ -648,7 +681,7 @@ export function updateBuildOverlay(
   }
 
   const previewPoint = assessment.point ?? displayPoint;
-  const groundY = sampleTerrainHeight(previewPoint.x, previewPoint.z);
+  const groundY = groundHeightAt(previewPoint.x, previewPoint.z);
   const color = assessment.status === 'valid' ? VALID_COLOR : INVALID_COLOR;
 
   // The target ring shows the space this piece will claim. Overlapping rings

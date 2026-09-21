@@ -79,6 +79,8 @@ import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 export type NetCallbacks = {
   /** A remote player joined (self is filtered out). */
   onPlayerJoin?: (player: PlayerState) => void;
+  /** A remote player's worn cutout changed after joining. */
+  onPlayerAvatar?: (player: PlayerState) => void;
   /** A remote player left. */
   onPlayerLeave?: (id: string) => void;
   /** A build piece appeared. */
@@ -432,23 +434,42 @@ function wirePlayers(
   // temporary collection directly would miss that initial collection swap.
   $(room.state as any).players.onAdd((raw: any, id: string) => {
     if (id === selfId) return; // don't render ourselves as a remote
-    buffer.push(id, raw.x, raw.z, raw.facing);
-    let lastInside: string = raw.inside ?? '';
-    $(raw).onChange(() => {
-      buffer.push(id, raw.x, raw.z, raw.facing);
-      const inside: string = raw.inside ?? '';
-      if (inside !== lastInside) {
-        lastInside = inside;
-        callbacks.onPlayerInside?.(id, inside);
-      }
-    });
-    callbacks.onPlayerJoin?.(readPlayer(id, raw));
+    wireRemotePlayer(raw, id, $, buffer, callbacks);
   });
   $(room.state as any).players.onRemove((_raw: any, id: string) => {
     if (id === selfId) return;
     buffer.remove(id);
     callbacks.onPlayerLeave?.(id);
   });
+}
+
+/** Wire one remote player. Exported as a narrow test seam because the avatar
+ * callback lives on a nested Colyseus schema, while movement lives on its
+ * parent — the distinction that caused real worn looks to stay as fallbacks. */
+export function wireRemotePlayer(
+  raw: any,
+  id: string,
+  $: (target: any) => { onChange: (callback: () => void) => unknown },
+  buffer: Pick<RemotePlayerBuffer, 'push'>,
+  callbacks: NetCallbacks,
+): void {
+  buffer.push(id, raw.x, raw.z, raw.facing);
+  let lastInside: string = raw.inside ?? '';
+  $(raw).onChange(() => {
+    buffer.push(id, raw.x, raw.z, raw.facing);
+    const inside: string = raw.inside ?? '';
+    if (inside !== lastInside) {
+      lastInside = inside;
+      callbacks.onPlayerInside?.(id, inside);
+    }
+  });
+  // AvatarSchema is nested. Colyseus reports its fields on the child schema,
+  // not on PlayerSchema's movement callback, so a look worn just after join
+  // otherwise stays as the fallback cutout for everyone already watching.
+  if (raw.avatar) {
+    $(raw.avatar).onChange(() => callbacks.onPlayerAvatar?.(readPlayer(id, raw)));
+  }
+  callbacks.onPlayerJoin?.(readPlayer(id, raw));
 }
 
 function wirePieces(

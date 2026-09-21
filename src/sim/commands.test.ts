@@ -1049,6 +1049,25 @@ describe('placing build pieces', () => {
     expect(chosen?.material).toBe('paper.grey');
   });
 
+  it('persists a completed build on the scene-qualified home interior page', () => {
+    const state = createDefaultGameState();
+    state.player.tools['squeaky-hammer'] = 1;
+    state.player.equippedTool = 'squeaky-hammer';
+
+    const result = applyGameCommand(state, {
+      type: 'completeBuildStep', templateKey: 'path-plank', stepId: 'build',
+      x: 40_000, z: 40_000, rotY: 0, pageId: 'in:home:0,0', now: 1000,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(Object.values(state.world.pages['in:home:0,0'].placedPieces)).toHaveLength(1);
+    expect(state.world.pages['in:home:0,0'].placedPieces).toEqual(expect.objectContaining({
+      [Object.keys(state.world.pages['in:home:0,0'].placedPieces)[0]]: expect.objectContaining({
+        page: 'in:home:0,0', x: 40_000, z: 40_000,
+      }),
+    }));
+  });
+
   it('refuses an out-of-order or invented assembly step without creating a site', () => {
     const state = createDefaultGameState();
     state.player.tools['squeaky-hammer'] = 1;

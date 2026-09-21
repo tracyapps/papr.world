@@ -356,6 +356,33 @@ export function findBuildFootprintBlocker(x: number, z: number, radius: number):
   return findFootprint(x, z, radius, (footprint) => !footprint.id.startsWith('placed:'), getPage);
 }
 
+/** Breathing room between a home wall and unrelated world objects. */
+export const HOME_SITE_CLEARANCE = 0.35;
+
+/**
+ * Whether a neighborhood lot can safely hold a fully expanded home.
+ *
+ * Home footprints are excluded because the lot allocator handles those with
+ * its wider eight-unit spacing rule. Everything else counts: authored
+ * landmarks, water, generated props, and local placed pieces. Checking both
+ * future annex positions prevents a clear-looking tent lot from becoming an
+ * impossible house lot later.
+ */
+export function isHomeLotClear(place: { x: number; z: number }): boolean {
+  const isUnrelated = (footprint: DigFootprint) => (
+    !footprint.id.startsWith('home-') && !footprint.id.startsWith('neighbor:')
+  );
+  return homeSolids(place, { first: true, second: true }).every((solid) => (
+    findFootprint(
+      solid.x,
+      solid.z,
+      solid.radius + HOME_SITE_CLEARANCE,
+      isUnrelated,
+      getPage,
+    ) === null
+  ));
+}
+
 /**
  * The physical obstruction at a point, or null when it is walkable.
  *

@@ -2,8 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../render/context', () => ({ textureLoader: { load: () => ({}) } }));
 
-const { findDigFootprintBlocker, findSolidBlocker, isSolidAt } = await import('./footprints');
+const { findDigFootprintBlocker, findSolidBlocker, isHomeLotClear, isSolidAt } = await import('./footprints');
 const { getPage } = await import('./pages');
+const { HOME_OFFSET } = await import('./homeSite');
+const { HOME_FALLBACK_PLACE } = await import('./homeSite');
+const { nextLot } = await import('./neighborhood');
 
 // The clearing has to be loaded before movement queries can see it.
 //
@@ -68,6 +71,20 @@ describe('footprints', () => {
     const blocker = findSolidBlocker(HOUSE.x, HOUSE.z, 0);
     expect(blocker?.label).toBe('the house');
     expect(blocker?.id).toBe('starter-house');
+  });
+
+  it('refuses a home lot whose house would cover an existing landmark', () => {
+    const placeOverThingMaker = {
+      x: THING_MAKER.x - HOME_OFFSET.x,
+      z: THING_MAKER.z - HOME_OFFSET.z,
+    };
+    expect(isHomeLotClear(placeOverThingMaker)).toBe(false);
+  });
+
+  it('still finds a clear neighborhood lot in the authored clearing', () => {
+    const lot = nextLot([], HOME_FALLBACK_PLACE, '0,0', 16, isHomeLotClear);
+    expect(lot).not.toBeNull();
+    expect(isHomeLotClear(lot!)).toBe(true);
   });
 });
 

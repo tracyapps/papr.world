@@ -30,6 +30,7 @@ import {
   type FriendsSnapshot,
   type HomeExit,
   type KnockNotice,
+  type PlayerCardInfo,
 } from '../../../shared/src/index';
 
 let server: Server;
@@ -47,6 +48,7 @@ type Guest = {
   friends: FriendsSnapshot | null;
   exits: HomeExit[];
   chat: string[];
+  cards: PlayerCardInfo[];
 };
 
 async function join(name: string, signedIn = true): Promise<Guest> {
@@ -63,7 +65,7 @@ async function join(name: string, signedIn = true): Promise<Guest> {
   rooms.push(room);
   const guest: Guest = {
     room, accountId: account?.id ?? `guest:${room.sessionId}`,
-    entries: [], knocks: [], cleared: [], notices: [], friends: null, exits: [], chat: [],
+    entries: [], knocks: [], cleared: [], notices: [], friends: null, exits: [], chat: [], cards: [],
   };
   room.onMessage(ServerMessage.EntryResult, (m: EntryResult) => guest.entries.push(m));
   room.onMessage(ServerMessage.KnockNotice, (m: KnockNotice) => guest.knocks.push(m));
@@ -72,9 +74,10 @@ async function join(name: string, signedIn = true): Promise<Guest> {
   room.onMessage(ServerMessage.Friends, (m: FriendsSnapshot) => { guest.friends = m; });
   room.onMessage(ServerMessage.HomeExit, (m: HomeExit) => guest.exits.push(m));
   room.onMessage(ServerMessage.Chat, (m: { text: string }) => guest.chat.push(m.text));
+  room.onMessage(ServerMessage.PlayerCard, (m: PlayerCardInfo) => guest.cards.push(m));
   for (const type of [
     ServerMessage.ChatHistory, ServerMessage.Blocks, ServerMessage.Mailbox, ServerMessage.Inventory,
-    ServerMessage.HomePolicy, ServerMessage.Rejected, ServerMessage.MailSent, ServerMessage.PlayerCard,
+    ServerMessage.HomePolicy, ServerMessage.Rejected, ServerMessage.MailSent,
   ]) room.onMessage(type, () => {});
   return guest;
 }
@@ -151,6 +154,40 @@ describe('seeing homes', () => {
     publishHome(guest, ['floor']);
     await new Promise((resolve) => setTimeout(resolve, 150));
     expect(homeOf(guest, guest)).toBeUndefined();
+  });
+});
+
+describe('player cards', () => {
+  it('answers with the avatar the account is currently wearing', async () => {
+    const tapps = await join('Tapps');
+    const neighbor = await join('Neighbor');
+    const design = {
+      version: 1 as const,
+      id: 'purple-monster',
+      name: 'Purple monster',
+      silhouette: 'spikey-monster',
+      paper: { color: 'construction-purple', pattern: 'plain' },
+      strokes: [],
+      preset: 'medium' as const,
+      sharedOnCard: false,
+      createdAt: 1_000,
+      updatedAt: 1_000,
+    };
+
+    tapps.room.send(ClientMessage.WearDesign, { design, edgeColor: '#8b62a8' });
+    await until(
+      () => (playerOf(neighbor, tapps) as { avatar?: { drawingKey?: string } } | undefined)
+        ?.avatar?.drawingKey === design.id,
+      'the worn avatar reaches the neighbor',
+    );
+    neighbor.room.send(ClientMessage.RequestPlayerCard, { accountId: tapps.accountId });
+    await until(() => neighbor.cards.length === 1, 'the player card answer arrives');
+
+    expect(neighbor.cards[0]).toMatchObject({
+      accountId: tapps.accountId,
+      found: true,
+      drawingKey: design.id,
+    });
   });
 });
 

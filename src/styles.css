@@ -3278,6 +3278,7 @@ body.is-feedback-reviewing { overflow: hidden; }
   height: 36px;
   line-height: 32px;
   padding: 0;
+  position: fixed;
   right: 18px;
   text-align: center;
   top: 18px;
@@ -3465,7 +3466,7 @@ body.is-feedback-reviewing { overflow: hidden; }
    right moves every branch's columns together. */
 .tech-tree-grid {
   --tech-label-width: 168px;
-  --tech-col-width: 172px;
+  --tech-col-width: 208px;
   overflow-x: auto;
   padding-bottom: 6px;
 }
@@ -3562,7 +3563,7 @@ body.is-feedback-reviewing { overflow: hidden; }
   transform: rotate(-0.6deg);
 }
 
-.tech-node-card.is-selected {
+.tech-node-card.is-expanded {
   border-color: rgb(49 95 92 / 0.78);
   box-shadow:
     0 0 0 3px rgb(255 253 244 / 0.72),
@@ -3602,6 +3603,26 @@ body.is-feedback-reviewing { overflow: hidden; }
   background: color-mix(in srgb, var(--branch-card) 58%, #ece7dc);
   border-style: dashed;
   box-shadow: 0 5px 12px rgb(52 41 31 / 0.14);
+  filter: saturate(0.42);
+  opacity: 0.78;
+}
+
+.tech-node-locked .tech-node-card.is-expanded { opacity: 0.92; }
+
+.tech-node.is-required-highlight .tech-node-card {
+  animation: tech-requirement-pulse 900ms ease-out 2;
+  border-color: #235350;
+  border-style: solid;
+  box-shadow:
+    0 0 0 4px rgb(255 253 244 / 0.9),
+    0 0 0 8px rgb(49 95 92 / 0.7),
+    0 10px 22px rgb(43 30 21 / 0.3);
+  filter: none;
+  opacity: 1;
+}
+
+@keyframes tech-requirement-pulse {
+  50% { transform: translateY(-3px) rotate(0deg); }
 }
 
 .tech-node-owned .tech-node-card {
@@ -3664,8 +3685,54 @@ body.is-feedback-reviewing { overflow: hidden; }
   text-transform: uppercase;
 }
 
-.tech-node-card.is-selected .tech-node-select-state {
+.tech-node-card.is-expanded .tech-node-select-state {
   color: #235350;
+}
+
+.tech-node-lock {
+  background: rgb(244 240 230 / 0.9);
+  border: 1px solid rgb(109 86 68 / 0.26);
+  border-radius: 7px;
+  margin: 8px 0 9px;
+  padding: 7px;
+}
+
+.tech-node-lock-label {
+  color: #594638;
+  display: block;
+  font: 750 10px/1.2 system-ui, sans-serif;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.tech-node-requirement-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tech-node-requirement-links button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  color: #235350;
+  cursor: pointer;
+  font: 700 10px/1.25 system-ui, sans-serif;
+  padding: 2px 0;
+  text-align: left;
+}
+
+.tech-node-requirement-links button:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.72);
+  outline-offset: 2px;
+}
+
+.tech-node-lock-hint {
+  color: #725c48;
+  display: block;
+  font: 600 9px/1.35 system-ui, sans-serif;
+  margin-top: 6px;
 }
 
 .tech-node-status-badge {

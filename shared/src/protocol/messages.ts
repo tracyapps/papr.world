@@ -391,6 +391,8 @@ export type MailboxSnapshot = { items: MailItem[]; claimedIds: string[] };
 export type PlayerCardInfo = {
   accountId: string;
   found: boolean;
+  /** The look this account is wearing in the room right now. Empty when offline or using the fallback. */
+  drawingKey?: string;
   /** Server epoch ms the account was created — rendered as "papering since". */
   papersSince?: number;
   /** Design ids this account has opted (`sharedOnCard`) to show, newest first. */

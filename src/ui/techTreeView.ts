@@ -67,7 +67,9 @@ import {
 let overlay: HTMLElement | null = null;
 let lastFocused: HTMLElement | null = null;
 let isOpen = false;
-let selectedNodeId: TechNodeId | null = null;
+const expandedNodeIds = new Set<TechNodeId>();
+const autoExpandedNodeIds = new Set<TechNodeId>();
+const highlightedRequirementIds = new Set<TechNodeId>();
 let learningActionMessage = '';
 
 const STATUS_LABEL: Record<TechNodeStatus, string> = {
@@ -104,22 +106,35 @@ function nodeRequirementText(nodeId: TechNodeId, status: TechNodeStatus): string
   return `Needs: ${names.join(', ')}. Still waiting on: ${missingNames.join(', ')}.`;
 }
 
-function compactRequirementText(nodeId: TechNodeId, status: TechNodeStatus): string {
-  const node = TECH_DEFS[nodeId];
-  const reqIds = node.requires as TechNodeId[];
-  if (reqIds.length === 0) return 'Starting point';
-
-  const sourceIds = status === 'locked' ? missingTechPrerequisites(nodeId, getGameState()) : reqIds;
-  const names = sourceIds.map((reqId) => TECH_DEFS[reqId].name);
-  const first = names[0];
-  const remainder = names.length > 1 ? ` + ${names.length - 1} more` : '';
-  return status === 'locked'
-    ? `Waiting on ${first}${remainder}`
-    : `After ${first}${remainder}`;
-}
-
 function allTechNodeIds(): TechNodeId[] {
   return TECH_BRANCH_ORDER.flatMap(techNodesInBranch);
+}
+
+function syncActionableExpansion() {
+  const activeNodeId = getGameState().player.activeLearning?.nodeId as TechNodeId | undefined;
+  const actionable = [...availableTechNodeIds(), ...(activeNodeId ? [activeNodeId] : [])];
+  for (const nodeId of actionable) {
+    if (autoExpandedNodeIds.has(nodeId)) continue;
+    autoExpandedNodeIds.add(nodeId);
+    expandedNodeIds.add(nodeId);
+  }
+}
+
+function renderLockedRequirements(nodeId: TechNodeId, status: TechNodeStatus): string {
+  if (status !== 'locked') return '';
+  const missing = missingTechPrerequisites(nodeId, getGameState());
+  if (missing.length === 0) return '';
+  return `
+    <section class="tech-node-lock" aria-label="Required knowledge">
+      <span class="tech-node-lock-label"><span aria-hidden="true">🔒</span> Learn first</span>
+      <div class="tech-node-requirement-links">
+        ${missing.map((requirementId) => `
+          <button type="button" data-tech-requirement="${requirementId}">
+            ${TECH_DEFS[requirementId].name}
+          </button>`).join('')}
+      </div>
+      <span class="tech-node-lock-hint">Select this card to highlight ${missing.length === 1 ? 'it' : 'them'} in the tree.</span>
+    </section>`;
 }
 
 function availableTechNodeIds(): TechNodeId[] {
@@ -290,37 +305,39 @@ function renderNode(nodeId: TechNodeId, column: number, row: number): string {
   const node = TECH_DEFS[nodeId];
   const status = techNodeStatus(nodeId, getGameState());
   const isLearning = getGameState().player.activeLearning?.nodeId === nodeId;
-  const isSelected = selectedNodeId === nodeId;
+  const isExpanded = expandedNodeIds.has(nodeId);
+  const isRequired = highlightedRequirementIds.has(nodeId);
   const summaryId = `tech-node-summary-${nodeId}`;
   const requirementId = `tech-node-requirement-${nodeId}`;
   const detailsId = `tech-node-details-${nodeId}`;
   // +2: grid columns are 1-based, and column 1 is the sticky branch label.
   const style = `grid-column: ${column + 2}; grid-row: ${row + 1};`;
   return `
-    <li class="tech-node tech-node-${status}${isLearning ? ' tech-node-learning' : ''}" data-tech-node="${nodeId}" style="${style}">
-      <article class="tech-node-card${isSelected ? ' is-selected' : ''}">
+    <li class="tech-node tech-node-${status}${isLearning ? ' tech-node-learning' : ''}${isRequired ? ' is-required-highlight' : ''}" data-tech-node="${nodeId}" style="${style}">
+      <article class="tech-node-card${isExpanded ? ' is-expanded' : ''}">
         <div class="tech-node-heading">
           <h4>
             <button
               class="tech-node-select"
               type="button"
               data-tech-select="${nodeId}"
-              aria-expanded="${isSelected}"
+              aria-expanded="${isExpanded}"
               aria-controls="${detailsId}"
               aria-describedby="${summaryId} ${requirementId}"
             >
               <span class="tech-node-select-name">${node.name}</span>
-              <span class="tech-node-select-state" aria-hidden="true">${isSelected ? 'In focus' : 'View'}</span>
+              <span class="tech-node-select-state">
+                <span aria-hidden="true">${isExpanded ? '▾' : '▸'}</span>
+                ${isExpanded ? 'Collapse details' : 'Expand details'}
+              </span>
             </button>
           </h4>
-          <span class="tech-node-status-badge tech-node-status-badge-${isLearning ? 'learning' : status}">${isLearning ? 'Learning now' : STATUS_LABEL[status]}${!isLearning && STATUS_SPOKEN_EXTRA[status] ? `<span class="sr-only">${STATUS_SPOKEN_EXTRA[status]}</span>` : ''}</span>
+          <span class="tech-node-status-badge tech-node-status-badge-${isLearning ? 'learning' : status}">${!isLearning && status === 'locked' ? '<span aria-hidden="true">🔒</span> ' : ''}${isLearning ? 'Learning now' : STATUS_LABEL[status]}${!isLearning && STATUS_SPOKEN_EXTRA[status] ? `<span class="sr-only">${STATUS_SPOKEN_EXTRA[status]}</span>` : ''}</span>
         </div>
         <p class="tech-node-summary" id="${summaryId}">${node.summary}</p>
-        <p class="tech-node-path tech-node-path-${status}" aria-hidden="true">
-          ${compactRequirementText(nodeId, status)}
-        </p>
+        ${renderLockedRequirements(nodeId, status)}
         <p class="tech-node-requirement sr-only" id="${requirementId}">${nodeRequirementText(nodeId, status)}</p>
-        <div class="tech-node-details" id="${detailsId}"${isSelected ? '' : ' hidden'}>
+        <div class="tech-node-details" id="${detailsId}"${isExpanded ? '' : ' hidden'}>
           ${renderUnlocks(nodeId)}
           ${renderLearningDetails(nodeId, status)}
         </div>
@@ -418,10 +435,7 @@ function buildOverlay(): HTMLElement {
 
 function render() {
   if (!overlay) return;
-  if (!selectedNodeId) {
-    const activeNodeId = getGameState().player.activeLearning?.nodeId as TechNodeId | undefined;
-    selectedNodeId = activeNodeId ?? availableTechNodeIds()[0] ?? allTechNodeIds()[0] ?? null;
-  }
+  syncActionableExpansion();
   const list = overlay.querySelector<HTMLElement>('.tech-tree-branches');
   if (!list) return;
   const columnCount = techTreeColumnCount();
@@ -452,11 +466,26 @@ function updateTimelineControls() {
 
 function focusNode(nodeId: TechNodeId) {
   if (!overlay) return;
-  selectedNodeId = nodeId;
+  expandedNodeIds.add(nodeId);
+  highlightedRequirementIds.clear();
   render();
   const button = overlay.querySelector<HTMLButtonElement>(`[data-tech-select="${nodeId}"]`);
   button?.focus({ preventScroll: true });
   button?.closest('.tech-node')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function toggleNode(nodeId: TechNodeId) {
+  const status = techNodeStatus(nodeId, getGameState());
+  if (expandedNodeIds.has(nodeId)) expandedNodeIds.delete(nodeId);
+  else expandedNodeIds.add(nodeId);
+  highlightedRequirementIds.clear();
+  if (status === 'locked') {
+    for (const requirementId of missingTechPrerequisites(nodeId, getGameState())) {
+      highlightedRequirementIds.add(requirementId);
+    }
+  }
+  render();
+  overlay?.querySelector<HTMLButtonElement>(`[data-tech-select="${nodeId}"]`)?.focus({ preventScroll: true });
 }
 
 export function isTechTreeViewOpen() {
@@ -499,7 +528,12 @@ export function openTechTreeView(requestedNodeId?: TechNodeId) {
       }
       const select = target.closest<HTMLButtonElement>('[data-tech-select]');
       const jump = target.closest<HTMLButtonElement>('[data-tech-jump]');
-      const nodeId = (select?.dataset.techSelect ?? jump?.dataset.techJump) as TechNodeId | undefined;
+      const requirement = target.closest<HTMLButtonElement>('[data-tech-requirement]');
+      const nodeId = (requirement?.dataset.techRequirement ?? jump?.dataset.techJump ?? select?.dataset.techSelect) as TechNodeId | undefined;
+      if (nodeId && TECH_DEFS[nodeId] && select) {
+        toggleNode(nodeId);
+        return;
+      }
       if (nodeId && TECH_DEFS[nodeId]) {
         focusNode(nodeId);
         return;
@@ -514,6 +548,9 @@ export function openTechTreeView(requestedNodeId?: TechNodeId) {
     overlay.querySelector<HTMLElement>('.tech-tree-grid')?.addEventListener('scroll', updateTimelineControls);
     document.body.append(overlay);
   }
+  expandedNodeIds.clear();
+  autoExpandedNodeIds.clear();
+  highlightedRequirementIds.clear();
   render();
   lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   overlay.classList.add('is-open');

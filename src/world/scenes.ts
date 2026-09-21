@@ -14,6 +14,10 @@ import { pageId } from './types';
 export const SURFACE_SCENE = 'surface';
 /** The player's own home. One dwelling per account, so one interior tree. */
 export const HOME_INTERIOR_SCENE = 'in:home';
+/** The home currently has one room-sized page. Keeping this scene-qualified
+ * prevents furniture at interior coordinates from ever leaking onto a
+ * surface page, while using the same persisted page shape as outdoor builds. */
+export const HOME_INTERIOR_PAGE_ID = `${HOME_INTERIOR_SCENE}:0,0`;
 
 export type SceneId = string;
 export type SceneAddress = { scene: SceneId; px: number; pz: number };

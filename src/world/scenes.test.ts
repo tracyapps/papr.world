@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { pageId } from './types';
 import {
+  HOME_INTERIOR_PAGE_ID,
   HOME_INTERIOR_SCENE,
   SURFACE_SCENE,
   formatSceneAddress,
@@ -19,7 +20,7 @@ describe('scene addresses', () => {
   });
 
   it('prefixes other scenes', () => {
-    expect(formatSceneAddress({ scene: HOME_INTERIOR_SCENE, px: 0, pz: 0 })).toBe('in:home:0,0');
+    expect(formatSceneAddress({ scene: HOME_INTERIOR_SCENE, px: 0, pz: 0 })).toBe(HOME_INTERIOR_PAGE_ID);
     expect(formatSceneAddress({ scene: 'under', px: 3, pz: -2 })).toBe('under:3,-2');
   });
 

@@ -6,6 +6,8 @@
 // toward it, so the spot you spawn on (and the guide arrives at) is the
 // doorstep, not the middle of the tent.
 
+import { pageId, pageOfPosition } from './types';
+
 /** Where the home stands, relative to the saved Home place. Clear of the Thing Maker. */
 export const HOME_OFFSET = { x: -2.1, z: 1.2 } as const;
 
@@ -34,6 +36,13 @@ export function homePosition(place: { x: number; z: number }): { x: number; z: n
  */
 export function homePlaceForLot(lot: { x: number; z: number }): { x: number; z: number } {
   return { x: lot.x, z: lot.z };
+}
+
+/** A home marker is indexed by the page containing the home, not whatever
+ * page its owner is currently exploring when they publish it. */
+export function homeMarkerPage(x: number, z: number): string {
+  const page = pageOfPosition(x, z);
+  return pageId(page.px, page.pz);
 }
 
 export function isNearHome(

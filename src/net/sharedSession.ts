@@ -1,6 +1,6 @@
 import { sanitizeAvatarDesign, type AvatarDesign, type HomeMarker, type PlacedPiece } from '../../shared/src/index';
 import type { Vector3 } from 'three';
-import { avatar } from '../game/avatar';
+import { avatar, placeAvatarAt } from '../game/avatar';
 import { getYaw } from '../game/camera';
 import { showPetToast } from '../game/petting';
 import {
@@ -32,8 +32,9 @@ import { initializeSharedChat } from '../ui/sharedChat';
 import { handlePlayerCardResponse, setPlayerCardRequestHandler, setPlayerCardSafetyHandlers } from '../ui/playerCard';
 import { getCurrentPageId } from '../world/streaming';
 import { allNeighborHomes, subscribeNeighborHomes } from '../world/neighborHomes';
-import { HOME_FALLBACK_PLACE } from '../world/homeSite';
+import { HOME_FALLBACK_PLACE, homeMarkerPage } from '../world/homeSite';
 import { KEEP_HOME_LOT, resolveHomeLot } from '../world/neighborhood';
+import { isHomeLotClear } from '../world/footprints';
 import { getPlace, HOME_PLACE_ID, setHomePlace } from '../world/places';
 import { connect, type NetConnection } from './client';
 import { describeClose } from './closeReason';
@@ -368,6 +369,7 @@ export async function initializeSharedSession(): Promise<void> {
             addRemoteAvatar(player);
             ui.addNotice(`${player.name} wandered in.`);
           },
+          onPlayerAvatar: addRemoteAvatar,
           onPlayerLeave: (id) => {
             removeRemoteAvatar(id);
             ui.addNotice('A neighbor wandered home.');
@@ -625,7 +627,7 @@ export function publishHome(): void {
   connection.sendSetHome({
     x: home.x,
     z: home.z,
-    page: getCurrentPageId(),
+    page: homeMarkerPage(home.x, home.z),
     parts: look.parts,
     building: look.building,
   });
@@ -650,7 +652,7 @@ function resolveHomeLotForSelf(): void {
   if (!connection || selfIsGuest()) return;
   const home = getPlace(HOME_PLACE_ID);
   if (!home) return;
-  const page = getCurrentPageId();
+  const page = homeMarkerPage(home.x, home.z);
   const anchors = allNeighborHomes()
     .filter((neighbor) => neighbor.page === page)
     .map((neighbor) => ({
@@ -664,9 +666,17 @@ function resolveHomeLotForSelf(): void {
     anchors,
     origin: HOME_FALLBACK_PLACE,
     page,
+    candidateAllowed: isHomeLotClear,
   });
   if (lot === KEEP_HOME_LOT || lot === null) return;
-  setHomePlace(lot.x, lot.z);
+  // A newly joined account is still standing on the legacy spawn (its old
+  // Home place). Bring it with the newly assigned lot so two people do not
+  // begin stacked on one another. Someone already exploring is never yanked
+  // back just because their saved house had to settle against a late marker.
+  const standingOnOldLot = !isInteriorActive()
+    && Math.hypot(avatar.position.x - home.x, avatar.position.z - home.z) < 0.75;
+  if (!setHomePlace(lot.x, lot.z)) return;
+  if (standingOnOldLot) placeAvatarAt(lot.x, lot.z);
 }
 
 /** What was last sent, so a change of house or spot is sent again and nothing else is. */

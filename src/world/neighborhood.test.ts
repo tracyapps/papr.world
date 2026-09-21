@@ -75,6 +75,13 @@ describe('the neighbourhood lots', () => {
     expect(nextLot(taken, ORIGIN, PAGE)).toEqual(lotInRing(1, 1, ORIGIN, PAGE));
   });
 
+  it('skips lots rejected by the surrounding world', () => {
+    const lot = nextLot([], ORIGIN, PAGE, 2, (candidate) => (
+      candidate.x !== ORIGIN.x || candidate.z !== ORIGIN.z
+    ));
+    expect(lot?.ring).toBe(1);
+  });
+
   it('keeps every lot at least the spacing from every other, on any page', () => {
     for (const page of [PAGE, '3,-7', '']) {
       const grid: Lot[] = [];
@@ -187,6 +194,20 @@ describe('resolving which lot a home claims', () => {
       .toBe(KEEP_HOME_LOT);
     expect(resolveHomeLot({ selfAccountId: 'acct-z', selfLot: mine, anchors: taken, origin: ORIGIN, page: PAGE }))
       .toBe(KEEP_HOME_LOT);
+  });
+
+  it('moves an existing home when its lot is occupied by the world', () => {
+    const next = resolveHomeLot({
+      selfAccountId: 'acct-a',
+      selfLot: ORIGIN,
+      anchors: [],
+      origin: ORIGIN,
+      page: PAGE,
+      candidateAllowed: (candidate) => candidate.x !== ORIGIN.x || candidate.z !== ORIGIN.z,
+    });
+    expect(next).not.toBe(KEEP_HOME_LOT);
+    expect(next).not.toBeNull();
+    expect((next as Lot).ring).toBe(1);
   });
 
   it('yields a contested slot to the account whose id sorts first', () => {

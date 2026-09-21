@@ -11,6 +11,10 @@ import {
   type InteriorLayout,
 } from '../world/homeInterior';
 import type { DwellingPartId } from '../sim/catalogs/dwellings';
+import { getGameState } from '../sim/state';
+import { HOME_INTERIOR_PAGE_ID } from '../world/scenes';
+import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
+import { registerPlacedPieceVisual } from './placedPieceInteractions';
 
 /**
  * The inside of the home, drawn in a scene of its own.
@@ -35,6 +39,12 @@ interiorScene.add(room);
 
 const fixtures = new THREE.Group();
 room.add(fixtures);
+
+/** Player-made furniture uses world-space interior coordinates, just like the
+ * avatar, so it sits beside (rather than inside) the origin-offset room group. */
+const playerBuilds = new THREE.Group();
+playerBuilds.name = 'interior-placed-piece-visuals';
+interiorScene.add(playerBuilds);
 
 const ambient = new THREE.AmbientLight('#fff1d6', 1.0);
 // Sky-and-ground light, so upright things (the cutout, the walls) are lit from every side.
@@ -87,6 +97,7 @@ let drawn = '';
 
 /** (Re)draw the room for these finished parts, only when the picture would change. */
 export function refreshInterior(parts: readonly DwellingPartId[]) {
+  refreshInteriorBuilds();
   const signature = [parts.includes('floor'), parts.includes('walls'), parts.includes('room-1'), parts.includes('room-2')].join('|');
   if (signature === drawn) return;
   drawn = signature;
@@ -97,6 +108,25 @@ export function refreshInterior(parts: readonly DwellingPartId[]) {
     });
   }
   fixtures.add(buildRoom(homeInteriorLayout(parts), parts));
+}
+
+/** Redraw the local player's persisted interior page after a build or load. */
+export function refreshInteriorBuilds() {
+  playerBuilds.clear();
+  const page = getGameState().world.pages[HOME_INTERIOR_PAGE_ID];
+  if (!page) return;
+  for (const piece of Object.values(page.placedPieces)) {
+    if (piece.page !== HOME_INTERIOR_PAGE_ID) continue;
+    const visual = buildPlacedPieceVisual(piece);
+    visual.position.set(piece.x, 0.01, piece.z);
+    playerBuilds.add(visual);
+    registerPlacedPieceVisual(piece.id, visual);
+  }
+}
+
+/** A visit must never decorate somebody else's room with the visitor's save. */
+export function setInteriorBuildsVisible(visible: boolean) {
+  playerBuilds.visible = visible;
 }
 
 /** The floor and walls a walker meets inside. Flat floor at height 0. */

@@ -8,6 +8,7 @@ import { findDigFootprintBlocker } from '../world/footprints';
 import { refreshBuiltPageTerrain } from '../world/streaming';
 import { pageId, pageOfPosition } from '../world/types';
 import { sampleTerrainHeight } from '../world/terrain';
+import { groundHeightAt } from '../world/activeScene';
 import { avatar } from './avatar';
 import { playCozySound } from './cozyAudio';
 import { getCritterNearGroundPoint } from './critters';
@@ -42,22 +43,22 @@ export function pickTerrainAtScreen(clientX: number, clientY: number): THREE.Vec
   raycaster.setFromCamera(ndc, camera);
   const ray = raycaster.ray;
   let previousT = 0;
-  let previousGap = ray.origin.y - sampleTerrainHeight(ray.origin.x, ray.origin.z);
+  let previousGap = ray.origin.y - groundHeightAt(ray.origin.x, ray.origin.z);
   for (let t = RAY_STEP; t <= MAX_RAY_DISTANCE; t += RAY_STEP) {
     ray.at(t, rayPoint);
-    const gap = rayPoint.y - sampleTerrainHeight(rayPoint.x, rayPoint.z);
+    const gap = rayPoint.y - groundHeightAt(rayPoint.x, rayPoint.z);
     if (previousGap > 0 && gap <= 0) {
       let low = previousT;
       let high = t;
       for (let iteration = 0; iteration < 9; iteration += 1) {
         const middle = (low + high) / 2;
         ray.at(middle, rayPoint);
-        const middleGap = rayPoint.y - sampleTerrainHeight(rayPoint.x, rayPoint.z);
+        const middleGap = rayPoint.y - groundHeightAt(rayPoint.x, rayPoint.z);
         if (middleGap > 0) low = middle;
         else high = middle;
       }
       ray.at((low + high) / 2, rayPoint);
-      rayPoint.y = sampleTerrainHeight(rayPoint.x, rayPoint.z);
+      rayPoint.y = groundHeightAt(rayPoint.x, rayPoint.z);
       return rayPoint.clone();
     }
     previousT = t;

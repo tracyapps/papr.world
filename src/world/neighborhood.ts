@@ -199,12 +199,13 @@ export function nextLot(
   origin: LotPoint,
   page: string,
   maxRing = LOT_MAX_RING,
+  candidateAllowed: (candidate: LotPoint) => boolean = () => true,
 ): Lot | null {
   for (let ring = 0; ring <= maxRing; ring += 1) {
     const count = ringSlotCount(ring);
     for (let slot = 0; slot < count; slot += 1) {
       const candidate = lotInRing(ring, slot, origin, page);
-      if (isLotFree(candidate, anchors)) return candidate;
+      if (isLotFree(candidate, anchors) && candidateAllowed(candidate)) return candidate;
     }
   }
   return null;
@@ -235,6 +236,9 @@ export type ResolveHomeLotInput = {
   origin: LotPoint;
   /** The canonical page id; '' for solo/unknown, which simply means no turn. */
   page: string;
+  /** Deterministic world-space clearance check for landmarks, water, trees,
+   * and player-built objects. Home-vs-home spacing remains `anchors` above. */
+  candidateAllowed?: (candidate: LotPoint) => boolean;
 };
 
 /**
@@ -268,12 +272,12 @@ export const KEEP_HOME_LOT = 'keep' as const;
  * neighbourhood opens adjacent).
  */
 export function resolveHomeLot(input: ResolveHomeLotInput): Lot | null | typeof KEEP_HOME_LOT {
-  const { selfAccountId, selfLot, anchors, origin, page } = input;
+  const { selfAccountId, selfLot, anchors, origin, page, candidateAllowed = () => true } = input;
   // A published anchor for our own account would be us; the rule is about the
   // ground OTHERS take.
   const others = anchors.filter((anchor) => anchor.accountId !== selfAccountId);
 
-  if (!selfLot) return nextLot(others, origin, page);
+  if (!selfLot) return nextLot(others, origin, page, LOT_MAX_RING, candidateAllowed);
 
   // Do any of our neighbours' homes sit on our slot, and does the nearest
   // relevant one sort before us? `isLotFree` is the same predicate `nextLot`
@@ -281,5 +285,8 @@ export function resolveHomeLot(input: ResolveHomeLotInput): Lot | null | typeof 
   const yielded = others.some(
     (anchor) => anchor.accountId < selfAccountId && !isLotFree(selfLot, [anchor]),
   );
-  return yielded ? nextLot(others, origin, page) : KEEP_HOME_LOT;
+  const blockedByWorld = !candidateAllowed(selfLot);
+  return yielded || blockedByWorld
+    ? nextLot(others, origin, page, LOT_MAX_RING, candidateAllowed)
+    : KEEP_HOME_LOT;
 }
