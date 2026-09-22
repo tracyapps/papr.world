@@ -69,7 +69,12 @@ function buildOwnerSign(): THREE.Group {
   host.name = 'my-home-sign';
   const x = -1.3;
   const z = 1.75;
-  const height = 0.9;
+  const boardY = 0.78;
+  const boardHeight = 0.56;
+  // Stops right where the board's own bottom edge is, never reaching into it —
+  // a taller post would show past the board's sides as it turns to face the
+  // camera and cross the "MY HOME" text printed on its face.
+  const height = boardY - boardHeight / 2;
   const post = new THREE.Mesh(
     new THREE.CylinderGeometry(0.035, 0.045, height, 6),
     createColorMaterial('#7c5c3a', 0.92),
@@ -116,10 +121,47 @@ function buildOwnerSign(): THREE.Group {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   const board = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthWrite: false }));
-  board.position.set(x, height - 0.12, z);
-  board.scale.set(1.42, 0.56, 1);
+  board.position.set(x, boardY, z);
+  board.scale.set(1.42, boardHeight, 1);
   host.add(board);
   return host;
+}
+
+/**
+ * A small hanging placard tied to the scaffolding, shown only while a part is
+ * actively going up — the moment `buildHouse` below draws scaffolding at all.
+ * Separate from the bigger status sign: this one is about *this house right
+ * now*, not who lives here, so it draws for the player's own home and every
+ * neighbor's alike, straight off the shared `buildHouse`.
+ */
+function addDustSign(host: THREE.Group, width: number, depth: number, height: number, x = 0, z = 0) {
+  if (typeof document === 'undefined') return; // Vitest's renderer-free scene checks have no document.
+  const canvas = document.createElement('canvas');
+  canvas.width = 220;
+  canvas.height = 96;
+  const context = canvas.getContext('2d');
+  if (!context) return;
+  context.fillStyle = 'rgba(238, 230, 208, 0.97)';
+  context.strokeStyle = '#7c5c3a';
+  context.lineWidth = 5;
+  context.beginPath();
+  context.roundRect(4, 4, 212, 88, 10);
+  context.fill();
+  context.stroke();
+  context.textAlign = 'center';
+  context.fillStyle = '#5a4530';
+  context.font = '700 24px Georgia, serif';
+  context.fillText('EXCUSE OUR', 110, 42);
+  context.fillText('DUST', 110, 74);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthWrite: false }));
+  // Hung from the nearest scaffolding corner, partway up rather than at the
+  // top, so it reads as tied on rather than mounted like the noticeboard.
+  sign.position.set(x + width / 2 + 0.15, Math.min(height * 0.5, 0.85), z + depth / 2 + 0.15);
+  sign.scale.set(0.42, 0.18, 1);
+  sign.material.rotation = -0.08;
+  host.add(sign);
 }
 
 function addScaffolding(host: THREE.Group, width: number, depth: number, height: number, x = 0, z = 0) {
@@ -202,9 +244,16 @@ export function buildHouse(plan: ExteriorPlan): THREE.Group {
 
   if (plan.scaffolding) {
     const tall = plan.scaffolding === 'upstairs' ? top + 1.2 : Math.max(top, WALL_HEIGHT) + 0.7;
-    if (plan.scaffolding === 'room-1') addScaffolding(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, 0);
-    else if (plan.scaffolding === 'room-2') addScaffolding(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), 0);
-    else addScaffolding(host, WIDTH, DEPTH, tall);
+    if (plan.scaffolding === 'room-1') {
+      addScaffolding(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, 0);
+      addDustSign(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, 0);
+    } else if (plan.scaffolding === 'room-2') {
+      addScaffolding(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), 0);
+      addDustSign(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), 0);
+    } else {
+      addScaffolding(host, WIDTH, DEPTH, tall);
+      addDustSign(host, WIDTH, DEPTH, tall);
+    }
   }
   return host;
 }

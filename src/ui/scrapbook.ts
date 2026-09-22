@@ -7,7 +7,6 @@ import {
 } from '../world/resources';
 import type { ResourceId } from '../world/types';
 import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
-import { RECIPE_DEFS, isKnowledgeOutput, isRecipeAvailable, type RecipeId } from '../sim/catalogs/recipes';
 import { dispatchGameCommand } from '../sim/commands';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { SEED_DEFS, type SeedId } from '../sim/catalogs/seeds';
@@ -16,7 +15,6 @@ import { getToolArt } from '../game/toolPresentation';
 import { getResourceArt } from '../game/resourcePresentation';
 import { requestHudLayout } from './hudLayout';
 import { mailArrivesAt, mailAttachment, mailHasArrived, mailSubject, mailText } from '../sim/mail';
-import { setMillPanelOpen } from '../game/millCounter';
 import {
   claimSharedMail,
   getSharedInventory,
@@ -51,7 +49,7 @@ const stripElement = document.querySelector<HTMLElement>('#scrapbook-strip');
 const tabsElement = document.querySelector<HTMLElement>('#scrapbook-tabs');
 const panelElement = document.querySelector<HTMLElement>('#scrapbook-panel');
 
-type TabId = ResourceCategoryId | 'tools' | 'plans' | 'trinkets' | 'mail' | 'pouch';
+type TabId = ResourceCategoryId | 'tools' | 'trinkets' | 'mail';
 
 type TabDefinition = {
   id: TabId;
@@ -93,19 +91,7 @@ const TABS: TabDefinition[] = [
   })),
   { id: 'tools', label: 'Tools', summary: () => String(ownedTools().length) },
   { id: 'trinkets', label: 'Trinkets', summary: () => String(trinketCount()) },
-  { id: 'plans', label: 'Plans', summary: () => null },
   { id: 'mail', label: 'Mail', summary: () => String(getGameState().player.mailbox.length) },
-  {
-    id: 'pouch',
-    label: 'Neighborhood Pouch',
-    summary: () => {
-      const inventory = getSharedInventory();
-      if (!inventory) return null;
-      return String(Number(inventory.chips > 0)
-        + [inventory.resources, inventory.tools, inventory.items]
-          .reduce((total, bag) => total + Object.values(bag).filter((count) => count > 0).length, 0));
-    },
-  },
 ];
 
 function renderTabs() {
@@ -187,33 +173,6 @@ function renderToolsTab() {
   }).join('')}</ul>`;
 }
 
-function renderPlansTab() {
-  const state = getGameState();
-  const plans = (state.player.plans as RecipeId[]).filter(isRecipeAvailable);
-  if (plans.length === 0) {
-    return '<p class="scrapbook-empty">Plans you discover will be pressed onto this page.</p>';
-  }
-  return `
-    <p class="scrapbook-panel-note">Fold tools and materials at the Thing Maker. Build pieces go up in place, with a hammer. Know-how is simply known.</p>
-    <ul class="scrapbook-items">${plans.map((planId) => {
-    const recipe = RECIPE_DEFS[planId];
-    // `completedOutputs` holds recipe ids, not output labels — comparing
-    // against the label silently marked every plan as never made.
-    // A build-piece or know-how plan is never crafted, so it is never
-    // "undiscovered" by that measure — knowing it is the whole of what it is.
-    const made = isKnowledgeOutput(recipe.output)
-      || state.world.thingMaker.completedOutputs.includes(recipe.id);
-    return `
-        <li class="scrapbook-item ${made ? '' : 'is-undiscovered'}">
-          <span class="scrapbook-item-icon" style="--material-color:#a98455" aria-hidden="true"></span>
-          <span class="scrapbook-item-copy">
-            <strong>${recipe.name}</strong>
-            <small>${recipe.planName}</small>
-          </span>
-        </li>`;
-  }).join('')}</ul>`;
-}
-
 const diaryDateFormatter = new Intl.DateTimeFormat(undefined, {
   month: 'short',
   day: 'numeric',
@@ -230,15 +189,6 @@ function diaryDate(timestamp: number): { datetime: string; label: string } {
   }
 }
 
-/** "Order from the Wood Mill" — the mailbox is also the mill's catalog. */
-function renderMailOrderButton() {
-  return `
-    <div class="scrapbook-mail-order">
-      <button type="button" data-open-mill-order>Order from the Wood Mill…</button>
-      <small>Chisel refines raw stock by post, for a small delivery fee.</small>
-    </div>`;
-}
-
 /** Whole minutes, never "0": a parcel due in 20 seconds is "under a minute". */
 function arrivalLabel(arrivesAt: number) {
   const seconds = Math.max(0, Math.ceil((arrivesAt - Date.now()) / 1000));
@@ -248,10 +198,9 @@ function arrivalLabel(arrivesAt: number) {
 function renderMailTab() {
   const state = getGameState();
   if (state.player.mailbox.length === 0) {
-    return `${renderMailOrderButton()}<p class="scrapbook-empty">Your mailbox is empty. Letters and parcels will wait here whenever they arrive.</p>`;
+    return '<p class="scrapbook-empty">Your mailbox is empty. Letters and parcels will wait here whenever they arrive. Order refined materials by post from your mailbox outside.</p>';
   }
   return `
-    ${renderMailOrderButton()}
     ${mailMessage ? `<p class="scrapbook-mail-message" aria-live="polite">${escapeHtml(mailMessage)}</p>` : ''}
     <ol class="scrapbook-mail-list">${state.player.mailbox.map((mail) => {
     const attachment = mailAttachment(mail);
@@ -276,34 +225,6 @@ function renderMailTab() {
           </footer>` : ''}
       </li>`;
   }).join('')}</ol>`;
-}
-
-function renderPouchTab() {
-  const inventory = getSharedInventory();
-  if (!inventory) {
-    return '<p class="scrapbook-empty">Visit a shared neighborhood to open your server-kept pouch.</p>';
-  }
-  const entries: Array<{ label: string; count: number }> = [];
-  if (inventory.chips > 0) entries.push({ label: 'Shiny chips', count: inventory.chips });
-  for (const [id, count] of Object.entries(inventory.resources)) {
-    if (count <= 0) continue;
-    const resource = RESOURCE_DEFS[id as ResourceId];
-    entries.push({ label: resource?.label ?? id.replace(/[-_.]+/g, ' '), count });
-  }
-  for (const [id, count] of Object.entries(inventory.tools)) {
-    if (count > 0) entries.push({ label: TOOL_DEFS[id as ToolId]?.name ?? id.replace(/[-_.]+/g, ' '), count });
-  }
-  for (const [id, count] of Object.entries(inventory.items)) {
-    if (count > 0) entries.push({ label: id.replace(/[-_.]+/g, ' '), count });
-  }
-  return `
-    <p class="scrapbook-panel-note">This pouch is kept by the neighborhood server, so its contents can be mailed safely. Your private solo scrapbook stays separate.</p>
-    ${entries.length === 0
-      ? '<p class="scrapbook-empty">Your neighborhood pouch is empty.</p>'
-      : `<ul class="scrapbook-items">${entries
-        .sort((a, b) => a.label.localeCompare(b.label))
-        .map((entry) => `<li class="scrapbook-item"><span class="scrapbook-item-copy"><strong>${escapeHtml(entry.label)}</strong><small>${entry.count}</small></span></li>`)
-        .join('')}</ul>`}`;
 }
 
 /**
@@ -347,9 +268,7 @@ function renderPanel() {
 
   if (activeTab === 'tools') panelElement.innerHTML = renderToolsTab();
   else if (activeTab === 'trinkets') panelElement.innerHTML = renderTrinketsTab();
-  else if (activeTab === 'plans') panelElement.innerHTML = renderPlansTab();
   else if (activeTab === 'mail') panelElement.innerHTML = renderMailTab();
-  else if (activeTab === 'pouch') panelElement.innerHTML = renderPouchTab();
   else panelElement.innerHTML = renderMaterialsTab(activeTab);
 }
 
@@ -412,11 +331,6 @@ export function initializeScrapbook() {
   tabsElement?.addEventListener('keydown', handleTabKeydown);
   panelElement?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
-
-    if (target.closest('[data-open-mill-order]')) {
-      setMillPanelOpen(true, 'mail');
-      return;
-    }
 
     const mailId = target.closest<HTMLButtonElement>('[data-collect-mail]')?.dataset.collectMail;
     if (mailId) {

@@ -29,13 +29,21 @@ import { sampleTerrainHeight } from '../world/terrain';
 // where it stands and what the sign and the plate say. Everything the sign says
 // is also said in words when you walk up to it (`game/guestsUi.ts`).
 
-const POST_HEIGHT = 0.92;
-const SIGN_Y = POST_HEIGHT - 0.14;
+const SIGN_WIDTH = 1.5;
+const SIGN_HEIGHT = 0.66;
+const SIGN_Y = 0.78;
+/** Tall enough to hold the board up, never taller: a post reaching into the
+ *  board's own height would show past its edges as the sprite turns to face
+ *  the camera, crossing the name or heading text printed on its face. */
+const POST_HEIGHT = SIGN_Y - SIGN_HEIGHT / 2;
 /** The sign stands to the side of the door, clear of the doorstep and the annex rooms. */
 const SIGN_LOCAL = { x: -1.3, z: 1.75 } as const;
 
-const PLATE_POST_HEIGHT = 0.62;
-const PLATE_Y = PLATE_POST_HEIGHT - 0.1;
+const PLATE_WIDTH = 1.02;
+const PLATE_HEIGHT = 0.41;
+const PLATE_Y = 0.52;
+/** Same reasoning as `POST_HEIGHT` above, sized to the smaller plate. */
+const PLATE_POST_HEIGHT = PLATE_Y - PLATE_HEIGHT / 2;
 /** The plate gets its own short stake on the other side of the door, so the two
  *  boards never read as one cluttered noticeboard. Still clear of the annex
  *  room that stands at local (1.75, 0). */
@@ -136,7 +144,7 @@ function makeSignSprite(home: NeighborHome): THREE.Sprite {
       context.fillText(line, 192, stripeHeight + 112);
     }
   }
-  return boardSprite(canvas, 1.5, 0.66, SIGN_Y);
+  return boardSprite(canvas, SIGN_WIDTH, SIGN_HEIGHT, SIGN_Y);
 }
 
 /**
@@ -169,7 +177,7 @@ function makeAddressPlateSprite(home: NeighborHome): THREE.Sprite {
     context.font = '600 30px Georgia, serif';
     context.fillText(address.name.slice(0, 24), 160, 94);
   }
-  return boardSprite(canvas, 1.02, 0.41, PLATE_Y);
+  return boardSprite(canvas, PLATE_WIDTH, PLATE_HEIGHT, PLATE_Y);
 }
 
 function disposeSprite(sprite: THREE.Sprite) {

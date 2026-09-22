@@ -10,6 +10,7 @@ import {
   sanitizeHomePolicy,
   splitHomeParts,
 } from './guests';
+import { DEFAULT_MAILBOX_PRIMARY, DEFAULT_MAILBOX_SECONDARY, DEFAULT_MAILBOX_STYLE } from './constants';
 import { sanitizeSetHome } from './validate';
 
 describe('home policy', () => {
@@ -63,10 +64,15 @@ describe('home parts', () => {
   });
 
   it('is carried by SetHome, and older clients that omit it still work', () => {
+    const defaultMailbox = {
+      mailboxStyle: DEFAULT_MAILBOX_STYLE,
+      mailboxPrimary: DEFAULT_MAILBOX_PRIMARY,
+      mailboxSecondary: DEFAULT_MAILBOX_SECONDARY,
+    };
     expect(sanitizeSetHome({ x: 1, z: 2, page: '0,0', parts: ['floor', 'bad id'], building: 'walls' }))
-      .toEqual({ x: 1, z: 2, page: '0,0', parts: ['floor'], building: 'walls' });
+      .toEqual({ x: 1, z: 2, page: '0,0', parts: ['floor'], building: 'walls', ...defaultMailbox });
     expect(sanitizeSetHome({ x: 1, z: 2, page: '0,0' }))
-      .toEqual({ x: 1, z: 2, page: '0,0', parts: [], building: '' });
+      .toEqual({ x: 1, z: 2, page: '0,0', parts: [], building: '', ...defaultMailbox });
   });
 });
 

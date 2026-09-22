@@ -118,9 +118,26 @@ export function initializeSharedChat(
   registerDraggableHudWidget({
     id: 'chat',
     element: aside,
-    minScale: 0.75,
-    maxScale: 1.75,
+    // A conversation reads better tall than it does blown up: dimensions
+    // mode (see hud.ts) resizes the real box in pixels — width and the log's
+    // own height, independently — rather than scaling the whole widget (and
+    // its font) uniformly, the way the minimap already works.
+    resizeMode: 'dimensions',
+    // Scale is unused in dimensions mode, but still needs valid bounds.
+    minScale: 1,
+    maxScale: 1,
     defaultScale: 1,
+    minWidth: 240,
+    maxWidth: 560,
+    // "Height" here is the log's own height (see .shared-chat-log's
+    // `var(--hud-widget-height, …)`), not the whole card — the header and
+    // the send row keep their natural height either way, same split the
+    // minimap uses for its body vs. its other rows.
+    minHeight: 72,
+    maxHeight: 520,
+    defaultSize: () => (
+      window.innerWidth <= 720 ? { width: 280, height: 126 } : { width: 320, height: 180 }
+    ),
     // Bottom-right by default — clear of the scrapbook dock and the tool
     // rail, and the corner most players asked for. Still fully draggable;
     // this is only where it starts.

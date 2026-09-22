@@ -79,8 +79,8 @@ describe('the sign', () => {
   it('says open house when it is, whatever is built', () => {
     expect(signWords(neighborHomeFrom({ ...ADA(), open: true, parts: ['floor'] })!).heading).toBe('OPEN HOUSE');
   });
-  it('says a home is being built until something is finished', () => {
-    expect(signWords(neighborHomeFrom(ADA())!).heading).toBe('BUILDING A HOME');
+  it('otherwise just says home, built or not — a marker only exists once someone has logged in', () => {
+    expect(signWords(neighborHomeFrom(ADA())!).heading).toBe('HOME');
     expect(signWords(neighborHomeFrom({ ...ADA(), parts: ['floor'] })!).heading).toBe('HOME');
   });
 });

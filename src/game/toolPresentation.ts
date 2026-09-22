@@ -97,6 +97,25 @@ export const TOOL_ART = {
     sourceUrl: new URL('../../assets/source/tools/standard-hammer.svg', import.meta.url).href,
     frame: { width: 208, left: -3, top: -2, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
   },
+  // Framing is a first guess, copied from the hand-tool group (hammers,
+  // scissors) rather than the long-handled shovels, since these drawings are
+  // already compact/diagonal like a hammer head rather than drawn flat and
+  // long like a shovel. Nudge once you have looked at them.
+  spork: {
+    aspectRatio: 377 / 285,
+    sourceUrl: new URL('../../assets/source/tools/spork.svg', import.meta.url).href,
+    frame: { width: 200, left: 4, top: 4, rotate: -14, activeLift: -16, activeBadgeLift: -8 },
+  },
+  'basic-pickaxe': {
+    aspectRatio: 584 / 407,
+    sourceUrl: new URL('../../assets/source/tools/basic-pickaxe.svg', import.meta.url).href,
+    frame: { width: 208, left: -3, top: -2, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
+  },
+  'heavyduty-pickaxe': {
+    aspectRatio: 584 / 407,
+    sourceUrl: new URL('../../assets/source/tools/heavyduty-pickaxe.svg', import.meta.url).href,
+    frame: { width: 208, left: -3, top: -2, rotate: -12, activeLift: -16, activeBadgeLift: -8 },
+  },
 } as const satisfies Partial<Record<ToolId, {
   aspectRatio: number;
   sourceUrl: string;

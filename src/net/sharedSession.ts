@@ -1,4 +1,4 @@
-import { sanitizeAvatarDesign, type AvatarDesign, type HomeMarker, type PlacedPiece } from '../../shared/src/index';
+import { sanitizeAvatarDesign, type AvatarDesign, type HomeMarker, type MailAttachmentIntent, type PlacedPiece } from '../../shared/src/index';
 import type { Vector3 } from 'three';
 import { avatar, placeAvatarAt } from '../game/avatar';
 import { getYaw } from '../game/camera';
@@ -743,6 +743,18 @@ export function blockAccount(accountId: string): void {
 export function reportAccount(accountId: string, details?: string): void {
   if (!accountId) return;
   connection?.sendReport({ accountId, ...(details ? { details } : {}) });
+}
+
+/**
+ * Post a letter to another account by id — the same room message the chat ⋯
+ * menu's "message" action sends (`ClientMessage.SendMail`), called here from
+ * the mailbox panel's own compose box instead of a chat line's actions.
+ * A no-op without a live connection: solo play has nobody else's mailbox to
+ * reach.
+ */
+export function sendPlayerMail(accountId: string, text: string, attachment?: MailAttachmentIntent): void {
+  if (!accountId || !text.trim()) return;
+  connection?.sendMail({ toAccountId: accountId, text, ...(attachment ? { attachment } : {}) });
 }
 
 /**

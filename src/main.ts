@@ -135,7 +135,8 @@ import {
   updateHomePrompt,
 } from './game/homePanel';
 import { isHomeAtScreen } from './game/dwellingExterior';
-import { updateMailboxExterior } from './game/mailboxExterior';
+import { isMailboxAtScreen, isNearMailboxExterior, updateMailboxExterior } from './game/mailboxExterior';
+import { initializeMailboxPanel, isMailboxPanelOpen, openMailboxPanel } from './game/mailboxPanel';
 import {
   goOutside,
   initializeSceneTransition,
@@ -206,6 +207,7 @@ initializeMillCounter();
 initializeHomePanel();
 initializeVisitPanel();
 initializeFriendsPanel();
+initializeMailboxPanel();
 initializeKnockNotices();
 initializeCasePanel();
 setCaseHandlers({ say: showPetToast });
@@ -298,6 +300,20 @@ registerScreenInteraction({
       closeMillPanel();
       setHomePanelOpen(true);
     } else showPetToast('That is your home. Walk closer to plan and build.');
+    return true;
+  },
+});
+// Your own mailbox: messages, friend requests, writing to a friend, and
+// mail-ordering from Chisel's mill. Same reach and "walk closer" pattern as
+// the home marker just above, since it stands right beside it.
+registerScreenInteraction({
+  id: 'mailbox',
+  priority: 87,
+  hitTest: (x, y) => isMailboxAtScreen(x, y, camera),
+  interact: () => {
+    if (isNearMailboxExterior(avatar.position)) {
+      if (!isMailboxPanelOpen()) openMailboxPanel();
+    } else showPetToast('That is your mailbox. Walk closer to check it.');
     return true;
   },
 });

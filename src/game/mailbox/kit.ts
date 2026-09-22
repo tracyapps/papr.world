@@ -504,11 +504,16 @@ const PLATE_STYLES: Record<string, PlateSpec> = {
       ctx.lineWidth = h * 0.07;
       ctx.strokeRect(h * 0.08, h * 0.08, w - h * 0.16, h - h * 0.16);
       const label = text.toUpperCase();
-      const size = fitFont(ctx, label, SANS, w * 0.72, h * 0.34, 800, 0.12);
+      // `fitFont` only shrinks for width, never height, so a short name (like
+      // "TAPPS") never triggers it and renders at the full starting size —
+      // which, at 0.34, was tall enough for a `middle`-baseline line this
+      // close to the top edge to clip. A smaller start plus a little more
+      // headroom above the baseline keeps every name inside the plate.
+      const size = fitFont(ctx, label, SANS, w * 0.72, h * 0.24, 800, 0.12);
       ctx.font = `800 ${size}px ${SANS}`;
       ctx.fillStyle = '#1d2733';
       ctx.textBaseline = 'middle';
-      drawTracked(ctx, label, w / 2, h * 0.36, size * 0.12);
+      drawTracked(ctx, label, w / 2, h * 0.4, size * 0.12);
       ctx.font = `600 ${size * 0.62}px ${SANS}`;
       drawTracked(ctx, 'POST', w / 2, h * 0.72, size * 0.12);
     },

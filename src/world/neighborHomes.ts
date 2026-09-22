@@ -152,10 +152,17 @@ export function nearestNeighborHome(
   return best;
 }
 
-/** What a home's sign says, in its two lines (the drawing and the words agree). */
+/**
+ * What a home's sign says, in its two lines (the drawing and the words
+ * agree). "Building a home" was dropped for anyone with a published
+ * marker: reaching this function at all means the owner has logged in at
+ * least once, so a home mid-construction gets the small "excuse our dust"
+ * hanging sign instead (see `buildHouse` in game/dwellingExterior.ts) — a
+ * signed-up account that never joins publishes no marker and has no sign
+ * at all, which already reads as "not started."
+ */
 export function signWords(home: NeighborHome): { heading: string; line: string } {
   if (home.open) return { heading: 'OPEN HOUSE', line: 'come on in' };
-  if (home.parts.length === 0) return { heading: 'BUILDING A HOME', line: 'a new neighbor, papering in' };
   return { heading: 'HOME', line: '' };
 }
 

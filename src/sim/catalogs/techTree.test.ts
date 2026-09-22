@@ -194,7 +194,7 @@ describe('tech tree catalog shape', () => {
     const readyIds = TECH_NODE_ORDER.filter((id) => TECH_DEFS[id].readiness === 'ready');
     expect(readyIds.sort()).toEqual([
       'digging-1', 'digging-2', 'digging-3', 'gardening-1', 'gardening-2', 'trimming-1', 'trimming-2',
-      'mining-1', 'building-1', 'building-2', 'building-3',
+      'mining-1', 'mining-2', 'mining-3', 'building-1', 'building-2', 'building-3',
       'garden-structures', 'outdoor-furniture', 'display-cases', 'simple-crossings', 'wetland-growing',
       'materials-refinement-1', 'materials-refinement-2',
       'house-floors', 'house-walls', 'house-roofing', 'extra-rooms', 'stairs-and-upper-floors',
@@ -400,11 +400,15 @@ describe('biome-expansion nodes', () => {
     expect(TECH_DEFS['wetland-growing'].branch).toBe('caring-for-the-land');
   });
 
-  it('climbs the mining ladder from the built rung, one placeholder at a time', () => {
+  it('climbs the built pickaxe ladder, then the wall-mining placeholders beyond it', () => {
     expect(TECH_DEFS['mining-2'].requires).toEqual(['mining-1']);
-    expect(TECH_DEFS['mining-3'].requires).toContain('mining-2');
-    expect(TECH_DEFS['mining-2'].readiness).toBe('concept');
-    expect(techNodeColumn('mining-3')).toBeGreaterThan(techNodeColumn('mining-2'));
+    expect(TECH_DEFS['mining-2'].readiness).toBe('ready');
+    expect(TECH_DEFS['mining-3'].requires).toEqual(['mining-2']);
+    expect(TECH_DEFS['mining-3'].readiness).toBe('ready');
+    expect(TECH_DEFS['mining-wall-seams'].requires).toEqual(['mining-3']);
+    expect(TECH_DEFS['mining-wall-seams'].readiness).toBe('concept');
+    expect(TECH_DEFS['mining-deep-wall'].requires).toContain('mining-wall-seams');
+    expect(techNodeColumn('mining-deep-wall')).toBeGreaterThan(techNodeColumn('mining-wall-seams'));
   });
 
   it('keeps the water ladder in one chain: tending, then fishing, wells, and boats', () => {

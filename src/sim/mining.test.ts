@@ -42,8 +42,8 @@ describe('mine command', () => {
 
   it('requires the mining verb, depletes the formation, and leaves regional stone drops', () => {
     const state = createDefaultGameState();
-    state.player.tools['tin-snips-pick'] = 1;
-    state.player.equippedTool = 'tin-snips-pick';
+    state.player.tools['spork'] = 1;
+    state.player.equippedTool = 'spork';
 
     const result = mine(state);
     expect(result.ok).toBe(true);

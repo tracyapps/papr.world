@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { getGameState, onGameStateChanged } from '../sim/state';
 import { getPlace, HOME_PLACE_ID, onPlacesChanged } from '../world/places';
-import { homeFacing, homePosition } from '../world/homeSite';
+import { homeFacing, homePosition, isNearHome } from '../world/homeSite';
 import { sampleTerrainHeight } from '../world/terrain';
 import { registerMapFeature, updateMapFeaturePosition } from '../world/mapFeatures';
 import { getSelfName } from '../net/sharedSession';
@@ -42,6 +42,8 @@ let root: THREE.Group | null = null;
 let instance: MailboxInstance | null = null;
 let built = '';
 const scratchLook = new THREE.Vector3();
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 function homePlace(): { x: number; z: number } {
   const place = getPlace(HOME_PLACE_ID);
@@ -119,6 +121,21 @@ export function buildMailboxExterior(parent: THREE.Group): void {
   redraw();
   onGameStateChanged(redraw);
   onPlacesChanged(syncPosition);
+}
+
+/** Mirrors dwellingExterior.ts's `isNearHomeExterior` — the mailbox stands
+ *  right beside the same Home place, so the same reach applies. */
+export function isNearMailboxExterior(position: { x: number; z: number }): boolean {
+  return isNearHome(position, homePlace());
+}
+
+/** True when the pointer is over the player's own mailbox — the click that
+ *  opens its messages/friends/mail-order panel (game/mailboxPanel.ts). */
+export function isMailboxAtScreen(clientX: number, clientY: number, camera: THREE.Camera): boolean {
+  if (!root || !instance || root.parent?.visible === false) return false;
+  pointer.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+  raycaster.setFromCamera(pointer, camera);
+  return raycaster.intersectObject(instance.root, true).length > 0;
 }
 
 /** Called every outdoor frame (see main.ts's animate()), same as updateCritters etc. */

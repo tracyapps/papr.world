@@ -245,14 +245,25 @@ function renderMailboxStyles(container: HTMLElement, currentStyle: string) {
  * team colors. Always available — nothing to unlock, nothing to pay for —
  * and the nameplate takes care of itself: it always reads this account's own
  * display name (see game/mailboxExterior.ts), so there is nothing to type here.
+ *
+ * Only about half the rigs actually take a team color (`design.team`) — the
+ * rest have a fixed look of their own. Showing two color pickers that
+ * visibly do nothing reads as broken, so they're hidden for those designs
+ * rather than left to confuse whether a pick "took."
  */
 function renderMailboxPicker() {
   if (!panel) return;
   const styles = panel.querySelector<HTMLElement>('[data-mailbox-styles]');
+  const colors = panel.querySelector<HTMLElement>('[data-mailbox-colors]');
+  const colorsNote = panel.querySelector<HTMLElement>('[data-mailbox-colors-note]');
   const primary = panel.querySelector<HTMLInputElement>('[data-mailbox-primary]');
   const secondary = panel.querySelector<HTMLInputElement>('[data-mailbox-secondary]');
   const look = getGameState().world.mailboxLook;
   if (styles) renderMailboxStyles(styles, look.style);
+  const design = MAILBOX_DESIGNS.find((entry) => entry.id === look.style);
+  const takesColor = design?.team === true;
+  if (colors) colors.hidden = !takesColor;
+  if (colorsNote) colorsNote.hidden = takesColor;
   if (primary && primary.value !== look.primary) primary.value = look.primary;
   if (secondary && secondary.value !== look.secondary) secondary.value = look.secondary;
 }
@@ -377,7 +388,8 @@ export function initializeHomePanel() {
         <span>Seen by every neighbor who walks by. Your name goes on the plate automatically.</span>
       </div>
       <div class="avatar-editor-swatches" data-mailbox-styles role="list" aria-label="Mailbox style"></div>
-      <div class="guest-settings">
+      <p class="hint" data-mailbox-colors-note hidden>This design doesn't take team colors — it has a look of its own.</p>
+      <div class="guest-settings" data-mailbox-colors>
         <label>
           <span>Primary color</span>
           <input type="color" data-mailbox-primary aria-label="Mailbox primary color">
