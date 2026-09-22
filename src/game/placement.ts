@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene } from '../render/context';
+import { camera, scene } from '../render/context';
 import { getGameState, LOCAL_MAKER_ID } from '../sim/state';
 import type { BuildSiteState } from '../sim/state';
 import { dispatchGameCommand, materialCost, resolveIngredientAllocation } from '../sim/commands';
@@ -15,11 +15,9 @@ import { RECIPE_DEFS, unlearnedBuildPlan } from '../sim/catalogs/recipes';
 import {
   BUILD_PIECE_DEFS,
   buildPieceDef,
-  buildPieceDefsConflict,
   buildPiecesConflict,
   type BuildPieceDef,
   type BuildPieceKey,
-  type ResolvedBuildPiece,
 } from '../world/buildPieces';
 import type { PlacedPiece } from '../../shared/src/index';
 import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
@@ -39,7 +37,7 @@ import { getActionMode, onActionModeChanged, setActionMode } from './actionMode'
 import { createGroundRing, setGhostAppearance } from './gardenOverlay';
 import { startTimedAction } from './timedAction';
 import { publishSharedPlacedPiece } from '../net/sharedSession';
-import { setPlacedPieceVisualVisible } from './placedPieceInteractions';
+import { getPlacedPieceVisual, setPlacedPieceVisualVisible } from './placedPieceInteractions';
 import { refreshInteriorBuilds } from './interiorScene';
 
 // Build-mode placement: choosing a piece, aiming it at the ground, seeing a
@@ -234,13 +232,6 @@ type CarryState = {
   rotY: number;
 };
 
-/** Treated as a piece with almost no footprint, so "does this footprint
- * overlap that click point" reuses the same rotated-rectangle math as any
- * other conflict check instead of a bespoke point-in-rectangle test. */
-const PICKUP_POINT_DEF: ResolvedBuildPiece = {
-  key: 'unknown', label: '', summary: '', radiusX: 0.05, radiusZ: 0.05, overlap: 'none', solid: false,
-};
-
 let carrying: CarryState | null = null;
 /** Where the carried group's pivot currently sits, tracked every frame so a
  * material swatch click — which has no click point of its own — knows where
@@ -298,29 +289,71 @@ function rotateOffset(x: number, z: number, radians: number): [number, number] {
   return [x * cos - z * sin, x * sin + z * cos];
 }
 
-/** The piece standing at this ground point that the local player made, if any. */
-function ownedPieceAtPoint(x: number, z: number): { piece: PlacedPiece; pageId: string } | null {
-  const activePageId = currentBuildPageId(x, z);
-  if (!activePageId) return null;
-  const page = getGameState().world.pages[activePageId];
-  for (const piece of Object.values(page?.placedPieces ?? {})) {
-    if (piece.makerId !== LOCAL_MAKER_ID) continue;
-    const def = buildPieceDef(piece.templateKey);
-    if (buildPieceDefsConflict(
-      PICKUP_POINT_DEF, { x, z, rotY: 0 },
-      def, { x: piece.x, z: piece.z, rotY: piece.rotY },
-    )) {
-      return { piece, pageId: piece.page };
+const pieceRaycaster = new THREE.Raycaster();
+const pieceHitNdc = new THREE.Vector2();
+
+/**
+ * Which of the player's own placed pieces the pointer is actually resting
+ * on -- found by raycasting against each one's real rendered mesh, the same
+ * way `cozyInteractions.ts` and the critter/trinket pickers do it.
+ *
+ * This is deliberately NOT the ground-footprint check `crowdingPiece` and
+ * friends use for spacing (a rotated rectangle at the piece's base, tested
+ * against wherever a *terrain* raycast lands). That check answers "does a
+ * new piece here overlap an old one," which only ever needs the base. A
+ * click needs to answer a different question -- "is the player looking at
+ * this thing" -- and for anything with real height (a bench's seat and
+ * back, a plank's raised edge) those two answers disagree constantly: the
+ * terrain ray sails past the piece's body to whatever ground is actually
+ * behind it from that camera angle, so most clicks on the visible shape of
+ * a tall piece landed on a footprint rectangle nowhere near the click at
+ * all. Raycasting the piece's own mesh instead means a click anywhere you
+ * can actually see the piece hits it (2026-09-22).
+ */
+function pickOwnedPieceVisualAt(clientX: number, clientY: number): { piece: PlacedPiece; pageId: string } | null {
+  pieceHitNdc.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+  pieceRaycaster.setFromCamera(pieceHitNdc, camera);
+
+  const candidates: { piece: PlacedPiece; pageId: string; object: THREE.Object3D }[] = [];
+  for (const [candidatePageId, page] of Object.entries(getGameState().world.pages)) {
+    for (const piece of Object.values(page.placedPieces)) {
+      if (piece.makerId !== LOCAL_MAKER_ID) continue;
+      const object = getPlacedPieceVisual(piece.id);
+      // Invisible while it is the one currently being carried (see
+      // beginCarrying) -- a raycast has no business finding a piece that is
+      // not really there right now.
+      if (object && object.visible) candidates.push({ piece, pageId: candidatePageId, object });
+    }
+  }
+  if (candidates.length === 0) return null;
+
+  const hits = pieceRaycaster.intersectObjects(candidates.map((entry) => entry.object), true);
+  for (const hit of hits) {
+    let node: THREE.Object3D | null = hit.object;
+    while (node) {
+      const match = candidates.find((entry) => entry.object === node);
+      if (match) return { piece: match.piece, pageId: match.pageId };
+      node = node.parent;
     }
   }
   return null;
 }
 
+/** Whether the screen point is currently hovering a piece the player could
+ * click to select -- i.e. one of their own placed pieces, and only while
+ * they are not already carrying something (a carry's click drops instead of
+ * selecting). Exported purely as a cheap, side-effect-free hover check for
+ * the cursor (see interactionCursor.ts); it runs the same raycast as an
+ * actual click without touching selection state. */
+export function canSelectPieceAtScreen(clientX: number, clientY: number): boolean {
+  return !carrying && pickOwnedPieceVisualAt(clientX, clientY) !== null;
+}
+
 /** Shift-click an owned placed piece: add or remove it from the pending
  * bulk-move group. Returns false (so the caller can fall through to normal
  * placement) when the click did not land on anything of the player's own. */
-function toggleSelectedPiece(x: number, z: number): boolean {
-  const owned = ownedPieceAtPoint(x, z);
+function toggleSelectedPiece(clientX: number, clientY: number): boolean {
+  const owned = pickOwnedPieceVisualAt(clientX, clientY);
   if (!owned) return false;
   if (selectedPieceIds.has(owned.piece.id)) selectedPieceIds.delete(owned.piece.id);
   else selectedPieceIds.add(owned.piece.id);
@@ -889,33 +922,30 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
     if (point) dropCarriedPiece(point);
     return true;
   }
-  const groundPoint = pickTerrainAtScreen(clientX, clientY);
-  if (groundPoint) {
-    if (event?.shiftKey) {
-      // Shift-click builds up a bulk-move group instead of picking anything
-      // up immediately. A shift-click that misses an owned piece falls
-      // through to normal placement below, same as an unmodified miss would.
-      if (toggleSelectedPiece(groundPoint.x, groundPoint.z)) return true;
-    } else {
-      const owned = ownedPieceAtPoint(groundPoint.x, groundPoint.z);
-      if (owned) {
-        // A plain click on your own piece selects it -- and only it -- so
-        // the material panel can restyle it (or a shift-built group) without
-        // picking anything up. Moving is a separate, explicit step now: the
-        // build palette's "Move" button (`enterMoveMode`) is what actually
-        // starts a carry.
-        selectOwnedPiece(owned.piece.id);
-        return true;
-      }
-      // A plain click that landed on open ground (or someone else's piece)
-      // while something of yours was selected just closes that selection --
-      // the same "click away to dismiss" every other panel here uses. It
-      // does not also place a new piece in the same click; a second click
-      // does that once the selection is out of the way.
-      if (selectedPieceIds.size > 0) {
-        clearSelectedPlacedPieces();
-        return true;
-      }
+  if (event?.shiftKey) {
+    // Shift-click builds up a bulk-move group instead of picking anything
+    // up immediately. A shift-click that misses an owned piece falls
+    // through to normal placement below, same as an unmodified miss would.
+    if (toggleSelectedPiece(clientX, clientY)) return true;
+  } else {
+    const owned = pickOwnedPieceVisualAt(clientX, clientY);
+    if (owned) {
+      // A plain click on your own piece selects it -- and only it -- so
+      // the material panel can restyle it (or a shift-built group) without
+      // picking anything up. Moving is a separate, explicit step now: the
+      // build palette's "Move" button (`enterMoveMode`) is what actually
+      // starts a carry.
+      selectOwnedPiece(owned.piece.id);
+      return true;
+    }
+    // A plain click that landed on open ground (or someone else's piece)
+    // while something of yours was selected just closes that selection --
+    // the same "click away to dismiss" every other panel here uses. It
+    // does not also place a new piece in the same click; a second click
+    // does that once the selection is out of the way.
+    if (selectedPieceIds.size > 0) {
+      clearSelectedPlacedPieces();
+      return true;
     }
   }
   const assessment = assessPlaceTargetAtScreen(clientX, clientY);
