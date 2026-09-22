@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { scene } from '../render/context';
 import { getGameState, LOCAL_MAKER_ID } from '../sim/state';
 import type { BuildSiteState } from '../sim/state';
-import { dispatchGameCommand, resolveIngredientAllocation } from '../sim/commands';
+import { dispatchGameCommand, materialCost, resolveIngredientAllocation } from '../sim/commands';
 import {
   buildAssemblyDef,
   buildMaterialUnits,
@@ -328,11 +328,48 @@ function toggleSelectedPiece(x: number, z: number): boolean {
   return true;
 }
 
+/**
+ * Plain (unmodified) click on an owned placed piece: make it -- and only
+ * it -- the selection. Clicking the one piece that is already the whole
+ * selection deselects it instead, so a click always toggles the thing it
+ * lands on rather than only ever adding.
+ *
+ * This used to pick the piece straight up (see git history). Selecting is
+ * now a separate, cheaper step from moving it: the build palette shows a
+ * "Move" action once something is selected (`enterMoveMode` below), so a
+ * plain click can be used to open the material panel and restyle a piece
+ * without ever picking it up, and a stray click no longer risks yanking
+ * something out of the ground you only meant to look at.
+ */
+function selectOwnedPiece(id: string): void {
+  if (selectedPieceIds.size === 1 && selectedPieceIds.has(id)) {
+    selectedPieceIds.clear();
+  } else {
+    selectedPieceIds.clear();
+    selectedPieceIds.add(id);
+  }
+  for (const listener of selectionListeners) listener();
+}
+
 export function clearSelectedPlacedPieces(): boolean {
   if (selectedPieceIds.size === 0) return false;
   selectedPieceIds.clear();
   for (const listener of selectionListeners) listener();
   return true;
+}
+
+/** Find one of the player's own placed pieces by id, wherever it currently
+ * lives -- selection ids carry no page of their own, so anything that needs
+ * the actual piece (or the page it is on) looks it up fresh here rather
+ * than trusting a stale reference. Pages are few enough per player that
+ * this is a short scan, not a real cost. */
+function findOwnedPieceById(id: string): { piece: PlacedPiece; pageId: string } | null {
+  const pages = getGameState().world.pages;
+  for (const [pageId, page] of Object.entries(pages)) {
+    const piece = page.placedPieces[id];
+    if (piece && piece.makerId === LOCAL_MAKER_ID) return { piece, pageId };
+  }
+  return null;
 }
 
 /** Re-fetch every currently-selected piece from live game state (never trust
@@ -348,6 +385,135 @@ function collectSelectedPieces(pageId: string): { piece: PlacedPiece; pageId: st
     if (piece) found.push({ piece, pageId });
   }
   return found;
+}
+
+/**
+ * Every currently-selected piece, resolved fresh and grouped by nothing in
+ * particular -- for callers (the group-restyle math below) that just want
+ * "what's selected right now", regardless of which page each one is on.
+ */
+function collectSelectedPiecesAnyPage(): { piece: PlacedPiece; pageId: string }[] {
+  const found: { piece: PlacedPiece; pageId: string }[] = [];
+  for (const id of selectedPieceIds) {
+    const owned = findOwnedPieceById(id);
+    if (owned) found.push(owned);
+  }
+  return found;
+}
+
+/**
+ * The selected pieces that all share one template, so one material choice
+ * makes sense for the whole group -- this is what unlocks the material
+ * panel for a plain (non-carrying) selection. Null while carrying (its own
+ * solo context applies instead, see `getCarriedPieceContext`), with nothing
+ * selected, or when the selection mixes piece types: a mixed group has no
+ * one look to move them all to, same reasoning as a mixed bulk carry.
+ * `material` is the group's shared material, or null when the pieces
+ * already differ -- nothing to highlight as "current" in that case.
+ */
+export function getSelectedGroupContext(): { templateKey: string; count: number; material: string | null } | null {
+  if (carrying || selectedPieceIds.size === 0) return null;
+  const pieces = collectSelectedPiecesAnyPage().map(({ piece }) => piece);
+  if (pieces.length === 0) return null;
+  const templateKey = pieces[0].templateKey;
+  if (!pieces.every((piece) => piece.templateKey === templateKey)) return null;
+  const materials = new Set(pieces.map((piece) => piece.material));
+  return { templateKey, count: pieces.length, material: materials.size === 1 ? pieces[0].material : null };
+}
+
+/**
+ * Simulates restyling every given piece to `material`, in the same
+ * charge-then-refund order and against the same running balance that
+ * `updatePlacedPiece` uses for one piece at a time (see `materialCost` in
+ * sim/commands.ts) -- so a group where some members already have the new
+ * material, refunding nothing and charging nothing, never overstates what
+ * the ones that do change actually cost. All told against one shared
+ * balance, all-or-nothing: nobody wants three of five benches restyled
+ * because the fourth ran the bag dry partway through.
+ */
+function canAffordGroupRestyle(pieces: readonly PlacedPiece[], material: BuildMaterialId): boolean {
+  const balance: Partial<Record<string, number>> = { ...getGameState().player.inventory };
+  for (const piece of pieces) {
+    if (piece.material === material) continue;
+    const units = buildMaterialUnits(piece.templateKey);
+    const charge = materialCost(material, units);
+    const refund = materialCost(piece.material, units);
+    if (charge) {
+      const have = balance[charge.resource] ?? 0;
+      if (have < charge.units) return false;
+      balance[charge.resource] = have - charge.units;
+    }
+    if (refund) balance[refund.resource] = (balance[refund.resource] ?? 0) + refund.units;
+  }
+  return true;
+}
+
+/** Whether the whole current selection could be restyled to `material` right
+ * now -- the build palette calls this to grey out a swatch the group's bag
+ * cannot actually cover, the same way it already does for a single carried
+ * piece. */
+export function canAffordSelectedGroupRestyle(material: BuildMaterialId): boolean {
+  const context = getSelectedGroupContext();
+  if (!context) return false;
+  return canAffordGroupRestyle(collectSelectedPiecesAnyPage().map(({ piece }) => piece), material);
+}
+
+/**
+ * Restyle every selected piece to `material` at once, instantly -- no build
+ * timer, unlike restyling a single piece you are actively carrying
+ * (`dropCarriedPiece` below). Animating an arbitrary number of simultaneous
+ * timers for a group wasn't worth building for this pass; this can grow a
+ * timer later if a bare instant swap ever feels wrong for a big group.
+ * Returns false when there is no restyleable selection to act on at all
+ * (so the palette knows the click had nothing to do), true once it has
+ * tried -- including the "the bag couldn't cover it" case, which still
+ * shows a toast rather than silently doing nothing.
+ */
+export function applyMaterialToSelectedPieces(material: BuildMaterialId): boolean {
+  if (getActionMode() !== 'place' || carrying) return false;
+  const context = getSelectedGroupContext();
+  if (!context) return false;
+  const entries = collectSelectedPiecesAnyPage();
+  if (entries.length === 0) return false;
+
+  if (!canAffordGroupRestyle(entries.map(({ piece }) => piece), material)) {
+    const perPiece = buildMaterialUnits(context.templateKey);
+    showPetToast(entries.length > 1
+      ? `Not enough of that material to restyle all ${entries.length} -- ${perPiece} needed each.`
+      : `Not enough of that material -- ${perPiece} needed.`);
+    return true;
+  }
+
+  let changed = 0;
+  let lastMessage = '';
+  const touchedPages = new Set<string>();
+  for (const { piece, pageId } of entries) {
+    if (piece.material === material) continue;
+    const result = dispatchGameCommand({
+      type: 'updatePlacedPiece',
+      id: piece.id,
+      x: piece.x,
+      z: piece.z,
+      rotY: piece.rotY,
+      material,
+      pageId,
+    });
+    touchedPages.add(pageId);
+    if (result.ok) {
+      changed += 1;
+      lastMessage = result.message;
+    } else {
+      lastMessage = result.reason;
+    }
+  }
+  invalidateFootprintCache();
+  for (const pageId of touchedPages) {
+    if (sceneOfPageId(pageId) === HOME_INTERIOR_SCENE) refreshInteriorBuilds();
+    else refreshBuiltPageTerrain(pageId);
+  }
+  if (changed > 0) playCozySound('rustle');
+  showPetToast(changed > 1 ? `Restyled ${changed} pieces.` : lastMessage);
+  return true;
 }
 
 function beginCarrying(pieces: { piece: PlacedPiece; pageId: string }[]) {
@@ -371,6 +537,41 @@ function beginCarrying(pieces: { piece: PlacedPiece; pageId: string }[]) {
   for (const { piece } of pieces) setPlacedPieceVisualVisible(piece.id, false);
   selectedPieceIds.clear();
   for (const listener of selectionListeners) listener();
+}
+
+/**
+ * The build palette's "Move" action: pick up the whole current selection
+ * (one piece or several) so it starts following the cursor, exactly what a
+ * plain click used to do by itself before selecting and picking up were
+ * split into two steps. Does nothing outside build mode, mid-carry already,
+ * or with nothing selected -- the palette only ever shows the button when
+ * none of those apply, this is just the same guard kept honest.
+ */
+export function enterMoveMode(): boolean {
+  if (getActionMode() !== 'place' || carrying || selectedPieceIds.size === 0) return false;
+  const pieces = collectSelectedPiecesAnyPage();
+  if (pieces.length === 0) {
+    selectedPieceIds.clear();
+    for (const listener of selectionListeners) listener();
+    return false;
+  }
+  beginCarrying(pieces);
+  return true;
+}
+
+/**
+ * The build palette's "✓ Done" action while carrying: set the group down
+ * exactly where its ghost currently sits, without needing a ground click
+ * first -- the same commit a click performs, aimed at `carryHoverPoint`
+ * (which the ghost has been following all along) instead of a fresh pick.
+ * Confirms a rotate-only adjustment, or simply "yes, leave it here," with
+ * one predictable button instead of having to click the exact spot the
+ * ghost is already standing on.
+ */
+export function commitCarryInPlace(): boolean {
+  if (!carrying || !carryHoverPoint) return false;
+  dropCarriedPiece(carryHoverPoint.clone());
+  return true;
 }
 
 /** Esc: while carrying, put every member back exactly where it was (nothing
@@ -698,16 +899,21 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
     } else {
       const owned = ownedPieceAtPoint(groundPoint.x, groundPoint.z);
       if (owned) {
-        // A plain click on a piece that is part of a 2-or-more selection
-        // picks up the whole group; a plain click on anything else (or a
-        // stray 1-piece "selection", equivalent to none) just carries that
-        // one piece solo, same as ever, and drops any leftover selection.
-        if (selectedPieceIds.size > 1 && selectedPieceIds.has(owned.piece.id)) {
-          beginCarrying(collectSelectedPieces(owned.pageId));
-        } else {
-          if (selectedPieceIds.size > 0) selectedPieceIds.clear();
-          beginCarrying([owned]);
-        }
+        // A plain click on your own piece selects it -- and only it -- so
+        // the material panel can restyle it (or a shift-built group) without
+        // picking anything up. Moving is a separate, explicit step now: the
+        // build palette's "Move" button (`enterMoveMode`) is what actually
+        // starts a carry.
+        selectOwnedPiece(owned.piece.id);
+        return true;
+      }
+      // A plain click that landed on open ground (or someone else's piece)
+      // while something of yours was selected just closes that selection --
+      // the same "click away to dismiss" every other panel here uses. It
+      // does not also place a new piece in the same click; a second click
+      // does that once the selection is out of the way.
+      if (selectedPieceIds.size > 0) {
+        clearSelectedPlacedPieces();
         return true;
       }
     }

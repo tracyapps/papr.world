@@ -7,11 +7,16 @@ import { buildMaterialUnits, type BuildMaterialId } from '../sim/catalogs/buildi
 import { buildMaterialOffers } from '../game/buildMaterials';
 import { getActionMode, onActionModeChanged } from '../game/actionMode';
 import {
+  applyMaterialToSelectedPieces,
+  canAffordSelectedGroupRestyle,
   carriedPieceCount,
+  commitCarryInPlace,
+  enterMoveMode,
   getCarriedPieceContext,
   getSelectedBuildMaterial,
   getSelectedBuildPiece,
   getSelectedBuildRotation,
+  getSelectedGroupContext,
   getSelectedPlacedPieceIds,
   isCarryingPlacedPiece,
   onSelectedBuildPieceChanged,
@@ -57,8 +62,22 @@ export function initializeBuildPalette() {
     }
     const materialButton = target.closest<HTMLButtonElement>('[data-build-material]');
     if (materialButton?.dataset.buildMaterial) {
-      setSelectedBuildMaterial(materialButton.dataset.buildMaterial as BuildMaterialId);
+      const material = materialButton.dataset.buildMaterial as BuildMaterialId;
+      // Three different things a material swatch can mean, and only one
+      // applies at a time (the section itself is hidden the rest of the
+      // time): restyle the piece you are actively carrying (the existing
+      // timed swap), restyle a plain selection sitting on the ground (the
+      // newer, instant group path), or -- the ordinary case, nothing picked
+      // up or selected at all -- just choose what the *next* new piece will
+      // be built out of.
+      if (isCarryingPlacedPiece()) setSelectedBuildMaterial(material);
+      else if (getSelectedPlacedPieceIds().size > 0) applyMaterialToSelectedPieces(material);
+      else setSelectedBuildMaterial(material);
+      return;
     }
+    const selectionAction = target.closest<HTMLButtonElement>('[data-selection-action]')?.dataset.selectionAction;
+    if (selectionAction === 'move') enterMoveMode();
+    else if (selectionAction === 'done') commitCarryInPlace();
   });
   palette.addEventListener('pointerdown', (event) => event.stopPropagation());
   palette.addEventListener('pointerup', (event) => event.stopPropagation());
@@ -87,25 +106,46 @@ function renderPalette() {
   // Restyling an already-placed piece prices and highlights against *that*
   // piece, never the leftover "next new piece" selection above — those are
   // unrelated the moment you pick something up off the ground. A bulk carry
-  // has no one piece to restyle at all (see materialSection below).
+  // has no one piece to restyle at all (see materialSection below). A plain
+  // (non-carrying) selection gets the same treatment through `selectedGroup`
+  // once every selected piece shares one template.
   const carriedContext = getCarriedPieceContext();
-  const materialPieceKey = carriedContext ? carriedContext.templateKey : selected;
-  const materialSelected = carriedContext ? carriedContext.material : selectedMaterial;
+  const selectedGroup = carrying ? null : getSelectedGroupContext();
+  const materialPieceKey = carriedContext ? carriedContext.templateKey : selectedGroup ? selectedGroup.templateKey : selected;
+  const materialSelected = carriedContext ? carriedContext.material : selectedGroup ? selectedGroup.material : selectedMaterial;
   const plans = getGameState().player.plans;
   const degrees = Math.round(getSelectedBuildRotation() * 180 / Math.PI) % 360;
   const heading = bulkCarrying
-    ? `Carrying ${carriedCount} pieces — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground to set down · Esc cancel`
+    ? `Carrying ${carriedCount} pieces — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground or ✓ Done to set down · Esc cancel`
     : carrying
-      ? 'Carrying — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground to set down · a material re-builds it · Esc cancel'
+      ? 'Carrying — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground or ✓ Done to set down · a material re-builds it · Esc cancel'
       : pendingSelection.size > 0
-        ? `${pendingSelection.size} selected — click one to carry them all · shift-click to add or remove · Esc to clear`
-        : `Build — click ground · click your own piece to pick it up, shift-click to select several · R rotate (${degrees}°) · Esc put away`;
-  // While carrying, picking a new piece type does nothing (setSelectedBuildPiece
-  // only ever affects what gets placed fresh, never the piece in hand) — so the
-  // list is dead weight exactly when rail height is tightest. Dropping it here
-  // both declutters the "what do I do now" moment and buys back the room the
-  // material swatches need to stay reachable on a short screen.
-  const pieceList = carrying ? '' : `
+        ? `${pendingSelection.size} selected — Move to pick ${pendingSelection.size > 1 ? 'them' : 'it'} up${selectedGroup ? ', or choose a material to restyle' : ''} · shift-click to add or remove · Esc to clear`
+        : `Build — click ground · click your own piece to select it, shift-click to select several · R rotate (${degrees}°) · Esc put away`;
+  const selectionActions = (!carrying && pendingSelection.size > 0) ? `
+    <div class="build-selection-actions">
+      <button type="button" data-selection-action="move">
+        Move${pendingSelection.size > 1 ? ` ${pendingSelection.size} pieces` : ''}
+      </button>
+    </div>` : '';
+  // Extension point: Duplicate and "save as template" both belong in this
+  // same row once they exist -- one more `<button data-selection-action="…">`
+  // each, handled in the click listener above. Not built yet, so not shown:
+  // a button that does nothing is worse than no button.
+  const carryActions = carrying ? `
+    <div class="build-selection-actions">
+      <button type="button" data-selection-action="done">
+        <span aria-hidden="true">✓</span> Done
+      </button>
+    </div>` : '';
+  // While carrying, or while something already sits selected, picking a new
+  // piece type does nothing useful in the moment (setSelectedBuildPiece only
+  // ever affects what gets placed fresh, never the piece in hand or on the
+  // ground already) — so the list is dead weight exactly when rail height is
+  // tightest. Dropping it here both declutters the "what do I do now" moment
+  // and buys back the room the Move button and material swatches need to
+  // stay reachable on a short screen.
+  const pieceList = (carrying || pendingSelection.size > 0) ? '' : `
     <div class="build-palette-list" role="listbox" aria-label="Choose a piece to build">
       ${(Object.keys(BUILD_PIECE_DEFS) as BuildPieceKey[]).map((key) => {
     const def = BUILD_PIECE_DEFS[key];
@@ -131,48 +171,72 @@ function renderPalette() {
           </button>`;
   }).join('')}
     </div>`;
-  // A mixed bulk group has no one material to restyle into (setSelectedBuildMaterial
-  // refuses a swatch click during one anyway) — dropping the section entirely
+  // A mixed bulk carry, and a plain selection with nothing in common, both
+  // have no one material to restyle into — dropping the section entirely
   // here, rather than showing stale or misleading swatches, is the honest
   // version of "nothing to do here right now".
-  const materialSection = bulkCarrying ? '' : `
-    <p class="build-palette-heading build-material-heading">${materialHeading(materialPieceKey)}</p>
+  const groupCount = selectedGroup?.count ?? 1;
+  // Hidden for a bulk carry (mixed footprint, no one thing to restyle into)
+  // and for a plain selection that mixes piece types (no one thing there
+  // either) -- shown in every other case, including the ordinary "nothing
+  // selected, nothing carried" moment, where it is choosing what the *next*
+  // new piece will be built out of.
+  const mixedSelection = !carrying && pendingSelection.size > 0 && !selectedGroup;
+  const materialSection = (bulkCarrying || mixedSelection) ? '' : `
+    <p class="build-palette-heading build-material-heading">${materialHeading(materialPieceKey, groupCount)}</p>
     <div class="build-material-list" role="listbox" aria-label="Choose a material">
-      ${materialSwatches(materialPieceKey, materialSelected)}
+      ${materialSwatches(materialPieceKey, materialSelected, groupCount, Boolean(selectedGroup))}
     </div>`;
   palette.innerHTML = `
     <p class="build-palette-heading">${heading}</p>
     ${pieceList}
+    ${selectionActions}
+    ${carryActions}
     ${materialSection}`;
 }
 
 /**
  * The Material heading carries the price, because the picker is the only
- * place a player finds out that a piece costs anything at all.
+ * place a player finds out that a piece costs anything at all. `count` is
+ * how many selected pieces a swatch click would restyle at once (always 1
+ * while carrying, since a bulk carry never reaches this section at all).
  */
-function materialHeading(piece: string | null): string {
+function materialHeading(piece: string | null, count = 1): string {
   if (!piece) return 'Material';
-  const units = buildMaterialUnits(piece);
-  return units > 0 ? `Material — ${units} needed` : 'Material';
+  const perPiece = buildMaterialUnits(piece);
+  if (perPiece <= 0) return 'Material';
+  return count > 1
+    ? `Material — ${perPiece} needed each, ${perPiece * count} total for ${count}`
+    : `Material — ${perPiece} needed`;
 }
 
 /**
- * Only what is in the bag, and only in quantities that would finish the piece.
+ * Only what is in the bag, and only in quantities that would finish the piece
+ * (or, for a selected group, restyle every piece in it).
  *
  * The six curated paper textures this replaced were free and tied to nothing,
  * so the picker could always show a full row. Now an empty row is a true and
  * useful thing to say: go and gather something.
+ *
+ * `isGroup` switches the affordability check from "the bag covers one" to
+ * "the bag covers restyling the whole current selection" — the exact
+ * charge/refund simulation in `canAffordSelectedGroupRestyle`, so a group
+ * where some members already have the material (nothing charged for those)
+ * is never greyed out over a cost nobody would actually be asked to pay.
  */
-function materialSwatches(piece: string | null, selectedMaterial: string | null): string {
+function materialSwatches(piece: string | null, selectedMaterial: string | null, count = 1, isGroup = false): string {
   const offers = buildMaterialOffers();
   if (offers.length === 0) {
     return '<p class="build-material-empty">Nothing to build with yet — gather some paper, sticks or stone.</p>';
   }
 
-  const units = piece ? buildMaterialUnits(piece) : 0;
+  const perPiece = piece ? buildMaterialUnits(piece) : 0;
+  const needed = perPiece * count;
   return offers.map((offer) => {
-    const affordable = offer.owned >= units;
-    const label = `${offer.label} — ${offer.owned} in your bag${affordable ? '' : `, ${units} needed`}`;
+    const affordable = isGroup
+      ? canAffordSelectedGroupRestyle(offer.id as BuildMaterialId)
+      : offer.owned >= needed;
+    const label = `${offer.label} — ${offer.owned} in your bag${affordable ? '' : `, ${needed} needed`}`;
     return `
           <button type="button" role="option" aria-selected="${selectedMaterial === offer.id}"
             class="build-material-item${selectedMaterial === offer.id ? ' is-selected' : ''}${affordable ? '' : ' is-short'}"

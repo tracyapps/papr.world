@@ -1251,6 +1251,37 @@ body {
   margin-top: 12px;
 }
 
+/* The "Move" / "✓ Done" row: the one action a selection or a carry actually
+   needs right now. Sits like a piece row's own button rather than a swatch,
+   since it is a decision, not a texture. */
+.build-selection-actions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.build-selection-actions button {
+  background: rgb(224 238 198 / 0.85);
+  border: 1px solid rgb(67 91 45 / 0.4);
+  border-radius: 10px;
+  color: #2d261e;
+  cursor: pointer;
+  font: 700 13px/1.3 Georgia, serif;
+  padding: 8px 11px;
+  text-align: center;
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+.build-selection-actions button:hover {
+  background: rgb(224 238 198 / 1);
+  transform: translateX(-3px);
+}
+
+.build-selection-actions button:focus-visible {
+  outline: 3px solid rgb(49 95 92 / 0.85);
+  outline-offset: 2px;
+}
+
 .build-material-list {
   display: grid;
   gap: 8px;

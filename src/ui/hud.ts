@@ -349,8 +349,19 @@ function handleHudWidgetPointerMove(event: PointerEvent) {
   const deltaY = event.clientY - hudWidgetInteraction.startY;
 
   if (hudWidgetInteraction.kind === 'drag') {
+    // Carry the resized width/height along untouched. Omitting them here
+    // used to mean "leave them as they are", but clampHudWidgetState's
+    // fallback for a missing height is `element.offsetHeight` -- the whole
+    // card, borders and all -- which is NOT what "height" means for a
+    // dimensions-mode widget like the chat (there it's just the log's own
+    // height; see the comment on HudWidgetConfig.resizeMode). Every drag
+    // was quietly re-measuring the whole card and feeding that back in as
+    // the log's new height, so picking up a resized chat window and moving
+    // it made it grow taller with each pointermove (2026-09-22).
     applyHudWidgetState(config, {
       scale: hudWidgetInteraction.originScale,
+      width: hudWidgetInteraction.originWidth,
+      height: hudWidgetInteraction.originHeight,
       x: hudWidgetInteraction.originX + deltaX,
       y: hudWidgetInteraction.originY + deltaY,
     });

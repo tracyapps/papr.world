@@ -192,7 +192,10 @@ function spendAllocation(state: GameState, allocation: ResourceAllocation) {
  * which names no resource — those cost and refund nothing, and must not, or
  * an old save would start charging for a choice it never made.
  */
-function materialCost(material: string, units: number): { resource: ResourceId; units: number } | null {
+// Exported so placement.ts can run the exact same charge/refund math on a
+// client-side dry run before committing a multi-piece restyle -- one
+// definition of "what a material swap costs", not two that can drift.
+export function materialCost(material: string, units: number): { resource: ResourceId; units: number } | null {
   const resource = buildMaterialResource(material);
   if (!resource || units <= 0) return null;
   return { resource, units };
