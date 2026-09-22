@@ -5,6 +5,7 @@ import { sampleTerrainHeight } from '../world/terrain';
 import { updateWading, wadeSinkAt, wadeSpeedMultiplier } from './wading';
 import { getViewCloseness, getYaw } from './camera';
 import { getMovementInput, type MovementInput } from './input';
+import { getSetting } from './settings';
 import { groundHeightAt, solidAt } from '../world/activeScene';
 import { DESIGN_CUTOUT, DESIGN_GROUND_Y, DESIGN_SHEET } from '../../shared/src/index';
 import { slideMove } from '../core/placement';
@@ -159,9 +160,14 @@ export function updateAvatar(delta: number) {
   const direction = desiredDirection(movement);
   const wantsToMove = direction.lengthSq() > 0.0001;
 
+  // The player's walk-speed setting scales the same MAX_SPEED everything
+  // below (bob, lean, wade slowdown) already reads relative to, so a slower
+  // or faster pace still feels internally consistent, not just capped.
+  const maxSpeed = MAX_SPEED * getSetting('walkSpeedMultiplier');
+
   // Accelerate toward the desired velocity; brake a little harder than
   // we accelerate so stopping feels planted, not slippery.
-  const targetVelocity = direction.clone().multiplyScalar(MAX_SPEED);
+  const targetVelocity = direction.clone().multiplyScalar(maxSpeed);
   const rate = wantsToMove ? ACCELERATION : DECELERATION;
   const maxChange = rate * delta;
   const change = targetVelocity.sub(velocity);
@@ -190,7 +196,7 @@ export function updateAvatar(delta: number) {
   }
 
   // Walk bob: a light hop that scales with how fast we're moving.
-  const speedRatio = Math.min(speed / MAX_SPEED, 1);
+  const speedRatio = Math.min(speed / maxSpeed, 1);
   walkPhase += delta * BOB_FREQUENCY * (0.4 + speedRatio);
   const bob = Math.abs(Math.sin(walkPhase)) * BOB_HEIGHT * speedRatio;
 
@@ -223,7 +229,7 @@ export function updateAvatar(delta: number) {
 
   const yaw = getYaw();
   const rightward = velocity.x * Math.cos(yaw) - velocity.z * Math.sin(yaw);
-  const targetLean = -THREE.MathUtils.clamp(rightward / MAX_SPEED, -1, 1) * LEAN_AMOUNT;
+  const targetLean = -THREE.MathUtils.clamp(rightward / maxSpeed, -1, 1) * LEAN_AMOUNT;
   currentLean = THREE.MathUtils.lerp(currentLean, targetLean, Math.min(delta * 9, 1));
   avatar.rotateZ(currentLean);
 

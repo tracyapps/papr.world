@@ -6,10 +6,22 @@ import {
   UI_TEXT_SCALE_MIN,
   HUD_SCALE_MAX,
   HUD_SCALE_MIN,
+  WALK_SPEED_MAX,
+  WALK_SPEED_MIN,
   getSetting,
   onSettingsChanged,
   setSetting,
 } from '../game/settings';
+import {
+  ACTIONS,
+  DEFAULT_GAMEPAD_BINDINGS,
+  DEFAULT_KEY_BINDINGS,
+  actionDef,
+  describeGamepadButton,
+  describeKeyCode,
+  type ActionId,
+} from '../game/controlActions';
+import { beginGamepadCapture, beginKeyCapture, cancelBindingCapture } from '../game/input';
 import { openAvatarLookEditor, wearDesign } from '../game/avatarLook';
 import { NOTIFY_CATEGORIES, sanitizeNotifyCategories, type NotifyCategory } from './notifications';
 import { openWardrobePanel } from './avatarEditor/wardrobePanel';
@@ -40,17 +52,31 @@ let openMenu: MenuId | null = null;
 /** Restores focus to whatever opened the overlay, per dialog convention. */
 let lastFocused: HTMLElement | null = null;
 
-const CONTROLS: Array<{ group: string; rows: Array<[string, string]> }> = [
+/**
+ * A row either names a fixed input directly (mouse, sticks, click) or names
+ * an `ActionId` and lets the current keyboard binding fill in the `<kbd>` —
+ * so this reference reads correctly however the player has remapped things,
+ * instead of going stale the moment Settings → Controls changes a key.
+ */
+type ControlRow = [string, string] | { action: ActionId; description: string };
+
+const CONTROLS: Array<{ group: string; rows: ControlRow[] }> = [
   {
     group: 'Moving around',
     rows: [
-      ['W A S D / arrows', 'Walk'],
+      { action: 'moveForward', description: 'Walk forward — arrow keys always work too' },
+      { action: 'moveBack', description: 'Walk back' },
+      { action: 'moveLeft', description: 'Walk left' },
+      { action: 'moveRight', description: 'Walk right' },
       ['Left stick / D-pad', 'Walk (gamepad)'],
       ['Right-drag or middle-drag', 'Look around'],
       ['Left-drag empty space', 'Look around'],
       ['Right stick', 'Look around (gamepad)'],
       ['Mouse wheel', 'Zoom — all the way in becomes first person'],
-      ['R / F', 'Tilt the view'],
+      { action: 'zoomIn', description: 'Zoom in — Numpad + always works too' },
+      { action: 'zoomOut', description: 'Zoom out — Numpad − always works too' },
+      { action: 'rotate', description: 'Rotate a held piece, or tilt the view up' },
+      { action: 'pitchDown', description: 'Tilt the view down' },
     ],
   },
   {
@@ -58,10 +84,11 @@ const CONTROLS: Array<{ group: string; rows: Array<[string, string]> }> = [
     rows: [
       ['Left click', 'Use whatever is under the cursor'],
       ['1 – 4', 'Choose a tool slot'],
-      ['E', 'Use the Thing Maker when you are near it'],
-      ['I', 'Open and close the scrapbook'],
-      ['M', 'Open and close the map'],
-      ['G', 'Mark this spot as a saved place, and guide you back to it'],
+      { action: 'interact', description: 'Use the Thing Maker when you are near it' },
+      { action: 'toggleScrapbook', description: 'Open and close the scrapbook' },
+      { action: 'openMap', description: 'Open and close the map' },
+      { action: 'markPlace', description: 'Mark this spot as a saved place, and guide you back to it' },
+      { action: 'autoWalk', description: 'Toggle auto-walk — keep walking without holding a key' },
       ['Escape', 'Close what is open, then put your tools away'],
     ],
   },
@@ -71,6 +98,17 @@ function buildHelpOverlay(): HTMLElement {
   const overlay = document.createElement('div');
   overlay.className = 'hud-overlay';
   overlay.hidden = true;
+  const keyBindings = getSetting('keyBindings');
+  const renderRow = (row: ControlRow) => {
+    const [key, description] = Array.isArray(row)
+      ? row
+      : [describeKeyCode(keyBindings[row.action]), row.description];
+    return `
+            <div class="hud-controls-row">
+              <dt><kbd>${key}</kbd></dt>
+              <dd>${description}</dd>
+            </div>`;
+  };
   overlay.innerHTML = `
     <div class="hud-overlay-card" role="dialog" aria-modal="true" aria-labelledby="hud-help-title">
       <button class="hud-overlay-close" type="button" aria-label="Close help">×</button>
@@ -79,12 +117,9 @@ function buildHelpOverlay(): HTMLElement {
       ${CONTROLS.map((section) => `
         <h3 class="hud-overlay-subhead">${section.group}</h3>
         <dl class="hud-controls-list">
-          ${section.rows.map(([key, description]) => `
-            <div class="hud-controls-row">
-              <dt><kbd>${key}</kbd></dt>
-              <dd>${description}</dd>
-            </div>`).join('')}
+          ${section.rows.map(renderRow).join('')}
         </dl>`).join('')}
+      <p class="hud-overlay-note">Every key above, and gamepad buttons, can be changed in Settings → Controls.</p>
       <h3 class="hud-overlay-subhead">Alpha notebook</h3>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="help-send-feedback">
@@ -189,6 +224,21 @@ function buildSettingsOverlay(): HTMLElement {
           <output for="setting-camera-sensitivity" id="setting-camera-sensitivity-value"></output>
         </div>
       </div>
+      <h3 class="hud-overlay-subhead">Gameplay</h3>
+      <div class="hud-setting hud-setting-select">
+        <label for="setting-pickup-ring">
+          <strong>Show pickup range on the ground</strong>
+          <small id="setting-pickup-ring-hint">
+            A faint ring at your feet showing how close you need to be to a
+            resource before walking over it collects it
+          </small>
+        </label>
+        <select id="setting-pickup-ring" aria-describedby="setting-pickup-ring-hint">
+          <option value="auto">Only when zoomed in close</option>
+          <option value="always">Always show it</option>
+          <option value="off">Never show it</option>
+        </select>
+      </div>
       <h3 class="hud-overlay-subhead">You</h3>
       <div class="hud-setting hud-setting-action">
         <button class="hud-setting-button" type="button" id="setting-change-look">
@@ -269,9 +319,61 @@ function buildSettingsOverlay(): HTMLElement {
         </button>
         <small>Report a bug, suggest an improvement, or leave a new idea. Notes survive an offline spell.</small>
       </div>
+      <h3 class="hud-overlay-subhead">Controls</h3>
+      <div class="hud-setting hud-setting-slider">
+        <label for="setting-walk-speed">
+          <strong>Walking speed</strong>
+          <small id="setting-walk-speed-hint">How fast you move on foot — separate from how fast the camera turns</small>
+        </label>
+        <div class="hud-slider-row">
+          <span class="hud-slider-end" aria-hidden="true">Slower</span>
+          <input
+            type="range"
+            id="setting-walk-speed"
+            min="${WALK_SPEED_MIN}"
+            max="${WALK_SPEED_MAX}"
+            step="0.05"
+            aria-describedby="setting-walk-speed-hint"
+          >
+          <span class="hud-slider-end" aria-hidden="true">Faster</span>
+          <output for="setting-walk-speed" id="setting-walk-speed-value"></output>
+        </div>
+      </div>
+      <p class="hud-overlay-note" id="controls-rebind-status" role="status" aria-live="polite"></p>
+      <div class="hud-rebind-list" id="controls-rebind-list">
+        <div class="hud-rebind-list-head" aria-hidden="true">
+          <span></span><span>Keyboard</span><span>Gamepad</span>
+        </div>
+        ${ACTIONS.map((action) => `
+        <div class="hud-rebind-row">
+          <div class="hud-rebind-row-label">
+            <strong>${action.label}</strong>
+            ${action.hint ? `<small>${action.hint}</small>` : ''}
+          </div>
+          <button
+            type="button"
+            class="hud-rebind-button"
+            data-rebind-key="${action.id}"
+            aria-pressed="false"
+            aria-label="${action.label}, keyboard: press to change"
+          >${describeKeyCode(getSetting('keyBindings')[action.id])}</button>
+          <button
+            type="button"
+            class="hud-rebind-button"
+            data-rebind-gamepad="${action.id}"
+            aria-pressed="false"
+            aria-label="${action.label}, gamepad: press to change"
+          >${describeGamepadButton(getSetting('gamepadBindings')[action.id])}</button>
+        </div>`).join('')}
+      </div>
+      <div class="hud-setting hud-setting-action">
+        <button class="hud-setting-button" type="button" id="setting-reset-controls">
+          Reset controls to defaults
+        </button>
+        <small>Restores every key and gamepad button above, and walking speed, to how the game shipped.</small>
+      </div>
       <p class="hud-overlay-note">
-        Coming here later: key remapping, gamepad mapping, invert stick look,
-        and audio.
+        Coming here later: invert stick look, and audio.
       </p>
     </div>`;
 
@@ -280,6 +382,17 @@ function buildSettingsOverlay(): HTMLElement {
     dragMode.checked = getSetting('cameraDragMode') === 'grab-world';
     dragMode.addEventListener('change', () => {
       setSetting('cameraDragMode', dragMode.checked ? 'grab-world' : 'move-camera');
+    });
+  }
+
+  const pickupRing = overlay.querySelector<HTMLSelectElement>('#setting-pickup-ring');
+  if (pickupRing) {
+    pickupRing.value = getSetting('pickupRingVisibility');
+    pickupRing.addEventListener('change', () => {
+      const value = pickupRing.value;
+      if (value === 'auto' || value === 'always' || value === 'off') {
+        setSetting('pickupRingVisibility', value);
+      }
     });
   }
 
@@ -412,7 +525,150 @@ function buildSettingsOverlay(): HTMLElement {
     // Let the account receive any look saved moments ago before the desk reads it.
     void flushWardrobeSync().then(() => window.location.assign(accountDeskUrl()));
   });
+
+  const walkSpeed = overlay.querySelector<HTMLInputElement>('#setting-walk-speed');
+  const walkSpeedValue = overlay.querySelector<HTMLOutputElement>('#setting-walk-speed-value');
+  if (walkSpeed) {
+    const describe = (value: number) => `${Math.round(value * 100)}% walking speed`;
+    const reflect = (value: number) => {
+      walkSpeed.setAttribute('aria-valuetext', describe(value));
+      if (walkSpeedValue) walkSpeedValue.textContent = `${Math.round(value * 100)}%`;
+    };
+    walkSpeed.value = String(getSetting('walkSpeedMultiplier'));
+    reflect(getSetting('walkSpeedMultiplier'));
+    walkSpeed.addEventListener('input', () => {
+      const value = Number(walkSpeed.value);
+      setSetting('walkSpeedMultiplier', value);
+      reflect(value);
+    });
+    walkSpeed.addEventListener('keydown', (event) => event.stopPropagation());
+  }
+
+  wireControlsRebinding(overlay, walkSpeed);
+
   return overlay;
+}
+
+/**
+ * The rebind rows under Settings → Controls. Each action gets two buttons —
+ * one for its keyboard binding, one for its gamepad binding — that put
+ * game/input.ts into capture mode on click and show whatever the next key
+ * or button press turns out to be, via the same `beginKeyCapture` /
+ * `beginGamepadCapture` the module exposes for exactly this. Nothing here
+ * stops two actions sharing a key, but a rebind *onto* an already-used key
+ * clears it from wherever it used to live first, so a press never silently
+ * controls two things at once.
+ */
+function wireControlsRebinding(overlay: HTMLElement, walkSpeedInput: HTMLInputElement | null) {
+  const status = overlay.querySelector<HTMLElement>('#controls-rebind-status');
+  const announce = (message: string) => {
+    if (status) status.textContent = message;
+  };
+
+  const keyButtons = new Map<ActionId, HTMLButtonElement>();
+  const gamepadButtons = new Map<ActionId, HTMLButtonElement>();
+  for (const action of ACTIONS) {
+    const keyButton = overlay.querySelector<HTMLButtonElement>(`[data-rebind-key="${action.id}"]`);
+    const gamepadButton = overlay.querySelector<HTMLButtonElement>(`[data-rebind-gamepad="${action.id}"]`);
+    if (keyButton) keyButtons.set(action.id, keyButton);
+    if (gamepadButton) gamepadButtons.set(action.id, gamepadButton);
+  }
+
+  function refreshRow(id: ActionId) {
+    const keyButton = keyButtons.get(id);
+    if (keyButton) keyButton.textContent = describeKeyCode(getSetting('keyBindings')[id]);
+    const gamepadButton = gamepadButtons.get(id);
+    if (gamepadButton) gamepadButton.textContent = describeGamepadButton(getSetting('gamepadBindings')[id]);
+  }
+
+  function refreshAll() {
+    for (const action of ACTIONS) refreshRow(action.id);
+  }
+
+  // Tracked so a capture abandoned mid-listen (alt-tab away from the game
+  // entirely) doesn't leave a button stuck reading "Press a key…" forever —
+  // input.ts's own blur handler cancels the capture itself, but has no way
+  // to tell this button's own display to stand down too.
+  let listeningButton: HTMLButtonElement | null = null;
+  function stopListening() {
+    listeningButton?.classList.remove('is-listening');
+    listeningButton?.setAttribute('aria-pressed', 'false');
+    listeningButton = null;
+  }
+  window.addEventListener('blur', () => {
+    if (!listeningButton) return;
+    stopListening();
+    refreshAll();
+    announce('Rebind cancelled — the window lost focus.');
+  });
+
+  for (const [id, button] of keyButtons) {
+    button.addEventListener('click', () => {
+      cancelBindingCapture();
+      stopListening();
+      listeningButton = button;
+      button.classList.add('is-listening');
+      button.setAttribute('aria-pressed', 'true');
+      button.textContent = 'Press a key…';
+      announce(`${actionDef(id).label}: press any key, or Escape to cancel.`);
+      beginKeyCapture((code) => {
+        stopListening();
+        if (code) {
+          const bindings = { ...getSetting('keyBindings') };
+          for (const other of ACTIONS) {
+            if (other.id !== id && bindings[other.id] === code) bindings[other.id] = '';
+          }
+          bindings[id] = code;
+          setSetting('keyBindings', bindings);
+          announce(`${actionDef(id).label} is now ${describeKeyCode(code)}.`);
+        } else {
+          announce('Rebind cancelled.');
+        }
+        refreshAll();
+      });
+    });
+  }
+
+  for (const [id, button] of gamepadButtons) {
+    button.addEventListener('click', () => {
+      cancelBindingCapture();
+      stopListening();
+      listeningButton = button;
+      button.classList.add('is-listening');
+      button.setAttribute('aria-pressed', 'true');
+      button.textContent = 'Press a button…';
+      announce(`${actionDef(id).label}: press a gamepad button, or Escape on the keyboard to cancel.`);
+      beginGamepadCapture((buttonIndex) => {
+        stopListening();
+        if (buttonIndex !== null) {
+          const bindings = { ...getSetting('gamepadBindings') };
+          for (const other of ACTIONS) {
+            if (other.id !== id && bindings[other.id] === buttonIndex) bindings[other.id] = null;
+          }
+          bindings[id] = buttonIndex;
+          setSetting('gamepadBindings', bindings);
+          announce(`${actionDef(id).label} is now ${describeGamepadButton(buttonIndex)}.`);
+        } else {
+          announce('Rebind cancelled.');
+        }
+        refreshAll();
+      });
+    });
+  }
+
+  overlay.querySelector<HTMLButtonElement>('#setting-reset-controls')?.addEventListener('click', () => {
+    cancelBindingCapture();
+    stopListening();
+    setSetting('keyBindings', { ...DEFAULT_KEY_BINDINGS });
+    setSetting('gamepadBindings', { ...DEFAULT_GAMEPAD_BINDINGS });
+    setSetting('walkSpeedMultiplier', 1);
+    if (walkSpeedInput) {
+      walkSpeedInput.value = '1';
+      walkSpeedInput.dispatchEvent(new Event('input'));
+    }
+    refreshAll();
+    announce('Controls reset to defaults.');
+  });
 }
 
 /**

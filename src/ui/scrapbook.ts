@@ -21,13 +21,15 @@ import {
   onSharedInventoryChanged,
 } from '../net/sharedInventory';
 import {
+  getTrinketInstance,
   getTrinkets,
   pickUpTrinket,
   placeTrinket,
   trinketCount,
 } from '../game/trinkets';
 import { getTrinketDef, TRINKET_FAMILIES } from '../sim/catalogs/trinkets';
-import { avatar } from '../game/avatar';
+import { buildTrinketRig } from '../game/trinketRigs';
+import { beginDropCarry } from '../game/dropPlacement';
 import { getCurrentPageId } from '../world/streaming';
 import { openMyPlayerCard } from './playerCard';
 
@@ -356,9 +358,28 @@ export function initializeScrapbook() {
 
     const placeId = target.closest<HTMLButtonElement>('[data-place-trinket]')?.dataset.placeTrinket;
     if (placeId) {
-      const placed = placeTrinket(placeId, getCurrentPageId(), avatar.position.x, avatar.position.z, 0);
-      mailMessage = placed ? 'Set down near your feet. It will be here when you return.' : 'That trinket could not be placed.';
-      render();
+      const instance = getTrinketInstance(placeId);
+      const def = instance ? getTrinketDef(instance.defId) : null;
+      if (instance && def) {
+        // Close the book so there's a world to aim the ghost at — the same
+        // reason build mode's own panel folds away while placing a piece.
+        setScrapbookOpen(false);
+        beginDropCarry({
+          label: def.label,
+          buildVisual: () => buildTrinketRig(def, instance.seed),
+          groundOffset: 0.02, // matches trinketVisuals.ts's placed-trinket height
+          rotatable: true,
+          onDrop: (point, rotY) => {
+            const placed = placeTrinket(instance.id, getCurrentPageId(), point.x, point.z, rotY);
+            return placed
+              ? { ok: true }
+              : { ok: false, message: 'That trinket could not be placed.' };
+          },
+        });
+      } else {
+        mailMessage = 'That trinket could not be placed.';
+        render();
+      }
       return;
     }
     const pickupId = target.closest<HTMLButtonElement>('[data-pickup-trinket]')?.dataset.pickupTrinket;

@@ -13,7 +13,7 @@ import { dispatchGameCommand } from '../sim/commands';
 
 const HARVEST_REACH = 3.4;
 /** Walking across the visible bundle gathers it without another input. */
-const WALK_PICKUP_RADIUS = 0.82;
+export const WALK_PICKUP_RADIUS = 0.82;
 
 type HarvestState = Record<string, number>;
 type Harvestable = {

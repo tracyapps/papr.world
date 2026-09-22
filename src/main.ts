@@ -10,7 +10,7 @@ import { initializeAvatarLook } from './game/avatarLook';
 import { isAvatarStudioOpen } from './ui/avatarEditor/editor';
 import { initializeGuidance, updateGuidance } from './game/guidance';
 import { getCameraDebug, getYaw, updateCamera, adjustCameraZoom } from './game/camera';
-import { initializeInput, setVirtualMovement, updateGamepadCamera } from './game/input';
+import { initializeInput, setVirtualMovement, updateGamepadActions, updateGamepadCamera } from './game/input';
 import { initializeTouchControls, refreshTouchControls } from './game/touchControls';
 import {
   isMakerPanelOpen,
@@ -43,6 +43,8 @@ import { pickSharedHomeAtScreen, pickSharedHomePlateAtScreen, updateSharedHomeVi
 import { hasCozyInteractionAt, initializeCozyInteractions, tryCozyInteractionAt, updateCozyInteractions } from './game/cozyInteractions';
 import { initializeInteractionCursor } from './game/interactionCursor';
 import { initializeHarvesting, isHarvestableAtScreen, tryHarvestAt, updateHarvestables } from './game/harvesting';
+import { initializePickupRing, updatePickupRing } from './game/pickupRing';
+import { cancelDropCarry, rotateDropCarry, updateDropPlacement } from './game/dropPlacement';
 import { getCurrentPageId, isPageActive, updateStreaming } from './world/streaming';
 import { pageId, pageOfPosition } from './world/types';
 import {
@@ -63,6 +65,7 @@ import { initializeActivityLog, isActivityLogOpen, setActivityLogOpen } from './
 import { initializePlaces } from './world/places';
 import { getPage } from './world/pages';
 import { initializeRegionBanner, updateRegionBanner } from './ui/regionBanner';
+import { handleAutoWalkChanged, initializeAutoWalkIndicator } from './ui/autoWalkIndicator';
 import { hasOrbitBlockingInteractionAt, registerScreenInteraction, tryScreenInteractionAt } from './game/interactionRouter';
 import { getGameState, initializeGameState } from './sim/state';
 import { hasToolActionAt, initializeToolActions, tryToolActionAt } from './game/toolActions';
@@ -264,6 +267,7 @@ initializeCritterDialogue();
 initializeTrinketVisuals();
 initializeCozyInteractions();
 initializeHarvesting();
+initializePickupRing();
 initializeToolActions();
 initializeToolToolbar();
 // The rail the minimap's default position clears only exists from the line
@@ -275,6 +279,7 @@ initializePlacement();
 initializeBuildPalette();
 initializeWading();
 initializeRegionBanner();
+initializeAutoWalkIndicator();
 void initializeSharedSession();
 registerScreenInteraction({
   id: 'critter-conversation',
@@ -531,7 +536,7 @@ initializeInput({
     else toggleTreasureMap();
   },
   onSelectToolSlot: selectToolSlot,
-  onRotateBuild: rotateSelectedBuildPiece,
+  onRotateBuild: () => rotateDropCarry() || rotateSelectedBuildPiece(),
   onPrimaryAction: (event) => {
     if (isTimedActionActive()) return;
     if (tryScreenInteractionAt(event.clientX, event.clientY)) return;
@@ -546,6 +551,7 @@ initializeInput({
   onEscape: () => {
     if (closeAlphaNotice()) return true;
     if (closeTreasureMap()) return true;
+    if (cancelDropCarry()) return true;
     if (cancelCarryingPiece()) return true;
     if (cancelTimedAction('escape')) return true;
     if (closeTechTreeView()) return true;
@@ -588,6 +594,7 @@ initializeInput({
    * silently when someone forgets one.
    */
   isWorldTarget: (event) => event.target === canvas,
+  onAutoWalkToggled: handleAutoWalkChanged,
 });
 
 // Touch/tablet overlay. Every button here is the non-gesture twin of a key
@@ -647,6 +654,7 @@ function homeIsNearerThanMaker(): boolean {
 function animateIndoors(delta: number, elapsed: number, animationTime: number) {
   updateTimedAction(animationTime);
   updateGamepadCamera(delta);
+  updateGamepadActions();
   updateAvatar(delta);
   // If the room cannot place you inside (a guest in their own tent), friends
   // see you at the door of the home you are in, on the surface page outside it.
@@ -659,6 +667,7 @@ function animateIndoors(delta: number, elapsed: number, animationTime: number) {
   updateHome();
   const hovered = getActionMode() === 'place' ? pickTerrainAtScreen(pointerX, pointerY) : null;
   updateBuildOverlay(delta, elapsed, avatar.position, hovered);
+  updateDropPlacement(pointerX, pointerY);
   // Act stays live indoors: it is the way out, and the home's own panel.
   refreshTouchControls();
   updateCamera(avatar.position);
@@ -700,6 +709,7 @@ function animate(animationTime = 0) {
 
   updateTimedAction(animationTime);
   updateGamepadCamera(delta);
+  updateGamepadActions();
   updateAvatar(delta);
   updateStreaming(avatar.position);
   if (getCurrentPageId() !== lastNotedPage) {
@@ -742,6 +752,7 @@ function animate(animationTime = 0) {
   updatePetEffects(delta);
   updateCozyInteractions(delta, elapsed);
   updateHarvestables();
+  updatePickupRing();
   updateTrimmableTrees();
   updateMineableRocks();
   updatePlanting();
@@ -763,6 +774,7 @@ function animate(animationTime = 0) {
   } else {
     updateBuildOverlay(delta, elapsed, avatar.position, null);
   }
+  updateDropPlacement(pointerX, pointerY);
 
   // The Rotate button appears the moment build mode does; refreshed with the
   // overlay it belongs to, hence the second call once the mode is known.

@@ -30,7 +30,24 @@ export type ToolbarStyle = 'full' | 'compact';
  */
 export type TouchControlsMode = 'auto' | 'on' | 'off';
 
+/**
+ * The ground ring showing the walk-pickup radius (see `WALK_PICKUP_RADIUS`
+ * in game/harvesting.ts, drawn by game/pickupRing.ts):
+ * - 'auto': fades in as the camera zooms toward first person, and fades back
+ *   out at normal orbit distance. Default — this is a first-person legibility
+ *   aid, not clutter at the usual view.
+ * - 'always': visible at any camera distance.
+ * - 'off': never drawn.
+ */
+export type PickupRingVisibility = 'auto' | 'always' | 'off';
+
 import { DEFAULT_NOTIFY_CATEGORIES, sanitizeNotifyCategories, type NotifyCategory } from '../ui/notifications';
+import {
+  ACTIONS,
+  DEFAULT_GAMEPAD_BINDINGS,
+  DEFAULT_KEY_BINDINGS,
+  type ActionId,
+} from './controlActions';
 
 export type Settings = {
   /**
@@ -89,6 +106,25 @@ export type Settings = {
    * and turning them off would mean turning off dragging.
    */
   touchControls: TouchControlsMode;
+  /** See `PickupRingVisibility`. */
+  pickupRingVisibility: PickupRingVisibility;
+  /**
+   * One KeyboardEvent.code per rebindable action (see game/controlActions.ts
+   * for the full list and what each one does). Arrow keys and the numpad
+   * zoom keys are NOT stored here — they're permanent secondary bindings
+   * input.ts keeps working regardless, so losing this file or resetting to
+   * defaults can never leave a player with no way to move or zoom.
+   */
+  keyBindings: Record<ActionId, string>;
+  /** One gamepad button index per rebindable action, or null for unbound.
+   *  Movement stays on the analog stick/dpad and is never in this map. */
+  gamepadBindings: Record<ActionId, number | null>;
+  /**
+   * Multiplier on walking speed. 1 is the original, tuned pace; the range
+   * exists for players who want to cover ground faster, or who'd rather
+   * slow things down.
+   */
+  walkSpeedMultiplier: number;
   /** The first-run "this is an early alpha" card has been read. */
   alphaNoticeSeen: boolean;
   /**
@@ -112,6 +148,11 @@ export const UI_TEXT_SCALE_MAX = 1.4;
 export const HUD_SCALE_MIN = 0.6;
 export const HUD_SCALE_MAX = 1.2;
 
+/** Walk-speed slider bounds. Below 0.6 movement starts feeling broken rather
+ *  than deliberately slow; above 1.6 the run animation can't keep up. */
+export const WALK_SPEED_MIN = 0.6;
+export const WALK_SPEED_MAX = 1.6;
+
 const DEFAULTS: Settings = {
   cameraDragMode: 'grab-world',
   cameraSensitivity: 1,
@@ -121,6 +162,10 @@ const DEFAULTS: Settings = {
   hudScale: 1,
   toolbarStyle: 'full',
   touchControls: 'auto',
+  pickupRingVisibility: 'auto',
+  keyBindings: { ...DEFAULT_KEY_BINDINGS },
+  gamepadBindings: { ...DEFAULT_GAMEPAD_BINDINGS },
+  walkSpeedMultiplier: 1,
   alphaNoticeSeen: false,
   notifyCategories: [...DEFAULT_NOTIFY_CATEGORIES],
 };
@@ -172,6 +217,40 @@ function load(): Settings {
       // leaving the overlay in a state no code path can reason about.
       if (parsed.touchControls === 'auto' || parsed.touchControls === 'on' || parsed.touchControls === 'off') {
         settings.touchControls = parsed.touchControls;
+      }
+      if (
+        parsed.pickupRingVisibility === 'auto'
+        || parsed.pickupRingVisibility === 'always'
+        || parsed.pickupRingVisibility === 'off'
+      ) {
+        settings.pickupRingVisibility = parsed.pickupRingVisibility;
+      }
+      // Merged onto the defaults rather than trusted whole: a saved file is
+      // only ever a set of *overrides*, so an action added after someone
+      // saved their bindings still comes back with a real default instead of
+      // `undefined`, and a corrupted single entry can't take the rest of the
+      // map down with it.
+      if (parsed.keyBindings && typeof parsed.keyBindings === 'object') {
+        for (const action of ACTIONS) {
+          const value = (parsed.keyBindings as Partial<Record<ActionId, unknown>>)[action.id];
+          if (typeof value === 'string' && value.length > 0) {
+            settings.keyBindings[action.id] = value;
+          }
+        }
+      }
+      if (parsed.gamepadBindings && typeof parsed.gamepadBindings === 'object') {
+        for (const action of ACTIONS) {
+          const value = (parsed.gamepadBindings as Partial<Record<ActionId, unknown>>)[action.id];
+          if (value === null || (typeof value === 'number' && Number.isInteger(value) && value >= 0)) {
+            settings.gamepadBindings[action.id] = value;
+          }
+        }
+      }
+      if (typeof parsed.walkSpeedMultiplier === 'number' && Number.isFinite(parsed.walkSpeedMultiplier)) {
+        settings.walkSpeedMultiplier = Math.min(
+          WALK_SPEED_MAX,
+          Math.max(WALK_SPEED_MIN, parsed.walkSpeedMultiplier),
+        );
       }
       if (typeof parsed.alphaNoticeSeen === 'boolean') settings.alphaNoticeSeen = parsed.alphaNoticeSeen;
       // Always through the sanitiser: a missing key (older save), a non-array,

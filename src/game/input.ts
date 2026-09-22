@@ -4,6 +4,7 @@ import { addYaw, adjustCameraPitch, adjustCameraZoom, applyGamepadLook } from '.
 // this module owns *when* it is applied, not the numbers themselves.
 import { pinchZoomDelta, twoPointerDistance } from './touchControls';
 import { getSetting } from './settings';
+import type { ActionId } from './controlActions';
 
 // Keyboard, pointer, wheel, and gamepad input.
 // Action keys route through callbacks so this module stays UI-agnostic.
@@ -48,6 +49,14 @@ export type InputCallbacks = {
    * must not know what the canvas is, or which panels exist.
    */
   isWorldTarget: (event: PointerEvent) => boolean;
+  /**
+   * Fired whenever the auto-walk lock changes — from the keyboard shortcut,
+   * the HUD toggle button, or the safety clear on window blur — so the HUD
+   * can show it's on (this is a deliberate, always-visible cousin of the
+   * "stuck moving" bug fixed 2026-09-22: same mechanism, opted into on
+   * purpose instead of landed in by accident).
+   */
+  onAutoWalkToggled?: (locked: boolean) => void;
 };
 
 const input: InputState = {
@@ -56,6 +65,36 @@ const input: InputState = {
   left: false,
   right: false,
 };
+
+/**
+ * Deliberate "keep walking" lock — see `onAutoWalkToggled` above. Contributes
+ * a steady forward push in `getMovementInput()` exactly like a held key, so
+ * it sums and cancels with real input the same way keyboard/gamepad/touch
+ * already do (walking backward while it's on slows or reverses it, same as
+ * holding both keys would).
+ */
+let autoWalkLocked = false;
+/** Set once by `initializeInput`; lets `toggleAutoWalkLocked()` (called from
+ *  the HUD button, outside this module) reach the same notification the
+ *  keyboard shortcut uses, instead of duplicating it. */
+let activeCallbacks: InputCallbacks | null = null;
+
+function setAutoWalkLocked(locked: boolean) {
+  if (locked === autoWalkLocked) return;
+  autoWalkLocked = locked;
+  document.documentElement.classList.toggle('is-auto-walking', locked);
+  activeCallbacks?.onAutoWalkToggled?.(locked);
+}
+
+export function isAutoWalkLocked() {
+  return autoWalkLocked;
+}
+
+/** Toggle the lock. Exported so the HUD button can drive the exact same
+ *  state the keyboard shortcut does. */
+export function toggleAutoWalkLocked() {
+  setAutoWalkLocked(!autoWalkLocked);
+}
 
 /**
  * A virtual stick any on-screen control can drive.
@@ -74,16 +113,188 @@ export function setVirtualMovement(movement: MovementInput) {
   virtualMovement.y = movement.y;
 }
 
-const keys: Record<string, keyof InputState> = {
-  ArrowUp: 'forward',
-  KeyW: 'forward',
-  ArrowDown: 'back',
-  KeyS: 'back',
-  ArrowLeft: 'left',
-  KeyA: 'left',
-  ArrowRight: 'right',
-  KeyD: 'right',
+/** Movement actions, and the InputState field each drives — the only
+ *  actions with "held" semantics; everything else fires once per press. */
+const MOVEMENT_ACTION_FIELD: Partial<Record<ActionId, keyof InputState>> = {
+  moveForward: 'forward',
+  moveBack: 'back',
+  moveLeft: 'left',
+  moveRight: 'right',
 };
+
+/**
+ * Keys that always work, however the player has rebound things — arrow keys
+ * for movement, numpad +/- for zoom. A bad rebind (or one made and then
+ * forgotten) should never be a dead end with no in-game way to walk or see.
+ */
+const PERMANENT_KEY_ACTIONS: Partial<Record<string, ActionId>> = {
+  ArrowUp: 'moveForward',
+  ArrowDown: 'moveBack',
+  ArrowLeft: 'moveLeft',
+  ArrowRight: 'moveRight',
+  NumpadAdd: 'zoomIn',
+  NumpadSubtract: 'zoomOut',
+};
+
+/** Resolve a KeyboardEvent.code to the action bound to it — the permanent
+ *  fallbacks above first, then whatever the player has it bound to. */
+function resolveKeyAction(code: string): ActionId | null {
+  const permanent = PERMANENT_KEY_ACTIONS[code];
+  if (permanent) return permanent;
+  const bindings = getSetting('keyBindings');
+  for (const id of Object.keys(bindings) as ActionId[]) {
+    if (bindings[id] === code) return id;
+  }
+  return null;
+}
+
+/**
+ * Apply one resolved action — the single place both keyboard and gamepad
+ * dispatch fire through, so "what E does" (or whatever it's rebound to) is
+ * written once. Movement actions set the held state getMovementInput() sums;
+ * everything else fires once per press, matching how each always worked as
+ * a hardcoded keydown handler (OS key-repeat still re-fires it while a key
+ * is held, same as before rebinding existed).
+ *
+ * Returns whether the caller should preventDefault — false only for
+ * 'interact', which never claimed the keyboard event either.
+ */
+function fireAction(id: ActionId, callbacks: InputCallbacks): boolean {
+  const movementField = MOVEMENT_ACTION_FIELD[id];
+  if (movementField) {
+    input[movementField] = true;
+    return true;
+  }
+
+  switch (id) {
+    case 'autoWalk':
+      toggleAutoWalkLocked();
+      return true;
+    case 'toggleScrapbook':
+      callbacks.onToggleScrapbook();
+      return true;
+    case 'interact':
+      callbacks.onToggleNearby();
+      return false;
+    case 'openMap':
+      callbacks.onToggleMap?.();
+      return true;
+    case 'markPlace':
+      callbacks.onMarkPlace();
+      return true;
+    case 'zoomIn':
+      adjustCameraZoom(-0.8);
+      return true;
+    case 'zoomOut':
+      adjustCameraZoom(0.8);
+      return true;
+    case 'rotate':
+      if (!callbacks.onRotateBuild()) adjustCameraPitch(0.14);
+      return true;
+    case 'pitchDown':
+      adjustCameraPitch(-0.14);
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Capture the next keydown or gamepad button press for a rebind row,
+ * instead of it firing whatever it's currently bound to. Only one capture
+ * runs at a time — starting either kind cancels the other. Escape always
+ * cancels (the callback receives null) rather than becoming a key nobody
+ * can use to back out of a capture prompt.
+ */
+let keyCaptureCallback: ((code: string | null) => void) | null = null;
+let gamepadCaptureCallback: ((buttonIndex: number | null) => void) | null = null;
+
+export function beginKeyCapture(onCaptured: (code: string | null) => void) {
+  gamepadCaptureCallback = null;
+  keyCaptureCallback = onCaptured;
+}
+
+export function beginGamepadCapture(onCaptured: (buttonIndex: number | null) => void) {
+  keyCaptureCallback = null;
+  gamepadCaptureCallback = onCaptured;
+}
+
+export function cancelBindingCapture() {
+  keyCaptureCallback = null;
+  gamepadCaptureCallback = null;
+}
+
+/** Per-gamepad button-press state from the previous poll, so a one-shot
+ *  action fires once per press rather than every frame the button stays
+ *  down. */
+const gamepadButtonPrevPressed = new Map<number, boolean[]>();
+
+/** Movement held via a rebound gamepad button — kept apart from the
+ *  keyboard's own `input` state so a gamepad release can never stomp a key
+ *  still held down, and vice versa. Summed into getMovementInput() exactly
+ *  like every other source. The analog stick bypasses this entirely; it's
+ *  still read directly in getMovementInput() as before. */
+const gamepadButtonMovement: InputState = {
+  forward: false,
+  back: false,
+  left: false,
+  right: false,
+};
+
+/**
+ * Per-frame gamepad button polling for rebindable actions — the button
+ * equivalent of the keydown handler below. Call once per frame alongside
+ * updateGamepadCamera(); the analog stick and dpad are unaffected, they're
+ * still read directly in getMovementInput().
+ */
+export function updateGamepadActions() {
+  const callbacks = activeCallbacks;
+  const bindings = getSetting('gamepadBindings');
+  const gamepads = navigator.getGamepads?.() ?? [];
+
+  gamepadButtonMovement.forward = false;
+  gamepadButtonMovement.back = false;
+  gamepadButtonMovement.left = false;
+  gamepadButtonMovement.right = false;
+
+  for (const gamepad of gamepads) {
+    if (!gamepad) continue;
+
+    if (gamepadCaptureCallback) {
+      const pressedIndex = gamepad.buttons.findIndex((button) => button.pressed);
+      if (pressedIndex !== -1) {
+        const callback = gamepadCaptureCallback;
+        gamepadCaptureCallback = null;
+        callback(pressedIndex);
+      }
+      // Capturing a button shouldn't also fire whatever it's already bound
+      // to, or move the avatar with it.
+      continue;
+    }
+
+    const prevPressed = gamepadButtonPrevPressed.get(gamepad.index) ?? [];
+    const currentPressed = gamepad.buttons.map((button) => button.pressed);
+
+    for (const id of Object.keys(bindings) as ActionId[]) {
+      const buttonIndex = bindings[id];
+      if (buttonIndex === null || buttonIndex === undefined) continue;
+      const pressed = currentPressed[buttonIndex] ?? false;
+
+      const movementField = MOVEMENT_ACTION_FIELD[id];
+      if (movementField) {
+        if (pressed) gamepadButtonMovement[movementField] = true;
+        continue;
+      }
+
+      const wasPressed = prevPressed[buttonIndex] ?? false;
+      if (pressed && !wasPressed && callbacks) {
+        fireAction(id, callbacks);
+      }
+    }
+
+    gamepadButtonPrevPressed.set(gamepad.index, currentPressed);
+  }
+}
 
 let isOrbiting = false;
 let lastPointerX = 0;
@@ -203,27 +414,86 @@ function buttonMask(button: 0 | 1 | 2): number {
 /**
  * Resting-position baselines per gamepad. Sticks (and some devices that
  * merely claim to be gamepads) can report a constant non-zero value at
- * rest, which reads as endless camera drift. Measuring axes relative to
- * where they sat when first seen cancels that out.
+ * rest, which reads as endless drift in one direction if left uncorrected.
+ *
+ * Fixed 2026-09-22 (was: "stuck moving left" after connecting a controller).
+ * The old version snapshotted whatever the stick read on the very *first*
+ * poll and used that forever. Chrome doesn't expose a gamepad in
+ * getGamepads() until it sees some input on it, so that first poll can land
+ * mid-deflection — lock that in as "centre" and the player is stuck walking
+ * that direction for the rest of the session, with no way back.
+ *
+ * Now: average a short window of samples right after the gamepad is first
+ * seen (much less likely to land exactly on a deliberate full push than one
+ * frame), then let the baseline keep creeping toward whatever the stick
+ * reports whenever it's already close to the current baseline. Deliberate
+ * input pushes far enough, fast enough, to never qualify for that nudge;
+ * slow session-long drift keeps getting corrected.
  */
-const gamepadBaselines = new Map<number, number[]>();
+type GamepadCalibration = {
+  /** Raw axis samples collected so far this calibration window. */
+  samples: number[][];
+  /** Settled resting value per axis, once the window has enough samples. */
+  baseline: number[] | null;
+};
+
+const gamepadCalibrations = new Map<number, GamepadCalibration>();
+
+/** Frames of resting-window samples averaged into the initial baseline. */
+const BASELINE_CALIBRATION_SAMPLES = 12;
+/**
+ * How close a live reading has to be to the current baseline to be treated
+ * as "still resting" and nudge the baseline toward it — comfortably below
+ * what a deliberate stick push reads as, even post-deadzone.
+ */
+const BASELINE_DRIFT_TRACKING = 0.12;
+const BASELINE_DRIFT_RATE = 0.05;
 
 function baselinedAxis(gamepad: Gamepad, axisIndex: number): number {
-  let baseline = gamepadBaselines.get(gamepad.index);
-  if (!baseline) {
-    baseline = [...gamepad.axes];
-    gamepadBaselines.set(gamepad.index, baseline);
+  let calibration = gamepadCalibrations.get(gamepad.index);
+  if (!calibration) {
+    calibration = { samples: [], baseline: null };
+    gamepadCalibrations.set(gamepad.index, calibration);
   }
-  return applyDeadzone((gamepad.axes[axisIndex] ?? 0) - (baseline[axisIndex] ?? 0));
+
+  const raw = gamepad.axes[axisIndex] ?? 0;
+
+  if (!calibration.baseline) {
+    calibration.samples.push([...gamepad.axes]);
+    if (calibration.samples.length < BASELINE_CALIBRATION_SAMPLES) {
+      // Still gathering the resting window — report raw input directly so a
+      // player who starts moving the instant the controller connects isn't
+      // ignored for it.
+      return applyDeadzone(raw);
+    }
+    const axisCount = gamepad.axes.length;
+    const averaged: number[] = [];
+    for (let i = 0; i < axisCount; i++) {
+      const sum = calibration.samples.reduce((total, sample) => total + (sample[i] ?? 0), 0);
+      averaged.push(sum / calibration.samples.length);
+    }
+    calibration.baseline = averaged;
+  }
+
+  const baseline = calibration.baseline;
+  const current = baseline[axisIndex] ?? 0;
+  if (Math.abs(raw - current) < BASELINE_DRIFT_TRACKING) {
+    baseline[axisIndex] = current + (raw - current) * BASELINE_DRIFT_RATE;
+  }
+
+  return applyDeadzone(raw - baseline[axisIndex]);
 }
 
 export function getMovementInput(): MovementInput {
   const movement: MovementInput = { x: 0, y: 0 };
 
-  if (input.forward) movement.y += 1;
-  if (input.back) movement.y -= 1;
-  if (input.right) movement.x += 1;
-  if (input.left) movement.x -= 1;
+  if (input.forward || gamepadButtonMovement.forward) movement.y += 1;
+  if (input.back || gamepadButtonMovement.back) movement.y -= 1;
+  if (input.right || gamepadButtonMovement.right) movement.x += 1;
+  if (input.left || gamepadButtonMovement.left) movement.x -= 1;
+  // A steady forward push, exactly like a held-down forward key, so it sums
+  // and clamps with everything else below rather than needing its own path.
+  if (autoWalkLocked) movement.y += 1;
 
   // The touch pad. Added before the clamp below like every other source, so a
   // thumb held at full throw and a held arrow key still sum to a single unit
@@ -283,88 +553,79 @@ function isFormElementEvent(event: Event) {
 }
 
 export function initializeInput(callbacks: InputCallbacks) {
+  activeCallbacks = callbacks;
+
+  // A gamepad reconnecting (unplug/replug, OS Bluetooth hiccup, swapping
+  // controllers) gets a clean calibration window rather than inheriting
+  // whatever baseline the previous connection settled on.
+  window.addEventListener('gamepaddisconnected', (event) => {
+    gamepadCalibrations.delete(event.gamepad.index);
+    gamepadButtonPrevPressed.delete(event.gamepad.index);
+  });
+
   window.addEventListener('keydown', (event) => {
+    if (keyCaptureCallback) {
+      // Anything captures except Escape, which always cancels rather than
+      // becoming a key nobody can bind because it's reserved for backing out.
+      event.preventDefault();
+      const callback = keyCaptureCallback;
+      keyCaptureCallback = null;
+      callback(event.code === 'Escape' ? null : event.code);
+      return;
+    }
+
     if (isFormElementEvent(event) && event.code !== 'Escape') return;
 
     if (event.code === 'Escape') {
+      if (gamepadCaptureCallback) {
+        const callback = gamepadCaptureCallback;
+        gamepadCaptureCallback = null;
+        callback(null);
+        event.preventDefault();
+        return;
+      }
       if (callbacks.onEscape()) {
         event.preventDefault();
       }
       return;
     }
 
-    if (event.code === 'KeyI') {
-      event.preventDefault();
-      callbacks.onToggleScrapbook();
-      return;
-    }
-
-    if (event.code === 'KeyE') {
-      callbacks.onToggleNearby();
-      return;
-    }
-
-    // M is the universal "open the map"; G marks this spot (and points the
-    // guide at it). Swapped from N / M on 2026-09-20.
-    if (event.code === 'KeyM') {
-      event.preventDefault();
-      callbacks.onToggleMap?.();
-      return;
-    }
-
-    if (event.code === 'KeyG') {
-      event.preventDefault();
-      callbacks.onMarkPlace();
-      return;
-    }
-
     // Number-row shortcuts for the tool rail. Kept as a range rather than a
     // hardcoded list so adding a rail slot doesn't silently leave it
     // keyboard-unreachable; the toolbar ignores numbers it has no slot for.
+    // Deliberately not rebindable — see controlActions.ts.
     if (/^Digit[1-9]$/.test(event.code)) {
       event.preventDefault();
       callbacks.onSelectToolSlot(Number(event.code.slice(-1)));
       return;
     }
 
-    if (event.code === 'Equal' || event.code === 'NumpadAdd') {
-      event.preventDefault();
-      adjustCameraZoom(-0.8);
-      return;
-    }
+    const action = resolveKeyAction(event.code);
+    if (!action) return;
 
-    if (event.code === 'Minus' || event.code === 'NumpadSubtract') {
+    if (fireAction(action, callbacks)) {
       event.preventDefault();
-      adjustCameraZoom(0.8);
-      return;
-    }
-
-    if (event.code === 'KeyR') {
-      event.preventDefault();
-      if (!callbacks.onRotateBuild()) adjustCameraPitch(0.14);
-      return;
-    }
-
-    if (event.code === 'KeyF') {
-      event.preventDefault();
-      adjustCameraPitch(-0.14);
-      return;
-    }
-
-    const mapped = keys[event.code];
-    if (mapped) {
-      event.preventDefault();
-      input[mapped] = true;
     }
   });
 
   window.addEventListener('keyup', (event) => {
-    if (isFormElementEvent(event)) return;
-    const mapped = keys[event.code];
-    if (mapped) {
-      event.preventDefault();
-      input[mapped] = false;
+    // Releasing a movement key must always clear it, even when the release
+    // lands on a menu/panel button — the matching keydown fired out in the
+    // world (isFormElementEvent skips setting `input[mapped]` for keydowns
+    // inside form chrome), so a key already known to be "down" only ever got
+    // that way from the world and must be clearable from anywhere. Before
+    // this fix, opening a menu with WASD still held and releasing the key
+    // while focus was on a menu button left it permanently "held" — the
+    // exact bug reported 2026-09-22 as movement "sticking" after a menu.
+    // Mirrors the same fix already applied to pointer gestures above:
+    // clearing state must not be blockable, only acting on it is.
+    const action = resolveKeyAction(event.code);
+    const movementField = action ? MOVEMENT_ACTION_FIELD[action] : undefined;
+    if (movementField) {
+      input[movementField] = false;
     }
+    if (isFormElementEvent(event)) return;
+    event.preventDefault();
   });
 
   /**
@@ -479,6 +740,26 @@ export function initializeInput(callbacks: InputCallbacks) {
 
   // Alt-tabbing away mid-drag otherwise returns to a latched orbit.
   window.addEventListener('blur', clearPointerGestures);
+  // Same failure mode for held movement keys: losing focus entirely (alt-
+  // tab, a system dialog) means the eventual keyup never reaches this
+  // window, so a key held at the moment of blur would otherwise stay "down"
+  // forever, same as the menu-keyup bug above.
+  window.addEventListener('blur', () => {
+    input.forward = false;
+    input.back = false;
+    input.left = false;
+    input.right = false;
+    gamepadButtonMovement.forward = false;
+    gamepadButtonMovement.back = false;
+    gamepadButtonMovement.left = false;
+    gamepadButtonMovement.right = false;
+    // Leaving the window entirely (alt-tab, a system dialog) shouldn't leave
+    // the avatar walking into whatever's in front of it unattended.
+    setAutoWalkLocked(false);
+    // A stuck "press a key" prompt with nobody at the keyboard is worse than
+    // a cancelled rebind.
+    cancelBindingCapture();
+  });
 
   window.addEventListener('pointermove', (event) => {
     const tracked = trackedPointers.get(event.pointerId);
