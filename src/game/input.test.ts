@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // is worth testing because getting it wrong presents as "clicking doesn't
 // work" with nothing in the console.
 
-const cameraSpies = vi.hoisted(() => ({ adjustCameraPitch: vi.fn() }));
+const cameraSpies = vi.hoisted(() => ({ adjustCameraPitch: vi.fn(), addYaw: vi.fn() }));
 
 vi.mock('./camera', () => ({
-  addYaw: () => {},
+  addYaw: cameraSpies.addYaw,
   adjustCameraPitch: cameraSpies.adjustCameraPitch,
   adjustCameraZoom: () => {},
   applyGamepadLook: () => {},
@@ -100,6 +100,12 @@ let orbitOnPrimary: boolean;
 let onWorld: boolean;
 let rotateBuildHandled: boolean;
 let rotateBuildCalls: number;
+let arrowNudgeHandled: boolean;
+let arrowNudgeCalls: string[];
+let fineRotateHandled: boolean;
+let fineRotateCalls: Array<1 | -1>;
+let beginCarryRotateHandled: boolean;
+let carryRotateDeltas: number[];
 let markCalls: number;
 let mapCalls: number;
 let autoWalkStates: boolean[];
@@ -114,6 +120,12 @@ beforeEach(() => {
   onWorld = true;
   rotateBuildHandled = false;
   rotateBuildCalls = 0;
+  arrowNudgeHandled = false;
+  arrowNudgeCalls = [];
+  fineRotateHandled = false;
+  fineRotateCalls = [];
+  beginCarryRotateHandled = false;
+  carryRotateDeltas = [];
   markCalls = 0;
   mapCalls = 0;
   autoWalkStates = [];
@@ -124,6 +136,7 @@ beforeEach(() => {
   settingsValues.gamepadBindings = { ...DEFAULT_GAMEPAD_BINDINGS };
   cancelBindingCapture();
   cameraSpies.adjustCameraPitch.mockClear();
+  cameraSpies.addYaw.mockClear();
 
   const stub = {
     window: {
@@ -164,6 +177,18 @@ beforeEach(() => {
       rotateBuildCalls += 1;
       return rotateBuildHandled;
     },
+    onArrowNudge: (code) => {
+      arrowNudgeCalls.push(code);
+      return arrowNudgeHandled;
+    },
+    onFineRotate: (direction) => {
+      fineRotateCalls.push(direction);
+      return fineRotateHandled;
+    },
+    onBeginCarryRotateDrag: () => beginCarryRotateHandled,
+    onCarryRotateDrag: (delta) => {
+      carryRotateDeltas.push(delta);
+    },
     isWheelCaptured: () => false,
     isPointerCaptured: () => false,
     isWorldTarget: () => onWorld,
@@ -186,6 +211,106 @@ describe('build rotation key', () => {
 
     expect(rotateBuildCalls).toBe(1);
     expect(cameraSpies.adjustCameraPitch).toHaveBeenCalledWith(0.14);
+  });
+});
+
+describe('arrow-key nudge', () => {
+  it('offers a literal arrow key to a carried piece before moving the avatar', () => {
+    arrowNudgeHandled = true;
+    fire('keydown', { code: 'ArrowUp' });
+
+    expect(arrowNudgeCalls).toEqual(['ArrowUp']);
+    // Handled by the nudge, so this must not also register as movement.
+    expect(getMovementInput().y).toBe(0);
+  });
+
+  it('still walks the avatar when nothing is being carried', () => {
+    arrowNudgeHandled = false;
+    fire('keydown', { code: 'ArrowUp' });
+
+    expect(arrowNudgeCalls).toEqual(['ArrowUp']);
+    expect(getMovementInput().y).toBe(1);
+  });
+
+  it('leaves WASD movement alone even while a piece is carried', () => {
+    // Only the literal arrow keys are offered to onArrowNudge — WASD (or
+    // whatever else is bound to movement) must keep walking the avatar
+    // around while something is in hand.
+    arrowNudgeHandled = true;
+    fire('keydown', { code: 'KeyW' });
+
+    expect(arrowNudgeCalls).toEqual([]);
+    expect(getMovementInput().y).toBe(1);
+  });
+});
+
+describe('fine rotation (shift+R / shift+F)', () => {
+  it('offers shift+R as a fine positive rotation and consumes the key', () => {
+    fineRotateHandled = true;
+    fire('keydown', { code: 'KeyR', shiftKey: true });
+
+    expect(fineRotateCalls).toEqual([1]);
+    expect(rotateBuildCalls).toBe(0);
+    expect(cameraSpies.adjustCameraPitch).not.toHaveBeenCalled();
+  });
+
+  it('offers shift+F as a fine negative rotation and consumes the key', () => {
+    fineRotateHandled = true;
+    fire('keydown', { code: 'KeyF', shiftKey: true });
+
+    expect(fineRotateCalls).toEqual([-1]);
+  });
+
+  it('leaves a plain, unshifted R doing the usual coarse rotate/pitch', () => {
+    fire('keydown', { code: 'KeyR' });
+
+    expect(fineRotateCalls).toEqual([]);
+    expect(rotateBuildCalls).toBe(1);
+  });
+
+  it('falls through to the coarse action when nothing is carried to fine-rotate', () => {
+    fineRotateHandled = false;
+    fire('keydown', { code: 'KeyR', shiftKey: true });
+
+    expect(fineRotateCalls).toEqual([1]);
+    // Declined by fine-rotate, so the shifted press still does whatever an
+    // unshifted R would have done, rather than being silently swallowed.
+    expect(rotateBuildCalls).toBe(1);
+  });
+});
+
+describe('right-drag carry rotation', () => {
+  it('claims a right-drag for free-angle rotation instead of camera orbit, when offered', () => {
+    beginCarryRotateHandled = true;
+    fire('pointerdown', { button: 2, buttons: 2, clientX: 100, clientY: 50, pointerId: 1 });
+    fire('pointermove', { buttons: 2, clientX: 130, clientY: 50, pointerId: 1 });
+
+    expect(carryRotateDeltas).toHaveLength(1);
+    expect(carryRotateDeltas[0]).toBeCloseTo(30 * 0.01, 5);
+    expect(cameraSpies.addYaw).not.toHaveBeenCalled();
+
+    // Release, same as every other pointer gesture test does, so this test's
+    // claimed drag cannot leak into the next test's fresh gesture.
+    fire('pointerup', { button: 2, buttons: 0, clientX: 130, clientY: 50, pointerId: 1 });
+  });
+
+  it('leaves an ordinary right-drag orbiting the camera when nothing claims it', () => {
+    beginCarryRotateHandled = false;
+    fire('pointerdown', { button: 2, buttons: 2, clientX: 100, clientY: 50, pointerId: 1 });
+    fire('pointermove', { buttons: 2, clientX: 130, clientY: 50, pointerId: 1 });
+
+    expect(carryRotateDeltas).toEqual([]);
+    expect(cameraSpies.addYaw).toHaveBeenCalled();
+  });
+
+  it('stops rotating once the button is released', () => {
+    beginCarryRotateHandled = true;
+    fire('pointerdown', { button: 2, buttons: 2, clientX: 100, clientY: 50, pointerId: 1 });
+    fire('pointermove', { buttons: 2, clientX: 130, clientY: 50, pointerId: 1 });
+    fire('pointerup', { button: 2, buttons: 0, clientX: 130, clientY: 50, pointerId: 1 });
+    fire('pointermove', { buttons: 0, clientX: 200, clientY: 50, pointerId: 1 });
+
+    expect(carryRotateDeltas).toHaveLength(1);
   });
 });
 

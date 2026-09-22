@@ -7,9 +7,12 @@ import { buildMaterialUnits, type BuildMaterialId } from '../sim/catalogs/buildi
 import { buildMaterialOffers } from '../game/buildMaterials';
 import { getActionMode, onActionModeChanged } from '../game/actionMode';
 import {
+  carriedPieceCount,
+  getCarriedPieceContext,
   getSelectedBuildMaterial,
   getSelectedBuildPiece,
   getSelectedBuildRotation,
+  getSelectedPlacedPieceIds,
   isCarryingPlacedPiece,
   onSelectedBuildPieceChanged,
   setSelectedBuildMaterial,
@@ -78,13 +81,31 @@ function renderPalette() {
   const selected = getSelectedBuildPiece();
   const selectedMaterial = getSelectedBuildMaterial();
   const carrying = isCarryingPlacedPiece();
+  const carriedCount = carriedPieceCount();
+  const bulkCarrying = carrying && carriedCount > 1;
+  const pendingSelection = getSelectedPlacedPieceIds();
+  // Restyling an already-placed piece prices and highlights against *that*
+  // piece, never the leftover "next new piece" selection above — those are
+  // unrelated the moment you pick something up off the ground. A bulk carry
+  // has no one piece to restyle at all (see materialSection below).
+  const carriedContext = getCarriedPieceContext();
+  const materialPieceKey = carriedContext ? carriedContext.templateKey : selected;
+  const materialSelected = carriedContext ? carriedContext.material : selectedMaterial;
   const plans = getGameState().player.plans;
   const degrees = Math.round(getSelectedBuildRotation() * 180 / Math.PI) % 360;
-  const heading = carrying
-    ? 'Carrying — click ground to set down · R rotate · a material re-builds it · Esc cancel'
-    : `Build — click ground · click your own piece to pick it up · R rotate (${degrees}°) · Esc put away`;
-  palette.innerHTML = `
-    <p class="build-palette-heading">${heading}</p>
+  const heading = bulkCarrying
+    ? `Carrying ${carriedCount} pieces — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground to set down · Esc cancel`
+    : carrying
+      ? 'Carrying — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground to set down · a material re-builds it · Esc cancel'
+      : pendingSelection.size > 0
+        ? `${pendingSelection.size} selected — click one to carry them all · shift-click to add or remove · Esc to clear`
+        : `Build — click ground · click your own piece to pick it up, shift-click to select several · R rotate (${degrees}°) · Esc put away`;
+  // While carrying, picking a new piece type does nothing (setSelectedBuildPiece
+  // only ever affects what gets placed fresh, never the piece in hand) — so the
+  // list is dead weight exactly when rail height is tightest. Dropping it here
+  // both declutters the "what do I do now" moment and buys back the room the
+  // material swatches need to stay reachable on a short screen.
+  const pieceList = carrying ? '' : `
     <div class="build-palette-list" role="listbox" aria-label="Choose a piece to build">
       ${(Object.keys(BUILD_PIECE_DEFS) as BuildPieceKey[]).map((key) => {
     const def = BUILD_PIECE_DEFS[key];
@@ -109,18 +130,27 @@ function renderPalette() {
             <span class="build-piece-summary">${def.summary}</span>
           </button>`;
   }).join('')}
-    </div>
-    <p class="build-palette-heading build-material-heading">${materialHeading(selected)}</p>
-    <div class="build-material-list" role="listbox" aria-label="Choose a material">
-      ${materialSwatches(selected, selectedMaterial)}
     </div>`;
+  // A mixed bulk group has no one material to restyle into (setSelectedBuildMaterial
+  // refuses a swatch click during one anyway) — dropping the section entirely
+  // here, rather than showing stale or misleading swatches, is the honest
+  // version of "nothing to do here right now".
+  const materialSection = bulkCarrying ? '' : `
+    <p class="build-palette-heading build-material-heading">${materialHeading(materialPieceKey)}</p>
+    <div class="build-material-list" role="listbox" aria-label="Choose a material">
+      ${materialSwatches(materialPieceKey, materialSelected)}
+    </div>`;
+  palette.innerHTML = `
+    <p class="build-palette-heading">${heading}</p>
+    ${pieceList}
+    ${materialSection}`;
 }
 
 /**
  * The Material heading carries the price, because the picker is the only
  * place a player finds out that a piece costs anything at all.
  */
-function materialHeading(piece: BuildPieceKey | null): string {
+function materialHeading(piece: string | null): string {
   if (!piece) return 'Material';
   const units = buildMaterialUnits(piece);
   return units > 0 ? `Material — ${units} needed` : 'Material';
@@ -133,7 +163,7 @@ function materialHeading(piece: BuildPieceKey | null): string {
  * so the picker could always show a full row. Now an empty row is a true and
  * useful thing to say: go and gather something.
  */
-function materialSwatches(piece: BuildPieceKey | null, selectedMaterial: string | null): string {
+function materialSwatches(piece: string | null, selectedMaterial: string | null): string {
   const offers = buildMaterialOffers();
   if (offers.length === 0) {
     return '<p class="build-material-empty">Nothing to build with yet — gather some paper, sticks or stone.</p>';

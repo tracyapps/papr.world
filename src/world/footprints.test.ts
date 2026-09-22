@@ -2,11 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../render/context', () => ({ textureLoader: { load: () => ({}) } }));
 
-const { findDigFootprintBlocker, findSolidBlocker, isHomeLotClear, isSolidAt } = await import('./footprints');
+const { findDigFootprintBlocker, findSolidBlocker, invalidateFootprintCache, isHomeLotClear, isSolidAt } = await import('./footprints');
 const { getPage } = await import('./pages');
-const { HOME_OFFSET } = await import('./homeSite');
+const { HOME_OFFSET, homePosition } = await import('./homeSite');
 const { HOME_FALLBACK_PLACE } = await import('./homeSite');
 const { nextLot } = await import('./neighborhood');
+const { updateGameState } = await import('../sim/state');
 
 // The clearing has to be loaded before movement queries can see it.
 //
@@ -85,6 +86,50 @@ describe('footprints', () => {
     const lot = nextLot([], HOME_FALLBACK_PLACE, '0,0', 16, isHomeLotClear);
     expect(lot).not.toBeNull();
     expect(isHomeLotClear(lot!)).toBe(true);
+  });
+
+  it('does not evict a home whose own porch furniture sits at its door', () => {
+    // Regression for the 2026-09-22 bug: a bench and floor tiles built right
+    // at the front door made resolveHomeLotForSelf() (net/sharedSession.ts)
+    // think the home's OWN lot was blocked on every reconnect, moving the
+    // house away from the porch that was built for it. Starts from a lot
+    // `nextLot` itself calls clear (not HOME_FALLBACK_PLACE directly, which
+    // the authored clearing's own tree already crowds) so the only thing
+    // under test is whether adding the player's own furniture changes the
+    // answer.
+    const lot = nextLot([], HOME_FALLBACK_PLACE, '0,0', 16, isHomeLotClear);
+    expect(lot).not.toBeNull();
+    expect(isHomeLotClear(lot!)).toBe(true);
+
+    const doorstep = homePosition(lot!);
+    updateGameState((state) => {
+      state.world.pages['0,0'] = {
+        ...state.world.pages['0,0'],
+        terrainEdits: {}, resourceDrops: {}, treeGrowth: {}, rockGrowth: {}, plantedCells: {}, placedEntities: {},
+        buildSites: {},
+        placedPieces: {
+          'porch-bench': {
+            id: 'porch-bench',
+            templateKey: 'paper-bench',
+            x: doorstep.x,
+            z: doorstep.z,
+            rotY: 0,
+            material: 'paper.grey',
+            makerId: 'local-player',
+            page: '0,0',
+          } as never,
+        },
+      };
+    });
+    invalidateFootprintCache();
+    try {
+      expect(isHomeLotClear(lot!)).toBe(true);
+    } finally {
+      updateGameState((state) => {
+        delete state.world.pages['0,0'].placedPieces['porch-bench'];
+      });
+      invalidateFootprintCache();
+    }
   });
 });
 

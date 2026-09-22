@@ -37,6 +37,33 @@ export type InputCallbacks = {
   onSelectToolSlot: (slot: number) => void;
   /** Build mode gets first refusal on R; false preserves camera pitch elsewhere. */
   onRotateBuild: () => boolean;
+  /**
+   * Build mode gets first refusal on the arrow keys too, while something is
+   * being carried: true means it nudged the carried piece instead of moving
+   * the avatar, so this module should not also treat the press as movement.
+   * Optional so every other caller (and every existing test) is unaffected.
+   */
+  onArrowNudge?: (code: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight') => boolean;
+  /**
+   * Shift + whatever is bound to rotate/pitchDown, while carrying: a finer
+   * rotation step than the plain R press. `direction` is +1 for rotate's key
+   * (KeyR by default), -1 for pitchDown's (KeyF) — the same up/down pairing
+   * those two already have for camera pitch, extended into build mode.
+   * True means it was handled; false lets the key fall through to its usual
+   * un-shifted meaning (this module does not otherwise look at Shift).
+   */
+  onFineRotate?: (direction: 1 | -1) => boolean;
+  /**
+   * Right-button press: true claims the drag for free-angle carry rotation
+   * instead of the camera orbit that button normally drives. Checked once,
+   * on press — the gesture that begins then (rotate or orbit) runs for the
+   * whole drag, the same way `shouldOrbitWithPrimary` decides left-button
+   * once and stays with that answer.
+   */
+  onBeginCarryRotateDrag?: (event: PointerEvent) => boolean;
+  /** Fired every frame a claimed right-drag moves, with the incremental
+   * yaw (radians) that horizontal movement earned since the last frame. */
+  onCarryRotateDrag?: (deltaRadians: number) => void;
   /** Return true when a wheel event belongs to an open panel, not the camera. */
   isWheelCaptured: (event: WheelEvent) => boolean;
   /** HUD widget drags own the pointer while active. */
@@ -310,6 +337,16 @@ let orbitButton: 0 | 1 | 2 | null = null;
  */
 let orbitPointerId: number | null = null;
 /**
+ * A right-drag claimed for free-angle carry rotation instead of camera
+ * orbit — kept entirely separate from `isOrbiting`/`orbitButton` so this
+ * gesture can never be mistaken for one the camera code reacts to, and vice
+ * versa. Mirrors `isOrbiting`/`orbitPointerId`/`lastPointerX` one for one,
+ * just for this alternate meaning of a right-button drag.
+ */
+let carryDragActive = false;
+let carryDragPointerId: number | null = null;
+let carryDragLastX = 0;
+/**
  * Every pointer currently down on the world, keyed by `pointerId`.
  *
  * Kept so the *number* of fingers can be known — which is the whole of multi-
@@ -347,6 +384,8 @@ function clearPointerGestures() {
   isOrbiting = false;
   orbitButton = null;
   orbitPointerId = null;
+  carryDragActive = false;
+  carryDragPointerId = null;
   trackedPointers.clear();
   pinchDistance = null;
   document.documentElement.classList.remove('is-camera-orbiting');
@@ -368,6 +407,10 @@ function dropPointer(pointerId: number) {
     orbitButton = null;
     orbitPointerId = null;
     document.documentElement.classList.remove('is-camera-orbiting');
+  }
+  if (carryDragPointerId === pointerId) {
+    carryDragActive = false;
+    carryDragPointerId = null;
   }
   pinchDistance = currentPinchDistance();
 }
@@ -404,6 +447,10 @@ const PRIMARY_DRAG_THRESHOLD_STATIONARY = 18;
  */
 const HORIZONTAL_DRAG_SENSITIVITY = 0.0042;
 const VERTICAL_DRAG_SENSITIVITY = 0.0022;
+/** Radians of carried-piece rotation per pixel of right-drag — a full turn
+ * across roughly a third of a typical window width, fast enough to feel
+ * direct without the piece snapping past where the cursor is pointing. */
+const CARRY_ROTATE_DRAG_SENSITIVITY = 0.01;
 
 function buttonMask(button: 0 | 1 | 2): number {
   if (button === 0) return 1;
@@ -600,7 +647,30 @@ export function initializeInput(callbacks: InputCallbacks) {
       return;
     }
 
+    // The literal arrow keys, not whatever movement is bound to — carrying
+    // something takes first refusal on them so WASD (or any other movement
+    // binding) still walks the avatar around while a piece is in hand.
+    if (
+      (event.code === 'ArrowUp' || event.code === 'ArrowDown'
+        || event.code === 'ArrowLeft' || event.code === 'ArrowRight')
+      && callbacks.onArrowNudge?.(event.code)
+    ) {
+      event.preventDefault();
+      return;
+    }
+
     const action = resolveKeyAction(event.code);
+
+    if (event.shiftKey && callbacks.onFineRotate) {
+      if (action === 'rotate' && callbacks.onFineRotate(1)) {
+        event.preventDefault();
+        return;
+      }
+      if (action === 'pitchDown' && callbacks.onFineRotate(-1)) {
+        event.preventDefault();
+        return;
+      }
+    }
     if (!action) return;
 
     if (fireAction(action, callbacks)) {
@@ -674,6 +744,8 @@ export function initializeInput(callbacks: InputCallbacks) {
       isOrbiting = false;
       orbitButton = null;
       orbitPointerId = null;
+      carryDragActive = false;
+      carryDragPointerId = null;
       pendingPrimary = null;
       document.documentElement.classList.remove('is-camera-orbiting');
       pinchDistance = currentPinchDistance();
@@ -684,6 +756,16 @@ export function initializeInput(callbacks: InputCallbacks) {
     // it set would make the first frame of the *next* pinch compute a jump
     // against a distance from the last one.
     pinchDistance = null;
+
+    // A right-press gets first refusal for carry rotation, exactly the way
+    // build placement gets first refusal on R (onRotateBuild) — only when
+    // something claims it does this button skip camera orbit entirely.
+    if (event.button === 2 && callbacks.onBeginCarryRotateDrag?.(event)) {
+      carryDragActive = true;
+      carryDragPointerId = event.pointerId;
+      carryDragLastX = event.clientX;
+      return;
+    }
 
     if (event.button === 2 || event.button === 1) {
       isOrbiting = true;
@@ -812,6 +894,22 @@ export function initializeInput(callbacks: InputCallbacks) {
       if (distance >= threshold) {
         pendingPrimary = null;
       }
+    }
+
+    if (carryDragActive) {
+      // Only the pointer that claimed the drag may steer it.
+      if (carryDragPointerId !== event.pointerId) return;
+      // Released off-window: stop rather than sticking to the cursor, same
+      // self-heal the orbit branch below does for its own button.
+      if ((event.buttons & buttonMask(2)) === 0) {
+        carryDragActive = false;
+        carryDragPointerId = null;
+        return;
+      }
+      const deltaX = event.clientX - carryDragLastX;
+      carryDragLastX = event.clientX;
+      callbacks.onCarryRotateDrag?.(deltaX * CARRY_ROTATE_DRAG_SENSITIVITY);
+      return;
     }
 
     if (!isOrbiting) return;

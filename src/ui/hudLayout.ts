@@ -203,9 +203,28 @@ function isRendered(element: HTMLElement) {
 }
 
 /**
+ * Never let a rail panel shrink to nothing. Below this, `overflow-y: auto`
+ * (styles.css) is doing all the work and a sliver is still enough to find
+ * and grab the scrollbar — this just stops the clamp from reading as the
+ * panel vanishing again, which is the exact bug it exists to fix.
+ */
+const MIN_PANEL_HEIGHT = 120;
+
+/**
  * Stack a rail's panels from measured heights. Hidden panels contribute
  * nothing, so toggling one closed collapses the gap it left behind instead
  * of stranding a hole in the rail.
+ *
+ * Each panel also gets a `max-height` capping it to whatever room is left
+ * above the dock (or the bottom edge). Before this, a panel whose content
+ * grew taller than that gap just kept going as `position: fixed` normally
+ * does — sliding under the dock, or off the bottom of the screen entirely,
+ * with nothing to scroll it back into view. That is how the build palette's
+ * material swatches went missing on a short viewport (2026-09-22): the panel
+ * was never actually hidden, its bottom half was simply rendered somewhere
+ * the player could not reach. Capping the height and letting the panel
+ * scroll internally (see `.build-palette` in styles.css) means "taller than
+ * the screen" degrades to "scroll for the rest" instead of "gone".
  */
 function layoutRail(rail: HudRailId) {
   const panels = railPanels.get(rail) ?? [];
@@ -215,6 +234,8 @@ function layoutRail(rail: HudRailId) {
     const { element } = panel;
     if (!isRendered(element)) continue;
     element.style.top = `${offset}px`;
+    const available = window.innerHeight - offset - dockReserve() - EDGE;
+    element.style.maxHeight = `${Math.max(MIN_PANEL_HEIGHT, available)}px`;
     offset += element.offsetHeight + RAIL_GAP;
   }
 }

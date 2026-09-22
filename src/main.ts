@@ -73,7 +73,11 @@ import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } fr
 import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverlay';
 import {
   cancelCarryingPiece,
+  dragRotateCarriedPiece,
+  fineRotateCarriedPiece,
   initializePlacement,
+  isCarryingPlacedPiece,
+  nudgeCarriedPiece,
   rotateSelectedBuildPiece,
   tryPlaceAt,
   updateBuildOverlay,
@@ -537,9 +541,16 @@ initializeInput({
   },
   onSelectToolSlot: selectToolSlot,
   onRotateBuild: () => rotateDropCarry() || rotateSelectedBuildPiece(),
+  onArrowNudge: nudgeCarriedPiece,
+  onFineRotate: fineRotateCarriedPiece,
+  // Right-drag rotates a carried piece freely instead of orbiting the
+  // camera — only while something is actually in hand, so an ordinary
+  // right-drag look-around is untouched the rest of the time.
+  onBeginCarryRotateDrag: () => isCarryingPlacedPiece(),
+  onCarryRotateDrag: dragRotateCarriedPiece,
   onPrimaryAction: (event) => {
     if (isTimedActionActive()) return;
-    if (tryScreenInteractionAt(event.clientX, event.clientY)) return;
+    if (tryScreenInteractionAt(event.clientX, event.clientY, event)) return;
     tryPetAt(event.clientX, event.clientY);
   },
   shouldOrbitWithPrimary: (event) => (

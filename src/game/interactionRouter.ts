@@ -15,7 +15,12 @@ export type ScreenInteraction = {
    */
   blocksOrbit?: boolean;
   hitTest: (clientX: number, clientY: number) => boolean;
-  interact: (clientX: number, clientY: number) => boolean;
+  /**
+   * The optional `event` is only there for an interaction that cares about a
+   * modifier key (shift-click to multi-select a placed piece, so far) — most
+   * implementations take just the coordinates and ignore it.
+   */
+  interact: (clientX: number, clientY: number, event?: PointerEvent) => boolean;
 };
 
 const interactions = new Map<string, ScreenInteraction>();
@@ -59,10 +64,10 @@ export function getScreenInteractionAt(clientX: number, clientY: number) {
   return orderedInteractions().find((interaction) => interaction.hitTest(clientX, clientY)) ?? null;
 }
 
-export function tryScreenInteractionAt(clientX: number, clientY: number) {
+export function tryScreenInteractionAt(clientX: number, clientY: number, event?: PointerEvent) {
   for (const interaction of orderedInteractions()) {
     if (!interaction.hitTest(clientX, clientY)) continue;
-    return interaction.interact(clientX, clientY);
+    return interaction.interact(clientX, clientY, event);
   }
   return false;
 }

@@ -363,14 +363,21 @@ export const HOME_SITE_CLEARANCE = 0.35;
  * Whether a neighborhood lot can safely hold a fully expanded home.
  *
  * Home footprints are excluded because the lot allocator handles those with
- * its wider eight-unit spacing rule. Everything else counts: authored
- * landmarks, water, generated props, and local placed pieces. Checking both
- * future annex positions prevents a clear-looking tent lot from becoming an
- * impossible house lot later.
+ * its wider eight-unit spacing rule. Authored landmarks, water and generated
+ * props all still count, so a clear-looking tent lot can't turn into an
+ * impossible house lot once annex rooms grow into it.
+ *
+ * Placed pieces (`placed:…`) are excluded too — fixed 2026-09-22 after a
+ * porch bench and floor tiles built right at a player's own front door
+ * evicted the house to a new lot on the next reconnect (`resolveHomeLotForSelf`
+ * re-runs this on every `set-home` publish). Decorating right up to your own
+ * door is the point of building a porch, not a reason to lose the door.
  */
 export function isHomeLotClear(place: { x: number; z: number }): boolean {
   const isUnrelated = (footprint: DigFootprint) => (
-    !footprint.id.startsWith('home-') && !footprint.id.startsWith('neighbor:')
+    !footprint.id.startsWith('home-')
+    && !footprint.id.startsWith('neighbor:')
+    && !footprint.id.startsWith('placed:')
   );
   return homeSolids(place, { first: true, second: true }).every((solid) => (
     findFootprint(
