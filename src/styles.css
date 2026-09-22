@@ -63,6 +63,13 @@ body {
 .shared-chat-header {
   align-items: center;
   display: flex;
+  /* Wraps rather than clipping: title + status icon + the unread badge (only
+     shown once messages are actually waiting) can outgrow the collapsed
+     pill's width, and .shared-chat's `overflow: hidden` was silently
+     cutting off the collapse/reopen button — the one control a folded
+     widget can never lose (2026-09-22, see knowledge-tree.md → "Collapsing
+     the HUD"). Wrapping keeps it on-screen on its own line instead. */
+  flex-wrap: wrap;
   gap: 6px;
   justify-content: space-between;
   padding: 9px 11px;

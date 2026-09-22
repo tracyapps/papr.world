@@ -156,9 +156,11 @@ function addDustSign(host: THREE.Group, width: number, depth: number, height: nu
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthWrite: false }));
-  // Hung from the nearest scaffolding corner, partway up rather than at the
-  // top, so it reads as tied on rather than mounted like the noticeboard.
-  sign.position.set(x + width / 2 + 0.15, Math.min(height * 0.5, 0.85), z + depth / 2 + 0.15);
+  // Hung mid-span on the front scaffolding beam, partway up rather than at
+  // the top, so it reads as tied on rather than mounted like the noticeboard.
+  // Deliberately NOT at a corner post: a post there used to sit right behind
+  // the sign and blot out the words from most camera angles (2026-09-22).
+  sign.position.set(x, Math.min(height * 0.5, 0.85), z + depth / 2 + 0.15);
   sign.scale.set(0.42, 0.18, 1);
   sign.material.rotation = -0.08;
   host.add(sign);
