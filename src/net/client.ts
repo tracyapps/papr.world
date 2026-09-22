@@ -73,6 +73,11 @@ import {
   type SetHomeIntent,
   type WearDesignIntent,
   splitHomeParts,
+  sanitizeMailboxStyle,
+  sanitizeMailboxColor,
+  DEFAULT_MAILBOX_STYLE,
+  DEFAULT_MAILBOX_PRIMARY,
+  DEFAULT_MAILBOX_SECONDARY,
 } from '../../shared/src/index';
 import { RemotePlayerBuffer, type RemoteSample } from './remotePlayers';
 
@@ -506,6 +511,9 @@ function readHome(accountId: string, raw: any): HomeMarker {
     parts: splitHomeParts(raw.parts ?? ''),
     building: raw.building ?? '',
     open: Boolean(raw.open),
+    mailboxStyle: sanitizeMailboxStyle(raw.mailboxStyle, DEFAULT_MAILBOX_STYLE),
+    mailboxPrimary: sanitizeMailboxColor(raw.mailboxPrimary, DEFAULT_MAILBOX_PRIMARY),
+    mailboxSecondary: sanitizeMailboxColor(raw.mailboxSecondary, DEFAULT_MAILBOX_SECONDARY),
   };
 }
 

@@ -4,8 +4,8 @@
 // The client MAY call the same helpers for instant UI feedback before a round
 // trip. Because the logic lives here once, both sides always agree.
 
-import { LIMITS } from './constants';
-import { sanitizeHomeBuilding, sanitizeHomeParts } from './guests';
+import { DEFAULT_MAILBOX_PRIMARY, DEFAULT_MAILBOX_SECONDARY, DEFAULT_MAILBOX_STYLE, LIMITS } from './constants';
+import { sanitizeHomeBuilding, sanitizeHomeParts, sanitizeMailboxColor, sanitizeMailboxStyle } from './guests';
 import type { AccountInventory, AccountTech, AvatarRef, MailItem, SoloMigrationSnapshot } from './state';
 import type {
   AccountCredentials,
@@ -329,6 +329,9 @@ export function sanitizeSetHome(raw: unknown): SetHomeIntent | null {
     page: typeof value.page === 'string' ? value.page.slice(0, 32) : '',
     parts: sanitizeHomeParts(value.parts),
     building: sanitizeHomeBuilding(value.building),
+    mailboxStyle: sanitizeMailboxStyle(value.mailboxStyle, DEFAULT_MAILBOX_STYLE),
+    mailboxPrimary: sanitizeMailboxColor(value.mailboxPrimary, DEFAULT_MAILBOX_PRIMARY),
+    mailboxSecondary: sanitizeMailboxColor(value.mailboxSecondary, DEFAULT_MAILBOX_SECONDARY),
   };
 }
 

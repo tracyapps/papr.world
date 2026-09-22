@@ -11,6 +11,7 @@ import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
 import { createDwelling, sanitizeDwelling } from './dwellingState';
 import type { DwellingPartId } from './catalogs/dwellings';
+import { createMailboxLook, sanitizeMailboxLook } from './mailboxState';
 import { SURFACE_SCENE, sanitizeScene } from '../world/scenes';
 
 export const SAVE_SCHEMA_VERSION = 1;
@@ -170,6 +171,13 @@ export type DwellingState = {
   projects: Partial<Record<DwellingPartId, DwellingProjectState>>;
 };
 
+/** The mailbox rig a player has chosen, and the two team colors it's painted. */
+export type MailboxLookState = {
+  style: string;
+  primary: string;
+  secondary: string;
+};
+
 export type ActivityEntry = {
   id: string;
   kind: 'garden' | 'harvest' | 'gathering' | 'crafting' | 'building';
@@ -320,6 +328,8 @@ export type GameState = {
     pages: Record<string, PageModificationState>;
     /** The player's home: what is built, and what is being paid for. */
     dwelling: DwellingState;
+    /** The player's mailbox: which rig, and its two team colors. */
+    mailboxLook: MailboxLookState;
     /**
      * What this device's own display cases show, by piece id. Solo cases are
      * Show cases only (keepsakes to look at): stock and taking need a shared
@@ -401,6 +411,7 @@ export function createDefaultGameState(): GameState {
       harvestRespawns: {},
       pages: {},
       dwelling: createDwelling(),
+      mailboxLook: createMailboxLook(),
       localCases: {},
       thingMaker: { level: 1, activeCraft: null, completedOutputs: [], trayOutputs: [] },
     },
@@ -937,6 +948,7 @@ function normalizeState(value: unknown): GameState | null {
   state.world.harvestRespawns = finiteCounts(world.harvestRespawns);
   state.world.pages = normalizePageModifications(world.pages);
   state.world.dwelling = sanitizeDwelling(world.dwelling);
+  state.world.mailboxLook = sanitizeMailboxLook(world.mailboxLook);
   state.world.localCases = normalizeLocalCases(world.localCases);
   state.world.thingMaker.level = typeof maker.level === 'number'
     ? Math.max(1, Math.min(4, Math.floor(maker.level))) : 1;

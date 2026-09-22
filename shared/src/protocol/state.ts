@@ -115,6 +115,11 @@ export type HomeMarker = {
   building: string;
   /** Open house: shows a sign anyone can read. The rest of the door settings are private. */
   open: boolean;
+  /** Mailbox rig id (`isMailboxStyleId` in sim/catalogs/mailboxes.ts). */
+  mailboxStyle: string;
+  /** Mailbox team colors, as hex strings. */
+  mailboxPrimary: string;
+  mailboxSecondary: string;
 };
 
 /**

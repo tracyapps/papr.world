@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import type { HomeMarker } from '../../shared/src/index';
 import { buildHouse } from '../game/dwellingExterior';
 import { exteriorPlanFromParts } from '../game/dwellingLook';
+import { animalDesigns } from '../game/mailbox/designs.animals';
+import { objectDesigns } from '../game/mailbox/designs.objects';
+import type { MailboxDesign, MailboxInstance } from '../game/mailbox/kit';
 import { camera, scene } from '../render/context';
 import { invalidateFootprintCache } from '../world/footprints';
 import { homeFacing, homePosition } from '../world/homeSite';
@@ -38,10 +41,18 @@ const PLATE_Y = PLATE_POST_HEIGHT - 0.1;
  *  room that stands at local (1.75, 0). */
 const PLATE_LOCAL = { x: 1.15, z: 1.7 } as const;
 
+/** Same spot mailboxExterior.ts uses for the player's own — so a home reads
+ *  the same whether it is yours or a neighbor's. */
+const MAILBOX_LOCAL = { x: 1.75, z: 1.1 } as const;
+const MAILBOX_DESIGNS: MailboxDesign[] = [...objectDesigns, ...animalDesigns];
+const MAILBOX_DESIGN_BY_ID = new Map(MAILBOX_DESIGNS.map((design) => [design.id, design]));
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
 type HomeVisual = {
   root: THREE.Group;
   sign: THREE.Sprite;
   plate: THREE.Sprite;
+  mailbox: MailboxInstance;
   address: HomeAddress;
   accountId: string;
   name: string;
@@ -200,6 +211,15 @@ export function addSharedHome(marker: HomeMarker): void {
   plate.position.z = PLATE_LOCAL.z;
   host.add(plate);
 
+  const design: MailboxDesign = MAILBOX_DESIGN_BY_ID.get(home.mailboxStyle) ?? MAILBOX_DESIGNS[0];
+  const mailbox = design.build({
+    name: home.name,
+    team: { primary: home.mailboxPrimary, secondary: home.mailboxSecondary },
+    reduced: reducedMotion,
+  });
+  mailbox.root.position.set(MAILBOX_LOCAL.x, 0, MAILBOX_LOCAL.z);
+  host.add(mailbox.root);
+
   const spot = homePosition(home.place);
   host.position.set(spot.x, sampleTerrainHeight(spot.x, spot.z), spot.z);
   host.rotation.y = homeFacing();
@@ -209,6 +229,7 @@ export function addSharedHome(marker: HomeMarker): void {
     root: host,
     sign,
     plate,
+    mailbox,
     address: homeAddress(home),
     accountId: home.accountId,
     name: home.name,
@@ -224,6 +245,7 @@ export function removeSharedHome(accountId: string, forget = true): void {
     disposeGroup(visual.root);
     disposeSprite(visual.sign);
     disposeSprite(visual.plate);
+    visual.mailbox.dispose();
     visuals.delete(accountId);
   }
   if (forget) {
@@ -240,6 +262,15 @@ export function clearSharedHomeVisuals(): void {
 
 export function sharedHomeCount(): number {
   return visuals.size;
+}
+
+/** Neighbor mailboxes animate in place (a waving flag, a wagging tail…) but,
+ *  unlike your own, never react to gaze or unread mail — those are private to
+ *  the owner. Call once per outdoor frame, same as updateMailboxExterior. */
+export function updateSharedHomeVisuals(delta: number, elapsed: number): void {
+  for (const visual of visuals.values()) {
+    visual.mailbox.tick(elapsed, delta, { message: false, look: null, reduced: reducedMotion });
+  }
 }
 
 export type SharedHomeHit = { accountId: string; name: string };

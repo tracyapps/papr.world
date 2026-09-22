@@ -202,3 +202,23 @@ export function joinHomeParts(parts: readonly string[]): string {
 export function splitHomeParts(joined: string): string[] {
   return sanitizeHomeParts(joined ? joined.split(',') : []);
 }
+
+// ---- Mailbox look: rig + team colors, published on the same home marker ----
+
+const MAILBOX_STYLE_ID = /^[a-z0-9-]{1,32}$/;
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+/**
+ * A mailbox rig id, or `fallback` when the value is missing or malformed.
+ * The shared layer has no catalog (same split as home parts above); the
+ * client keeps only ids it actually has a design for
+ * (`isMailboxStyleId` in sim/catalogs/mailboxes.ts).
+ */
+export function sanitizeMailboxStyle(raw: unknown, fallback: string): string {
+  return typeof raw === 'string' && MAILBOX_STYLE_ID.test(raw) ? raw : fallback;
+}
+
+/** A `#rrggbb` hex color, lowercased, or `fallback` when malformed. */
+export function sanitizeMailboxColor(raw: unknown, fallback: string): string {
+  return typeof raw === 'string' && HEX_COLOR.test(raw) ? raw.toLowerCase() : fallback;
+}

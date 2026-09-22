@@ -242,6 +242,10 @@ export type SetHomeIntent = {
   parts?: string[];
   /** The part under construction, or ''. */
   building?: string;
+  /** Mailbox rig + team colors. Older clients omit them; the server fills defaults. */
+  mailboxStyle?: string;
+  mailboxPrimary?: string;
+  mailboxSecondary?: string;
 };
 
 export type ClientPayloads = {

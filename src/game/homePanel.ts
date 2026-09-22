@@ -10,6 +10,9 @@ import {
   type DwellingPartId,
 } from '../sim/catalogs/dwellings';
 import { collectingPercent, describeDwellingWait, partStatus } from '../sim/dwelling';
+import { animalDesigns } from './mailbox/designs.animals';
+import { objectDesigns } from './mailbox/designs.objects';
+import type { MailboxDesign } from './mailbox/kit';
 import { showPetToast } from './petting';
 import { playCozySound } from './cozyAudio';
 import { describeHome, isNearHome } from './dwellingLook';
@@ -45,6 +48,8 @@ let open = false;
 let message = '';
 let lastTick = 0;
 let openedHandler: (() => void) | null = null;
+
+const MAILBOX_DESIGNS: MailboxDesign[] = [...objectDesigns, ...animalDesigns];
 
 /** Register what should close when this panel opens (the other right-hand panels). */
 export function onHomePanelOpened(handler: () => void) {
@@ -177,6 +182,7 @@ function render(now = Date.now()) {
     if (door.textContent !== text) door.textContent = text;
   }
   renderGuestSettings();
+  renderMailboxPicker();
   if (cards) {
     const html = DWELLING_PART_IDS.map((id) => renderCard(id, now)).join('');
     // The panel re-renders about once a second while open. Rewriting identical
@@ -196,6 +202,7 @@ function render(now = Date.now()) {
 
 let renderedCards = '';
 let renderedGuestLists = '';
+let renderedMailboxStyles = '';
 
 const guestRow = (text: string, buttons: Array<{ label: string; attrs: Record<string, string>; quiet?: boolean }>) => {
   const row = document.createElement('div');
@@ -214,6 +221,41 @@ const guestRow = (text: string, buttons: Array<{ label: string; attrs: Record<st
   }
   return row;
 };
+
+/** One button per rig, built fresh each render like the dwelling cards above —
+ *  cheap at 16 items, and it keeps the pressed state, the label and the focus
+ *  handling all one code path instead of two ways to say "this one's picked". */
+function renderMailboxStyles(container: HTMLElement, currentStyle: string) {
+  const html = MAILBOX_DESIGNS.map((design) => `
+    <button type="button" class="avatar-editor-swatch" data-mailbox-style="${design.id}"
+      title="${escapeHtml(design.tagline)}" aria-pressed="${design.id === currentStyle}">
+      <span class="swatch-label">${escapeHtml(design.name)}</span>
+    </button>`).join('');
+  if (html === renderedMailboxStyles) return;
+  const focused = document.activeElement instanceof HTMLElement && container.contains(document.activeElement)
+    ? document.activeElement.dataset.mailboxStyle
+    : null;
+  container.innerHTML = html;
+  renderedMailboxStyles = html;
+  if (focused) container.querySelector<HTMLElement>(`[data-mailbox-style="${CSS.escape(focused)}"]`)?.focus();
+}
+
+/**
+ * The mailbox picker: which of the 16 rigs stands by the door, and its two
+ * team colors. Always available — nothing to unlock, nothing to pay for —
+ * and the nameplate takes care of itself: it always reads this account's own
+ * display name (see game/mailboxExterior.ts), so there is nothing to type here.
+ */
+function renderMailboxPicker() {
+  if (!panel) return;
+  const styles = panel.querySelector<HTMLElement>('[data-mailbox-styles]');
+  const primary = panel.querySelector<HTMLInputElement>('[data-mailbox-primary]');
+  const secondary = panel.querySelector<HTMLInputElement>('[data-mailbox-secondary]');
+  const look = getGameState().world.mailboxLook;
+  if (styles) renderMailboxStyles(styles, look.style);
+  if (primary && primary.value !== look.primary) primary.value = look.primary;
+  if (secondary && secondary.value !== look.secondary) secondary.value = look.secondary;
+}
 
 /**
  * The door settings (friends walk in / knock / closed, everyone else knock /
@@ -331,6 +373,23 @@ export function initializeHomePanel() {
     </section>
     <section class="seed-store-section">
       <div class="seed-store-section-heading">
+        <h2>Mailbox</h2>
+        <span>Seen by every neighbor who walks by. Your name goes on the plate automatically.</span>
+      </div>
+      <div class="avatar-editor-swatches" data-mailbox-styles role="list" aria-label="Mailbox style"></div>
+      <div class="guest-settings">
+        <label>
+          <span>Primary color</span>
+          <input type="color" data-mailbox-primary aria-label="Mailbox primary color">
+        </label>
+        <label>
+          <span>Secondary color</span>
+          <input type="color" data-mailbox-secondary aria-label="Mailbox secondary color">
+        </label>
+      </div>
+    </section>
+    <section class="seed-store-section">
+      <div class="seed-store-section-heading">
         <h2>Building</h2>
         <span>Pay in whenever you like. Take it back any time.</span>
       </div>
@@ -380,6 +439,16 @@ export function initializeHomePanel() {
       render();
       return;
     }
+    const mailboxStyle = target.closest<HTMLElement>('[data-mailbox-style]')?.dataset.mailboxStyle;
+    if (mailboxStyle) {
+      const look = getGameState().world.mailboxLook;
+      const result = dispatchGameCommand({
+        type: 'setMailboxLook', style: mailboxStyle, primary: look.primary, secondary: look.secondary,
+      });
+      message = result.ok ? result.message : result.reason;
+      render();
+      return;
+    }
     const give = target.closest<HTMLElement>('[data-home-give]')?.dataset.homeGive as DwellingPartId | undefined;
     const refund = target.closest<HTMLElement>('[data-home-refund]')?.dataset.homeRefund as DwellingPartId | undefined;
     const down = target.closest<HTMLElement>('[data-home-down]')?.dataset.homeDown as DwellingPartId | undefined;
@@ -410,6 +479,20 @@ export function initializeHomePanel() {
       setHomePolicy({ others: target.value as 'knock' | 'closed' });
     } else if (target instanceof HTMLInputElement && target.matches('[data-door-open]')) {
       setHomePolicy({ open: target.checked });
+    } else if (target instanceof HTMLInputElement && target.matches('[data-mailbox-primary]')) {
+      const look = getGameState().world.mailboxLook;
+      const result = dispatchGameCommand({
+        type: 'setMailboxLook', style: look.style, primary: target.value, secondary: look.secondary,
+      });
+      message = result.ok ? result.message : result.reason;
+      render();
+    } else if (target instanceof HTMLInputElement && target.matches('[data-mailbox-secondary]')) {
+      const look = getGameState().world.mailboxLook;
+      const result = dispatchGameCommand({
+        type: 'setMailboxLook', style: look.style, primary: look.primary, secondary: target.value,
+      });
+      message = result.ok ? result.message : result.reason;
+      render();
     }
   });
 

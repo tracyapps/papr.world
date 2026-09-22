@@ -75,6 +75,11 @@ export class HomeSchema extends Schema {
   @type('string') building = '';
   /** Open house: a public sign. The other door settings are not synced. */
   @type('boolean') open = false;
+  /** Mailbox rig id; mirrors shared/protocol/constants.ts DEFAULT_MAILBOX_STYLE. */
+  @type('string') mailboxStyle = 'classic-flag';
+  /** Mailbox team colors; mirror DEFAULT_MAILBOX_PRIMARY/SECONDARY. */
+  @type('string') mailboxPrimary = '#a9351f';
+  @type('string') mailboxSecondary = '#fff8e4';
 }
 
 export class CaseSchema extends Schema {

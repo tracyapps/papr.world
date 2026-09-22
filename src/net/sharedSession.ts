@@ -623,13 +623,17 @@ export function publishHome(): void {
   // house would be noise, not information.
   if (!home || !connection || selfIsGuest()) return;
   const look = publishedLook(getGameState().world.dwelling);
-  publishedHomeSignature = homeSignature(home.x, home.z, look);
+  const mailbox = getGameState().world.mailboxLook;
+  publishedHomeSignature = homeSignature(home.x, home.z, look, mailbox);
   connection.sendSetHome({
     x: home.x,
     z: home.z,
     page: homeMarkerPage(home.x, home.z),
     parts: look.parts,
     building: look.building,
+    mailboxStyle: mailbox.style,
+    mailboxPrimary: mailbox.primary,
+    mailboxSecondary: mailbox.secondary,
   });
 }
 
@@ -682,17 +686,23 @@ function resolveHomeLotForSelf(): void {
 /** What was last sent, so a change of house or spot is sent again and nothing else is. */
 let publishedHomeSignature = '';
 
-function homeSignature(x: number, z: number, look: { parts: string[]; building: string }): string {
-  return `${x.toFixed(2)}|${z.toFixed(2)}|${look.parts.join(',')}|${look.building}`;
+function homeSignature(
+  x: number,
+  z: number,
+  look: { parts: string[]; building: string },
+  mailbox: { style: string; primary: string; secondary: string },
+): string {
+  return `${x.toFixed(2)}|${z.toFixed(2)}|${look.parts.join(',')}|${look.building}|${mailbox.style}|${mailbox.primary}|${mailbox.secondary}`;
 }
 
-/** Neighbors see the house as it is: send it again when a part is finished or started, or Home moves. */
+/** Neighbors see the house (and mailbox) as it is: send it again whenever either changes, or Home moves. */
 function republishHomeIfChanged(): void {
   if (!connection || !connected) return;
   const home = getPlace(HOME_PLACE_ID);
   if (!home) return;
   const look = publishedLook(getGameState().world.dwelling);
-  if (homeSignature(home.x, home.z, look) !== publishedHomeSignature) publishHome();
+  const mailbox = getGameState().world.mailboxLook;
+  if (homeSignature(home.x, home.z, look, mailbox) !== publishedHomeSignature) publishHome();
 }
 onGameStateChanged(republishHomeIfChanged);
 
@@ -708,6 +718,17 @@ subscribeNeighborHomes(resolveHomeLotForSelf);
  * the chat ⋯ menu sends (`ClientMessage.Block`) and is silent by design — the
  * blocked player is never told, and nothing about it is broadcast.
  */
+/**
+ * This account's own display name, for anything drawn locally that should
+ * read the same as the sign neighbors see on the published home marker
+ * (`HomeMarker.name`) — the mailbox nameplate, chiefly. Falls back to the
+ * same "Paper Friend" placeholder used everywhere else before a name is
+ * known (readSharedModeConfig, WorldEntryHandoff, PlayerSchema).
+ */
+export function getSelfName(): string {
+  return playerName ?? 'Paper Friend';
+}
+
 export function blockAccount(accountId: string): void {
   if (!accountId) return;
   connection?.sendBlock(accountId);

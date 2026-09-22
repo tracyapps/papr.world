@@ -39,7 +39,7 @@ import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from '.
 import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
-import { pickSharedHomeAtScreen, pickSharedHomePlateAtScreen } from './net/sharedHomeVisuals';
+import { pickSharedHomeAtScreen, pickSharedHomePlateAtScreen, updateSharedHomeVisuals } from './net/sharedHomeVisuals';
 import { hasCozyInteractionAt, initializeCozyInteractions, tryCozyInteractionAt, updateCozyInteractions } from './game/cozyInteractions';
 import { initializeInteractionCursor } from './game/interactionCursor';
 import { initializeHarvesting, isHarvestableAtScreen, tryHarvestAt, updateHarvestables } from './game/harvesting';
@@ -135,6 +135,7 @@ import {
   updateHomePrompt,
 } from './game/homePanel';
 import { isHomeAtScreen } from './game/dwellingExterior';
+import { updateMailboxExterior } from './game/mailboxExterior';
 import {
   goOutside,
   initializeSceneTransition,
@@ -704,6 +705,8 @@ function animate(animationTime = 0) {
   const clearingActive = isPageActive(CLEARING_PAGE);
   updateThingMaker(delta, elapsed, avatar.position, clearingActive);
   updateCritters(delta, elapsed, avatar.position);
+  updateMailboxExterior(delta, elapsed, avatar.position);
+  updateSharedHomeVisuals(delta, elapsed);
   const homeNearer = isNearHomePanel(avatar.position) && homeIsNearerThanMaker();
   updateMakerPrompt(avatar.position, homeNearer);
   updateSeedStorePrompt(avatar.position);

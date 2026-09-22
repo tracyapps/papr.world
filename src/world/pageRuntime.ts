@@ -16,6 +16,7 @@ const PATTERN_REPEAT: [number, number] = [1, 1];
 import { buildCritters, populatePageCritters } from '../game/critters';
 import { buildThingMaker } from '../game/thingMaker';
 import { buildDwellingExterior } from '../game/dwellingExterior';
+import { buildMailboxExterior } from '../game/mailboxExterior';
 import { buildSeedStore } from '../game/seedStore';
 import { registerMapFeature } from './mapFeatures';
 import { buildClearingHouse, buildCozyClearingDetails, buildDisplayWall } from './setPieces';
@@ -686,6 +687,8 @@ function buildProp(page: PageData, prop: PropData, index: number, group: THREE.G
           buildThingMaker(group);
           // The home stands beside its Thing Maker (game/dwellingExterior.ts).
           buildDwellingExterior(group);
+          // The mailbox stands beside the home (game/mailboxExterior.ts).
+          buildMailboxExterior(group);
           break;
         case 'seedStore':
           buildSeedStore(group);

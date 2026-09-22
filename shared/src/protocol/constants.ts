@@ -155,3 +155,11 @@ export const DEFAULT_ROOM = 'neighborhood';
 
 /** Backward-compatible room for old `?shared=1` development links and saves. */
 export const LEGACY_INVITE_CODE = 'PAPR-22';
+
+// ---- Mailbox look (docs/house-and-home.md, mailbox customization) --------
+
+/** Style id shown before a player ever opens the mailbox picker. */
+export const DEFAULT_MAILBOX_STYLE = 'classic-flag';
+/** Team colors, matching the design lab's own default palette. */
+export const DEFAULT_MAILBOX_PRIMARY = '#a9351f';
+export const DEFAULT_MAILBOX_SECONDARY = '#fff8e4';

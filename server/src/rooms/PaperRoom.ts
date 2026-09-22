@@ -43,6 +43,11 @@ import {
   isGuestAccount,
   joinHomeParts,
   splitHomeParts,
+  sanitizeMailboxStyle,
+  sanitizeMailboxColor,
+  DEFAULT_MAILBOX_STYLE,
+  DEFAULT_MAILBOX_PRIMARY,
+  DEFAULT_MAILBOX_SECONDARY,
   homePolicyOrDefault,
   DEFAULT_HOME_POLICY,
   INTERIOR_SPACE,
@@ -1114,6 +1119,9 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     home.page = intent.page;
     home.parts = joinHomeParts(intent.parts ?? []);
     home.building = intent.building ?? '';
+    home.mailboxStyle = intent.mailboxStyle ?? DEFAULT_MAILBOX_STYLE;
+    home.mailboxPrimary = intent.mailboxPrimary ?? DEFAULT_MAILBOX_PRIMARY;
+    home.mailboxSecondary = intent.mailboxSecondary ?? DEFAULT_MAILBOX_SECONDARY;
     home.open = this.policyOf(player.accountId).open;
     this.persist();
   }
@@ -1642,6 +1650,9 @@ export class PaperRoom extends Room<PaperRoomOptions> {
         parts: splitHomeParts(h.parts),
         building: h.building,
         open: h.open,
+        mailboxStyle: h.mailboxStyle,
+        mailboxPrimary: h.mailboxPrimary,
+        mailboxSecondary: h.mailboxSecondary,
       });
     });
     const homePolicies: Record<string, HomePolicy> = {};
@@ -1706,6 +1717,10 @@ export class PaperRoom extends Room<PaperRoomOptions> {
       home.parts = joinHomeParts(h.parts ?? []);
       home.building = h.building ?? '';
       home.open = h.open === true;
+      // Absent on saves written before the mailbox existed.
+      home.mailboxStyle = sanitizeMailboxStyle(h.mailboxStyle, DEFAULT_MAILBOX_STYLE);
+      home.mailboxPrimary = sanitizeMailboxColor(h.mailboxPrimary, DEFAULT_MAILBOX_PRIMARY);
+      home.mailboxSecondary = sanitizeMailboxColor(h.mailboxSecondary, DEFAULT_MAILBOX_SECONDARY);
       this.state.homes.set(home.accountId, home);
     }
     for (const [accountId, raw] of Object.entries(save.homePolicies ?? {})) {

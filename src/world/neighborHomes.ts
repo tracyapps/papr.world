@@ -7,6 +7,13 @@
 // the doorstep meets the same door everyone else does.
 
 import { isDwellingPartId, type DwellingPartId } from '../sim/catalogs/dwellings';
+import { isMailboxStyleId } from '../sim/catalogs/mailboxes';
+import {
+  DEFAULT_MAILBOX_PRIMARY,
+  DEFAULT_MAILBOX_SECONDARY,
+  DEFAULT_MAILBOX_STYLE,
+  sanitizeMailboxColor,
+} from '../../shared/src/index';
 import { HOME_BODY_RADIUS, HOME_REACH, homeDoorstep, homePosition, homeSolids, type HomeSolid } from './homeSite';
 import { stableHash } from './neighborhood';
 
@@ -28,6 +35,10 @@ export type NeighborHome = {
   building: DwellingPartId | null;
   /** Open house: the sign is out and anyone may walk in. */
   open: boolean;
+  /** Mailbox rig id; falls back to the default rig when unset or unknown. */
+  mailboxStyle: string;
+  mailboxPrimary: string;
+  mailboxSecondary: string;
 };
 
 /** The shape a published marker arrives in (`HomeMarker`), read loosely so bad data cannot get in. */
@@ -40,6 +51,9 @@ export type NeighborHomeInput = {
   parts?: readonly string[];
   building?: string;
   open?: boolean;
+  mailboxStyle?: string;
+  mailboxPrimary?: string;
+  mailboxSecondary?: string;
 };
 
 const homes = new Map<string, NeighborHome>();
@@ -61,6 +75,9 @@ export function neighborHomeFrom(input: NeighborHomeInput): NeighborHome | null 
     parts: [...new Set(parts)],
     building: isDwellingPartId(input.building) ? input.building : null,
     open: input.open === true,
+    mailboxStyle: isMailboxStyleId(input.mailboxStyle) ? input.mailboxStyle : DEFAULT_MAILBOX_STYLE,
+    mailboxPrimary: sanitizeMailboxColor(input.mailboxPrimary, DEFAULT_MAILBOX_PRIMARY),
+    mailboxSecondary: sanitizeMailboxColor(input.mailboxSecondary, DEFAULT_MAILBOX_SECONDARY),
   };
 }
 
