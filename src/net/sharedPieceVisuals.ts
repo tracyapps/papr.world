@@ -15,6 +15,25 @@ interiorRoot.name = 'shared-interior-pieces';
 const visuals = new Map<string, { piece: PlacedPiece; group: THREE.Group }>();
 let interiorOwner: string | null = null;
 
+/**
+ * Once a server echo of one of OUR OWN pieces has been matched to the local
+ * piece standing in for it, that pairing (shared piece id -> local piece id)
+ * is remembered here for as long as the local piece exists.
+ *
+ * Why this exists: the server has no "move" or "restyle" message (see
+ * placement.ts), so a local carry/restyle only ever updates this device's
+ * own save -- the shared echo the server keeps sending back still describes
+ * wherever the piece ORIGINALLY stood. `hasLocalEquivalent` used to match
+ * purely by re-comparing position on every call, which worked at build time
+ * but silently broke the moment the local piece moved: the echo no longer
+ * matched anything, so the next unrelated sync (someone else placing
+ * something, say) would un-hide it right where the piece used to be --
+ * "it reappeared in the old spot when I wasn't looking" (2026-09-22). Once
+ * matched, this map keeps the echo hidden by the pairing itself rather than
+ * by re-deriving it, so a later move can never un-hide it again.
+ */
+const matchedLocalIds = new Map<string, string>();
+
 export function initializeSharedPieceVisuals(): void {
   if (!root.parent) scene.add(root);
   if (!interiorRoot.parent) interiorScene.add(interiorRoot);
@@ -37,6 +56,7 @@ export function removeSharedPiece(id: string): void {
   visual.group.removeFromParent();
   visuals.delete(id);
   unregisterCasePiece(id);
+  matchedLocalIds.delete(id);
 }
 
 /** Hide the server echo of a piece already represented by this device's solo save. */
@@ -82,6 +102,18 @@ function hasLocalEquivalent(target: PlacedPiece): boolean {
   // A visitor's own save also uses `in:home:0,0`; it must never hide a host's
   // chair merely because both people put the same chair at the same coordinates.
   if (target.makerId !== getSelfAccount()) return false;
+
+  const remembered = matchedLocalIds.get(target.id);
+  if (remembered !== undefined) {
+    for (const page of Object.values(getGameState().world.pages)) {
+      if (remembered in page.placedPieces) return true;
+    }
+    // The local piece this echo stood in for is gone (picked back up, or
+    // never existed on this device to begin with) -- forget the pairing so
+    // a fresh position match can be tried below like normal.
+    matchedLocalIds.delete(target.id);
+  }
+
   for (const page of Object.values(getGameState().world.pages)) {
     for (const piece of Object.values(page.placedPieces)) {
       if (
@@ -89,7 +121,10 @@ function hasLocalEquivalent(target: PlacedPiece): boolean {
         && Math.abs(piece.x - target.x) < 0.01
         && Math.abs(piece.z - target.z) < 0.01
         && Math.abs(piece.rotY - target.rotY) < 0.01
-      ) return true;
+      ) {
+        matchedLocalIds.set(target.id, piece.id);
+        return true;
+      }
     }
   }
   return false;
