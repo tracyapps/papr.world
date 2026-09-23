@@ -68,6 +68,12 @@ export function createTimedActionController() {
       const finished = active.request.steps[active.stepIndex];
       const finishedAt = active.stepCompletesAt;
       active.request.onStepComplete?.(finished);
+      // A step callback that discovers it can no longer proceed (a
+      // multi-step build that ran out of a step-specific material partway
+      // through, say) is allowed to call `cancelTimedAction` from inside
+      // here -- that nulls `active`, so this loop must notice and stop
+      // rather than keep indexing into a request that just ended itself.
+      if (!active) return;
       active.stepIndex += 1;
 
       if (active.stepIndex >= active.request.steps.length) {

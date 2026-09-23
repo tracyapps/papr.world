@@ -35,7 +35,7 @@ import { showPetToast } from './petting';
 import { playCozySound } from './cozyAudio';
 import { getActionMode, onActionModeChanged, setActionMode } from './actionMode';
 import { createGroundRing, setGhostAppearance } from './gardenOverlay';
-import { startTimedAction } from './timedAction';
+import { cancelTimedAction, startTimedAction } from './timedAction';
 import { publishSharedPlacedPiece } from '../net/sharedSession';
 import { getPlacedPieceVisual, setPlacedPieceVisualVisible } from './placedPieceInteractions';
 import { refreshInteriorBuilds } from './interiorScene';
@@ -382,6 +382,26 @@ function selectOwnedPiece(id: string): void {
     selectedPieceIds.add(id);
   }
   for (const listener of selectionListeners) listener();
+}
+
+/**
+ * The mode-independent screen interaction (see main.ts, `placed-piece-select`)
+ * that lets a plain or shift-click select one of your own placed pieces --
+ * exactly like clicking a critter makes it face you, with no tool required.
+ * Equipping the hammer is only needed afterwards, to act on the selection
+ * (the build palette's Move button and material swatches).
+ *
+ * Returns false on a miss so the router falls through to whatever is under
+ * the cursor next; `carrying` is excluded because a click while something is
+ * already picked up is a drop, still handled by `tryPlaceAt` in build mode.
+ */
+export function trySelectPieceAtScreen(clientX: number, clientY: number, event?: PointerEvent): boolean {
+  if (carrying) return false;
+  if (event?.shiftKey) return toggleSelectedPiece(clientX, clientY);
+  const owned = pickOwnedPieceVisualAt(clientX, clientY);
+  if (!owned) return false;
+  selectOwnedPiece(owned.piece.id);
+  return true;
 }
 
 export function clearSelectedPlacedPieces(): boolean {
@@ -915,38 +935,26 @@ export function currentBuildPageId(x: number, z: number): string | null {
 
 // ---- Placement -----------------------------------------------------------
 
-export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEvent) {
+export function tryPlaceAt(clientX: number, clientY: number, _event?: PointerEvent) {
   if (getActionMode() !== 'place') return false;
   if (carrying) {
     const point = pickTerrainAtScreen(clientX, clientY);
     if (point) dropCarriedPiece(point);
     return true;
   }
-  if (event?.shiftKey) {
-    // Shift-click builds up a bulk-move group instead of picking anything
-    // up immediately. A shift-click that misses an owned piece falls
-    // through to normal placement below, same as an unmodified miss would.
-    if (toggleSelectedPiece(clientX, clientY)) return true;
-  } else {
-    const owned = pickOwnedPieceVisualAt(clientX, clientY);
-    if (owned) {
-      // A plain click on your own piece selects it -- and only it -- so
-      // the material panel can restyle it (or a shift-built group) without
-      // picking anything up. Moving is a separate, explicit step now: the
-      // build palette's "Move" button (`enterMoveMode`) is what actually
-      // starts a carry.
-      selectOwnedPiece(owned.piece.id);
-      return true;
-    }
-    // A plain click that landed on open ground (or someone else's piece)
-    // while something of yours was selected just closes that selection --
-    // the same "click away to dismiss" every other panel here uses. It
-    // does not also place a new piece in the same click; a second click
-    // does that once the selection is out of the way.
-    if (selectedPieceIds.size > 0) {
-      clearSelectedPlacedPieces();
-      return true;
-    }
+  // Selecting a piece (plain or shift-click) is handled upstream now, by the
+  // mode-independent `placed-piece-select` interaction (see
+  // `trySelectPieceAtScreen` and main.ts) -- it runs before this one and
+  // already claims any click that actually landed on one of your pieces.
+  // What is left to handle here is a click that reaches this far at all:
+  // one on open ground (or someone else's piece). While something of yours
+  // is selected, that just closes the selection -- the same "click away to
+  // dismiss" every other panel here uses -- rather than also placing a new
+  // piece in the same click; a second click does that once the selection is
+  // out of the way.
+  if (selectedPieceIds.size > 0) {
+    clearSelectedPlacedPieces();
+    return true;
   }
   const assessment = assessPlaceTargetAtScreen(clientX, clientY);
   if (assessment.status !== 'valid' || !assessment.def || !assessment.point) {
@@ -956,10 +964,9 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
   const { x, z } = assessment.point;
   const rotY = assessment.rotY ?? selectedRotY;
   const definition = buildAssemblyDef(assessment.def.key);
-  const step = definition
-    ? nextBuildStep(definition, assessment.site?.completedStepIds ?? [])
-    : null;
-  if (!definition || !step) {
+  const completedIds = assessment.site?.completedStepIds ?? [];
+  const nextStep = definition ? nextBuildStep(definition, completedIds) : null;
+  if (!definition || !nextStep) {
     showPetToast('That build plan cannot find its next step.');
     return true;
   }
@@ -980,14 +987,27 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
     rotY,
     material,
   };
+  // Every remaining step plays out from this one click, one after another,
+  // with the existing "Step X of Y" timer already built for a multi-step
+  // request (see timedAction.ts) -- just never actually handed more than
+  // one step before now. A three-step piece used to need three separate
+  // clicks with nothing on screen explaining why the ghost had quietly
+  // finished a step and was waiting for another one (2026-09-22).
+  const completedSet = new Set(completedIds);
+  const remainingSteps = definition.steps.filter((candidate) => !completedSet.has(candidate.id));
+  // Set only when a step's own command refuses partway through (out of a
+  // step-specific material the flat affordability check above does not
+  // itemize, say) -- `onCancel` reads it to toast the real reason instead
+  // of a generic "cancelled".
+  let stepFailure: string | null = null;
   const started = startTimedAction({
-    steps: [{
+    steps: remainingSteps.map((step) => ({
       id: step.id,
       kind: step.verb,
       label: step.label,
       durationMs: step.durationSeconds * 1000,
-    }],
-    onComplete: () => {
+    })),
+    onStepComplete: (finishedStep) => {
       const buildPageId = assessment.site?.page || assessment.pageId || pageIdAt(x, z);
       const piecesBefore = new Set(
         Object.keys(getGameState().world.pages[buildPageId]?.placedPieces ?? {}),
@@ -995,7 +1015,7 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
       const result = dispatchGameCommand({
         type: 'completeBuildStep',
         templateKey: assessment.def!.key,
-        stepId: step.id,
+        stepId: finishedStep.id!,
         x,
         z,
         rotY,
@@ -1004,8 +1024,12 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
         material,
       });
       if (!result.ok) {
-        activeBuildPreview = null;
-        showPetToast(result.reason);
+        // Whatever finished in earlier steps this same click already
+        // persisted for real (each `completeBuildStep` commits on its own);
+        // only the steps still queued behind this one are abandoned, so the
+        // next click picks up exactly where this one had to stop.
+        stepFailure = result.reason;
+        cancelTimedAction('build-step-failed');
         return;
       }
       // A finished piece or a newly persisted assembly site both change the
@@ -1019,10 +1043,13 @@ export function tryPlaceAt(clientX: number, clientY: number, event?: PointerEven
         getGameState().world.pages[buildPageId]?.placedPieces ?? {},
       ).find((piece) => !piecesBefore.has(piece.id));
       if (finishedPiece) publishSharedPlacedPiece(finishedPiece);
+    },
+    onComplete: () => {
       activeBuildPreview = null;
     },
     onCancel: () => {
       activeBuildPreview = null;
+      if (stepFailure) showPetToast(stepFailure);
     },
   });
   if (!started) activeBuildPreview = null;
@@ -1066,13 +1093,10 @@ export function initializePlacement() {
       const first = Object.keys(BUILD_PIECE_DEFS)[0] as BuildPieceKey;
       setSelectedBuildPiece(first);
     }
-    if (mode !== 'place') {
-      hideBuildOverlay();
-      // A pending bulk selection has no meaning outside build mode — leaving
-      // it armed would silently resurrect a stale group next time build mode
-      // opens and something is clicked.
-      clearSelectedPlacedPieces();
-    }
+    // A pending selection is no longer wiped on leaving build mode: it can
+    // now be made with a plain click in any mode (see trySelectPieceAtScreen),
+    // and its highlight ring stays visible outside build mode too (see
+    // updateBuildOverlay) -- there is nothing stale left to resurrect.
   });
 
   // Stable visual fixture for browser checks. It exercises the exact pinned
@@ -1213,16 +1237,26 @@ export function updateBuildOverlay(
   avatarPosition: THREE.Vector3,
   hover: THREE.Vector3 | null,
 ) {
-  const active = getActionMode() === 'place';
   if (!overlayRoot || !targetRing) return;
+  // The selection highlight means something in any mode now -- a piece can
+  // be selected with a plain click well before the build tool is ever
+  // equipped (see trySelectPieceAtScreen) -- so the overlay group stays
+  // visible and this ring set is kept current every frame regardless of
+  // mode. Everything else below (the placement ghost, claimed-space rings,
+  // the target ring) is still build-mode-only.
+  overlayRoot.visible = true;
+  syncSelectionRings();
+
+  const active = getActionMode() === 'place';
   if (!active) {
-    overlayRoot.visible = false;
+    if (ghostHost) ghostHost.visible = false;
+    if (claimedRings) claimedRings.clear();
+    if (groupGhostHost) groupGhostHost.visible = false;
+    targetRing.visible = false;
     return;
   }
-  overlayRoot.visible = true;
 
   syncClaimedRings(avatarPosition);
-  syncSelectionRings();
 
   const pinned = activeBuildPreview;
   // Once a nudge has taken over, the mouse stays hands-off for the rest of
@@ -1261,6 +1295,17 @@ export function updateBuildOverlay(
     return;
   }
   if (groupGhostHost) groupGhostHost.visible = false;
+
+  // A pending selection (not yet picked up with Move) means the player is
+  // choosing or acting on something they already built, not placing
+  // something new -- showing the "next piece" ghost at the same time is
+  // exactly the confusing overlap reported 2026-09-22 (a bench ghost
+  // hovering the cursor while three planks were selected for a move).
+  if (!carrying && selectedPieceIds.size > 0) {
+    targetRing.visible = false;
+    if (ghostHost) ghostHost.visible = false;
+    return;
+  }
 
   const soloCarryPiece = carrying ? carrying.members[0].piece : null;
   const key = pinned?.key ?? (soloCarryPiece ? soloCarryPiece.templateKey as BuildPieceKey : selectedKey);

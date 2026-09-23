@@ -73,6 +73,7 @@ import { gardenActionAtScreen, hasPlantActionAt, tryPlantAt, updatePlanting } fr
 import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverlay';
 import {
   cancelCarryingPiece,
+  canSelectPieceAtScreen,
   dragRotateCarriedPiece,
   fineRotateCarriedPiece,
   initializePlacement,
@@ -80,6 +81,7 @@ import {
   nudgeCarriedPiece,
   rotateSelectedBuildPiece,
   tryPlaceAt,
+  trySelectPieceAtScreen,
   updateBuildOverlay,
 } from './game/placement';
 import { initializeBuildPalette } from './ui/buildPalette';
@@ -414,6 +416,18 @@ registerScreenInteraction({
     if (pickUpPlacedTrinket(hit.id)) showPetToast('Trinket back on the shelf');
     return true;
   },
+});
+// A click on one of your own placed pieces selects it -- exactly like
+// clicking a critter makes it face you -- regardless of which tool (if any)
+// is equipped. Only acting on the selection (Move, restyle) still needs the
+// build palette open, which shows itself once something is selected.
+// Sits just under placed-trinket so a trinket sitting on a shelf still wins.
+registerScreenInteraction({
+  id: 'placed-piece-select',
+  priority: 76,
+  scene: 'any',
+  hitTest: canSelectPieceAtScreen,
+  interact: trySelectPieceAtScreen,
 });
 registerScreenInteraction({
   id: 'plant-care',

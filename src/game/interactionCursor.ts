@@ -5,7 +5,7 @@ import { getDigTargetStatusAtScreen } from './toolActions';
 import { gardenActionAtScreen } from './planting';
 import { assessTrimTarget } from './treeInteractions';
 import { assessMineTarget } from './rockInteractions';
-import { canSelectPieceAtScreen, placeTargetStatusAtScreen } from './placement';
+import { placeTargetStatusAtScreen } from './placement';
 import { hasReadyPlantDropAtScreen } from './plantInteractions';
 
 /**
@@ -86,15 +86,11 @@ function refreshCursor() {
   // the same resolver, so it can never say yes to a click that will be
   // refused. `build` is the verb's reserved cursor, first used here.
   //
-  // Hovering one of your own placed pieces is a different affordance --
-  // clicking it selects it rather than placing a new one -- so it gets the
-  // same `hand` cursor as any other clickable thing, checked before falling
-  // to the generic build/ghost-placement cursor below.
+  // Hovering one of your own placed pieces is caught above already: the
+  // mode-independent `placed-piece-select` interaction is not in this
+  // function's exclusion list, so it already won the generic `hand` branch
+  // before execution ever reaches here.
   if (getActionMode() === 'place') {
-    if (canSelectPieceAtScreen(hoverX, hoverY)) {
-      setCursor('hand');
-      return;
-    }
     setCursor('build', placeTargetStatusAtScreen(hoverX, hoverY) === 'valid');
     return;
   }
