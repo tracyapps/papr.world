@@ -8,6 +8,7 @@ import { getSelfName } from '../net/sharedSession';
 import { animalDesigns } from './mailbox/designs.animals';
 import { objectDesigns } from './mailbox/designs.objects';
 import type { MailboxDesign, MailboxInstance } from './mailbox/kit';
+import { hasReadyUnclaimedMail } from '../sim/mail';
 
 /**
  * The player's own mailbox, standing beside the home exterior
@@ -58,7 +59,7 @@ function mailboxLook() {
  *  physical trigger a "message" reaction (a raised flag, a lit window…) reads. */
 function hasUnclaimedMail(): boolean {
   const player = getGameState().player;
-  return player.mailbox.some((mail) => !player.claimedMailIds.includes(mail.id));
+  return hasReadyUnclaimedMail(player.mailbox, player.claimedMailIds, Date.now());
 }
 
 function signature(): string {

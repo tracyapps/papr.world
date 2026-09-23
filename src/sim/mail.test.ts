@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { LIMITS, type MailItem } from '../../shared/src/index';
 import { applyGameCommand } from './commands';
-import { createWelcomeMail, deliverMail, mailAttachment, mergeMailSnapshot } from './mail';
+import { createWelcomeMail, deliverMail, hasReadyUnclaimedMail, mailAttachment, mergeMailSnapshot } from './mail';
+
+describe('physical mailbox arrival', () => {
+  it('raises its message signal only when an unclaimed delayed parcel arrives', () => {
+    const parcel = mail({ id: 'order', payload: { subject: 'Lumber', arrivesAt: 5_000 } });
+    expect(hasReadyUnclaimedMail([parcel], [], 4_999)).toBe(false);
+    expect(hasReadyUnclaimedMail([parcel], [], 5_000)).toBe(true);
+    expect(hasReadyUnclaimedMail([parcel], ['order'], 5_000)).toBe(false);
+  });
+});
 import {
   SAVE_STORAGE_KEY,
   createDefaultGameState,

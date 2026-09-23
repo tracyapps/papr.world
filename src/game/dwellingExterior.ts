@@ -7,6 +7,8 @@ import { registerMapFeature, updateMapFeaturePosition } from '../world/mapFeatur
 import { getPlace, HOME_PLACE_ID, onPlacesChanged } from '../world/places';
 import { sampleTerrainHeight } from '../world/terrain';
 import { getGameState, onGameStateChanged } from '../sim/state';
+import { createHomeLook, type HomeLook } from '../sim/homeLook';
+import { homeSurfaceMaterial } from './homeSurfaceMaterial';
 import {
   exteriorPlan,
   exteriorSignature,
@@ -181,12 +183,12 @@ function addScaffolding(host: THREE.Group, width: number, depth: number, height:
 }
 
 /** The house for a plan, at the origin, door on +z. Shared by the player's own home and every neighbor's. */
-export function buildHouse(plan: ExteriorPlan): THREE.Group {
+export function buildHouse(plan: ExteriorPlan, look: HomeLook = createHomeLook()): THREE.Group {
   const host = new THREE.Group();
-  const cloth = getMaterial('paper.orangewrap');
-  const wallPaper = getMaterial('paper.notebook');
-  const roofPaper = getMaterial('paper.salmon');
-  const floorPaper = getMaterial('paper.brown.warm');
+  const cloth = homeSurfaceMaterial(look.outsideWalls);
+  const wallPaper = homeSurfaceMaterial(look.outsideWalls);
+  const roofPaper = homeSurfaceMaterial(look.outsideRoof);
+  const floorPaper = homeSurfaceMaterial(look.insideFloor);
   let top = 0;
 
   if (plan.groundSheet) host.add(box(WIDTH + 0.4, 0.03, DEPTH + 0.4, getMaterial('paper.cork'), 0, 0, 0));
@@ -278,7 +280,8 @@ export function buildHouse(plan: ExteriorPlan): THREE.Group {
 function redraw() {
   if (!root) return;
   const plan = exteriorPlan(getGameState().world.dwelling);
-  const signature = exteriorSignature(plan);
+  const look = getGameState().world.homeLook;
+  const signature = `${exteriorSignature(plan)}|${JSON.stringify(look)}`;
   if (signature === rendered) return;
   rendered = signature;
   // The ground the house claims changes with its rooms; walkers and diggers ask again.
@@ -293,7 +296,7 @@ function redraw() {
       }
     });
   }
-  root.add(buildHouse(plan), buildOwnerSign());
+  root.add(buildHouse(plan, look), buildOwnerSign());
 }
 
 /** The saved Home place this house stands beside. */

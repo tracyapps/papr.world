@@ -1,6 +1,8 @@
 import type * as THREE from 'three';
 import { dispatchGameCommand } from '../sim/commands';
-import { getGameState, onGameStateChanged } from '../sim/state';
+import { getGameState, onGameStateChanged, updateGameState } from '../sim/state';
+import { HOME_DESIGNS, HOME_SURFACES, type HomeDesignId, type HomeSurfaceId } from '../sim/homeLook';
+import { refreshInterior } from './interiorScene';
 import { RESOURCE_CORE_DEFS } from '../sim/catalogs/resources';
 import { TECH_DEFS, techNodeTeachingAbility } from '../sim/catalogs/techTree';
 import {
@@ -183,6 +185,13 @@ function render(now = Date.now()) {
   }
   renderGuestSettings();
   renderMailboxPicker();
+  for (const surface of HOME_SURFACES) {
+    const look = state.world.homeLook[surface];
+    const design = panel.querySelector<HTMLSelectElement>(`[data-home-design="${surface}"]`);
+    const color = panel.querySelector<HTMLInputElement>(`[data-home-color="${surface}"]`);
+    if (design && design.value !== look.design) design.value = look.design;
+    if (color && color.value !== look.color) color.value = look.color;
+  }
   if (cards) {
     const html = DWELLING_PART_IDS.map((id) => renderCard(id, now)).join('');
     // The panel re-renders about once a second while open. Rewriting identical
@@ -384,6 +393,18 @@ export function initializeHomePanel() {
     </section>
     <section class="seed-store-section">
       <div class="seed-store-section-heading">
+        <h2>Home appearance</h2>
+        <span>Choose paper designs and colors inside and out.</span>
+      </div>
+      <div class="guest-settings home-appearance-controls">
+        ${HOME_SURFACES.map((surface) => {
+          const label = ({ outsideWalls: 'Outside walls and tent', outsideRoof: 'Roof', insideWalls: 'Inside walls', insideFloor: 'Floor' } as const)[surface];
+          return `<label><span>${label}</span><select data-home-design="${surface}" aria-label="${label} design">${HOME_DESIGNS.map((design) => `<option value="${design}">${design.replace(/^(paper|wall|roof)\./, '').replace(/[0-9]/g, ' $&')}</option>`).join('')}</select><input type="color" data-home-color="${surface}" aria-label="${label} color"></label>`;
+        }).join('')}
+      </div>
+    </section>
+    <section class="seed-store-section">
+      <div class="seed-store-section-heading">
         <h2>Mailbox</h2>
         <span>Seen by every neighbor who walks by. Your name goes on the plate automatically.</span>
       </div>
@@ -485,6 +506,17 @@ export function initializeHomePanel() {
 
   panel.addEventListener('change', (event) => {
     const target = event.target as HTMLElement;
+    const surface = target.dataset.homeDesign ?? target.dataset.homeColor;
+    if (surface && HOME_SURFACES.includes(surface as HomeSurfaceId)) {
+      const id = surface as HomeSurfaceId;
+      if (target instanceof HTMLSelectElement && HOME_DESIGNS.includes(target.value as HomeDesignId)) {
+        updateGameState((state) => { state.world.homeLook[id].design = target.value as HomeDesignId; });
+      } else if (target instanceof HTMLInputElement && /^#[0-9a-fA-F]{6}$/.test(target.value)) {
+        updateGameState((state) => { state.world.homeLook[id].color = target.value.toLowerCase(); });
+      }
+      if (isIndoors()) refreshInterior(getGameState().world.dwelling.parts);
+      return;
+    }
     if (target instanceof HTMLSelectElement && target.matches('[data-door-friends]')) {
       setHomePolicy({ friends: target.value as 'walk' | 'knock' | 'closed' });
     } else if (target instanceof HTMLSelectElement && target.matches('[data-door-others]')) {

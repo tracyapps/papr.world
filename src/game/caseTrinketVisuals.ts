@@ -5,9 +5,11 @@ import { buildTrinketRig } from './trinketRigs';
 import { getPlacedPieceVisual } from './placedPieceInteractions';
 import { listCases, subscribeCases, type CaseView } from './cases';
 import { getSharedPieceVisual } from '../net/sharedPieceVisuals';
+import { RESOURCE_DEFS } from '../world/resources';
+import { getMaterial } from '../render/materials';
 
 /**
- * The keepsakes set out on a display case: purely decorative children of
+ * The contents visible inside a display case: purely decorative children of
  * the case's own rendered group, sitting on its two shelves (see
  * `buildDisplayCase` in world/buildPieceVisuals.ts for the shelf heights
  * these offsets line up with).
@@ -19,16 +21,16 @@ import { getSharedPieceVisual } from '../net/sharedPieceVisuals';
  * representing the case itself is replaced (a page refresh after a move,
  * say). Nothing here runs per frame.
  *
- * Before this, `state.world.localCases[id].trinkets` (what the case panel
- * shows and lets you set) had no 3D representation at all: a case could
- * report four trinkets and still look empty in the world (2026-09-22).
+ * Both keepsakes and stocked goods occupy slots, matching the panel.
  */
 
 const SLOT_OFFSETS: readonly [number, number, number][] = [
   [-0.42, 0.40, -0.06], [-0.14, 0.40, -0.06], [0.14, 0.40, -0.06], [0.42, 0.40, -0.06],
   [-0.42, 0.72, -0.06], [-0.14, 0.72, -0.06], [0.14, 0.72, -0.06], [0.42, 0.72, -0.06],
 ];
-const TRINKET_SCALE = 0.5;
+// These rigs are naturally tiny; at half size they disappeared behind the
+// frame and glass at normal camera distance.
+const TRINKET_SCALE = 1.5;
 
 type AnchoredSlots = { anchor: THREE.Object3D; group: THREE.Group; signature: string };
 
@@ -50,25 +52,34 @@ function anchorFor(view: CaseView): THREE.Object3D | null {
 }
 
 function signatureFor(view: CaseView): string {
-  return view.items
-    .filter((item) => item.kind === 'trinket')
-    .map((item) => `${item.defId}:${item.seed}`)
-    .join('|');
+  return JSON.stringify(view.items);
 }
 
 function buildSlotGroup(view: CaseView): THREE.Group {
   const slots = new THREE.Group();
   slots.name = 'case-trinkets';
-  const trinkets = view.items.filter((item) => item.kind === 'trinket');
-  trinkets.slice(0, SLOT_OFFSETS.length).forEach((item, index) => {
-    if (item.kind !== 'trinket') return;
-    const def = getTrinketDef(item.defId);
-    if (!def) return;
-    const rig = buildTrinketRig(def, item.seed);
-    rig.scale.setScalar(TRINKET_SCALE);
+  view.items.slice(0, SLOT_OFFSETS.length).forEach((item, index) => {
     const [x, y, z] = SLOT_OFFSETS[index];
-    rig.position.set(x, y, z);
-    slots.add(rig);
+    if (item.kind === 'trinket') {
+      const def = getTrinketDef(item.defId);
+      if (!def) return;
+      const rig = buildTrinketRig(def, item.seed);
+      rig.scale.setScalar(TRINKET_SCALE);
+      rig.position.set(x, y, z);
+      slots.add(rig);
+      return;
+    }
+    // Shared free cases hold resources, tools, and ordinary items. They do
+    // not have individual world rigs, so a small paper parcel represents
+    // each occupied slot, with the resource's own paper when available.
+    const material = item.kind === 'resource'
+      ? getMaterial(RESOURCE_DEFS[item.itemId as keyof typeof RESOURCE_DEFS]?.material ?? 'paper.cork')
+      : getMaterial(item.kind === 'tool' ? 'paper.grey' : 'paper.salmon');
+    const parcel = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.13, 0.16), material);
+    parcel.name = `case-item-${item.kind}`;
+    parcel.position.set(x, y + 0.065, z);
+    parcel.castShadow = true;
+    slots.add(parcel);
   });
   return slots;
 }

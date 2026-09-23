@@ -89,6 +89,11 @@ export function mailHasArrived(mail: MailItem, now: number): boolean {
   return mailArrivesAt(mail) <= now;
 }
 
+/** The physical mailbox reacts only to unclaimed mail that has arrived. */
+export function hasReadyUnclaimedMail(mailbox: readonly MailItem[], claimedIds: readonly string[], now: number): boolean {
+  return mailbox.some((mail) => mailHasArrived(mail, now) && !claimedIds.includes(mail.id));
+}
+
 /** Newest first, stable-id deduped, and bounded by the shared protocol limit. */
 export function deliverMail(state: GameState, mail: MailItem): boolean {
   if (state.player.mailbox.some((existing) => existing.id === mail.id)) return false;

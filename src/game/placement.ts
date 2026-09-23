@@ -245,6 +245,7 @@ let carryHoverPoint: THREE.Vector3 | null = null;
  * next pickup starts back under mouse control as usual.
  */
 let nudgeActive = false;
+let selectionDragOffset: THREE.Vector3 | null = null;
 
 /**
  * Placed pieces shift-clicked into a pending bulk-move group, waiting to be
@@ -588,7 +589,6 @@ function beginCarrying(pieces: { piece: PlacedPiece; pageId: string }[]) {
   carryHoverPoint = new THREE.Vector3(pivotX, 0, pivotZ);
   nudgeActive = false;
   for (const { piece } of pieces) setPlacedPieceVisualVisible(piece.id, false);
-  selectedPieceIds.clear();
   for (const listener of selectionListeners) listener();
 }
 
@@ -601,7 +601,7 @@ function beginCarrying(pieces: { piece: PlacedPiece; pageId: string }[]) {
  * none of those apply, this is just the same guard kept honest.
  */
 export function enterMoveMode(): boolean {
-  if (getActionMode() !== 'place' || carrying || selectedPieceIds.size === 0) return false;
+  if (carrying || selectedPieceIds.size === 0) return false;
   const pieces = collectSelectedPiecesAnyPage();
   if (pieces.length === 0) {
     selectedPieceIds.clear();
@@ -609,7 +609,78 @@ export function enterMoveMode(): boolean {
     return false;
   }
   beginCarrying(pieces);
+  nudgeActive = true;
   return true;
+}
+
+/** A selected item's left drag starts a reversible edit. The pointer keeps
+ * its offset from the group pivot so the furniture does not jump at pickup. */
+export function beginSelectedPieceDrag(clientX: number, clientY: number): boolean {
+  const hit = pickOwnedPieceVisualAt(clientX, clientY);
+  if (!hit || !selectedPieceIds.has(hit.piece.id)) return false;
+  const start = pickTerrainAtScreen(clientX, clientY);
+  if (!start || !enterMoveMode() || !carryHoverPoint) return false;
+  selectionDragOffset = carryHoverPoint.clone().sub(start);
+  moveSelectedPieceDrag(clientX, clientY);
+  return true;
+}
+
+export function moveSelectedPieceDrag(clientX: number, clientY: number): void {
+  if (!carrying || !selectionDragOffset) return;
+  const point = pickTerrainAtScreen(clientX, clientY);
+  if (point) carryHoverPoint = point.add(selectionDragOffset);
+}
+
+export function endSelectedPieceDrag(): void {
+  selectionDragOffset = null;
+}
+
+export function hasPendingPieceChanges(): boolean {
+  if (!carrying || !carryHoverPoint) return false;
+  if (Math.abs(carrying.rotY) > 0.0001) return true;
+  const first = carrying.members[0];
+  return Math.hypot(carryHoverPoint.x - first.piece.x + first.offsetX,
+    carryHoverPoint.z - first.piece.z + first.offsetZ) > 0.001;
+}
+
+export function getPendingPieceRotation(): number {
+  return carrying?.rotY ?? 0;
+}
+
+export function rotateSelectedPiecesTo(radians: number): boolean {
+  if (!carrying && !enterMoveMode()) return false;
+  if (!carrying) return false;
+  carrying.rotY = radians;
+  return true;
+}
+
+export function getSelectedPieceScreenBounds(): { left: number; top: number; right: number; bottom: number } | null {
+  const entries = collectSelectedPiecesAnyPage();
+  if (!entries.length) return null;
+  const originalX = entries.reduce((sum, entry) => sum + entry.piece.x, 0) / entries.length;
+  const originalZ = entries.reduce((sum, entry) => sum + entry.piece.z, 0) / entries.length;
+  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+  for (const { piece } of entries) {
+    const object = getPlacedPieceVisual(piece.id);
+    if (!object) continue;
+    object.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(object);
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+      const p = new THREE.Vector3(x, y, z);
+      if (carrying && carryHoverPoint) {
+        const [dx, dz] = rotateOffset(x - originalX, z - originalZ, carrying.rotY);
+        p.x = carryHoverPoint.x + dx;
+        p.z = carryHoverPoint.z + dz;
+        p.y += groundHeightAt(carryHoverPoint.x, carryHoverPoint.z) - groundHeightAt(originalX, originalZ);
+      }
+      p.project(camera);
+      left = Math.min(left, (p.x + 1) * window.innerWidth / 2);
+      right = Math.max(right, (p.x + 1) * window.innerWidth / 2);
+      top = Math.min(top, (1 - p.y) * window.innerHeight / 2);
+      bottom = Math.max(bottom, (1 - p.y) * window.innerHeight / 2);
+    }
+  }
+  return Number.isFinite(left) ? { left, top, right, bottom } : null;
 }
 
 /**
@@ -622,7 +693,7 @@ export function enterMoveMode(): boolean {
  * ghost is already standing on.
  */
 export function commitCarryInPlace(): boolean {
-  if (!carrying || !carryHoverPoint) return false;
+  if (!carrying || !carryHoverPoint || !hasPendingPieceChanges()) return false;
   dropCarriedPiece(carryHoverPoint.clone());
   return true;
 }
@@ -637,6 +708,7 @@ export function cancelCarryingPiece(): boolean {
     carrying = null;
     carryHoverPoint = null;
     nudgeActive = false;
+    selectionDragOffset = null;
     for (const listener of selectionListeners) listener();
     return true;
   }
@@ -652,7 +724,8 @@ export function cancelCarryingPiece(): boolean {
  * its normal arrow-key movement handling.
  */
 export function nudgeCarriedPiece(code: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'): boolean {
-  if (!carrying || !carryHoverPoint) return false;
+  if (!carrying && !enterMoveMode()) return false;
+  if (!carryHoverPoint) return false;
   const yaw = getYaw();
   const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
   const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
@@ -786,6 +859,8 @@ function dropCarriedPiece(pivot: THREE.Vector3, material?: BuildMaterialId) {
     carrying = null;
     carryHoverPoint = null;
     nudgeActive = false;
+    selectionDragOffset = null;
+    selectedPieceIds.clear();
     for (const listener of selectionListeners) listener();
     commit();
     return;
@@ -938,8 +1013,8 @@ export function currentBuildPageId(x: number, z: number): string | null {
 export function tryPlaceAt(clientX: number, clientY: number, _event?: PointerEvent) {
   if (getActionMode() !== 'place') return false;
   if (carrying) {
-    const point = pickTerrainAtScreen(clientX, clientY);
-    if (point) dropCarriedPiece(point);
+    // A selected edit stays pending until the floating ✓ or Enter commits it.
+    // Clicking elsewhere must not silently write an unfinished adjustment.
     return true;
   }
   // Selecting a piece (plain or shift-click) is handled upstream now, by the
@@ -1217,7 +1292,7 @@ function syncClaimedRings(avatarPosition: THREE.Vector3) {
 function syncSelectionRings() {
   if (!selectionRings) return;
   selectionRings.clear();
-  if (selectedPieceIds.size === 0) return;
+  if (selectedPieceIds.size === 0 || carrying) return;
   const activePageId = currentBuildPageId(avatar.position.x, avatar.position.z);
   const page = activePageId ? getGameState().world.pages[activePageId] : null;
   if (!page) return;
@@ -1247,7 +1322,7 @@ export function updateBuildOverlay(
   overlayRoot.visible = true;
   syncSelectionRings();
 
-  const active = getActionMode() === 'place';
+  const active = getActionMode() === 'place' || carrying !== null;
   if (!active) {
     if (ghostHost) ghostHost.visible = false;
     if (claimedRings) claimedRings.clear();
@@ -1262,7 +1337,7 @@ export function updateBuildOverlay(
   // Once a nudge has taken over, the mouse stays hands-off for the rest of
   // this carry (see nudgeActive) rather than stomping every keypress the
   // instant the pointer so much as twitches.
-  if (carrying && !pinned && hover && !nudgeActive) carryHoverPoint = hover.clone();
+  if (carrying && !pinned && hover && !nudgeActive && !selectionDragOffset) carryHoverPoint = hover.clone();
 
   // A bulk carry (2+ members) has no single piece type for the normal
   // ghost/ring path below to represent, so it renders through its own
@@ -1311,11 +1386,11 @@ export function updateBuildOverlay(
   const key = pinned?.key ?? (soloCarryPiece ? soloCarryPiece.templateKey as BuildPieceKey : selectedKey);
   const material = pinned?.material
     ?? (soloCarryPiece ? soloCarryPiece.material as BuildMaterialId : selectedMaterial);
-  const displayPoint = pinned?.point ?? hover;
+  const displayPoint = pinned?.point ?? (carrying ? carryHoverPoint : hover);
   const assessment = pinned
     ? { status: 'valid' as const, def: BUILD_PIECE_DEFS[pinned.key], point: pinned.point, rotY: pinned.rotY }
     : carrying
-      ? (hover ? assessCarryDropAtPoint(hover) : null)
+      ? (carryHoverPoint ? assessCarryDropAtPoint(carryHoverPoint) : null)
       : hover ? assessPlaceAtPoint(hover) : null;
   syncGhost(displayPoint && key ? key : null, material);
 

@@ -237,7 +237,7 @@ function note(handle: CaseHandle, text: string) {
 
 // ---- Asking ------------------------------------------------------------------
 
-const NEEDS_SHARED = 'That needs a shared neighborhood, where the server keeps the shelf.';
+const NEEDS_SHARED = 'That needs a shared neighborhood, where the server keeps the case contents.';
 
 /** Ask the server what this case means for you: your allowance, and the log if it is yours. */
 export function requestCaseDetail(handle: CaseHandle) {
@@ -269,7 +269,7 @@ export function stockCase(handle: CaseHandle, kind: CaseStackKind, itemId: strin
   transport.stock({ id: handle.id, kind, itemId, quantity });
 }
 
-/** Set a keepsake's look out on a show case. The keepsake stays on your shelf too. */
+/** Show a keepsake inside a case. The keepsake stays on your shelf too. */
 export function showTrinketOn(handle: CaseHandle, trinketId: string) {
   const trinket = getTrinketInstance(trinketId);
   if (!trinket) return note(handle, 'That keepsake is not on your shelf.');
@@ -287,7 +287,7 @@ export function showTrinketOn(handle: CaseHandle, trinketId: string) {
     }
     state.world.localCases[handle.id] = entry;
   });
-  note(handle, outcome.full ? 'The case is full.' : 'Set out on the case.');
+  note(handle, outcome.full ? 'The case is full.' : 'Placed inside the case.');
 }
 
 /** Take a stack back into your pouch, or a keepsake off the case. */
@@ -300,7 +300,7 @@ export function removeCaseItem(handle: CaseHandle, index: number) {
   updateGameState((state) => {
     state.world.localCases[handle.id]?.trinkets.splice(index, 1);
   });
-  note(handle, 'Taken back off the case.');
+  note(handle, 'Taken back out of the case.');
 }
 
 /** Take one from a free case. */
@@ -361,7 +361,7 @@ export function describeCaseResult(result: CaseResult, now = Date.now()): string
       }
       if (result.action === 'stock') return 'Put in the case.';
       if (result.action === 'remove') return 'Taken back out.';
-      if (result.action === 'show') return 'Set out on the case.';
+      if (result.action === 'show') return 'Placed inside the case.';
       return 'Saved.';
     case 'empty': return 'There is nothing to take right now.';
     case 'limit':
@@ -374,7 +374,7 @@ export function describeCaseResult(result: CaseResult, now = Date.now()): string
     case 'wrong-mode':
       if (result.action === 'take') return 'This case is for looking at, not taking.';
       if (result.action === 'stock') return 'This case is for keepsakes. Switch it to Free to stock goods.';
-      return 'This case gives things away. Switch it to Show to set keepsakes out.';
+      return 'This case gives things away. Switch it to Show to put keepsakes inside.';
     case 'full': return 'The case is full.';
     case 'no-stock': return 'You do not have that many in your pouch.';
     case 'not-empty': return 'Empty the case first to change what it is for.';

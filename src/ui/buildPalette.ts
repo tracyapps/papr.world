@@ -10,8 +10,6 @@ import {
   applyMaterialToSelectedPieces,
   canAffordSelectedGroupRestyle,
   carriedPieceCount,
-  commitCarryInPlace,
-  enterMoveMode,
   getCarriedPieceContext,
   getSelectedBuildMaterial,
   getSelectedBuildPiece,
@@ -75,9 +73,6 @@ export function initializeBuildPalette() {
       else setSelectedBuildMaterial(material);
       return;
     }
-    const selectionAction = target.closest<HTMLButtonElement>('[data-selection-action]')?.dataset.selectionAction;
-    if (selectionAction === 'move') enterMoveMode();
-    else if (selectionAction === 'done') commitCarryInPlace();
   });
   palette.addEventListener('pointerdown', (event) => event.stopPropagation());
   palette.addEventListener('pointerup', (event) => event.stopPropagation());
@@ -116,28 +111,12 @@ function renderPalette() {
   const plans = getGameState().player.plans;
   const degrees = Math.round(getSelectedBuildRotation() * 180 / Math.PI) % 360;
   const heading = bulkCarrying
-    ? `Carrying ${carriedCount} pieces — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground or ✓ Done to set down · Esc cancel`
+    ? `Editing ${carriedCount} pieces — arrows nudge · Enter commits · Esc cancels`
     : carrying
-      ? 'Carrying — arrows nudge · R rotate (shift = 15°, right-drag = free) · click ground or ✓ Done to set down · a material re-builds it · Esc cancel'
+      ? 'Editing a piece — arrows nudge · Enter commits · Esc cancels'
       : pendingSelection.size > 0
-        ? `${pendingSelection.size} selected — Move to pick ${pendingSelection.size > 1 ? 'them' : 'it'} up${selectedGroup ? ', or choose a material to restyle' : ''} · shift-click to add or remove · Esc to clear`
+        ? `${pendingSelection.size} selected — drag to move${selectedGroup ? ', or choose a material to restyle' : ''} · shift-click to add or remove · Esc to clear`
         : `Build — click ground · click your own piece to select it, shift-click to select several · R rotate (${degrees}°) · Esc put away`;
-  const selectionActions = (!carrying && pendingSelection.size > 0) ? `
-    <div class="build-selection-actions">
-      <button type="button" data-selection-action="move">
-        Move${pendingSelection.size > 1 ? ` ${pendingSelection.size} pieces` : ''}
-      </button>
-    </div>` : '';
-  // Extension point: Duplicate and "save as template" both belong in this
-  // same row once they exist -- one more `<button data-selection-action="…">`
-  // each, handled in the click listener above. Not built yet, so not shown:
-  // a button that does nothing is worse than no button.
-  const carryActions = carrying ? `
-    <div class="build-selection-actions">
-      <button type="button" data-selection-action="done">
-        <span aria-hidden="true">✓</span> Done
-      </button>
-    </div>` : '';
   // While carrying, or while something already sits selected, picking a new
   // piece type does nothing useful in the moment (setSelectedBuildPiece only
   // ever affects what gets placed fresh, never the piece in hand or on the
@@ -182,7 +161,7 @@ function renderPalette() {
   // selected, nothing carried" moment, where it is choosing what the *next*
   // new piece will be built out of.
   const mixedSelection = !carrying && pendingSelection.size > 0 && !selectedGroup;
-  const materialSection = (bulkCarrying || mixedSelection) ? '' : `
+  const materialSection = (carrying || mixedSelection) ? '' : `
     <p class="build-palette-heading build-material-heading">${materialHeading(materialPieceKey, groupCount)}</p>
     <div class="build-material-list" role="listbox" aria-label="Choose a material">
       ${materialSwatches(materialPieceKey, materialSelected, groupCount, Boolean(selectedGroup))}
@@ -190,8 +169,6 @@ function renderPalette() {
   palette.innerHTML = `
     <p class="build-palette-heading">${heading}</p>
     ${pieceList}
-    ${selectionActions}
-    ${carryActions}
     ${materialSection}`;
 }
 

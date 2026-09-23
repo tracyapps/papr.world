@@ -12,6 +12,7 @@ import {
 } from '../world/homeInterior';
 import type { DwellingPartId } from '../sim/catalogs/dwellings';
 import { getGameState } from '../sim/state';
+import { homeSurfaceMaterial } from './homeSurfaceMaterial';
 import { HOME_INTERIOR_PAGE_ID } from '../world/scenes';
 import { buildPlacedPieceVisual } from '../world/buildPieceVisuals';
 import { registerPlacedPieceVisual } from './placedPieceInteractions';
@@ -68,8 +69,9 @@ function buildRoom(layout: InteriorLayout, parts: readonly DwellingPartId[]) {
   const group = new THREE.Group();
   const { halfWidth: hw, halfDepth: hd } = layout;
   // Light floors, so a kraft-brown cutout (the default) never disappears into it.
-  const floorMaterial = parts.includes('floor') ? createColorMaterial('#d9bb8a', 0.92) : createColorMaterial('#e8dcbc', 0.95);
-  const wallMaterial = parts.includes('walls') ? getMaterial('paper.notebook') : getMaterial('paper.orangewrap');
+  const look = getGameState().world.homeLook;
+  const floorMaterial = homeSurfaceMaterial(look.insideFloor);
+  const wallMaterial = homeSurfaceMaterial(look.insideWalls);
 
   group.add(box(hw * 2, 0.06, hd * 2, floorMaterial, 0, -0.06, 0));
   group.add(box(2.4, 0.02, 1.6, getMaterial('paper.plaid'), 0, 0, -0.3));
@@ -98,7 +100,7 @@ let drawn = '';
 /** (Re)draw the room for these finished parts, only when the picture would change. */
 export function refreshInterior(parts: readonly DwellingPartId[]) {
   refreshInteriorBuilds();
-  const signature = [parts.includes('floor'), parts.includes('walls'), parts.includes('room-1'), parts.includes('room-2')].join('|');
+  const signature = [parts.includes('floor'), parts.includes('walls'), parts.includes('room-1'), parts.includes('room-2'), JSON.stringify(getGameState().world.homeLook)].join('|');
   if (signature === drawn) return;
   drawn = signature;
   for (const child of [...fixtures.children]) {

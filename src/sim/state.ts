@@ -10,6 +10,7 @@ import { BIOME_IDS, type Biome } from './catalogs/biomes';
 import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
 import { createDwelling, sanitizeDwelling } from './dwellingState';
+import { createHomeLook, sanitizeHomeLook, type HomeLook } from './homeLook';
 import type { DwellingPartId } from './catalogs/dwellings';
 import { createMailboxLook, sanitizeMailboxLook } from './mailboxState';
 import { SURFACE_SCENE, sanitizeScene } from '../world/scenes';
@@ -328,6 +329,7 @@ export type GameState = {
     pages: Record<string, PageModificationState>;
     /** The player's home: what is built, and what is being paid for. */
     dwelling: DwellingState;
+    homeLook: HomeLook;
     /** The player's mailbox: which rig, and its two team colors. */
     mailboxLook: MailboxLookState;
     /**
@@ -411,6 +413,7 @@ export function createDefaultGameState(): GameState {
       harvestRespawns: {},
       pages: {},
       dwelling: createDwelling(),
+      homeLook: createHomeLook(),
       mailboxLook: createMailboxLook(),
       localCases: {},
       thingMaker: { level: 1, activeCraft: null, completedOutputs: [], trayOutputs: [] },
@@ -948,6 +951,7 @@ function normalizeState(value: unknown): GameState | null {
   state.world.harvestRespawns = finiteCounts(world.harvestRespawns);
   state.world.pages = normalizePageModifications(world.pages);
   state.world.dwelling = sanitizeDwelling(world.dwelling);
+  state.world.homeLook = sanitizeHomeLook(world.homeLook);
   state.world.mailboxLook = sanitizeMailboxLook(world.mailboxLook);
   state.world.localCases = normalizeLocalCases(world.localCases);
   state.world.thingMaker.level = typeof maker.level === 'number'

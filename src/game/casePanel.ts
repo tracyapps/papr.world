@@ -118,7 +118,7 @@ function renderItems(current: CaseView) {
     empty.className = 'case-empty';
     empty.textContent = current.mine
       ? 'Nothing in this case yet.'
-      : current.mode === 'free' ? 'There is nothing in this case right now.' : 'Nothing is set out on this case yet.';
+      : current.mode === 'free' ? 'There is nothing in this case right now.' : 'There are no keepsakes inside this case yet.';
     host.replaceChildren(empty);
     return;
   }
@@ -151,7 +151,7 @@ function renderItems(current: CaseView) {
       back.dataset.caseAct = 'remove';
       back.dataset.index = String(index);
       back.classList.add('is-quiet');
-      back.textContent = item.kind === 'trinket' ? 'Take off' : 'Take back';
+      back.textContent = item.kind === 'trinket' ? 'Take out' : 'Take back';
       back.setAttribute('aria-label', `${back.textContent} ${describeCaseItem(item)}`);
       actions.append(back);
     }
@@ -409,12 +409,12 @@ export function initializeCasePanel() {
         </div>
       </div>
       <div data-case-show hidden>
-        <h3 class="case-heading">Set out a keepsake</h3>
-        <p class="case-note">It stays on your shelf too. The case only shows how it looks.</p>
+        <h3 class="case-heading">Put a keepsake inside</h3>
+        <p class="case-note">It stays on your shelf too. The case shows a copy inside.</p>
         <div class="case-field case-field-inline">
           <label for="case-trinket">Keepsake</label>
           <select id="case-trinket" data-case-trinket></select>
-          <button type="button" data-case-act="show">Set out on the case</button>
+          <button type="button" data-case-act="show">Put inside case</button>
         </div>
       </div>
       <div data-case-log hidden>

@@ -36,7 +36,7 @@ import {
 } from './game/critterDialogue';
 import { pickUpTrinket as pickUpPlacedTrinket } from './game/trinkets';
 import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from './game/trinketVisuals';
-import { initializeCaseTrinketVisuals } from './game/caseTrinketVisuals';
+import { initializeCaseTrinketVisuals, syncCaseTrinketVisuals } from './game/caseTrinketVisuals';
 import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
@@ -75,7 +75,10 @@ import { initializeGardenOverlay, updateGardenOverlay } from './game/gardenOverl
 import {
   cancelCarryingPiece,
   canSelectPieceAtScreen,
-  dragRotateCarriedPiece,
+  beginSelectedPieceDrag,
+  moveSelectedPieceDrag,
+  endSelectedPieceDrag,
+  commitCarryInPlace,
   fineRotateCarriedPiece,
   initializePlacement,
   isCarryingPlacedPiece,
@@ -86,6 +89,7 @@ import {
   updateBuildOverlay,
 } from './game/placement';
 import { initializeBuildPalette } from './ui/buildPalette';
+import { initializePlacedPieceEditor, updatePlacedPieceEditor } from './ui/placedPieceEditor';
 import { initializeWading } from './game/wading';
 import { updateWaterSurfaces } from './world/water';
 import { pickTerrainAtScreen } from './game/toolActions';
@@ -285,6 +289,7 @@ initializeInteractionCursor();
 initializeGardenOverlay();
 initializePlacement();
 initializeBuildPalette();
+initializePlacedPieceEditor();
 initializeWading();
 initializeRegionBanner();
 initializeAutoWalkIndicator();
@@ -558,12 +563,11 @@ initializeInput({
   onSelectToolSlot: selectToolSlot,
   onRotateBuild: () => rotateDropCarry() || rotateSelectedBuildPiece(),
   onArrowNudge: nudgeCarriedPiece,
+  onCommitSelection: commitCarryInPlace,
+  onBeginSelectedDrag: beginSelectedPieceDrag,
+  onMoveSelectedDrag: moveSelectedPieceDrag,
+  onEndSelectedDrag: endSelectedPieceDrag,
   onFineRotate: fineRotateCarriedPiece,
-  // Right-drag rotates a carried piece freely instead of orbiting the
-  // camera — only while something is actually in hand, so an ordinary
-  // right-drag look-around is untouched the rest of the time.
-  onBeginCarryRotateDrag: () => isCarryingPlacedPiece(),
-  onCarryRotateDrag: dragRotateCarriedPiece,
   onPrimaryAction: (event) => {
     if (isTimedActionActive()) return;
     if (tryScreenInteractionAt(event.clientX, event.clientY, event)) return;
@@ -692,9 +696,14 @@ function animateIndoors(delta: number, elapsed: number, animationTime: number) {
   updateVisitPrompt(avatar.position, true);
   updateCasePrompt(avatar.position, getCurrentPageId(), true);
   updateHome();
-  const hovered = getActionMode() === 'place' ? pickTerrainAtScreen(pointerX, pointerY) : null;
+  const hovered = getActionMode() === 'place' || isCarryingPlacedPiece()
+    ? pickTerrainAtScreen(pointerX, pointerY) : null;
   updateBuildOverlay(delta, elapsed, avatar.position, hovered);
   updateDropPlacement(pointerX, pointerY);
+  updatePlacedPieceEditor();
+  // Streaming may replace a case mesh without changing its saved contents.
+  // Reattach the decorative children to the current mesh after that swap.
+  syncCaseTrinketVisuals();
   // Act stays live indoors: it is the way out, and the home's own panel.
   refreshTouchControls();
   updateCamera(avatar.position);
@@ -795,13 +804,17 @@ function animate(animationTime = 0) {
     updateGardenOverlay(delta, elapsed, avatar.position, null, null);
   }
 
-  if (getActionMode() === 'place') {
+  if (getActionMode() === 'place' || isCarryingPlacedPiece()) {
     const hovered = pickTerrainAtScreen(pointerX, pointerY);
     updateBuildOverlay(delta, elapsed, avatar.position, hovered);
   } else {
     updateBuildOverlay(delta, elapsed, avatar.position, null);
   }
   updateDropPlacement(pointerX, pointerY);
+  updatePlacedPieceEditor();
+  // Outdoor page streaming can replace a case mesh without changing its
+  // contents; attach the saved decorations to the current mesh.
+  syncCaseTrinketVisuals();
 
   // The Rotate button appears the moment build mode does; refreshed with the
   // overlay it belongs to, hence the second call once the mode is known.

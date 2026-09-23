@@ -44,6 +44,10 @@ export type InputCallbacks = {
    * Optional so every other caller (and every existing test) is unaffected.
    */
   onArrowNudge?: (code: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight') => boolean;
+  onCommitSelection?: () => boolean;
+  onBeginSelectedDrag?: (x: number, y: number) => boolean;
+  onMoveSelectedDrag?: (x: number, y: number) => void;
+  onEndSelectedDrag?: () => void;
   /**
    * Shift + whatever is bound to rotate/pitchDown, while carrying: a finer
    * rotation step than the plain R press. `direction` is +1 for rotate's key
@@ -377,9 +381,12 @@ function currentPinchDistance(): number | null {
  * pointer — which is how a HUD drag ended up firing a world action.
  */
 let pendingPrimary: { clientX: number; clientY: number; pointerId: number } | null = null;
+let selectedDragPointerId: number | null = null;
 
 /** Drop any in-flight press and camera drag. Safe to call at any time. */
 function clearPointerGestures() {
+  if (selectedDragPointerId !== null) activeCallbacks?.onEndSelectedDrag?.();
+  selectedDragPointerId = null;
   pendingPrimary = null;
   isOrbiting = false;
   orbitButton = null;
@@ -400,6 +407,10 @@ function clearPointerGestures() {
  * dropped the finger that was orbiting the camera.
  */
 function dropPointer(pointerId: number) {
+  if (selectedDragPointerId === pointerId) {
+    activeCallbacks?.onEndSelectedDrag?.();
+    selectedDragPointerId = null;
+  }
   trackedPointers.delete(pointerId);
   if (pendingPrimary?.pointerId === pointerId) pendingPrimary = null;
   if (orbitPointerId === pointerId) {
@@ -621,7 +632,17 @@ export function initializeInput(callbacks: InputCallbacks) {
       return;
     }
 
-    if (isFormElementEvent(event) && event.code !== 'Escape') return;
+    // A dragged rotation handle keeps keyboard focus. Enter should still
+    // finish that edit, while ordinary form fields keep their native Enter.
+    const focusedRotateHandle = event.target instanceof HTMLElement
+      && Boolean(event.target.closest('.placed-piece-rotate-handle'));
+    if (isFormElementEvent(event) && event.code !== 'Escape'
+      && !(focusedRotateHandle && (event.code === 'Enter' || event.code === 'NumpadEnter'))) return;
+
+    if ((event.code === 'Enter' || event.code === 'NumpadEnter') && callbacks.onCommitSelection?.()) {
+      event.preventDefault();
+      return;
+    }
 
     if (event.code === 'Escape') {
       if (gamepadCaptureCallback) {
@@ -795,6 +816,10 @@ export function initializeInput(callbacks: InputCallbacks) {
   }, { capture: true });
 
   window.addEventListener('pointerup', (event) => {
+    if (selectedDragPointerId === event.pointerId) {
+      dropPointer(event.pointerId);
+      return;
+    }
     const claimed = pendingPrimary;
 
     // Clear first, unconditionally, and only for this pointer — the other
@@ -844,6 +869,11 @@ export function initializeInput(callbacks: InputCallbacks) {
   });
 
   window.addEventListener('pointermove', (event) => {
+    if (selectedDragPointerId === event.pointerId) {
+      if ((event.buttons & buttonMask(0)) === 0) dropPointer(event.pointerId);
+      else callbacks.onMoveSelectedDrag?.(event.clientX, event.clientY);
+      return;
+    }
     const tracked = trackedPointers.get(event.pointerId);
     if (tracked) {
       tracked.x = event.clientX;
@@ -892,6 +922,10 @@ export function initializeInput(callbacks: InputCallbacks) {
       );
       const threshold = isOrbiting ? PRIMARY_DRAG_THRESHOLD : PRIMARY_DRAG_THRESHOLD_STATIONARY;
       if (distance >= threshold) {
+        if (!isOrbiting && callbacks.onBeginSelectedDrag?.(pendingPrimary.clientX, pendingPrimary.clientY)) {
+          selectedDragPointerId = event.pointerId;
+          callbacks.onMoveSelectedDrag?.(event.clientX, event.clientY);
+        }
         pendingPrimary = null;
       }
     }
