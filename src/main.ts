@@ -36,6 +36,7 @@ import {
 } from './game/critterDialogue';
 import { pickUpTrinket as pickUpPlacedTrinket } from './game/trinkets';
 import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from './game/trinketVisuals';
+import { initializeCaseTrinketVisuals } from './game/caseTrinketVisuals';
 import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
@@ -271,6 +272,7 @@ initializeTechTreeView();
 initializePetting();
 initializeCritterDialogue();
 initializeTrinketVisuals();
+initializeCaseTrinketVisuals();
 initializeCozyInteractions();
 initializeHarvesting();
 initializePickupRing();
