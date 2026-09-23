@@ -19,6 +19,16 @@ export const HOME_BODY_RADIUS = 1.25;
 export const HOME_ANNEX_RADIUS = 0.95;
 /** Annex rooms stand this far to either side of the house's middle. */
 export const HOME_ANNEX_REACH = 1.75;
+/**
+ * Annex rooms are also pulled this far toward the rear (negative local z)
+ * rather than sitting flush with the house's own front wall. A room
+ * centered on z=0 ran its whole footprint straight through the mailbox,
+ * which stands fixed at the front step with the same local x as the first
+ * annex (see MAILBOX_LOCAL in game/mailboxExterior.ts). This constant is
+ * shared with the room's visual placement (game/dwellingExterior.ts) so the
+ * walls you see and the ground you can't walk through never drift apart.
+ */
+export const HOME_ANNEX_Z_OFFSET = -0.5;
 
 /** How near counts as "at the door" for the E key, the prompt and stepping inside. */
 export const HOME_REACH = 4.5;
@@ -89,13 +99,15 @@ export function homeSolids(
   const spot = homePosition(place);
   const turn = homeFacing();
   const solids: HomeSolid[] = [{ id: 'home-body', x: spot.x, z: spot.z, radius: HOME_BODY_RADIUS }];
-  // A local step along +x lands on (cos t, -sin t) in the world.
+  // A local point (along, HOME_ANNEX_Z_OFFSET) lands on
+  // (along*cos t + z*sin t, z*cos t - along*sin t) in the world.
   const annex = (id: string, side: 1 | -1) => {
     const along = side * HOME_ANNEX_REACH;
+    const lz = HOME_ANNEX_Z_OFFSET;
     solids.push({
       id,
-      x: spot.x + along * Math.cos(turn),
-      z: spot.z - along * Math.sin(turn),
+      x: spot.x + along * Math.cos(turn) + lz * Math.sin(turn),
+      z: spot.z - along * Math.sin(turn) + lz * Math.cos(turn),
       radius: HOME_ANNEX_RADIUS,
     });
   };

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { shadowed } from '../render/builders';
 import { createColorMaterial, getMaterial } from '../render/materials';
 import { invalidateFootprintCache } from '../world/footprints';
-import { homeFacing } from '../world/homeSite';
+import { homeFacing, HOME_ANNEX_Z_OFFSET } from '../world/homeSite';
 import { registerMapFeature, updateMapFeaturePosition } from '../world/mapFeatures';
 import { getPlace, HOME_PLACE_ID, onPlacesChanged } from '../world/places';
 import { sampleTerrainHeight } from '../world/terrain';
@@ -234,24 +234,39 @@ export function buildHouse(plan: ExteriorPlan): THREE.Group {
     host.add(roof);
   }
 
-  // Extra rooms are low annexes beside the house, each with its own small roof.
+  // Extra rooms are low annexes beside the house, each with its own small
+  // roof. Pulled back toward the rear (negative local z, HOME_ANNEX_Z_OFFSET)
+  // rather than centered on the house's own z=0, because centered ran the
+  // first room's whole 1.6x1.6 footprint straight through the mailbox, which
+  // stands fixed at the front step (MAILBOX_LOCAL in mailboxExterior.ts: x
+  // matches this room's own x exactly, z = 1.1) -- every player who built a
+  // first room extension was getting a mailbox growing out of its
+  // scaffolding (2026-09-22). The offset lives in world/homeSite.ts and is
+  // shared with homeSolids()'s collision circles for the same rooms, so the
+  // walls you see and the ground you can't walk through never drift apart.
+  // This is still a fixed-layout fix, not real placement: a room annex has
+  // no chosen position of its own to check against the rest of the world the
+  // way a build-piece ghost does (see placement.ts) -- `DwellingCommand`
+  // carries no x/z at all, only a part id, so a player-chosen spot for a
+  // room is a bigger change than this pass, not something patched in here.
+  const ANNEX_Z = HOME_ANNEX_Z_OFFSET;
   for (let index = 0; index < plan.rooms; index += 1) {
     const side = index === 0 ? 1 : -1;
     const x = side * (WIDTH / 2 + 0.85);
-    host.add(box(1.6, 0.95, 1.6, wallPaper, x, 0, 0));
+    host.add(box(1.6, 0.95, 1.6, wallPaper, x, 0, ANNEX_Z));
     const annexRoof = prism(1.8, 1.8, 0.5, roofPaper);
-    annexRoof.position.set(x, 0.95, 0);
+    annexRoof.position.set(x, 0.95, ANNEX_Z);
     host.add(annexRoof);
   }
 
   if (plan.scaffolding) {
     const tall = plan.scaffolding === 'upstairs' ? top + 1.2 : Math.max(top, WALL_HEIGHT) + 0.7;
     if (plan.scaffolding === 'room-1') {
-      addScaffolding(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, 0);
-      addDustSign(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, 0);
+      addScaffolding(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, ANNEX_Z);
+      addDustSign(host, 1.6, 1.6, 1.4, WIDTH / 2 + 0.85, ANNEX_Z);
     } else if (plan.scaffolding === 'room-2') {
-      addScaffolding(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), 0);
-      addDustSign(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), 0);
+      addScaffolding(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), ANNEX_Z);
+      addDustSign(host, 1.6, 1.6, 1.4, -(WIDTH / 2 + 0.85), ANNEX_Z);
     } else {
       addScaffolding(host, WIDTH, DEPTH, tall);
       addDustSign(host, WIDTH, DEPTH, tall);

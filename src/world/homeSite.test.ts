@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   HOME_ANNEX_REACH,
+  HOME_ANNEX_Z_OFFSET,
   HOME_BODY_RADIUS,
   HOME_DOORSTEP_DISTANCE,
   homeDoorstep,
@@ -33,17 +34,26 @@ describe('the home site', () => {
     expect(door.x * (toHome.x / length) + door.z * (toHome.z / length)).toBeCloseTo(1, 5);
   });
 
-  it('adds a solid per annex room, either side of the house', () => {
+  it('adds a solid per annex room, either side of the house and pulled toward the rear', () => {
     const none = homeSolids(HOME, { first: false, second: false });
     const both = homeSolids(HOME, { first: true, second: true });
     expect(none).toHaveLength(1);
     expect(both).toHaveLength(3);
     const [body, one, two] = both;
-    expect(Math.hypot(one.x - body.x, one.z - body.z)).toBeCloseTo(HOME_ANNEX_REACH, 5);
-    expect(Math.hypot(two.x - body.x, two.z - body.z)).toBeCloseTo(HOME_ANNEX_REACH, 5);
-    // Opposite sides: the two annexes mirror through the middle.
-    expect(one.x + two.x).toBeCloseTo(2 * body.x, 5);
-    expect(one.z + two.z).toBeCloseTo(2 * body.z, 5);
+    // Each annex sits HOME_ANNEX_REACH sideways and HOME_ANNEX_Z_OFFSET back
+    // (in the house's own local axes), so its distance from the body center
+    // is the hypotenuse of the two, not the reach alone.
+    const expectedDistance = Math.hypot(HOME_ANNEX_REACH, HOME_ANNEX_Z_OFFSET);
+    expect(Math.hypot(one.x - body.x, one.z - body.z)).toBeCloseTo(expectedDistance, 5);
+    expect(Math.hypot(two.x - body.x, two.z - body.z)).toBeCloseTo(expectedDistance, 5);
+    // Mirrored side-to-side (the sideways step flips sign between the two),
+    // but both are pulled toward the rear by the same amount, so the pair's
+    // midpoint sits behind the body center rather than on top of it.
+    const turn = homeFacing();
+    const midX = (one.x + two.x) / 2;
+    const midZ = (one.z + two.z) / 2;
+    expect(midX).toBeCloseTo(body.x + HOME_ANNEX_Z_OFFSET * Math.sin(turn), 5);
+    expect(midZ).toBeCloseTo(body.z + HOME_ANNEX_Z_OFFSET * Math.cos(turn), 5);
   });
 
   it('keeps the tent clear of the Thing Maker, the trail sign and the display wall', () => {
