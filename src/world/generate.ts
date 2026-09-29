@@ -53,13 +53,14 @@ const TROPICAL_CANOPY: Array<{ kind: TreeKind; weight: number }> = [
  * garnish around the tree and harvestable budgets, not a second forest.
  */
 const UNDERGROWTH: Partial<Record<Biome, DecorKind[]>> = {
-  meadow: ['shrub-temperate-1', 'shrub-temperate-2', 'shrub-flowering-1', 'flower-daisy', 'flower-cosmos', 'flower-sunflower', 'flower-coneflower'],
+  meadow: ['shrub-temperate-1', 'shrub-temperate-2', 'shrub-flowering-1', 'flower-daisy', 'flower-cosmos', 'flower-sunflower', 'flower-coneflower', 'flower-zinnia'],
   dunes: ['agave-1', 'agave-2', 'prickly-pear-1', 'aloe', 'euphorbia', 'shrub-desert-1', 'shrub-desert-2', 'marigold-1', 'flower-marigold'],
   forest: ['fern-1', 'fern-2', 'fern-3', 'mushroom-1', 'mushroom-2', 'mushroom-3', 'mushroom-morel', 'mushroom-shelf', 'moss-patch', 'moss-hummock', 'berry-shrub-1', 'shrub-flowering-2', 'flower-foxglove', 'boulder-mossy-1', 'fallen-log'],
   tropical: [
     'broadleaf-plant-1', 'broadleaf-plant-2', 'shrub-tropical-1', 'shrub-tropical-2',
     'shrub-tropical-3', 'hibiscus-1', 'anthurium-1', 'bird-of-paradise-1', 'bamboo-1',
     'mangrove-1', 'fern-1', 'fern-2', 'mushroom-1', 'mushroom-2', 'flower-plumeria', 'flower-protea',
+    'flower-bougainvillea',
   ],
   swamp: ['mangrove-prop', 'shrub-swamp', 'horsetail', 'pitcher-plant', 'moss-ball', 'moss-drape', 'moss-hummock', 'mushroom-amanita', 'mushroom-fly-agaric', 'flower-spider-lily', 'flower-lotus'],
   wetland: ['mangrove-1', 'horsetail', 'shrub-swamp', 'moss-patch', 'mushroom-coral', 'flower-lotus', 'flower-allium', 'flower-lupine'],

@@ -37,7 +37,7 @@ describe('biome expansion', () => {
   it('makes new living decor renewable while reserving rocks for mining', () => {
     expect(decorTrimSpecies('bamboo-tall')).toBe('bamboo');
     expect(decorTrimSpecies('shrub-swamp')).toBe('shrub');
-    expect(decorTrimSpecies('flower-lotus')).toBe('flower');
+    expect(decorTrimSpecies('flower-lotus')).toBe('lotus');
     expect(decorTrimSpecies('mushroom-morel')).toBe('mushroom');
     expect(decorTrimSpecies('moss-hummock')).toBe('moss');
     for (const rock of ['rock-small-1', 'rock-medium', 'rock-stack', 'cliff-slab'] as const) {

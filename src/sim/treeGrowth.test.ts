@@ -172,7 +172,7 @@ describe('trimming', () => {
     const redwood = resolveTrimYield({
       treeKey: 'k', species: 'redwood', tier: 2, stage: 'flourishing', trims: 1,
     });
-    expect(leafy[0].resource).toBe('mossy-paper-fiber');
+    expect(leafy[0].resource).toBe('leafy-clippings');
     expect(redwood[0].resource).toBe('redwood-bark-curls');
   });
 

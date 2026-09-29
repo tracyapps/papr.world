@@ -13,6 +13,7 @@ import { createDwelling, sanitizeDwelling } from './dwellingState';
 import { createHomeLook, sanitizeHomeLook, type HomeLook } from './homeLook';
 import type { DwellingPartId } from './catalogs/dwellings';
 import { createMailboxLook, sanitizeMailboxLook } from './mailboxState';
+import { TERRAIN_AUTO_MEND_MS } from './terrainCells';
 import { SURFACE_SCENE, sanitizeScene } from '../world/scenes';
 
 export const SAVE_SCHEMA_VERSION = 1;
@@ -461,6 +462,15 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
       : [];
     const state = cell.state === 'planted' || cell.state === 'mending'
       || cell.state === 'filled' || cell.state === 'raised' ? cell.state : 'dug';
+    // Holes dug before auto-mending existed get their clock started here, so
+    // the whole world's backlog of open holes levels out instead of standing
+    // forever. A real shovel hole schedules from when it was dug; the
+    // temporary garden pseudo-beds (tier 0, no depth) stay exempt.
+    const backfilledMendsAt = state === 'dug'
+      && (typeof cell.toolTier !== 'number' || cell.toolTier >= 1)
+      ? (typeof cell.changedAt === 'number' && Number.isFinite(cell.changedAt)
+        ? cell.changedAt : 0) + TERRAIN_AUTO_MEND_MS
+      : undefined;
     result[cellKey] = {
       kind: 'dug',
       state,
@@ -476,7 +486,8 @@ function normalizeTerrainEdits(value: unknown): Record<string, TerrainEditCellSt
       plantedSeedId: typeof cell.plantedSeedId === 'string' && cell.plantedSeedId in SEED_DEFS
         ? cell.plantedSeedId as SeedId : undefined,
       plantedAt: typeof cell.plantedAt === 'number' && Number.isFinite(cell.plantedAt) ? cell.plantedAt : undefined,
-      mendsAt: typeof cell.mendsAt === 'number' && Number.isFinite(cell.mendsAt) ? cell.mendsAt : undefined,
+      mendsAt: typeof cell.mendsAt === 'number' && Number.isFinite(cell.mendsAt)
+        ? cell.mendsAt : backfilledMendsAt,
       surfaceRestoresAt: typeof cell.surfaceRestoresAt === 'number' && Number.isFinite(cell.surfaceRestoresAt)
         ? cell.surfaceRestoresAt : undefined,
       lastTendedAt: typeof cell.lastTendedAt === 'number' && Number.isFinite(cell.lastTendedAt) ? cell.lastTendedAt : undefined,

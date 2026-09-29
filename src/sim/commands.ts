@@ -19,7 +19,7 @@ import { isMailboxStyleId } from './catalogs/mailboxes';
 import { sanitizeMailboxColor } from '../../shared/src/index';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import { TOOL_DEFS } from './catalogs/tools';
-import { TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
+import { TERRAIN_AUTO_MEND_MS, TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
 import type { DigDiscovery } from './catalogs/geology';
 import {
   SEED_DEFS,
@@ -645,6 +645,10 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
         toolTier: tool.tier,
         geologySeed: discovery.geologySeed,
         revealedLayers: [...(existing?.revealedLayers ?? []), discovery],
+        // Worked ground levels out on its own, like a trimmed tree — the
+        // world does not keep a hole open forever just because its digger
+        // wandered off. Planting clears this; a Mend-me seed replaces it.
+        mendsAt: command.now + TERRAIN_AUTO_MEND_MS,
         changedAt: command.now,
       };
       addWorldDrop(page, discovery.resource, discovery.quantity, target.x + 0.42, target.z + 0.18, command.now, `dig-${target.cellKey}`);
@@ -1315,7 +1319,12 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
     case 'completeMending': {
       const page = state.world.pages[command.target.pageId];
       const edit = page?.terrainEdits[command.target.cellKey];
-      if (!page || !edit || edit.state !== 'mending' || !edit.mendsAt) {
+      // Two ways a cell arrives here: a Mend-me seed set it 'mending', or an
+      // ordinary dig scheduled its own quiet leveling (state stays 'dug'
+      // until the moment it closes). Both mean the same thing now: the ground
+      // is done and the edit goes away.
+      const mending = edit?.state === 'mending' || edit?.state === 'dug';
+      if (!page || !edit || !mending || !edit.mendsAt) {
         return { ok: false, reason: 'That ground is not mending.' };
       }
       if (command.now < edit.mendsAt) return { ok: false, reason: 'The paper roots are still stitching.' };

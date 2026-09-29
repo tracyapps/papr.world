@@ -25,6 +25,19 @@ export const TERRAIN_CELL_SIZE = 0.5;
  */
 export const TERRAIN_CELL_RADIUS = TERRAIN_CELL_SIZE * 0.85;
 
+/**
+ * How long a dug hole takes to level out on its own.
+ *
+ * The sustainable answer to shared-world digging: like a trimmed tree or a
+ * mined formation, worked ground returns by itself, so a hole dug by someone
+ * who never came back does not claim that patch of the world forever. Ten
+ * minutes sits between the five-minute tree cycle and the feel of terrain —
+ * long enough to plant in a fresh bed, short enough that a busy page heals
+ * within a play session. `completeMending` is what actually closes the cell;
+ * this only schedules it.
+ */
+export const TERRAIN_AUTO_MEND_MS = 10 * 60 * 1000;
+
 export type TerrainCellAddress = {
   cellKey: string;
   pageId: string;

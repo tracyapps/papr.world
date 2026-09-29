@@ -6,7 +6,12 @@ import type { DecorKind } from './types';
 
 /**
  * Undergrowth cutouts that are part of the trim economy. Anything absent
- * stays pure scenery (ferns, cactus, logs, and all rock formations).
+ * stays pure scenery (ferns, aloe, logs, and all rock formations).
+ *
+ * Flowers are species-per-cutout: each blossom presses petals of its own
+ * (see SPECIES_YIELD in `sim/catalogs/trees.ts`). Cactus drawings group by
+ * shape — paddle pads, blooming barrels, saguaro columns — the art-direction
+ * pass the materials doc asked for.
  */
 const DECOR_TRIM_SPECIES: Partial<Record<DecorKind, TreeSpecies>> = {
   'mushroom-1': 'mushroom',
@@ -31,10 +36,26 @@ const DECOR_TRIM_SPECIES: Partial<Record<DecorKind, TreeSpecies>> = {
   'shrub-thorny': 'shrub',
   'shrub-flowering-1': 'shrub',
   'shrub-flowering-2': 'shrub',
-  'marigold-1': 'flower',
-  'hibiscus-1': 'flower',
-  'anthurium-1': 'flower',
-  'bird-of-paradise-1': 'flower',
+  // Cacti, by shape. cactus-01 and the wild prickly pear are paddles; the
+  // round blooming ones (04/06/07) are barrels; the tall saguaro silhouettes
+  // (02/03/05/08) are columns. Euphorbia is a columnar succulent that reads
+  // as one of the columns; aloe stays scenery.
+  'cactus-1': 'paddle-cactus',
+  'cactus-2': 'column-cactus',
+  'cactus-3': 'column-cactus',
+  'cactus-4': 'barrel-cactus',
+  'cactus-5': 'column-cactus',
+  'cactus-6': 'barrel-cactus',
+  'cactus-7': 'barrel-cactus',
+  'cactus-8': 'column-cactus',
+  'prickly-pear-1': 'paddle-cactus',
+  euphorbia: 'column-cactus',
+  'agave-1': 'agave',
+  'agave-2': 'agave',
+  'marigold-1': 'marigold',
+  'hibiscus-1': 'hibiscus',
+  'anthurium-1': 'anthurium',
+  'bird-of-paradise-1': 'bird-of-paradise',
   'bamboo-1': 'bamboo',
   'bamboo-2': 'bamboo',
   'bamboo-3': 'bamboo',
@@ -44,24 +65,24 @@ const DECOR_TRIM_SPECIES: Partial<Record<DecorKind, TreeSpecies>> = {
   'moss-drape': 'moss',
   'moss-hummock': 'moss',
   'moss-patch': 'moss',
-  'flower-allium': 'flower',
-  'flower-blackeyed-susan': 'flower',
-  'flower-bougainvillea': 'flower',
-  'flower-coneflower': 'flower',
-  'flower-cosmos': 'flower',
-  'flower-daisy': 'flower',
-  'flower-edelweiss': 'flower',
-  'flower-foxglove': 'flower',
-  'flower-lotus': 'flower',
-  'flower-lupine': 'flower',
-  'flower-marigold': 'flower',
-  'flower-paintbrush': 'flower',
-  'flower-plumeria': 'flower',
-  'flower-poppy': 'flower',
-  'flower-protea': 'flower',
-  'flower-spider-lily': 'flower',
-  'flower-sunflower': 'flower',
-  'flower-zinnia': 'flower',
+  'flower-allium': 'allium',
+  'flower-blackeyed-susan': 'blackeyed-susan',
+  'flower-bougainvillea': 'bougainvillea',
+  'flower-coneflower': 'coneflower',
+  'flower-cosmos': 'cosmos',
+  'flower-daisy': 'daisy',
+  'flower-edelweiss': 'edelweiss',
+  'flower-foxglove': 'foxglove',
+  'flower-lotus': 'lotus',
+  'flower-lupine': 'lupine',
+  'flower-marigold': 'marigold',
+  'flower-paintbrush': 'paintbrush',
+  'flower-plumeria': 'plumeria',
+  'flower-poppy': 'poppy',
+  'flower-protea': 'protea',
+  'flower-spider-lily': 'spider-lily',
+  'flower-sunflower': 'sunflower',
+  'flower-zinnia': 'zinnia',
   'hanging-vine-1': 'vine',
   'hanging-vine-2': 'vine',
   'hanging-vine-flowering-1': 'vine',

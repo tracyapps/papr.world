@@ -170,7 +170,10 @@ export function updatePlanting() {
       const target: TerrainCellAddress = { pageId: pageIdValue, cellKey, x: edit.x, z: edit.z };
       const id = `${pageIdValue}:${cellKey}`;
 
-      if (edit.state === 'mending' && edit.mendsAt) {
+      // 'mending' is a Mend-me seed stitching; a plain dug bed levels out on
+      // its own once its scheduled mendsAt passes — same completion, quieter
+      // entrance, so abandoned holes never claim ground forever.
+      if ((edit.state === 'mending' || edit.state === 'dug') && edit.mendsAt) {
         if (now >= edit.mendsAt) {
           dispatchGameCommand({ type: 'completeMending', target, now });
           builtStages.delete(id);

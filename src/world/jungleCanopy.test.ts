@@ -69,11 +69,15 @@ describe('trimmable undergrowth', () => {
     expect(biomesFor('blotting-caps')).toEqual(expect.arrayContaining(['forest', 'tropical']));
   });
 
-  it('keeps ferns, cactus, and rocks as pure scenery while flowers regrow', () => {
-    for (const art of ['fern-1', 'cactus-1', 'boulder-mossy-1'] as const) {
+  it('keeps ferns and rocks as pure scenery while cactus and flowers regrow', () => {
+    for (const art of ['fern-1', 'boulder-mossy-1'] as const) {
       expect(decorTrimSpecies(art)).toBeNull();
     }
-    expect(decorTrimSpecies('hibiscus-1')).toBe('flower');
+    expect(decorTrimSpecies('hibiscus-1')).toBe('hibiscus');
+    expect(decorTrimSpecies('cactus-1')).toBe('paddle-cactus');
+    expect(decorTrimSpecies('cactus-4')).toBe('barrel-cactus');
+    expect(decorTrimSpecies('cactus-8')).toBe('column-cactus');
+    expect(decorTrimSpecies('agave-2')).toBe('agave');
     expect(decorTrimSpecies('mushroom-1')).toBe('mushroom');
     expect(decorTrimSpecies('shrub-tropical-2')).toBe('shrub');
   });

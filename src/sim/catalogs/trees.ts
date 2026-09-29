@@ -52,12 +52,20 @@ export type TreeStage = 'flourishing' | 'trimmed' | 'cropped' | 'resting';
 // vine, mushroom, and shrub are not trees, but use the same renewable
 // snip-it-and-it-grows-back model (see SPECIES_FORM). Vines hang from the
 // tall jungle canopy, and mushrooms and shrubs are undergrowth cutouts that
-// joined the economy on 2026-09-18. Comments stay outside the union because
-// tools/validate-quests.mjs reads it as text.
+// joined the economy on 2026-09-18. Cacti and agaves joined 2026-09-28 (the
+// dunes' own trimmable layer), and flowers are species-per-cutout so every
+// blossom presses into petals of its own. Comments stay outside the union
+// because tools/validate-quests.mjs reads it as text.
 export type TreeSpecies =
   | 'pine' | 'leafy' | 'redwood' | 'palm' | 'banana'
   | 'cypress' | 'alpine-pine' | 'acacia' | 'baobab' | 'bamboo'
-  | 'vine' | 'mushroom' | 'moss' | 'shrub' | 'flower';
+  | 'paddle-cactus' | 'barrel-cactus' | 'column-cactus' | 'agave'
+  | 'vine' | 'mushroom' | 'moss' | 'shrub'
+  | 'daisy' | 'cosmos' | 'sunflower' | 'coneflower' | 'marigold'
+  | 'foxglove' | 'hibiscus' | 'anthurium' | 'bird-of-paradise' | 'plumeria'
+  | 'protea' | 'spider-lily' | 'lotus' | 'allium' | 'lupine' | 'edelweiss'
+  | 'paintbrush' | 'blackeyed-susan' | 'poppy' | 'zinnia' | 'bougainvillea'
+  | 'flower';
 
 /**
  * What kind of living thing a species is, for wording and for how a cut
@@ -77,10 +85,37 @@ export const SPECIES_FORM: Record<TreeSpecies, GrowthForm> = {
   acacia: 'tree',
   baobab: 'tree',
   bamboo: 'plant',
+  'paddle-cactus': 'plant',
+  'barrel-cactus': 'plant',
+  'column-cactus': 'plant',
+  agave: 'plant',
   vine: 'vine',
   mushroom: 'plant',
   moss: 'plant',
   shrub: 'plant',
+  daisy: 'plant',
+  cosmos: 'plant',
+  sunflower: 'plant',
+  coneflower: 'plant',
+  marigold: 'plant',
+  foxglove: 'plant',
+  hibiscus: 'plant',
+  anthurium: 'plant',
+  'bird-of-paradise': 'plant',
+  plumeria: 'plant',
+  protea: 'plant',
+  'spider-lily': 'plant',
+  lotus: 'plant',
+  allium: 'plant',
+  lupine: 'plant',
+  edelweiss: 'plant',
+  paintbrush: 'plant',
+  'blackeyed-susan': 'plant',
+  poppy: 'plant',
+  zinnia: 'plant',
+  bougainvillea: 'plant',
+  // Legacy: flower cutouts are species-per-kind now, but old saves recorded
+  // cuts under the shared 'flower' species and its tables stay resolvable.
   flower: 'plant',
 };
 
@@ -96,10 +131,35 @@ export const SPECIES_NAMES: Record<TreeSpecies, { one: string; many: string }> =
   acacia: { one: 'acacia tree', many: 'acacia trees' },
   baobab: { one: 'baobab', many: 'baobabs' },
   bamboo: { one: 'bamboo cluster', many: 'bamboo clusters' },
+  'paddle-cactus': { one: 'paddle cactus', many: 'paddle cacti' },
+  'barrel-cactus': { one: 'barrel cactus', many: 'barrel cacti' },
+  'column-cactus': { one: 'column cactus', many: 'column cacti' },
+  agave: { one: 'agave', many: 'agaves' },
   vine: { one: 'hanging vine', many: 'hanging vines' },
   mushroom: { one: 'mushroom cluster', many: 'mushroom clusters' },
   moss: { one: 'moss patch', many: 'moss patches' },
   shrub: { one: 'shrub', many: 'shrubs' },
+  daisy: { one: 'daisy', many: 'daisies' },
+  cosmos: { one: 'cosmos', many: 'cosmos' },
+  sunflower: { one: 'sunflower', many: 'sunflowers' },
+  coneflower: { one: 'coneflower', many: 'coneflowers' },
+  marigold: { one: 'marigold', many: 'marigolds' },
+  foxglove: { one: 'foxglove', many: 'foxgloves' },
+  hibiscus: { one: 'hibiscus', many: 'hibiscus' },
+  anthurium: { one: 'anthurium', many: 'anthuriums' },
+  'bird-of-paradise': { one: 'bird-of-paradise', many: "birds-of-paradise" },
+  plumeria: { one: 'plumeria', many: 'plumeria' },
+  protea: { one: 'protea', many: 'proteas' },
+  'spider-lily': { one: 'spider lily', many: 'spider lilies' },
+  lotus: { one: 'wild lotus', many: 'wild lotuses' },
+  allium: { one: 'allium', many: 'alliums' },
+  lupine: { one: 'lupine', many: 'lupines' },
+  edelweiss: { one: 'edelweiss', many: 'edelweiss' },
+  paintbrush: { one: 'paintbrush', many: 'paintbrushes' },
+  'blackeyed-susan': { one: 'black-eyed susan', many: 'black-eyed susans' },
+  poppy: { one: 'poppy', many: 'poppies' },
+  zinnia: { one: 'zinnia', many: 'zinnias' },
+  bougainvillea: { one: 'bougainvillea', many: 'bougainvillea' },
   flower: { one: 'flower', many: 'flowers' },
 };
 
@@ -223,8 +283,12 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     variety: 'ribbonwood-sticks',
   },
   leafy: {
-    primary: 'mossy-paper-fiber',
-    secondary: 'kraft-twigs',
+    // The generic broadleaf used to press mossy-paper-fiber as its primary,
+    // which left the plain tree with nothing of its own — and left moss
+    // sharing its signature material with a tree. Leafy clippings give the
+    // common tree its own identity while the fiber stays on as a secondary.
+    primary: 'leafy-clippings',
+    secondary: 'mossy-paper-fiber',
     variety: 'ribbonwood-sticks',
   },
   redwood: {
@@ -247,12 +311,13 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
   },
   banana: {
     // A banana "trunk" is a roll of leaf sheaths, so its trimmings read as
-    // clippings and fiber rather than timber — the tropical tree layer runs
-    // on the palm material pair, exactly as the biome plan intended ("palm
-    // clippings and palm fiber already cover the tree"). A wild fruit drop
-    // is deliberately not modeled yet: food still comes only from plants a
+    // clippings and fiber rather than timber. They used to run on the palm
+    // material pair, which left the tropics' most common tree with nothing
+    // of its own; banana leaf clippings are the sheaths' own material, with
+    // palm fiber staying on as the secondary. A wild fruit drop is
+    // deliberately not modeled yet: food still comes only from plants a
     // player grew, and the first wild source deserves its own slice.
-    primary: 'palm-clippings',
+    primary: 'banana-leaf-clippings',
     secondary: 'palm-fiber',
     variety: 'sunbaked-cardboard',
   },
@@ -309,6 +374,60 @@ export const SPECIES_YIELD: Record<TreeSpecies, {
     secondary: 'mossy-paper-fiber',
     variety: 'ribbonwood-sticks',
   },
+  // The three cactus species split the eight dunes drawings by shape (paddle
+  // pads, blooming barrels, saguaro columns; see `trimmableDecor.ts`). Each
+  // presses its own clippings — desert wood with the species in it — and all
+  // three share cactus fiber as the secondary, the way the shrubs share
+  // mossy fiber. A flourishing one sometimes gives up a pebble or a piece of
+  // sunbaked board caught between its pads.
+  'paddle-cactus': {
+    primary: 'paddle-cactus-clippings',
+    secondary: 'cactus-fiber',
+    variety: 'sunbaked-cardboard',
+  },
+  'barrel-cactus': {
+    primary: 'barrel-cactus-clippings',
+    secondary: 'cactus-fiber',
+    variety: 'terracotta-pebbles',
+  },
+  'column-cactus': {
+    primary: 'column-cactus-clippings',
+    secondary: 'cactus-fiber',
+    variety: 'sunbaked-cardboard',
+  },
+  agave: {
+    // A rosette of stiff blades, and the dunes' own long fiber — the desert
+    // answer to marsh grass. Secondaries overlap the shrubs on purpose; the
+    // fiber itself comes off nothing else.
+    primary: 'agave-fiber',
+    secondary: 'mossy-paper-fiber',
+    variety: 'sunbaked-cardboard',
+  },
+  // One species per flower cutout, one pressed-petal material each. The
+  // secondaries and the seed variety overlap across all of them — the petals
+  // are what make a marigold a marigold. `flower` below is the legacy shared
+  // species, kept resolvable for saves recorded before the split.
+  daisy: { primary: 'daisy-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  cosmos: { primary: 'cosmos-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  sunflower: { primary: 'sunflower-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  coneflower: { primary: 'coneflower-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  marigold: { primary: 'marigold-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  foxglove: { primary: 'foxglove-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  hibiscus: { primary: 'hibiscus-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  anthurium: { primary: 'anthurium-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  'bird-of-paradise': { primary: 'bird-of-paradise-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  plumeria: { primary: 'plumeria-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  protea: { primary: 'protea-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  'spider-lily': { primary: 'spider-lily-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  lotus: { primary: 'lotus-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  allium: { primary: 'allium-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  lupine: { primary: 'lupine-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  edelweiss: { primary: 'edelweiss-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  paintbrush: { primary: 'paintbrush-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  'blackeyed-susan': { primary: 'blackeyed-susan-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  poppy: { primary: 'poppy-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  zinnia: { primary: 'zinnia-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
+  bougainvillea: { primary: 'bougainvillea-petals', secondary: 'mossy-paper-fiber', variety: 'buttonbloom-seeds' },
   flower: {
     primary: 'pressed-petal-confetti',
     secondary: 'mossy-paper-fiber',

@@ -228,11 +228,39 @@ export const SPECIES_BIOMES: Record<TreeSpecies, Biome[]> = {
   // is what makes crepe vine a tropical-exclusive material.
   vine: ['tropical'],
   // Undergrowth — these follow `UNDERGROWTH` in `generate.ts`, which is
-  // where they are actually scattered.
+  // where they are actually scattered. Cacti are the dunes' tree-slot plants
+  // (`CACTI` there); the columnar euphorbia also stands in badlands.
   mushroom: ['forest', 'tropical', 'swamp', 'wetland', 'bamboo-forest'],
   moss: ['forest', 'swamp', 'wetland', 'bamboo-forest'],
   shrub: ['dunes', 'forest', 'tropical', 'swamp', 'wetland', 'rocky-highlands', 'savanna', 'badlands', 'bamboo-forest'],
+  'paddle-cactus': ['dunes'],
+  'barrel-cactus': ['dunes'],
+  'column-cactus': ['dunes', 'badlands'],
+  agave: ['dunes'],
   flower: ['meadow', 'dunes', 'forest', 'tropical', 'swamp', 'wetland', 'rocky-highlands', 'savanna', 'badlands', 'bamboo-forest'],
+  // One species per flower cutout, following the same UNDERGROWTH lists.
+  // The legacy shared 'flower' entry above stays for old saves.
+  daisy: ['meadow'],
+  cosmos: ['meadow'],
+  sunflower: ['meadow'],
+  coneflower: ['meadow'],
+  zinnia: ['meadow'],
+  marigold: ['dunes'],
+  foxglove: ['forest'],
+  hibiscus: ['tropical'],
+  anthurium: ['tropical'],
+  'bird-of-paradise': ['tropical'],
+  plumeria: ['tropical'],
+  bougainvillea: ['tropical'],
+  protea: ['tropical', 'savanna'],
+  'spider-lily': ['swamp'],
+  lotus: ['swamp', 'wetland'],
+  allium: ['wetland', 'bamboo-forest'],
+  lupine: ['wetland', 'rocky-highlands'],
+  edelweiss: ['rocky-highlands'],
+  paintbrush: ['rocky-highlands', 'badlands'],
+  'blackeyed-susan': ['savanna'],
+  poppy: ['badlands'],
 };
 
 /**

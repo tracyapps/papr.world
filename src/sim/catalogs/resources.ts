@@ -62,7 +62,47 @@ export const RESOURCE_CORE_DEFS = {
   'baobab-pith-fiber': { id: 'baobab-pith-fiber', label: 'Baobab pith fiber', shortLabel: 'Baobab fiber', category: 'fiber', iconKey: 'resource.baobab-pith-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber', 'long-fiber'] },
   'bamboo-strips': { id: 'bamboo-strips', label: 'Bamboo paper strips', shortLabel: 'Bamboo strips', category: 'sticks', iconKey: 'resource.bamboo-strips', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood', 'long-fiber'] },
   'supple-shrub-shoots': { id: 'supple-shrub-shoots', label: 'Supple shrub shoots', shortLabel: 'Shrub shoots', category: 'sticks', iconKey: 'resource.supple-shrub-shoots', processStage: 0, structuralClass: 1, tags: ['wood', 'long-fiber'] },
+  // The plain broadleaf's own trimmings. Every tree species now presses a
+  // primary of its own; see SPECIES_YIELD in catalogs/trees.ts.
+  'leafy-clippings': { id: 'leafy-clippings', label: 'Leafy-tree clippings', shortLabel: 'Leafy clippings', category: 'sticks', iconKey: 'resource.leafy-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  // A banana trunk is rolled leaf sheaths: pliable, stringy, and the
+  // tropics' most common tree's own material.
+  'banana-leaf-clippings': { id: 'banana-leaf-clippings', label: 'Banana-leaf clippings', shortLabel: 'Banana leaf', category: 'sticks', iconKey: 'resource.banana-leaf-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  // Desert wood. The three cactus species each press clippings of their own;
+  // see SPECIES_YIELD and `trimmableDecor.ts` for the shape grouping.
+  'paddle-cactus-clippings': { id: 'paddle-cactus-clippings', label: 'Paddle-cactus clippings', shortLabel: 'Paddle clippings', category: 'sticks', iconKey: 'resource.paddle-cactus-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  'barrel-cactus-clippings': { id: 'barrel-cactus-clippings', label: 'Barrel-cactus clippings', shortLabel: 'Barrel clippings', category: 'sticks', iconKey: 'resource.barrel-cactus-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  'column-cactus-clippings': { id: 'column-cactus-clippings', label: 'Column-cactus clippings', shortLabel: 'Column clippings', category: 'sticks', iconKey: 'resource.column-cactus-clippings', processStage: 0, structuralClass: 1, tags: ['wood', 'species-wood'] },
+  // Shared secondary of all three cactus species: soft, springy pulp stock.
+  'cactus-fiber': { id: 'cactus-fiber', label: 'Cactus fiber', shortLabel: 'Cactus fiber', category: 'fiber', iconKey: 'resource.cactus-fiber', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  // The agave rosette's own long fiber — the dunes' answer to marsh grass,
+  // and the only desert source of binding-length strands.
+  'agave-fiber': { id: 'agave-fiber', label: 'Agave fiber', shortLabel: 'Agave fiber', category: 'fiber', iconKey: 'resource.agave-fiber', processStage: 0, structuralClass: 0, tags: ['long-fiber'] },
   'pressed-petal-confetti': { id: 'pressed-petal-confetti', label: 'Pressed petal confetti', shortLabel: 'Petal confetti', category: 'fiber', iconKey: 'resource.pressed-petal-confetti', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  // One pressed-petal material per flower cutout — this is what makes each
+  // blossom worth seeking by name. All share soft-fiber; a future natural-
+  // dyes lesson is where pigment tags and recipes would earn their place.
+  'daisy-petals': { id: 'daisy-petals', label: 'Pressed daisy petals', shortLabel: 'Daisy petals', category: 'fiber', iconKey: 'resource.daisy-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'cosmos-petals': { id: 'cosmos-petals', label: 'Pressed cosmos petals', shortLabel: 'Cosmos petals', category: 'fiber', iconKey: 'resource.cosmos-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'sunflower-petals': { id: 'sunflower-petals', label: 'Pressed sunflower petals', shortLabel: 'Sunflower petals', category: 'fiber', iconKey: 'resource.sunflower-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'coneflower-petals': { id: 'coneflower-petals', label: 'Pressed coneflower petals', shortLabel: 'Coneflower petals', category: 'fiber', iconKey: 'resource.coneflower-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'marigold-petals': { id: 'marigold-petals', label: 'Pressed marigold petals', shortLabel: 'Marigold petals', category: 'fiber', iconKey: 'resource.marigold-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'foxglove-petals': { id: 'foxglove-petals', label: 'Pressed foxglove petals', shortLabel: 'Foxglove petals', category: 'fiber', iconKey: 'resource.foxglove-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'hibiscus-petals': { id: 'hibiscus-petals', label: 'Pressed hibiscus petals', shortLabel: 'Hibiscus petals', category: 'fiber', iconKey: 'resource.hibiscus-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'anthurium-petals': { id: 'anthurium-petals', label: 'Pressed anthurium petals', shortLabel: 'Anthurium petals', category: 'fiber', iconKey: 'resource.anthurium-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'bird-of-paradise-petals': { id: 'bird-of-paradise-petals', label: 'Pressed bird-of-paradise petals', shortLabel: 'Paradise petals', category: 'fiber', iconKey: 'resource.bird-of-paradise-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'plumeria-petals': { id: 'plumeria-petals', label: 'Pressed plumeria petals', shortLabel: 'Plumeria petals', category: 'fiber', iconKey: 'resource.plumeria-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'protea-petals': { id: 'protea-petals', label: 'Pressed protea petals', shortLabel: 'Protea petals', category: 'fiber', iconKey: 'resource.protea-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'spider-lily-petals': { id: 'spider-lily-petals', label: 'Pressed spider-lily petals', shortLabel: 'Spider-lily petals', category: 'fiber', iconKey: 'resource.spider-lily-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'lotus-petals': { id: 'lotus-petals', label: 'Pressed lotus petals', shortLabel: 'Lotus petals', category: 'fiber', iconKey: 'resource.lotus-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'allium-petals': { id: 'allium-petals', label: 'Pressed allium petals', shortLabel: 'Allium petals', category: 'fiber', iconKey: 'resource.allium-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'lupine-petals': { id: 'lupine-petals', label: 'Pressed lupine petals', shortLabel: 'Lupine petals', category: 'fiber', iconKey: 'resource.lupine-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'edelweiss-petals': { id: 'edelweiss-petals', label: 'Pressed edelweiss petals', shortLabel: 'Edelweiss petals', category: 'fiber', iconKey: 'resource.edelweiss-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'paintbrush-petals': { id: 'paintbrush-petals', label: 'Pressed paintbrush petals', shortLabel: 'Paintbrush petals', category: 'fiber', iconKey: 'resource.paintbrush-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'blackeyed-susan-petals': { id: 'blackeyed-susan-petals', label: 'Pressed black-eyed-susan petals', shortLabel: 'Susan petals', category: 'fiber', iconKey: 'resource.blackeyed-susan-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'poppy-petals': { id: 'poppy-petals', label: 'Pressed poppy petals', shortLabel: 'Poppy petals', category: 'fiber', iconKey: 'resource.poppy-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'zinnia-petals': { id: 'zinnia-petals', label: 'Pressed zinnia petals', shortLabel: 'Zinnia petals', category: 'fiber', iconKey: 'resource.zinnia-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
+  'bougainvillea-petals': { id: 'bougainvillea-petals', label: 'Pressed bougainvillea petals', shortLabel: 'Bougainvillea petals', category: 'fiber', iconKey: 'resource.bougainvillea-petals', processStage: 0, structuralClass: 0, tags: ['soft-fiber'] },
   'confetti-stones': { id: 'confetti-stones', label: 'Confetti stones', shortLabel: 'Confetti stone', category: 'stones', iconKey: 'resource.confetti-stones', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'graphite-cardstone': { id: 'graphite-cardstone', label: 'Graphite cardstone', shortLabel: 'Cardstone', category: 'stones', iconKey: 'resource.graphite-cardstone', processStage: 0, structuralClass: 1, tags: ['stone'] },
   'bluefold-pebbles': { id: 'bluefold-pebbles', label: 'Bluefold pebbles', shortLabel: 'Bluefolds', category: 'stones', iconKey: 'resource.bluefold-pebbles', processStage: 0, structuralClass: 1, tags: ['stone'] },
