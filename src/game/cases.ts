@@ -17,6 +17,7 @@
 import {
   DISPLAY_CASE_TEMPLATE,
   LIMITS,
+  caseCapacity,
   describeCaseLimit,
   type CaseDetail,
   type CaseItem,
@@ -32,9 +33,11 @@ import {
   type CaseTakeIntent,
   type PlacedPiece,
 } from '../../shared/src/index';
+import { dispatchGameCommand, resolveIngredientAllocation } from '../sim/commands';
+import { caseShelfRequirements } from '../sim/catalogs/building';
 import { TOOL_DEFS, type ToolId } from '../sim/catalogs/tools';
 import { getTrinketDef } from '../sim/catalogs/trinkets';
-import { getGameState, LOCAL_CASE_SLOTS, updateGameState } from '../sim/state';
+import { getGameState, updateGameState } from '../sim/state';
 import { RESOURCE_DEFS } from '../world/resources';
 import type { ResourceId } from '../world/types';
 import { getSelfAccount } from './guests';
@@ -59,6 +62,12 @@ export type CaseView = {
   label: string;
   items: CaseItem[];
   limit: CaseLimit | null;
+  /** How many shelves tall, 1 to `LIMITS.caseShelvesMax`. */
+  shelves: number;
+  /** How many things it holds at that height. */
+  capacity: number;
+  /** What the piece is built from, which is also what another shelf costs. */
+  material: string;
   /** Whether it is yours to change. Every local case is. */
   mine: boolean;
   /** The server's word on this visitor's allowance, once asked. Shared cases only. */
@@ -72,6 +81,7 @@ export type CaseTransport = {
   remove: (intent: CaseRemoveIntent) => void;
   take: (intent: CaseTakeIntent) => void;
   request: (id: string) => void;
+  extend: (id: string) => void;
 };
 
 export type CaseHandlers = { say: (text: string) => void };
@@ -83,6 +93,8 @@ const sharedStates = new Map<string, CaseState>();
 const sharedPieces = new Map<string, PlacedPiece>();
 const details = new Map<string, CaseDetail>();
 const notes = new Map<string, string>();
+/** Shared cases asked to grow, by id -> the material the shelf will be paid in once the server says yes. */
+const pendingShelves = new Map<string, string>();
 const listeners = new Set<() => void>();
 
 function changed() {
@@ -120,6 +132,7 @@ export function resetCases() {
   sharedPieces.clear();
   details.clear();
   notes.clear();
+  pendingShelves.clear();
   changed();
 }
 
@@ -154,7 +167,16 @@ export function receiveCaseDetail(detail: CaseDetail) {
 }
 
 export function receiveCaseResult(result: CaseResult, now = Date.now()) {
-  const text = describeCaseResult(result, now);
+  let text = describeCaseResult(result, now);
+  if (result.action === 'extend') {
+    const material = pendingShelves.get(result.id);
+    pendingShelves.delete(result.id);
+    // Paid only once the server has said yes, so a refusal costs nothing.
+    if (result.outcome === 'ok' && material !== undefined) {
+      const paid = dispatchGameCommand({ type: 'buildCaseShelf', material });
+      if (!paid.ok) text = `${text} (Your bag was short of materials by then, so this one was on the house.)`;
+    }
+  }
   notes.set(`shared:${result.id}`, text);
   // The panel's status line is announced; a toast only when the panel is not there to say it.
   if (!panelOpen) handlers?.say(text);
@@ -179,6 +201,9 @@ function sharedView(piece: PlacedPiece, state: CaseState): CaseView {
     label: state.label,
     items: state.items,
     limit: state.limit,
+    shelves: state.shelves,
+    capacity: caseCapacity(state.shelves),
+    material: piece.material,
     mine: getSelfAccount() !== '' && state.owner === getSelfAccount(),
     detail: details.get(piece.id) ?? null,
   };
@@ -204,6 +229,9 @@ export function listCases(): CaseView[] {
         label: own?.label ?? '',
         items: (own?.trinkets ?? []).map((trinket) => ({ kind: 'trinket', defId: trinket.defId, seed: trinket.seed })),
         limit: null,
+        shelves: own?.shelves ?? 1,
+        capacity: caseCapacity(own?.shelves ?? 1),
+        material: piece.material,
         mine: true,
         detail: null,
       });
@@ -260,7 +288,7 @@ export function setCase(handle: CaseHandle, patch: { mode?: CaseMode; label?: st
   if (patch.label !== undefined) {
     const label = patch.label.replace(/\s+/g, ' ').trim().slice(0, LIMITS.caseLabelMax);
     updateGameState((state) => {
-      const entry = state.world.localCases[handle.id] ?? { label: '', trinkets: [] };
+      const entry = state.world.localCases[handle.id] ?? { label: '', trinkets: [], shelves: 1 };
       entry.label = label;
       state.world.localCases[handle.id] = entry;
     });
@@ -285,9 +313,9 @@ export function showTrinketOn(handle: CaseHandle, trinketId: string) {
   }
   const outcome = { full: false };
   updateGameState((state) => {
-    const entry = state.world.localCases[handle.id] ?? { label: '', trinkets: [] };
+    const entry = state.world.localCases[handle.id] ?? { label: '', trinkets: [], shelves: 1 };
     if (!entry.trinkets.some((shown) => shown.defId === trinket.defId && shown.seed === trinket.seed)) {
-      if (entry.trinkets.length >= LOCAL_CASE_SLOTS) outcome.full = true;
+      if (entry.trinkets.length >= caseCapacity(entry.shelves)) outcome.full = true;
       else entry.trinkets.push({ defId: trinket.defId, seed: trinket.seed });
     }
     state.world.localCases[handle.id] = entry;
@@ -306,6 +334,40 @@ export function removeCaseItem(handle: CaseHandle, index: number) {
     state.world.localCases[handle.id]?.trinkets.splice(index, 1);
   });
   note(handle, 'Taken back out of the case.');
+}
+
+/** What another shelf would cost this case, in words: "1 Binding Cord and 3 Ribbonwood". */
+export function describeShelfCost(view: CaseView): string {
+  return caseShelfRequirements(view.material)
+    .map((requirement) => requirement.kind === 'exact'
+      ? `${requirement.quantity} ${itemName('resource', requirement.resource)}`
+      : `${requirement.quantity} ${requirement.family}`)
+    .join(' and ');
+}
+
+/** Whether the bag holds what another shelf costs. */
+export function canAffordShelf(view: CaseView): boolean {
+  return resolveIngredientAllocation(getGameState().player.inventory, caseShelfRequirements(view.material)) !== null;
+}
+
+/** Stack one more shelf on a case you own. Solo: built here and now. Shared: asked of the server, paid on its yes. */
+export function extendCase(view: CaseView) {
+  const handle = view.handle;
+  if (!view.mine) return note(handle, 'That case is not yours to change.');
+  if (view.shelves >= LIMITS.caseShelvesMax) return note(handle, 'This case is as tall as a case goes.');
+  if (!canAffordShelf(view)) return note(handle, `Another shelf takes ${describeShelfCost(view)}.`);
+  if (handle.source === 'shared') {
+    if (!transport) return note(handle, NEEDS_SHARED);
+    pendingShelves.set(handle.id, view.material);
+    transport.extend(handle.id);
+    return;
+  }
+  const result = dispatchGameCommand({ type: 'buildCaseShelf', material: view.material, localCaseId: handle.id });
+  note(handle, result.ok ? shelfAddedWords(view.shelves + 1) : result.reason);
+}
+
+function shelfAddedWords(shelves: number): string {
+  return `Added a shelf. The case is ${shelves} shelves tall now and holds ${caseCapacity(shelves)}.`;
 }
 
 /** Take one from a free case. */
@@ -367,6 +429,7 @@ export function describeCaseResult(result: CaseResult, now = Date.now()): string
       if (result.action === 'stock') return 'Put in the case.';
       if (result.action === 'remove') return 'Taken back out.';
       if (result.action === 'show') return 'Placed inside the case.';
+      if (result.action === 'extend') return `Added a shelf. It holds ${LIMITS.caseSlotsPerShelf} more.`;
       return 'Saved.';
     case 'empty': return 'There is nothing to take right now.';
     case 'limit':
@@ -383,6 +446,7 @@ export function describeCaseResult(result: CaseResult, now = Date.now()): string
     case 'full': return 'The case is full.';
     case 'no-stock': return 'You do not have that many in your pouch.';
     case 'not-empty': return 'Empty the case first to change what it is for.';
+    case 'maxed': return 'This case is as tall as a case goes.';
     default: return 'That did not work.';
   }
 }

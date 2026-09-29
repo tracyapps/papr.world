@@ -13,6 +13,8 @@ import {
   DEFAULT_CASE_LIMIT,
   LIMITS,
   caseAllowance,
+  caseCapacity,
+  sanitizeCaseShelves,
   sanitizeCaseId,
   sanitizeCaseItems,
   sanitizeCaseLabel,
@@ -39,6 +41,8 @@ export type CaseRecord = {
   label: string;
   items: CaseItem[];
   limit: CaseLimit | null;
+  /** How many shelves tall, 1 to `LIMITS.caseShelvesMax`. Records from before shelves read as 1. */
+  shelves: number;
   /** Newest first, at most `LIMITS.caseLogMax`. Owner only. */
   log: CaseLogEntry[];
   /** Visitor account id -> server epoch ms of each take. Private. */
@@ -60,7 +64,7 @@ const TAKES_TRACKED_MAX = 400;
 
 export function newCaseRecord(id: string, owner: string): CaseRecord {
   return {
-    id, owner, mode: 'show', label: '', items: [], limit: { ...DEFAULT_CASE_LIMIT }, log: [], takes: {},
+    id, owner, mode: 'show', label: '', items: [], limit: { ...DEFAULT_CASE_LIMIT }, shelves: 1, log: [], takes: {},
   };
 }
 
@@ -73,6 +77,7 @@ export function publicCase(record: CaseRecord): CaseState {
     label: record.label,
     items: record.items.map((item) => ({ ...item })),
     limit: record.limit ? { ...record.limit } : null,
+    shelves: record.shelves,
   };
 }
 
@@ -93,9 +98,12 @@ export function sanitizeCaseRecord(raw: unknown): CaseRecord | null {
   const id = sanitizeCaseId(value.id);
   if (!id || typeof value.owner !== 'string' || value.owner.length === 0 || value.owner.length > 128) return null;
   const mode = sanitizeCaseMode(value.mode) ?? 'show';
-  // Only the items that belong to the mode: a hand-edited file cannot smuggle a stack into a show case.
+  const shelves = sanitizeCaseShelves(value.shelves);
+  // Only the items that belong to the mode, and only as many as its shelves
+  // hold: a hand-edited file cannot smuggle a stack into a show case, or a
+  // twenty-fourth thing onto a one-shelf case.
   const items = sanitizeCaseItems(value.items).filter((item) =>
-    mode === 'show' ? item.kind === 'trinket' : item.kind !== 'trinket');
+    mode === 'show' ? item.kind === 'trinket' : item.kind !== 'trinket').slice(0, caseCapacity(shelves));
   const limit = value.limit === null ? null : sanitizeCaseLimit(value.limit) ?? { ...DEFAULT_CASE_LIMIT };
   const log: CaseLogEntry[] = [];
   if (Array.isArray(value.log)) {
@@ -113,7 +121,7 @@ export function sanitizeCaseRecord(raw: unknown): CaseRecord | null {
       if (kept.length > 0) takes[visitor] = kept;
     }
   }
-  return { id, owner: value.owner, mode, label: sanitizeCaseLabel(value.label), items, limit, log, takes };
+  return { id, owner: value.owner, mode, label: sanitizeCaseLabel(value.label), items, limit, shelves, log, takes };
 }
 
 function sanitizeLogEntry(raw: unknown): CaseLogEntry | null {
@@ -162,7 +170,7 @@ export function applyStock(ownerInventory: AccountInventory, record: CaseRecord,
     if (existing.quantity + intent.quantity > LIMITS.inventoryStackMax) return REFUSED('full');
     existing.quantity += intent.quantity;
   } else {
-    if (record.items.length >= LIMITS.caseSlots) return REFUSED('full');
+    if (record.items.length >= caseCapacity(record.shelves)) return REFUSED('full');
     record.items.push({ kind: intent.kind, itemId: intent.itemId, quantity: intent.quantity });
   }
   bag[intent.itemId] = (bag[intent.itemId] ?? 0) - intent.quantity;
@@ -175,8 +183,22 @@ export function applyShow(record: CaseRecord, intent: CaseShowIntent): CaseChang
   const already = record.items.some((item) =>
     item.kind === 'trinket' && item.defId === intent.defId && item.seed === intent.seed);
   if (already) return { ok: true };
-  if (record.items.length >= LIMITS.caseSlots) return REFUSED('full');
+  if (record.items.length >= caseCapacity(record.shelves)) return REFUSED('full');
   record.items.push({ kind: 'trinket', defId: intent.defId, seed: intent.seed });
+  return { ok: true };
+}
+
+/**
+ * Stack one more shelf on top, up to `LIMITS.caseShelvesMax`. Each shelf holds
+ * `caseSlotsPerShelf` more. Shelves only ever go up: taking one away would
+ * have to decide which of the things on it go where.
+ *
+ * The materials are paid on the owner's own device, the same trust every
+ * built piece gets; the server's part is the count and who may change it.
+ */
+export function applyExtend(record: CaseRecord): CaseChange {
+  if (record.shelves >= LIMITS.caseShelvesMax) return REFUSED('maxed');
+  record.shelves += 1;
   return { ok: true };
 }
 

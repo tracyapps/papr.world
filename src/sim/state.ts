@@ -5,7 +5,7 @@ import type { DigDiscovery } from './catalogs/geology';
 import { PLANT_STAGE_ORDER, SEED_DEFS, type PlantStage, type SeedId } from './catalogs/seeds';
 import { MAX_TREE_GROWTH, type TreeGrowthState, type TreeSpecies } from './catalogs/trees';
 import { MAX_ROCK_GROWTH, type RockFormation, type RockGrowthState } from './catalogs/mining';
-import { LIMITS, type MailItem, type PlacedPiece } from '../../shared/src/index';
+import { LIMITS, caseCapacity, sanitizeCaseShelves, type MailItem, type PlacedPiece } from '../../shared/src/index';
 import { BIOME_IDS, type Biome } from './catalogs/biomes';
 import { buildAssemblyDef } from './catalogs/building';
 import { createWelcomeMail } from './mail';
@@ -108,14 +108,16 @@ export type ResourceDropState = {
   createdAt: number;
 };
 
-/** A display case in the solo save: a label and the keepsakes set out on it. */
+/** A display case in the solo save: a label, how tall it stands, and the keepsakes set out on it. */
 export type LocalCaseState = {
   label: string;
   trinkets: Array<{ defId: string; seed: number }>;
+  /** Shelves, 1 to `LIMITS.caseShelvesMax`; each holds `LOCAL_CASE_SLOTS` more. Older saves read as 1. */
+  shelves: number;
 };
 
-/** Most keepsakes one solo case shows; matches the shared case's slots. */
-export const LOCAL_CASE_SLOTS = 8;
+/** Keepsakes one shelf of a solo case shows; matches the shared case's slots per shelf. */
+export const LOCAL_CASE_SLOTS = LIMITS.caseSlotsPerShelf;
 
 export type BuildSiteState = {
   id: string;
@@ -641,6 +643,7 @@ function normalizeLocalCases(value: unknown): Record<string, LocalCaseState> {
   for (const [id, raw] of Object.entries(safeObject(value)).slice(0, 200)) {
     if (id.length === 0 || id.length > 80) continue;
     const entry = safeObject(raw);
+    const shelves = sanitizeCaseShelves(entry.shelves);
     const trinkets: LocalCaseState['trinkets'] = [];
     if (Array.isArray(entry.trinkets)) {
       for (const rawTrinket of entry.trinkets) {
@@ -648,12 +651,13 @@ function normalizeLocalCases(value: unknown): Record<string, LocalCaseState> {
         if (typeof trinket.defId !== 'string' || trinket.defId.length === 0 || trinket.defId.length > 80) continue;
         const seed = typeof trinket.seed === 'number' && Number.isFinite(trinket.seed) ? Math.floor(trinket.seed) : 0;
         trinkets.push({ defId: trinket.defId, seed });
-        if (trinkets.length >= LOCAL_CASE_SLOTS) break;
+        if (trinkets.length >= caseCapacity(shelves)) break;
       }
     }
     result[id] = {
       label: typeof entry.label === 'string' ? entry.label.replace(/\s+/g, ' ').trim().slice(0, 60) : '',
       trinkets,
+      shelves,
     };
   }
   return result;

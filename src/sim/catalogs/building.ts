@@ -167,6 +167,22 @@ export function formatBuildMaterial(resource: ResourceId, colorway?: string | nu
 }
 
 /** The resource a piece is made of, or null when it predates resource-backed materials. */
+/**
+ * What stacking one more shelf on a display case costs: a few units of the
+ * case's own material, and one binding cord to fix it on. The same shape of
+ * cost as the case's own assembly step, so it reads as more of the same build.
+ * A case built from a retired paper key has no material resource, so it costs
+ * only the cord (see `materialCost` in sim/commands.ts for why).
+ */
+export const CASE_SHELF_MATERIAL_UNITS = 3;
+
+export function caseShelfRequirements(material: string): IngredientRequirement[] {
+  const requirements: IngredientRequirement[] = [{ kind: 'exact', resource: 'binding-cord', quantity: 1 }];
+  const resource = buildMaterialResource(material);
+  if (resource) requirements.push({ kind: 'exact', resource, quantity: CASE_SHELF_MATERIAL_UNITS });
+  return requirements;
+}
+
 export function buildMaterialResource(value: string): ResourceId | null {
   return parseBuildMaterial(value)?.resource ?? null;
 }

@@ -530,6 +530,7 @@ export async function initializeSharedSession(): Promise<void> {
         remove: (intent) => room.sendCaseRemove(intent),
         take: (intent) => room.sendCaseTake(intent),
         request: (id) => room.sendCaseRequest(id),
+        extend: (id) => room.sendCaseExtend(id),
       });
       connected = true;
       ui.setStatus(`online as ${config.name}`, true);

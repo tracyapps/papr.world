@@ -15,11 +15,14 @@ import { getTrinketDef } from '../sim/catalogs/trinkets';
 import { getGameState } from '../sim/state';
 import {
   CASE_REACH,
+  canAffordShelf,
   casesAvailable,
   describeAllowance,
   describeCaseItem,
   describeCaseRule,
+  describeShelfCost,
   describeWait,
+  extendCase,
   getCaseNote,
   getCaseView,
   itemName,
@@ -196,6 +199,25 @@ function renderOwner(current: CaseView) {
     }
   }
 
+  // Shelves
+  const shelvesNote = $('[data-case-shelves-note]');
+  const extend = $<HTMLButtonElement>('[data-case-act="extend"]');
+  const maxed = current.shelves >= LIMITS.caseShelvesMax;
+  const affordable = !maxed && canAffordShelf(current);
+  if (shelvesNote) {
+    const height = `${current.shelves} of ${LIMITS.caseShelvesMax} shelves, holding ${current.items.length} of ${current.capacity}.`;
+    const next = maxed
+      ? 'That is as tall as a case goes.'
+      : `Another shelf holds ${LIMITS.caseSlotsPerShelf} more and takes ${describeShelfCost(current)}${affordable ? '.' : ', which you do not have yet.'}`;
+    const text = `${height} ${next}`;
+    if (shelvesNote.textContent !== text) shelvesNote.textContent = text;
+  }
+  if (extend) {
+    // aria-disabled, not disabled: it stays in the tab order, and pressing it says why.
+    extend.setAttribute('aria-disabled', String(maxed || !affordable));
+    extend.hidden = maxed;
+  }
+
   const freeBlock = $('[data-case-free]');
   const showBlock = $('[data-case-show]');
   if (freeBlock) freeBlock.hidden = current.mode !== 'free' || !shared;
@@ -348,6 +370,8 @@ function act(action: string, index: number, current: CaseView) {
     const id = $<HTMLSelectElement>('[data-case-trinket]')?.value ?? '';
     if (!id) localMessage = 'Choose a keepsake first.';
     else showTrinketOn(current.handle, id);
+  } else if (action === 'extend') {
+    extendCase(current);
   } else if (action === 'refresh') {
     requestCaseDetail(current.handle);
     localMessage = 'Asked the neighborhood for the latest.';
@@ -388,6 +412,11 @@ export function initializeCasePanel() {
           <option value="free">Giving things away (free to take)</option>
         </select>
         <p class="case-note" id="case-mode-note" data-case-mode-note></p>
+      </div>
+      <div class="case-field">
+        <h3 class="case-heading">Shelves</h3>
+        <p class="case-note" id="case-shelves-note" data-case-shelves-note></p>
+        <button type="button" data-case-act="extend" aria-describedby="case-shelves-note">Add a shelf</button>
       </div>
       <div data-case-free hidden>
         <h3 class="case-heading">How much each visitor may take</h3>

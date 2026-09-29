@@ -96,6 +96,8 @@ export class CaseSchema extends Schema {
   @type('number') limitCount = 0;
   /** Per-visitor limit: over how many minutes. */
   @type('number') limitWindow = 0;
+  /** How many shelves tall it stands (1 to LIMITS.caseShelvesMax). */
+  @type('uint8') shelves = 1;
 }
 
 export class NodeSchema extends Schema {

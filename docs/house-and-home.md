@@ -413,8 +413,33 @@ focus kept). **Protocol v11.** Not yet tried: two real browsers in one room.
   region). No reflex asked of anyone; the panel is docked and takes focus to its
   title on open.
 - **Not built:** priced cases (parked with player-to-player chips); cases indoors;
-  the case mesh does not show what it holds (contents are in the panel text);
   market-green stalls; a per-case "who may take" (friends only).
+
+### Built 2026-09-28 (display case shelves)
+
+**Protocol v13.** A case is built one shelf tall and can be added on to, like a
+house: the owner's panel has **Add a shelf**, up to 3 shelves. Decided with the
+owner: each shelf adds **8 slots** (8 → 16 → 24), so capacity does grow here,
+unlike the wardrobe's tiers. A shelf costs **3 of the case's own material + 1
+binding cord**, paid from the bag. For a shared case the server keeps the
+count (`CaseState.shelves`, `case-extend`, owner only, refuses past 3 with
+`maxed`) and the client pays only when the server says yes; a solo case keeps
+`shelves` in `world.localCases`. Shelves only go up. Records and saves from
+before read as one shelf.
+
+- **The look.** The middle shelf is gone: the tallest keepsakes did not fit
+  under it. A case is now a cupboard with one glass level; each added shelf
+  stacks another glass level on top with a see-through glass shelf between,
+  and lifts the opaque lid to the new top. Measurements live in
+  `DISPLAY_CASE_SHAPE` (world/buildPieceVisuals.ts).
+- **Inside.** Eight to a level, two rows of four: the front row on the floor,
+  the back row on a low riser so it shows over the front. Each keepsake is
+  fitted to its slot (never drawn bigger than the old 1.5×), which keeps it
+  under the shelf above. The tallest keepsakes measured 0.6 units at 1.5×,
+  taller than a level, so fitting is what makes the rule hold.
+- **Keepsakes move.** Case keepsakes run the same idle motions as on a shelf
+  at home (`updateCaseTrinkets`), only while their case is drawn.
+- **Not tried in a browser yet**, and not yet with two real clients.
 
 Still to build: the mail line for a finished build waits on the mailbox. Faced masonry has no art yet, so the
 upstairs cost shows as text only.

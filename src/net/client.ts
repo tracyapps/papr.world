@@ -22,6 +22,7 @@ import {
   PROTOCOL_VERSION,
   ServerMessage,
   decodeCaseItems,
+  sanitizeCaseShelves,
   type CaseDetail,
   type CaseRemoveIntent,
   type CaseResult,
@@ -207,6 +208,7 @@ export type NetConnection = {
   sendCaseRemove: (intent: CaseRemoveIntent) => void;
   sendCaseTake: (intent: CaseTakeIntent) => void;
   sendCaseRequest: (id: string) => void;
+  sendCaseExtend: (id: string) => void;
   disconnect: () => void;
 };
 
@@ -374,6 +376,7 @@ export async function connect(
     sendCaseRemove: (intent) => room.send(ClientMessage.CaseRemove, intent),
     sendCaseTake: (intent) => room.send(ClientMessage.CaseTake, intent),
     sendCaseRequest: (id) => room.send(ClientMessage.CaseRequest, { id }),
+    sendCaseExtend: (id) => room.send(ClientMessage.CaseExtend, { id }),
     disconnect: () => {
       void room.leave();
     },
@@ -545,6 +548,7 @@ function readCase(id: string, raw: any): CaseState {
     label: raw.label ?? '',
     items: decodeCaseItems(raw.items ?? ''),
     limit: count > 0 && windowMinutes > 0 ? { count, windowMinutes } : null,
+    shelves: sanitizeCaseShelves(Number(raw.shelves)),
   };
 }
 

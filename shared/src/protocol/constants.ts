@@ -10,7 +10,7 @@
  * Bump when the wire shapes below change in a breaking way. The room checks
  * this on join so a stale client fails fast instead of desyncing silently.
  */
-export const PROTOCOL_VERSION = 12; // v12: placed pieces carry their home scope so furniture renders only in that interior. (v11: display cases)
+export const PROTOCOL_VERSION = 13; // v13: display cases carry a shelf count and can be extended (case-extend). v12: placed pieces carry their home scope so furniture renders only in that interior. (v11: display cases)
 
 /** Bump when RoomSave's shape changes; persistence migrates on load. */
 export const SAVE_VERSION = 1;
@@ -129,8 +129,12 @@ export const LIMITS = {
 
   /** Display cases one account may have standing in a room. */
   casesPerPlayer: 6,
-  /** Things one case holds: stacks in a free case, trinkets in a show case. */
-  caseSlots: 8,
+  /** Things one shelf of a case holds: stacks in a free case, trinkets in a show case. */
+  caseSlotsPerShelf: 8,
+  /** Shelves a case can grow to. It is built with one; each add-on stacks another on top. */
+  caseShelvesMax: 3,
+  /** The most any case can hold: every shelf full. Bounds every item list and slot index. */
+  caseSlots: 24,
   /** A case's label, in characters. */
   caseLabelMax: 60,
   /** Who-took-what lines kept per case; the oldest fall off. */

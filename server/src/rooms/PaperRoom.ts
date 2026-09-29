@@ -55,6 +55,7 @@ import {
   isFiniteNumber,
   DISPLAY_CASE_TEMPLATE,
   encodeCaseItems,
+  sanitizeCaseExtend,
   sanitizeCaseRequest,
   sanitizeCaseSet,
   sanitizeCaseShow,
@@ -313,6 +314,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     this.onMessage(ClientMessage.CaseRemove, (client, msg: unknown) => this.handleCaseRemove(client, msg));
     this.onMessage(ClientMessage.CaseTake, (client, msg: unknown) => this.handleCaseTake(client, msg));
     this.onMessage(ClientMessage.CaseRequest, (client, msg: unknown) => this.handleCaseRequest(client, msg));
+    this.onMessage(ClientMessage.CaseExtend, (client, msg: unknown) => this.handleCaseExtend(client, msg));
 
     // Mail belongs to accounts, not rooms. Every live room listens so a
     // recipient sees a delivery immediately even when sender and recipient
@@ -630,6 +632,7 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     schema.items = encodeCaseItems(shown.items);
     schema.limitCount = shown.limit?.count ?? 0;
     schema.limitWindow = shown.limit?.windowMinutes ?? 0;
+    schema.shelves = shown.shelves;
   }
 
   /**
@@ -740,6 +743,17 @@ export class PaperRoom extends Room<PaperRoomOptions> {
     const result = mail.caseTake(slot.id, { accountId: player.accountId, name: player.name }, slot.index, now);
     if (!result) return this.reject(client, 'case-take', 'invalid');
     this.finishCaseChange(client, player, 'take', slot.id, result, now);
+  }
+
+  private handleCaseExtend(client: Client, raw: unknown): void {
+    const intent = sanitizeCaseExtend(raw);
+    if (!intent) return this.reject(client, 'case-extend', 'invalid');
+    const context = this.caseContext(client, intent.id, 'extend');
+    if (!context) return;
+    if (isGuestAccount(context.player.accountId)) return this.answerCase(client, intent.id, 'extend', 'guest');
+    const result = mail.caseExtend(intent.id, context.player.accountId);
+    if (!result) return this.reject(client, 'case-extend', 'invalid');
+    this.finishCaseChange(client, context.player, 'extend', intent.id, result, context.now);
   }
 
   private handleCaseRequest(client: Client, raw: unknown): void {

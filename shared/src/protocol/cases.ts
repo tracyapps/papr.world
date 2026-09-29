@@ -58,7 +58,20 @@ export type CaseState = {
   items: CaseItem[];
   /** Only meaningful in `free` mode. */
   limit: CaseLimit | null;
+  /** How many shelves tall it stands, 1 to `LIMITS.caseShelvesMax`. Each holds `caseSlotsPerShelf`. */
+  shelves: number;
 };
+
+/** How many things a case this many shelves tall holds. */
+export function caseCapacity(shelves: number): number {
+  return sanitizeCaseShelves(shelves) * LIMITS.caseSlotsPerShelf;
+}
+
+/** A shelf count in range; anything else (missing, older record, nonsense) is a one-shelf case. */
+export function sanitizeCaseShelves(raw: unknown): number {
+  if (typeof raw !== 'number' || !Number.isSafeInteger(raw)) return 1;
+  return Math.min(LIMITS.caseShelvesMax, Math.max(1, raw));
+}
 
 // ---- Intents ------------------------------------------------------------------
 
@@ -76,10 +89,12 @@ export type CaseRemoveIntent = { id: string; index: number };
 /** Take one unit from the stack at `index`. */
 export type CaseTakeIntent = { id: string; index: number };
 export type CaseRequestIntent = { id: string };
+/** Owner only: stack one more shelf on top. The client pays its materials; the server counts shelves. */
+export type CaseExtendIntent = { id: string };
 
 // ---- Results ------------------------------------------------------------------
 
-export type CaseAction = 'set' | 'stock' | 'remove' | 'show' | 'take';
+export type CaseAction = 'set' | 'stock' | 'remove' | 'show' | 'take' | 'extend';
 
 export type CaseOutcome =
   | 'ok'
@@ -97,6 +112,8 @@ export type CaseOutcome =
   | 'no-stock'
   /** Change the case's mode only when it is empty. */
   | 'not-empty'
+  /** Already as tall as a case goes. */
+  | 'maxed'
   | 'invalid';
 
 export type CaseResult = {
@@ -202,7 +219,7 @@ export function encodeCaseItems(items: readonly CaseItem[]): string {
 }
 
 export function decodeCaseItems(text: string): CaseItem[] {
-  if (typeof text !== 'string' || text.length === 0 || text.length > 4096) return [];
+  if (typeof text !== 'string' || text.length === 0 || text.length > 8192) return [];
   try {
     return sanitizeCaseItems(JSON.parse(text));
   } catch {
@@ -265,6 +282,10 @@ export function sanitizeCaseRequest(raw: unknown): CaseRequestIntent | null {
   if (!isRecord(raw)) return null;
   const id = sanitizeCaseId(raw.id);
   return id ? { id } : null;
+}
+
+export function sanitizeCaseExtend(raw: unknown): CaseExtendIntent | null {
+  return sanitizeCaseRequest(raw);
 }
 
 // ---- The per-visitor limit ------------------------------------------------------

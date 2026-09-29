@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LIMITS, type AccountInventory } from '../../shared/src/index';
-import { applyRemove, applySet, applyShow, applyStock, applyTake, newCaseRecord, sanitizeCaseRecord } from './cases';
+import { applyExtend, applyRemove, applySet, applyShow, applyStock, applyTake, newCaseRecord, sanitizeCaseRecord } from './cases';
 import { MailStore } from './mail';
 
 const MIN = 60_000;
@@ -78,7 +78,7 @@ describe('stocking and unstocking', () => {
   it('is full at the slot limit, but still tops up a stack already there', () => {
     const record = freeCase();
     const owner = pouch({ resources: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`r${i}`, 5])) });
-    for (let index = 0; index < LIMITS.caseSlots; index += 1) {
+    for (let index = 0; index < LIMITS.caseSlotsPerShelf; index += 1) {
       expect(applyStock(owner, record, { id: 'case-1', kind: 'resource', itemId: `r${index}`, quantity: 1 }).ok).toBe(true);
     }
     expect(applyStock(owner, record, { id: 'case-1', kind: 'resource', itemId: 'r9', quantity: 1 })).toEqual({ ok: false, outcome: 'full' });
@@ -180,7 +180,53 @@ describe('taking', () => {
   });
 });
 
+describe('adding shelves', () => {
+  it('starts one shelf tall and grows to three, eight more slots each', () => {
+    const record = freeCase();
+    expect(record.shelves).toBe(1);
+    const owner = pouch({ resources: Object.fromEntries(Array.from({ length: 30 }, (_, i) => [`r${i}`, 5])) });
+    // How many new slots got filled: stacks already there only top up.
+    const fill = () => {
+      const before = record.items.length;
+      for (let index = 0; index < 30; index += 1) {
+        applyStock(owner, record, { id: 'case-1', kind: 'resource', itemId: `r${index}`, quantity: 1 });
+      }
+      return record.items.length - before;
+    };
+    expect(fill()).toBe(8);
+    expect(applyExtend(record)).toEqual({ ok: true });
+    expect(fill()).toBe(8);
+    expect(applyExtend(record)).toEqual({ ok: true });
+    expect(record.items).toHaveLength(16);
+    expect(fill()).toBe(8);
+    expect(record.items).toHaveLength(LIMITS.caseSlots);
+    expect(applyExtend(record)).toEqual({ ok: false, outcome: 'maxed' });
+    expect(record.shelves).toBe(LIMITS.caseShelvesMax);
+  });
+
+  it('lets only the owner add one, and keeps it through a restart', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'pp-shelves-'));
+    try {
+      const store = new MailStore(directory);
+      store.createCase('case-1', 'ada');
+      expect(store.caseExtend('case-1', 'sam')?.change).toEqual({ ok: false, outcome: 'not-yours' });
+      expect(store.caseExtend('case-1', 'ada')?.change).toEqual({ ok: true });
+      expect(new MailStore(directory).caseRecord('case-1')?.shelves).toBe(2);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('reading a record from disk', () => {
+  it('reads a record from before shelves as one shelf, and trims what a shelf count cannot hold', () => {
+    expect(sanitizeCaseRecord({ id: 'case-1', owner: 'ada' })?.shelves).toBe(1);
+    expect(sanitizeCaseRecord({ id: 'case-1', owner: 'ada', shelves: 9 })?.shelves).toBe(3);
+    const items = Array.from({ length: 20 }, (_, i) => ({ kind: 'trinket', defId: `t${i}`, seed: i }));
+    expect(sanitizeCaseRecord({ id: 'case-1', owner: 'ada', items })?.items).toHaveLength(8);
+    expect(sanitizeCaseRecord({ id: 'case-1', owner: 'ada', items, shelves: 3 })?.items).toHaveLength(20);
+  });
+
   it('keeps a good one and drops the goods that do not belong to its mode', () => {
     const record = sanitizeCaseRecord({
       id: 'case-1', owner: 'ada', mode: 'show', label: 'Hi',

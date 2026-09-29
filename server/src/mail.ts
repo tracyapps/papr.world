@@ -12,6 +12,7 @@ import {
   type MailItem,
 } from '../../shared/src/index';
 import {
+  applyExtend,
   applyRemove,
   applySet,
   applyShow,
@@ -277,6 +278,10 @@ export class MailStore {
 
   caseStock(id: string, actor: string, intent: CaseStockIntent) {
     return this.editCase(id, actor, actor, (inventory, record) => applyStock(inventory, record, intent));
+  }
+
+  caseExtend(id: string, actor: string) {
+    return this.editCase(id, actor, null, (_inventory, record) => applyExtend(record));
   }
 
   caseRemove(id: string, actor: string, index: number) {

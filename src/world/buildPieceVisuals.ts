@@ -156,6 +156,7 @@ function buildPicnicTable(group: THREE.Group, chosen: THREE.MeshStandardMaterial
 }
 
 let clearFront: THREE.MeshStandardMaterial | null = null;
+let clearShelf: THREE.MeshStandardMaterial | null = null;
 
 /** The case's clear front: a pale, see-through sheet, shared by every case. */
 function getClearFront(): THREE.MeshStandardMaterial {
@@ -165,24 +166,96 @@ function getClearFront(): THREE.MeshStandardMaterial {
   return clearFront;
 }
 
-function buildDisplayCase(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+/** The glass shelf between two levels: the same glass, a touch more there, so
+ * the edge of each shelf still reads while you look straight through it. */
+function getClearShelf(): THREE.MeshStandardMaterial {
+  clearShelf ??= new THREE.MeshStandardMaterial({
+    color: '#dbeef2', transparent: true, opacity: 0.45, roughness: 0.15, depthWrite: false,
+  });
+  return clearShelf;
+}
+
+/**
+ * The display case's measurements, shared with what sits inside it
+ * (game/caseTrinketVisuals.ts), so the two can never drift apart.
+ *
+ * A case is a low cupboard with one glass level on top. Each shelf the owner
+ * adds stacks another glass level on the one below, with a clear shelf
+ * between them, and lifts the lid to the new top. Every level is tall enough
+ * for the tallest keepsake once it has been fitted to its slot.
+ */
+export const DISPLAY_CASE_SHAPE = {
+  /** Height of the cupboard's top sheet, which is the first level's floor. */
+  baseTop: 0.36,
+  /** Floor to floor of one glass level. */
+  levelHeight: 0.62,
+  /** Half the thickness of a sheet: things stand this far above a floor's centre. */
+  sheetHalf: 0.0175,
+  /** A low step across the back of each level, so the back row shows over the front. */
+  riser: { width: 1.1, height: 0.08, depth: 0.22, z: -0.15 },
+  /** Slot rows, front first: the first things set out go where they are easiest to see. */
+  rows: [{ z: 0.12, raised: false }, { z: -0.15, raised: true }],
+  columns: [-0.42, -0.14, 0.14, 0.42],
+  /** The room one thing gets: its footprint and its height, after the riser. */
+  slotFootprint: 0.3,
+  slotHeight: 0.44,
+} as const;
+
+/** Where a level's floor sits (its centre line), counting the first level as 0. */
+export function displayCaseFloorY(level: number): number {
+  return DISPLAY_CASE_SHAPE.baseTop + level * DISPLAY_CASE_SHAPE.levelHeight;
+}
+
+/** Where the lid goes on a case this many shelves tall. */
+export function displayCaseLidY(shelves: number): number {
+  return displayCaseFloorY(shelves) + 0.02;
+}
+
+/** The mesh name of the lid, which caseTrinketVisuals lifts when a shelf is added. */
+export const DISPLAY_CASE_LID = 'display-case-lid';
+
+/**
+ * One glass level: four clear walls, a slim post at each corner, and the
+ * riser across the back. Level 0 stands on the cupboard; any higher level
+ * also gets the clear shelf it stands on.
+ */
+export function buildDisplayCaseLevel(level: number): THREE.Group {
+  const { levelHeight, riser, sheetHalf } = DISPLAY_CASE_SHAPE;
   const dark = getMaterial('paper.brown');
   const glass = getClearFront();
-  // A low cupboard for a base, with a top the shelf sits on.
-  group.add(createWall(1.2, 0.36, chosen, [0, 0.18, 0.3]));
-  group.add(createWall(1.2, 0.36, chosen, [0, 0.18, -0.3]));
-  for (const x of [-0.6, 0.6]) group.add(createWall(0.6, 0.36, chosen, [x, 0.18, 0], Math.PI / 2));
-  group.add(createSheet(1.2, 0.62, chosen, [0, 0.36, 0]));
-  // The clear box above it, with a slim frame at each corner and a lid.
-  group.add(createWall(1.16, 0.6, glass, [0, 0.68, 0.29]));
-  group.add(createWall(1.16, 0.6, glass, [0, 0.68, -0.29]));
-  for (const x of [-0.58, 0.58]) group.add(createWall(0.58, 0.6, glass, [x, 0.68, 0], Math.PI / 2));
+  const floor = displayCaseFloorY(level);
+  const middle = floor + levelHeight / 2;
+  const group = new THREE.Group();
+  group.name = `display-case-level-${level}`;
+  if (level > 0) group.add(createSheet(1.16, 0.58, getClearShelf(), [0, floor, 0]));
+  group.add(createWall(1.16, levelHeight, glass, [0, middle, 0.29]));
+  group.add(createWall(1.16, levelHeight, glass, [0, middle, -0.29]));
+  for (const x of [-0.58, 0.58]) group.add(createWall(0.58, levelHeight, glass, [x, middle, 0], Math.PI / 2));
   for (const x of [-0.6, 0.6]) {
-    for (const z of [-0.3, 0.3]) group.add(createWall(0.05, 0.62, dark, [x, 0.68, z]));
+    for (const z of [-0.3, 0.3]) group.add(createWall(0.05, levelHeight + 0.02, dark, [x, middle, z]));
   }
-  group.add(createSheet(1.28, 0.7, chosen, [0, 1.0, 0]));
-  // A shelf partway up, so there are two places to put things.
-  group.add(createSheet(1.1, 0.5, dark, [0, 0.68, 0]));
+  const step = new THREE.Mesh(new THREE.BoxGeometry(riser.width, riser.height, riser.depth), dark);
+  step.position.set(0, floor + sheetHalf + riser.height / 2, riser.z);
+  step.castShadow = true;
+  step.receiveShadow = true;
+  group.add(step);
+  return group;
+}
+
+function buildDisplayCase(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {
+  const { baseTop } = DISPLAY_CASE_SHAPE;
+  // A low cupboard for a base, with a top the first level stands on.
+  group.add(createWall(1.2, baseTop, chosen, [0, baseTop / 2, 0.3]));
+  group.add(createWall(1.2, baseTop, chosen, [0, baseTop / 2, -0.3]));
+  for (const x of [-0.6, 0.6]) group.add(createWall(0.6, baseTop, chosen, [x, baseTop / 2, 0], Math.PI / 2));
+  group.add(createSheet(1.2, 0.62, chosen, [0, baseTop, 0]));
+  // One glass level, and a lid. There is no shelf partway up any more: a
+  // level is one shelf, and a taller case is more levels (added by the owner,
+  // drawn by caseTrinketVisuals, which also lifts this lid to the new top).
+  group.add(buildDisplayCaseLevel(0));
+  const lid = createSheet(1.28, 0.7, chosen, [0, displayCaseLidY(1), 0]);
+  lid.name = DISPLAY_CASE_LID;
+  group.add(lid);
 }
 
 function buildFootbridge(group: THREE.Group, chosen: THREE.MeshStandardMaterial) {

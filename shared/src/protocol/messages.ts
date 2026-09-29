@@ -29,6 +29,7 @@ import type {
 } from './guests';
 import type {
   CaseDetail,
+  CaseExtendIntent,
   CaseRemoveIntent,
   CaseRequestIntent,
   CaseResult,
@@ -135,6 +136,8 @@ export const ClientMessage = {
   CaseTake: 'case-take',
   /** Ask what a case means for me: my allowance, and the log if it is mine. */
   CaseRequest: 'case-request',
+  /** Owner only: add a shelf on top of a case. */
+  CaseExtend: 'case-extend',
 } as const;
 export type ClientMessageType = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -277,6 +280,7 @@ export type ClientPayloads = {
   [ClientMessage.CaseRemove]: CaseRemoveIntent;
   [ClientMessage.CaseTake]: CaseTakeIntent;
   [ClientMessage.CaseRequest]: CaseRequestIntent;
+  [ClientMessage.CaseExtend]: CaseExtendIntent;
 };
 
 // ---- Server -> Client -------------------------------------------------------

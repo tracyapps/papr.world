@@ -36,7 +36,7 @@ import {
 } from './game/critterDialogue';
 import { pickUpTrinket as pickUpPlacedTrinket } from './game/trinkets';
 import { initializeTrinketVisuals, pickTrinketAtScreen, updateTrinkets } from './game/trinketVisuals';
-import { initializeCaseTrinketVisuals, syncCaseTrinketVisuals } from './game/caseTrinketVisuals';
+import { initializeCaseTrinketVisuals, syncCaseTrinketVisuals, updateCaseTrinkets } from './game/caseTrinketVisuals';
 import { noteVisitedPage } from './game/quests';
 import { pickRemoteAvatarAtScreen } from './net/remoteAvatarVisuals';
 import { closePlayerCard, openPlayerCardFor } from './ui/playerCard';
@@ -754,6 +754,7 @@ function animate(animationTime = 0) {
     noteVisitedPage(lastNotedPage, getPage(notedX, notedZ).biome);
   }
   updateTrinkets(delta, elapsed);
+  updateCaseTrinkets(delta, elapsed);
   updateSharedSession();
   const revealDx = avatar.position.x - lastMiniMapRevealX;
   const revealDz = avatar.position.z - lastMiniMapRevealZ;

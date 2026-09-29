@@ -5,7 +5,9 @@ import {
   describeAllowance,
   describeCaseItem,
   describeCaseResult,
+  describeShelfCost,
   describeWait,
+  extendCase,
   getCaseNote,
   getCaseView,
   listCases,
@@ -29,6 +31,17 @@ import {
   type CaseTransport,
 } from './cases';
 import { setSelfAccount } from './guests';
+import { RESOURCE_CORE_DEFS, type ResourceId } from '../sim/catalogs/resources';
+
+/** Some material a case can be built from that is not the cord itself. */
+const MATERIAL = (Object.keys(RESOURCE_CORE_DEFS) as ResourceId[]).find((id) => id !== 'binding-cord')!;
+
+function stockBag(cords: number, material: number) {
+  updateGameState((state) => {
+    state.player.inventory['binding-cord' as ResourceId] = cords;
+    state.player.inventory[MATERIAL] = material;
+  });
+}
 
 const MIN = 60_000;
 
@@ -37,12 +50,12 @@ function piece(id: string, x = 10, z = 10, page = '0,0'): PlacedPiece {
 }
 
 function caseState(id: string, patch: Partial<CaseState> = {}): CaseState {
-  return { id, owner: 'acct-ada', mode: 'free', label: 'Twigs', items: [{ kind: 'resource', itemId: 'twig', quantity: 3 }], limit: { count: 1, windowMinutes: 1440 }, ...patch };
+  return { id, owner: 'acct-ada', mode: 'free', label: 'Twigs', items: [{ kind: 'resource', itemId: 'twig', quantity: 3 }], limit: { count: 1, windowMinutes: 1440 }, shelves: 1, ...patch };
 }
 
 function fakeTransport() {
   return {
-    set: vi.fn(), stock: vi.fn(), show: vi.fn(), remove: vi.fn(), take: vi.fn(), request: vi.fn(),
+    set: vi.fn(), stock: vi.fn(), show: vi.fn(), remove: vi.fn(), take: vi.fn(), request: vi.fn(), extend: vi.fn(),
   } satisfies CaseTransport;
 }
 
@@ -322,5 +335,83 @@ describe('the words', () => {
       .toBe('You have taken your share for now. More opens up in 20 minutes.');
     expect(describeCaseResult({ id: 'p1', action: 'take', outcome: 'wrong-mode' })).toBe('This case is for looking at, not taking.');
     expect(describeCaseResult({ id: 'p1', action: 'stock', outcome: 'wrong-mode' })).toMatch(/Switch it to Free/);
+  });
+});
+
+describe('adding shelves', () => {
+  beforeEach(() => {
+    setSelfAccount('acct-ada');
+  });
+
+  it('grows a solo case a shelf at a time, charging its material and a cord, up to three', () => {
+    addLocalCase('local-1');
+    updateGameState((state) => { state.world.pages['0,0'].placedPieces['local-1'].material = MATERIAL; });
+    stockBag(5, 20);
+    const view = () => getCaseView('local:local-1')!;
+    expect(view().shelves).toBe(1);
+    expect(view().capacity).toBe(LOCAL_CASE_SLOTS);
+    expect(describeShelfCost(view())).toMatch(/^1 .* and 3 /);
+
+    extendCase(view());
+    expect(view().shelves).toBe(2);
+    expect(view().capacity).toBe(LOCAL_CASE_SLOTS * 2);
+    expect(getGameState().player.inventory['binding-cord' as ResourceId]).toBe(4);
+    expect(getGameState().player.inventory[MATERIAL]).toBe(17);
+
+    extendCase(view());
+    extendCase(view());
+    expect(view().shelves).toBe(3);
+    expect(getCaseNote('local:local-1')).toBe('This case is as tall as a case goes.');
+    expect(getGameState().player.inventory['binding-cord' as ResourceId]).toBe(3);
+  });
+
+  it('says what it takes, and charges nothing, when the bag is short', () => {
+    addLocalCase('local-1');
+    updateGameState((state) => { state.world.pages['0,0'].placedPieces['local-1'].material = MATERIAL; });
+    stockBag(1, 2);
+    extendCase(getCaseView('local:local-1')!);
+    expect(getCaseView('local:local-1')!.shelves).toBe(1);
+    expect(getCaseNote('local:local-1')).toMatch(/^Another shelf takes /);
+    expect(getGameState().player.inventory[MATERIAL]).toBe(2);
+  });
+
+  it('holds more keepsakes once it is taller', () => {
+    addLocalCase('local-1');
+    stockBag(5, 0);
+    extendCase(getCaseView('local:local-1')!);
+    for (let index = 0; index < LOCAL_CASE_SLOTS + 2; index += 1) {
+      addTrinket(`t${index}`, `shiny-${index}`, index);
+      showTrinketOn(getCaseView('local:local-1')!.handle, `t${index}`);
+    }
+    expect(getCaseView('local:local-1')?.items).toHaveLength(LOCAL_CASE_SLOTS + 2);
+  });
+
+  it('asks the server for a shared case, and pays only when it says yes', () => {
+    const shared = { ...piece('p1'), material: MATERIAL };
+    registerCasePiece(shared);
+    receiveCase(caseState('p1', { mode: 'show', items: [] }));
+    setCaseTransport(transport);
+    stockBag(3, 10);
+
+    extendCase(getCaseView('shared:p1')!);
+    expect(transport.extend).toHaveBeenCalledWith('p1');
+    expect(getGameState().player.inventory[MATERIAL]).toBe(10);
+
+    receiveCaseResult({ id: 'p1', action: 'extend', outcome: 'maxed' });
+    expect(getGameState().player.inventory[MATERIAL]).toBe(10);
+
+    extendCase(getCaseView('shared:p1')!);
+    receiveCaseResult({ id: 'p1', action: 'extend', outcome: 'ok' });
+    expect(getGameState().player.inventory[MATERIAL]).toBe(7);
+    expect(getGameState().player.inventory['binding-cord' as ResourceId]).toBe(2);
+  });
+
+  it('is not yours to grow when someone else owns it', () => {
+    registerCasePiece(piece('p1'));
+    receiveCase(caseState('p1', { owner: 'acct-bea' }));
+    setCaseTransport(transport);
+    stockBag(3, 10);
+    extendCase(getCaseView('shared:p1')!);
+    expect(transport.extend).not.toHaveBeenCalled();
   });
 });

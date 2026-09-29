@@ -29,7 +29,7 @@ describe('case items', () => {
   });
 
   it('drops malformed entries and cuts to the slot limit', () => {
-    const many = Array.from({ length: 20 }, (_, index) => ({ kind: 'item', itemId: `thing-${index}`, quantity: 1 }));
+    const many = Array.from({ length: LIMITS.caseSlots + 5 }, (_, index) => ({ kind: 'item', itemId: `thing-${index}`, quantity: 1 }));
     expect(sanitizeCaseItems(many)).toHaveLength(LIMITS.caseSlots);
     expect(sanitizeCaseItems([{ kind: 'resource', itemId: '', quantity: 1 }, null, 4, { kind: 'chips', quantity: 3 }])).toEqual([]);
     expect(sanitizeCaseItems([{ kind: 'item', itemId: 'x', quantity: 0 }])).toEqual([]);

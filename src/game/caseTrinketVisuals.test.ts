@@ -39,13 +39,35 @@ vi.mock('../sim/catalogs/trinkets', () => ({
 }));
 
 vi.mock('./trinketRigs', () => ({
-  buildTrinketRig: () => new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1)),
+  buildTrinketRig: () => {
+    // A tall, wide keepsake, so fitting it to a slot has something to do.
+    const rig = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.6));
+    body.position.y = 0.4;
+    rig.add(body);
+    return rig;
+  },
+  animateTrinketRig: (group: THREE.Group) => { group.userData.animated = (group.userData.animated ?? 0) + 1; },
 }));
 
 vi.mock('../world/resources', () => ({ RESOURCE_DEFS: {} }));
 vi.mock('../render/materials', () => ({ getMaterial: () => new THREE.MeshBasicMaterial() }));
 
-const { syncCaseTrinketVisuals } = await import('./caseTrinketVisuals');
+vi.mock('../world/buildPieceVisuals', () => ({
+  DISPLAY_CASE_LID: 'display-case-lid',
+  DISPLAY_CASE_SHAPE: {
+    baseTop: 0.36, levelHeight: 0.62, sheetHalf: 0.0175,
+    riser: { width: 1.1, height: 0.08, depth: 0.22, z: -0.15 },
+    rows: [{ z: 0.12, raised: false }, { z: -0.15, raised: true }],
+    columns: [-0.42, -0.14, 0.14, 0.42],
+    slotFootprint: 0.3, slotHeight: 0.44,
+  },
+  displayCaseFloorY: (level: number) => 0.36 + level * 0.62,
+  displayCaseLidY: (shelves: number) => 0.36 + shelves * 0.62 + 0.02,
+  buildDisplayCaseLevel: (level: number) => Object.assign(new THREE.Group(), { name: `display-case-level-${level}` }),
+}));
+
+const { caseSlotPositions, syncCaseTrinketVisuals, updateCaseTrinkets } = await import('./caseTrinketVisuals');
 
 const TRINKETS = 'case-trinkets';
 
@@ -53,10 +75,10 @@ function localPiece(id: string, x: number, z: number, page = '0,0') {
   return { id, templateKey: DISPLAY_CASE_TEMPLATE, x, z, rotY: 0, material: '', makerId: 'me', page };
 }
 
-function sharedView(id: string, x: number, z: number, items: CaseItem[], page = '0,0'): CaseView {
+function sharedView(id: string, x: number, z: number, items: CaseItem[], page = '0,0', shelves = 1): CaseView {
   return {
     handle: { key: `shared:${id}`, source: 'shared', id, x, z, page },
-    mode: 'show', label: '', items, limit: null, mine: true, detail: null,
+    mode: 'show', label: '', items, limit: null, shelves, capacity: shelves * 8, material: '', mine: true, detail: null,
   };
 }
 
@@ -172,5 +194,72 @@ describe('display case trinket visuals', () => {
     h.views = [];
     syncCaseTrinketVisuals();
     expect(findSlotGroup(own)).toBeUndefined();
+  });
+
+  it('draws the added levels and lifts the lid, even with nothing inside', () => {
+    const own = new THREE.Group();
+    const lid = Object.assign(new THREE.Mesh(), { name: 'display-case-lid' });
+    lid.position.y = 0.36 + 0.62 + 0.02;
+    own.add(lid);
+    h.pages['0,0'] = { placedPieces: { 'local-7': localPiece('local-7', 8, 8) } };
+    h.localVisuals.set('local-7', own);
+    h.views = [sharedView('echo-7', 8, 8, [], '0,0', 3)];
+
+    syncCaseTrinketVisuals();
+
+    const group = findSlotGroup(own)!;
+    expect(group.children.map((child) => child.name)).toEqual(['display-case-level-1', 'display-case-level-2']);
+    expect(lid.position.y).toBeCloseTo(0.36 + 3 * 0.62 + 0.02);
+
+    // The case going away puts the lid back where the piece drew it.
+    h.views = [];
+    syncCaseTrinketVisuals();
+    expect(lid.position.y).toBeCloseTo(0.36 + 0.62 + 0.02);
+  });
+
+  it('lays out eight slots a shelf, front row first, the back row raised', () => {
+    const slots = caseSlotPositions(2);
+    expect(slots).toHaveLength(16);
+    expect(slots[0].z).toBeGreaterThan(slots[4].z);
+    expect(slots[4].y).toBeGreaterThan(slots[0].y);
+    expect(slots[8].y).toBeCloseTo(slots[0].y + 0.62);
+  });
+
+  it('fits a big keepsake under the shelf above it', () => {
+    const own = new THREE.Group();
+    h.pages['0,0'] = { placedPieces: { 'local-8': localPiece('local-8', 9, 9) } };
+    h.localVisuals.set('local-8', own);
+    h.views = [sharedView('echo-8', 9, 9, [trinketItem()])];
+
+    syncCaseTrinketVisuals();
+
+    const rig = findSlotGroup(own)!.children[0];
+    rig.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(rig);
+    expect(box.max.y - box.min.y).toBeLessThanOrEqual(0.44);
+    expect(Math.max(box.max.x - box.min.x, box.max.z - box.min.z)).toBeLessThanOrEqual(0.3);
+  });
+
+  it('animates keepsakes only while their case is drawn', () => {
+    const scene = new THREE.Scene();
+    const own = new THREE.Group();
+    scene.add(own);
+    h.pages['0,0'] = { placedPieces: { 'local-9': localPiece('local-9', 11, 11) } };
+    h.localVisuals.set('local-9', own);
+    h.views = [sharedView('echo-9', 11, 11, [trinketItem()])];
+    syncCaseTrinketVisuals();
+    const rig = findSlotGroup(own)!.children[0];
+
+    updateCaseTrinkets(0.016, 1);
+    expect(rig.userData.animated).toBe(1);
+
+    own.visible = false;
+    updateCaseTrinkets(0.016, 2);
+    expect(rig.userData.animated).toBe(1);
+
+    own.visible = true;
+    scene.remove(own);
+    updateCaseTrinkets(0.016, 3);
+    expect(rig.userData.animated).toBe(1);
   });
 });

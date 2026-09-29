@@ -16,7 +16,7 @@ import { applyDwellingCommand, type DwellingCommand } from './dwelling';
 import { applySceneCommand, type SceneCommand } from './scene';
 import { getGameState, updateGameState, type GameState, type ResourceDropState } from './state';
 import { isMailboxStyleId } from './catalogs/mailboxes';
-import { sanitizeMailboxColor } from '../../shared/src/index';
+import { LIMITS, sanitizeMailboxColor } from '../../shared/src/index';
 import { RESOURCE_CORE_DEFS, type ResourceId } from './catalogs/resources';
 import { TOOL_DEFS } from './catalogs/tools';
 import { TERRAIN_AUTO_MEND_MS, TERRAIN_CELL_RADIUS, type TerrainCellAddress } from './terrainCells';
@@ -59,6 +59,7 @@ import {
   buildAssemblyDef,
   buildMaterialResource,
   buildMaterialUnits,
+  caseShelfRequirements,
   nextBuildStep,
   resolveBuildMaterial,
 } from './catalogs/building';
@@ -121,6 +122,13 @@ export type GameCommand =
   | { type: 'updatePlacedPiece'; id: string; x: number; z: number; rotY: number; material?: string; pageId: string }
   | { type: 'updatePlantSeedDrop'; target: TerrainCellAddress; now: number }
   | { type: 'upgradeThingMaker' }
+  /**
+   * Pay for one more shelf on a display case, from the case's own material
+   * plus a binding cord. With `localCaseId` (a solo case) the shelf goes on
+   * here too; a shared case's shelf count is the server's, so for one of
+   * those this only pays, once the server has said yes.
+   */
+  | { type: 'buildCaseShelf'; material: string; localCaseId?: string }
   /** The mailbox rig and its two team colors — always available, nothing to unlock or pay for. */
   | { type: 'setMailboxLook'; style: string; primary: string; secondary: string }
   // The home's parts and projects: see `dwelling.ts`.
@@ -1367,6 +1375,22 @@ export function applyGameCommand(state: GameState, command: GameCommand): Comman
       spendAllocation(state, allocation);
       maker.level = nextLevel;
       return { ok: true, allocation, message: `Thing Maker upgraded to level ${nextLevel}.` };
+    }
+
+    case 'buildCaseShelf': {
+      const local = command.localCaseId ? state.world.localCases[command.localCaseId] : undefined;
+      if (command.localCaseId && (local?.shelves ?? 1) >= LIMITS.caseShelvesMax) {
+        return { ok: false, reason: 'This case is as tall as a case goes.' };
+      }
+      const allocation = resolveIngredientAllocation(state.player.inventory, caseShelfRequirements(command.material));
+      if (!allocation) return { ok: false, reason: 'More materials are needed for another shelf.' };
+      spendAllocation(state, allocation);
+      if (command.localCaseId) {
+        const entry = local ?? { label: '', trinkets: [], shelves: 1 };
+        entry.shelves = Math.min(LIMITS.caseShelvesMax, entry.shelves + 1);
+        state.world.localCases[command.localCaseId] = entry;
+      }
+      return { ok: true, allocation, message: 'Added a shelf to the case.' };
     }
 
     case 'setMailboxLook': {
