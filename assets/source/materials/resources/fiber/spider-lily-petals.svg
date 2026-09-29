@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #b04840;
+  --foreground-01: #e85848;
+  --foreground-02: #f28a7a;
+  --foreground-03: #8a2c28;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<defs>
+<g id="m0"><path d="M 0 -19 Q 4.5 0 0 19 Q -4.5 0 0 -19 Z" fill="var(--foreground-01)"/></g>
+<g id="m1"><path d="M 0 -14 Q 3.5 0 0 14 Q -3.5 0 0 -14 Z" fill="var(--foreground-02)"/></g>
+<g id="m2"><circle cx="0" cy="0" r="3.2" fill="var(--foreground-03)"/></g>
+</defs>
+<use href="#m0" transform="translate(34.0 48.4) rotate(17.8) scale(0.87)"/>
+<use href="#m1" transform="translate(36.0 46.0) rotate(125.7) scale(1.16)"/>
+<use href="#m2" transform="translate(49.4 37.8) rotate(253.9) scale(0.95)"/>
+<use href="#m0" transform="translate(107.9 35.3) rotate(147.1) scale(1.16)"/>
+<use href="#m1" transform="translate(115.4 48.5) rotate(112.2) scale(0.98)"/>
+<use href="#m2" transform="translate(116.4 37.6) rotate(213.4) scale(0.93)"/>
+<use href="#m0" transform="translate(212.2 44.9) rotate(287.2) scale(0.86)"/>
+<use href="#m1" transform="translate(207.3 45.8) rotate(287.0) scale(0.96)"/>
+<use href="#m2" transform="translate(189.9 49.0) rotate(287.6) scale(0.94)"/>
+<use href="#m0" transform="translate(86.9 121.6) rotate(304.3) scale(1.04)"/>
+<use href="#m1" transform="translate(68.8 109.3) rotate(285.7) scale(0.98)"/>
+<use href="#m2" transform="translate(70.1 127.9) rotate(340.8) scale(0.97)"/>
+<use href="#m0" transform="translate(160.2 124.9) rotate(44.2) scale(0.95)"/>
+<use href="#m1" transform="translate(157.3 120.2) rotate(121.1) scale(1.01)"/>
+<use href="#m2" transform="translate(148.1 132.3) rotate(223.9) scale(0.92)"/>
+<use href="#m0" transform="translate(229.7 131.8) rotate(187.1) scale(1.06)"/>
+<use href="#m1" transform="translate(233.2 118.4) rotate(7.9) scale(0.88)"/>
+<use href="#m2" transform="translate(243.5 126.1) rotate(235.9) scale(1.17)"/>
+<use href="#m0" transform="translate(37.4 206.0) rotate(18.9) scale(1.13)"/>
+<use href="#m1" transform="translate(38.9 196.8) rotate(275.1) scale(0.87)"/>
+<use href="#m2" transform="translate(51.1 190.5) rotate(23.2) scale(1.08)"/>
+<use href="#m0" transform="translate(115.6 196.9) rotate(281.6) scale(1.05)"/>
+<use href="#m1" transform="translate(113.1 210.8) rotate(230.2) scale(0.99)"/>
+<use href="#m2" transform="translate(119.7 202.1) rotate(222.1) scale(0.93)"/>
+<use href="#m0" transform="translate(202.8 196.2) rotate(357.7) scale(0.91)"/>
+<use href="#m1" transform="translate(205.9 200.4) rotate(312.8) scale(1.01)"/>
+<use href="#m2" transform="translate(190.1 203.4) rotate(133.4) scale(0.85)"/>
+</g>
+</svg>

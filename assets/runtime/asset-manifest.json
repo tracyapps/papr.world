@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T16:05:25.955Z",
+  "generatedAt": "2026-09-29T01:52:26.254Z",
   "sourceRoot": "assets/source",
   "runtimeRoot": "assets/runtime",
   "maxRuntimeDimension": 4096,
@@ -1546,6 +1546,936 @@
       "size": "420x280"
     },
     {
+      "key": "materials.resources.fiber.agave-fiber",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/agave-fiber.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.agave-fiber.loose-01",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.agave-fiber.loose-02",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.agave-fiber.loose-03",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.agave-fiber.loose-04",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.agave-fiber.loose-05",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.agave-fiber.loose-06",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "runtime": "assets/runtime/resources/agave-fiber/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.allium-petals",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/allium-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.allium-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.allium-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.allium-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.allium-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.allium-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.allium-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "runtime": "assets/runtime/resources/allium-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.alpine-resin-paper",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/alpine-resin-paper.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-01",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-02",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-03",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-04",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-05",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.alpine-resin-paper.loose-06",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "runtime": "assets/runtime/resources/alpine-resin-paper/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.anthurium-petals",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/anthurium-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.anthurium-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "runtime": "assets/runtime/resources/anthurium-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.baobab-pith-fiber",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/baobab-pith-fiber.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-01",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-02",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-03",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-04",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-05",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.baobab-pith-fiber.loose-06",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.bird-of-paradise-petals",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/bird-of-paradise-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bird-of-paradise-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.blackeyed-susan-petals",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/blackeyed-susan-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blackeyed-susan-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.blotting-caps",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/blotting-caps.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.blotting-caps.loose-01",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blotting-caps.loose-02",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blotting-caps.loose-03",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blotting-caps.loose-04",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blotting-caps.loose-05",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.blotting-caps.loose-06",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "runtime": "assets/runtime/resources/blotting-caps/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.bougainvillea-petals",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/bougainvillea-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.bougainvillea-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "runtime": "assets/runtime/resources/bougainvillea-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.cactus-fiber",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/cactus-fiber.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-01",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-02",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-03",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-04",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-05",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cactus-fiber.loose-06",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "runtime": "assets/runtime/resources/cactus-fiber/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
       "key": "materials.resources.fiber.cattail",
       "source": "assets/source/materials/resources/fiber/cattail.svg",
       "runtime": "assets/runtime/materials/resources/fiber/cattail.png",
@@ -1636,6 +2566,936 @@
         "variant": 6
       },
       "sourceSize": "2000x1000",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.coneflower-petals",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/coneflower-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.coneflower-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "runtime": "assets/runtime/resources/coneflower-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.cosmos-petals",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/cosmos-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.cosmos-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "runtime": "assets/runtime/resources/cosmos-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.crepe-vine",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/crepe-vine.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.crepe-vine.loose-01",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.crepe-vine.loose-02",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.crepe-vine.loose-03",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.crepe-vine.loose-04",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.crepe-vine.loose-05",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.crepe-vine.loose-06",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "runtime": "assets/runtime/resources/crepe-vine/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.daisy-petals",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/daisy-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.daisy-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.daisy-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.daisy-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.daisy-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.daisy-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.daisy-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "runtime": "assets/runtime/resources/daisy-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.edelweiss-petals",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/edelweiss-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.edelweiss-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "runtime": "assets/runtime/resources/edelweiss-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.foxglove-petals",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/foxglove-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.foxglove-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "runtime": "assets/runtime/resources/foxglove-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.hibiscus-petals",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/hibiscus-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.hibiscus-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "runtime": "assets/runtime/resources/hibiscus-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.lotus-petals",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/lotus-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.lotus-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lotus-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lotus-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lotus-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lotus-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lotus-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "runtime": "assets/runtime/resources/lotus-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.lupine-petals",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/lupine-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.lupine-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lupine-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lupine-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lupine-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lupine-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.lupine-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "runtime": "assets/runtime/resources/lupine-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.marigold-petals",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/marigold-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.marigold-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.marigold-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.marigold-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.marigold-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.marigold-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.marigold-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "runtime": "assets/runtime/resources/marigold-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
       "size": "256x440"
     },
     {
@@ -1825,6 +3685,564 @@
       "size": "256x440"
     },
     {
+      "key": "materials.resources.fiber.paintbrush-petals",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/paintbrush-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.paintbrush-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "runtime": "assets/runtime/resources/paintbrush-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.palm-fiber",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/palm-fiber.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.palm-fiber.loose-01",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.palm-fiber.loose-02",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.palm-fiber.loose-03",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.palm-fiber.loose-04",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.palm-fiber.loose-05",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.palm-fiber.loose-06",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "runtime": "assets/runtime/resources/palm-fiber/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.plumeria-petals",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/plumeria-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.plumeria-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "runtime": "assets/runtime/resources/plumeria-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.poppy-petals",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/poppy-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.poppy-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.poppy-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.poppy-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.poppy-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.poppy-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.poppy-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "runtime": "assets/runtime/resources/poppy-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.pressed-petal-confetti",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/pressed-petal-confetti.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-01",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-02",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-03",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-04",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-05",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.pressed-petal-confetti.loose-06",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.protea-petals",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/protea-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.protea-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.protea-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.protea-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.protea-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.protea-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.protea-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "runtime": "assets/runtime/resources/protea-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
       "key": "materials.resources.fiber.shrub",
       "source": "assets/source/materials/resources/fiber/shrub.svg",
       "runtime": "assets/runtime/materials/resources/fiber/shrub.png",
@@ -1915,6 +4333,285 @@
         "variant": 6
       },
       "sourceSize": "1000x800",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.spider-lily-petals",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/spider-lily-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.spider-lily-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "runtime": "assets/runtime/resources/spider-lily-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.sunflower-petals",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/sunflower-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.sunflower-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "runtime": "assets/runtime/resources/sunflower-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "materials.resources.fiber.zinnia-petals",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/materials/resources/fiber/zinnia-petals.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-01",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-02",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-03",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-04",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-05",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "256x440"
+    },
+    {
+      "key": "resource.zinnia-petals.loose-06",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "runtime": "assets/runtime/resources/zinnia-petals/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "fiber",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
       "size": "256x440"
     },
     {
@@ -3257,9 +5954,288 @@
       "size": "360x300"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.green",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.green.png",
+      "key": "materials.resources.wood.acacia-thornwood",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/materials/resources/wood/acacia-thornwood.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-01",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-02",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-03",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-04",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-05",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.acacia-thornwood.loose-06",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "runtime": "assets/runtime/resources/acacia-thornwood/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.bamboo-strips",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/materials/resources/wood/bamboo-strips.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-01",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-02",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-03",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-04",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-05",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.bamboo-strips.loose-06",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "runtime": "assets/runtime/resources/bamboo-strips/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.banana-leaf-clippings",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/banana-leaf-clippings.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.banana-leaf-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.barrel-cactus-clippings.green",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.green.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3274,9 +6250,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.blue",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.blue.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.blue",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.blue.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3291,9 +6267,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.red",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.red.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.red",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.red.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3308,9 +6284,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.purple",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.purple.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.purple",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.purple.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3325,9 +6301,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.teal",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.teal.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.teal",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.teal.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3342,9 +6318,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.yellow",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.yellow.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.yellow",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.yellow.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3359,9 +6335,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.darkblue",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.darkblue.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.darkblue",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.darkblue.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3376,9 +6352,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.orange",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.orange.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.orange",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.orange.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3393,9 +6369,9 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus.pink",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.pink.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings.pink",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.pink.png",
       "type": "texture",
       "usage": "material",
       "colorway": {
@@ -3410,18 +6386,18 @@
       "size": "263x239"
     },
     {
-      "key": "materials.resources.wood.barrel-cactus",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.png",
+      "key": "materials.resources.wood.barrel-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.png",
       "type": "texture",
       "usage": "material",
       "sourceSize": "263x239",
       "size": "263x239"
     },
     {
-      "key": "resource.barrel-cactus.loose-01",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-01.png",
+      "key": "resource.barrel-cactus-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-01.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3433,9 +6409,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.barrel-cactus.loose-02",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-02.png",
+      "key": "resource.barrel-cactus-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-02.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3447,9 +6423,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.barrel-cactus.loose-03",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-03.png",
+      "key": "resource.barrel-cactus-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-03.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3461,9 +6437,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.barrel-cactus.loose-04",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-04.png",
+      "key": "resource.barrel-cactus-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-04.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3475,9 +6451,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.barrel-cactus.loose-05",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-05.png",
+      "key": "resource.barrel-cactus-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-05.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3489,9 +6465,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.barrel-cactus.loose-06",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "runtime": "assets/runtime/resources/barrel-cactus/loose-06.png",
+      "key": "resource.barrel-cactus-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-06.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3503,18 +6479,18 @@
       "size": "512x192"
     },
     {
-      "key": "materials.resources.wood.column-cactus",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/column-cactus.png",
+      "key": "materials.resources.wood.column-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/column-cactus-clippings.png",
       "type": "texture",
       "usage": "material",
       "sourceSize": "200x200",
       "size": "200x200"
     },
     {
-      "key": "resource.column-cactus.loose-01",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-01.png",
+      "key": "resource.column-cactus-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-01.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3526,9 +6502,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.column-cactus.loose-02",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-02.png",
+      "key": "resource.column-cactus-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-02.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3540,9 +6516,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.column-cactus.loose-03",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-03.png",
+      "key": "resource.column-cactus-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-03.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3554,9 +6530,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.column-cactus.loose-04",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-04.png",
+      "key": "resource.column-cactus-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-04.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3568,9 +6544,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.column-cactus.loose-05",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-05.png",
+      "key": "resource.column-cactus-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-05.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3582,9 +6558,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.column-cactus.loose-06",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "runtime": "assets/runtime/resources/column-cactus/loose-06.png",
+      "key": "resource.column-cactus-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/column-cactus-clippings/loose-06.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3593,6 +6569,99 @@
         "variant": 6
       },
       "sourceSize": "200x200",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.cypress-bark-folds",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/materials/resources/wood/cypress-bark-folds.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-01",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-02",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-03",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-04",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-05",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.cypress-bark-folds.loose-06",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "runtime": "assets/runtime/resources/cypress-bark-folds/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
       "size": "512x192"
     },
     {
@@ -3790,6 +6859,99 @@
       "size": "512x192"
     },
     {
+      "key": "materials.resources.wood.leafy-clippings",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/leafy-clippings.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.leafy-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "runtime": "assets/runtime/resources/leafy-clippings/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
       "key": "materials.resources.wood.leafy-tree",
       "source": "assets/source/materials/resources/wood/leafy-tree.svg",
       "runtime": "assets/runtime/materials/resources/wood/leafy-tree.png",
@@ -3883,18 +7045,18 @@
       "size": "512x192"
     },
     {
-      "key": "materials.resources.wood.paddle-cactus",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/materials/resources/wood/paddle-cactus.png",
+      "key": "materials.resources.wood.paddle-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/paddle-cactus-clippings.png",
       "type": "texture",
       "usage": "material",
       "sourceSize": "2000x1200",
       "size": "2000x1200"
     },
     {
-      "key": "resource.paddle-cactus.loose-01",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-01.png",
+      "key": "resource.paddle-cactus-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-01.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3906,9 +7068,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.paddle-cactus.loose-02",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-02.png",
+      "key": "resource.paddle-cactus-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-02.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3920,9 +7082,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.paddle-cactus.loose-03",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-03.png",
+      "key": "resource.paddle-cactus-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-03.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3934,9 +7096,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.paddle-cactus.loose-04",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-04.png",
+      "key": "resource.paddle-cactus-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-04.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3948,9 +7110,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.paddle-cactus.loose-05",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-05.png",
+      "key": "resource.paddle-cactus-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-05.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3962,9 +7124,9 @@
       "size": "512x192"
     },
     {
-      "key": "resource.paddle-cactus.loose-06",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "runtime": "assets/runtime/resources/paddle-cactus/loose-06.png",
+      "key": "resource.paddle-cactus-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-06.png",
       "type": "texture",
       "usage": "resource",
       "generated": {
@@ -3973,6 +7135,99 @@
         "variant": 6
       },
       "sourceSize": "2000x1200",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.palm-clippings",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/materials/resources/wood/palm-clippings.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.palm-clippings.loose-01",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.palm-clippings.loose-02",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.palm-clippings.loose-03",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.palm-clippings.loose-04",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.palm-clippings.loose-05",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.palm-clippings.loose-06",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "runtime": "assets/runtime/resources/palm-clippings/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
       "size": "512x192"
     },
     {
@@ -4159,6 +7414,99 @@
         "variant": 6
       },
       "sourceSize": "350x250",
+      "size": "512x192"
+    },
+    {
+      "key": "materials.resources.wood.supple-shrub-shoots",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/materials/resources/wood/supple-shrub-shoots.png",
+      "type": "texture",
+      "usage": "material",
+      "sourceSize": "240x240",
+      "size": "240x240"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-01",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-01.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 1
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-02",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-02.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 2
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-03",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-03.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 3
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-04",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-04.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 4
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-05",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-05.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 5
+      },
+      "sourceSize": "240x240",
+      "size": "512x192"
+    },
+    {
+      "key": "resource.supple-shrub-shoots.loose-06",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-06.png",
+      "type": "texture",
+      "usage": "resource",
+      "generated": {
+        "kind": "loose-resource",
+        "looseTemplate": "wood",
+        "variant": 6
+      },
+      "sourceSize": "240x240",
       "size": "512x192"
     },
     {
@@ -5967,6 +9315,15 @@
       "size": "464x323"
     },
     {
+      "key": "tools.basic-pickaxe",
+      "source": "assets/source/tools/basic-pickaxe.svg",
+      "runtime": "assets/runtime/tools/basic-pickaxe.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "584x407",
+      "size": "584x407"
+    },
+    {
       "key": "tools.fancy-shovel",
       "source": "assets/source/tools/fancy-shovel.svg",
       "runtime": "assets/runtime/tools/fancy-shovel.png",
@@ -6012,6 +9369,15 @@
       "size": "633x172"
     },
     {
+      "key": "tools.heavyduty-pickaxe",
+      "source": "assets/source/tools/heavyduty-pickaxe.svg",
+      "runtime": "assets/runtime/tools/heavyduty-pickaxe.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "584x407",
+      "size": "584x407"
+    },
+    {
       "key": "tools.kids-scissors",
       "source": "assets/source/tools/kids-scissors.svg",
       "runtime": "assets/runtime/tools/kids-scissors.png",
@@ -6028,6 +9394,15 @@
       "usage": "asset",
       "sourceSize": "610x181",
       "size": "610x181"
+    },
+    {
+      "key": "tools.spork",
+      "source": "assets/source/tools/spork.svg",
+      "runtime": "assets/runtime/tools/spork.png",
+      "type": "texture",
+      "usage": "asset",
+      "sourceSize": "377x285",
+      "size": "377x285"
     },
     {
       "key": "tools.squeaky-hammer",
@@ -6430,6 +9805,396 @@
       ]
     },
     {
+      "resourceId": "agave-fiber",
+      "source": "assets/source/materials/resources/fiber/agave-fiber.svg",
+      "surface": "assets/runtime/materials/resources/fiber/agave-fiber.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/agave-fiber/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "allium-petals",
+      "source": "assets/source/materials/resources/fiber/allium-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/allium-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/allium-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "alpine-resin-paper",
+      "source": "assets/source/materials/resources/fiber/alpine-resin-paper.svg",
+      "surface": "assets/runtime/materials/resources/fiber/alpine-resin-paper.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/alpine-resin-paper/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "anthurium-petals",
+      "source": "assets/source/materials/resources/fiber/anthurium-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/anthurium-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/anthurium-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "baobab-pith-fiber",
+      "source": "assets/source/materials/resources/fiber/baobab-pith-fiber.svg",
+      "surface": "assets/runtime/materials/resources/fiber/baobab-pith-fiber.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/baobab-pith-fiber/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "bird-of-paradise-petals",
+      "source": "assets/source/materials/resources/fiber/bird-of-paradise-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/bird-of-paradise-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bird-of-paradise-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "blackeyed-susan-petals",
+      "source": "assets/source/materials/resources/fiber/blackeyed-susan-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/blackeyed-susan-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blackeyed-susan-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "blotting-caps",
+      "source": "assets/source/materials/resources/fiber/blotting-caps.svg",
+      "surface": "assets/runtime/materials/resources/fiber/blotting-caps.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/blotting-caps/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "bougainvillea-petals",
+      "source": "assets/source/materials/resources/fiber/bougainvillea-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/bougainvillea-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/bougainvillea-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "cactus-fiber",
+      "source": "assets/source/materials/resources/fiber/cactus-fiber.svg",
+      "surface": "assets/runtime/materials/resources/fiber/cactus-fiber.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cactus-fiber/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
       "resourceId": "cattail",
       "source": "assets/source/materials/resources/fiber/cattail.svg",
       "surface": "assets/runtime/materials/resources/fiber/cattail.png",
@@ -6463,6 +10228,396 @@
         },
         {
           "runtime": "assets/runtime/resources/cattail/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "coneflower-petals",
+      "source": "assets/source/materials/resources/fiber/coneflower-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/coneflower-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/coneflower-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "cosmos-petals",
+      "source": "assets/source/materials/resources/fiber/cosmos-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/cosmos-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/cosmos-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "crepe-vine",
+      "source": "assets/source/materials/resources/fiber/crepe-vine.svg",
+      "surface": "assets/runtime/materials/resources/fiber/crepe-vine.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/crepe-vine/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "daisy-petals",
+      "source": "assets/source/materials/resources/fiber/daisy-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/daisy-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/daisy-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "edelweiss-petals",
+      "source": "assets/source/materials/resources/fiber/edelweiss-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/edelweiss-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/edelweiss-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "foxglove-petals",
+      "source": "assets/source/materials/resources/fiber/foxglove-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/foxglove-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/foxglove-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "hibiscus-petals",
+      "source": "assets/source/materials/resources/fiber/hibiscus-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/hibiscus-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/hibiscus-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "lotus-petals",
+      "source": "assets/source/materials/resources/fiber/lotus-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/lotus-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lotus-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "lupine-petals",
+      "source": "assets/source/materials/resources/fiber/lupine-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/lupine-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/lupine-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "marigold-petals",
+      "source": "assets/source/materials/resources/fiber/marigold-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/marigold-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/marigold-petals/loose-06.png",
           "size": "256x440",
           "aspectRatio": 0.5818181818181818
         }
@@ -6547,6 +10702,240 @@
       ]
     },
     {
+      "resourceId": "paintbrush-petals",
+      "source": "assets/source/materials/resources/fiber/paintbrush-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/paintbrush-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/paintbrush-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "palm-fiber",
+      "source": "assets/source/materials/resources/fiber/palm-fiber.svg",
+      "surface": "assets/runtime/materials/resources/fiber/palm-fiber.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-fiber/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "plumeria-petals",
+      "source": "assets/source/materials/resources/fiber/plumeria-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/plumeria-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/plumeria-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "poppy-petals",
+      "source": "assets/source/materials/resources/fiber/poppy-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/poppy-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/poppy-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "pressed-petal-confetti",
+      "source": "assets/source/materials/resources/fiber/pressed-petal-confetti.svg",
+      "surface": "assets/runtime/materials/resources/fiber/pressed-petal-confetti.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/pressed-petal-confetti/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "protea-petals",
+      "source": "assets/source/materials/resources/fiber/protea-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/protea-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/protea-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
       "resourceId": "shrub",
       "source": "assets/source/materials/resources/fiber/shrub.svg",
       "surface": "assets/runtime/materials/resources/fiber/shrub.png",
@@ -6580,6 +10969,123 @@
         },
         {
           "runtime": "assets/runtime/resources/shrub/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "spider-lily-petals",
+      "source": "assets/source/materials/resources/fiber/spider-lily-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/spider-lily-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/spider-lily-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "sunflower-petals",
+      "source": "assets/source/materials/resources/fiber/sunflower-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/sunflower-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/sunflower-petals/loose-06.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        }
+      ]
+    },
+    {
+      "resourceId": "zinnia-petals",
+      "source": "assets/source/materials/resources/fiber/zinnia-petals.svg",
+      "surface": "assets/runtime/materials/resources/fiber/zinnia-petals.png",
+      "surfaceColorways": [],
+      "looseTemplate": "fiber",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-01.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-02.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-03.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-04.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-05.png",
+          "size": "256x440",
+          "aspectRatio": 0.5818181818181818
+        },
+        {
+          "runtime": "assets/runtime/resources/zinnia-petals/loose-06.png",
           "size": "256x440",
           "aspectRatio": 0.5818181818181818
         }
@@ -7151,124 +11657,280 @@
       ]
     },
     {
-      "resourceId": "barrel-cactus",
-      "source": "assets/source/materials/resources/wood/barrel-cactus.svg",
-      "surface": "assets/runtime/materials/resources/wood/barrel-cactus.png",
-      "surfaceColorways": [
-        {
-          "id": "green",
-          "label": "Green",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.green.png"
-        },
-        {
-          "id": "blue",
-          "label": "Blue",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.blue.png"
-        },
-        {
-          "id": "red",
-          "label": "Red",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.red.png"
-        },
-        {
-          "id": "purple",
-          "label": "Purple",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.purple.png"
-        },
-        {
-          "id": "teal",
-          "label": "Teal",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.teal.png"
-        },
-        {
-          "id": "yellow",
-          "label": "Yellow",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.yellow.png"
-        },
-        {
-          "id": "darkblue",
-          "label": "Darkblue",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.darkblue.png"
-        },
-        {
-          "id": "orange",
-          "label": "Orange",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.orange.png"
-        },
-        {
-          "id": "pink",
-          "label": "Pink",
-          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus.pink.png"
-        }
-      ],
+      "resourceId": "acacia-thornwood",
+      "source": "assets/source/materials/resources/wood/acacia-thornwood.svg",
+      "surface": "assets/runtime/materials/resources/wood/acacia-thornwood.png",
+      "surfaceColorways": [],
       "looseTemplate": "wood",
       "loose": [
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-01.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-01.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-02.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-02.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-03.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-03.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-04.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-04.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-05.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-05.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/barrel-cactus/loose-06.png",
+          "runtime": "assets/runtime/resources/acacia-thornwood/loose-06.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         }
       ]
     },
     {
-      "resourceId": "column-cactus",
-      "source": "assets/source/materials/resources/wood/column-cactus.svg",
-      "surface": "assets/runtime/materials/resources/wood/column-cactus.png",
+      "resourceId": "bamboo-strips",
+      "source": "assets/source/materials/resources/wood/bamboo-strips.svg",
+      "surface": "assets/runtime/materials/resources/wood/bamboo-strips.png",
       "surfaceColorways": [],
       "looseTemplate": "wood",
       "loose": [
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-01.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-01.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-02.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-02.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-03.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-03.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-04.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-04.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-05.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-05.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/column-cactus/loose-06.png",
+          "runtime": "assets/runtime/resources/bamboo-strips/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "banana-leaf-clippings",
+      "source": "assets/source/materials/resources/wood/banana-leaf-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/banana-leaf-clippings.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/banana-leaf-clippings/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "barrel-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/barrel-cactus-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.png",
+      "surfaceColorways": [
+        {
+          "id": "green",
+          "label": "Green",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.green.png"
+        },
+        {
+          "id": "blue",
+          "label": "Blue",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.blue.png"
+        },
+        {
+          "id": "red",
+          "label": "Red",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.red.png"
+        },
+        {
+          "id": "purple",
+          "label": "Purple",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.purple.png"
+        },
+        {
+          "id": "teal",
+          "label": "Teal",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.teal.png"
+        },
+        {
+          "id": "yellow",
+          "label": "Yellow",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.yellow.png"
+        },
+        {
+          "id": "darkblue",
+          "label": "Darkblue",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.darkblue.png"
+        },
+        {
+          "id": "orange",
+          "label": "Orange",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.orange.png"
+        },
+        {
+          "id": "pink",
+          "label": "Pink",
+          "runtime": "assets/runtime/materials/resources/wood/barrel-cactus-clippings.pink.png"
+        }
+      ],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/barrel-cactus-clippings/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "column-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/column-cactus-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/column-cactus-clippings.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/column-cactus-clippings/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "cypress-bark-folds",
+      "source": "assets/source/materials/resources/wood/cypress-bark-folds.svg",
+      "surface": "assets/runtime/materials/resources/wood/cypress-bark-folds.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/cypress-bark-folds/loose-06.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         }
@@ -7345,6 +12007,45 @@
       ]
     },
     {
+      "resourceId": "leafy-clippings",
+      "source": "assets/source/materials/resources/wood/leafy-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/leafy-clippings.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/leafy-clippings/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
       "resourceId": "leafy-tree",
       "source": "assets/source/materials/resources/wood/leafy-tree.svg",
       "surface": "assets/runtime/materials/resources/wood/leafy-tree.png",
@@ -7384,39 +12085,78 @@
       ]
     },
     {
-      "resourceId": "paddle-cactus",
-      "source": "assets/source/materials/resources/wood/paddle-cactus.svg",
-      "surface": "assets/runtime/materials/resources/wood/paddle-cactus.png",
+      "resourceId": "paddle-cactus-clippings",
+      "source": "assets/source/materials/resources/wood/paddle-cactus-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/paddle-cactus-clippings.png",
       "surfaceColorways": [],
       "looseTemplate": "wood",
       "loose": [
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-01.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-01.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-02.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-02.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-03.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-03.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-04.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-04.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-05.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-05.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         },
         {
-          "runtime": "assets/runtime/resources/paddle-cactus/loose-06.png",
+          "runtime": "assets/runtime/resources/paddle-cactus-clippings/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "palm-clippings",
+      "source": "assets/source/materials/resources/wood/palm-clippings.svg",
+      "surface": "assets/runtime/materials/resources/wood/palm-clippings.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/palm-clippings/loose-06.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         }
@@ -7495,6 +12235,45 @@
         },
         {
           "runtime": "assets/runtime/resources/ribbonwood-sticks/loose-06.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        }
+      ]
+    },
+    {
+      "resourceId": "supple-shrub-shoots",
+      "source": "assets/source/materials/resources/wood/supple-shrub-shoots.svg",
+      "surface": "assets/runtime/materials/resources/wood/supple-shrub-shoots.png",
+      "surfaceColorways": [],
+      "looseTemplate": "wood",
+      "loose": [
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-01.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-02.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-03.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-04.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-05.png",
+          "size": "512x192",
+          "aspectRatio": 2.6666666666666665
+        },
+        {
+          "runtime": "assets/runtime/resources/supple-shrub-shoots/loose-06.png",
           "size": "512x192",
           "aspectRatio": 2.6666666666666665
         }

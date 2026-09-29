@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #55682f;
+  --foreground-01: #8aa04c;
+  --foreground-02: #a8bc68;
+  --foreground-03: #6f8440;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<path d="M -20 0.0 L 260 0.0" fill="none" stroke="var(--foreground-02)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 26.7 L 260 26.7" fill="none" stroke="var(--foreground-01)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 53.3 L 260 53.3" fill="none" stroke="var(--foreground-02)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 80.0 L 260 80.0" fill="none" stroke="var(--foreground-01)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 106.7 L 260 106.7" fill="none" stroke="var(--foreground-02)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 133.3 L 260 133.3" fill="none" stroke="var(--foreground-01)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 160.0 L 260 160.0" fill="none" stroke="var(--foreground-02)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 186.7 L 260 186.7" fill="none" stroke="var(--foreground-01)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 213.3 L 260 213.3" fill="none" stroke="var(--foreground-02)" stroke-width="6" stroke-linecap="round"/>
+<path d="M -20 240.0 L 260 240.0" fill="none" stroke="var(--foreground-01)" stroke-width="6" stroke-linecap="round"/>
+<path d="M 0.0 -20 L -28.0 260" fill="none" stroke="var(--foreground-03)" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M 53.3 -20 L 25.3 260" fill="none" stroke="var(--foreground-03)" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M 106.7 -20 L 78.7 260" fill="none" stroke="var(--foreground-03)" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M 160.0 -20 L 132.0 260" fill="none" stroke="var(--foreground-03)" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M 213.3 -20 L 185.3 260" fill="none" stroke="var(--foreground-03)" stroke-width="3.2" stroke-linecap="round"/>
+</g>
+</svg>

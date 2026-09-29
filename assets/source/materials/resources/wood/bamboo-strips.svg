@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #4f6e2e;
+  --foreground-01: #b8c86a;
+  --foreground-02: #8aa850;
+  --foreground-03: #6f8f3e;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<rect x="10.6" y="-8" width="26.9" height="256" rx="4.8" fill="var(--foreground-01)"/>
+<rect x="8.6" y="72.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="8.6" y="168.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="58.6" y="-8" width="26.9" height="256" rx="4.8" fill="var(--foreground-02)"/>
+<rect x="56.6" y="72.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="56.6" y="168.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="106.6" y="-8" width="26.9" height="256" rx="4.8" fill="var(--foreground-01)"/>
+<rect x="104.6" y="72.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="104.6" y="168.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="154.6" y="-8" width="26.9" height="256" rx="4.8" fill="var(--foreground-02)"/>
+<rect x="152.6" y="72.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="152.6" y="168.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="202.6" y="-8" width="26.9" height="256" rx="4.8" fill="var(--foreground-01)"/>
+<rect x="200.6" y="72.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+<rect x="200.6" y="168.0" width="30.9" height="7" rx="3.5" fill="var(--foreground-03)"/>
+</g>
+</svg>

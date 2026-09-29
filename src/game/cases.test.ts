@@ -124,6 +124,15 @@ describe('finding cases', () => {
     expect(listCases().map((view) => view.handle.key)).toEqual(['shared:p1']);
   });
 
+  it('does not let a case on another page stand for the local one, even at the same spot', () => {
+    // Interiors reuse surface coordinates, so only the page tells two cases
+    // at the same spot apart.
+    addLocalCase('local-1', 10, 10);
+    registerCasePiece(piece('p1', 10, 10, 'in:home:0,0'));
+    receiveCase(caseState('p1'));
+    expect(listCases().map((view) => view.handle.key).sort()).toEqual(['local:local-1', 'shared:p1']);
+  });
+
   it('finds the nearest case in reach, on the same page', () => {
     registerCasePiece(piece('near', 10, 10));
     registerCasePiece(piece('nearer', 11, 10));

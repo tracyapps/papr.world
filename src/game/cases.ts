@@ -163,8 +163,13 @@ export function receiveCaseResult(result: CaseResult, now = Date.now()) {
 
 // ---- Finding cases -----------------------------------------------------------
 
-function sameSpot(a: { x: number; z: number; rotY?: number }, b: { x: number; z: number; rotY?: number }) {
-  return Math.abs(a.x - b.x) < 0.01 && Math.abs(a.z - b.z) < 0.01;
+/** Standing in the same place: x/z within a hundredth, and on the same page
+ * too -- interiors reuse surface coordinates, so without the page a case
+ * inside a home would stand for (or hide behind) a case on the surface. */
+function sameSpot(a: { x: number; z: number; page?: string }, b: { x: number; z: number; page?: string }) {
+  return (a.page || '') === (b.page || '')
+    && Math.abs(a.x - b.x) < 0.01
+    && Math.abs(a.z - b.z) < 0.01;
 }
 
 function sharedView(piece: PlacedPiece, state: CaseState): CaseView {
@@ -191,7 +196,7 @@ export function listCases(): CaseView[] {
   for (const [pageId, page] of Object.entries(getGameState().world.pages)) {
     for (const piece of Object.values(page.placedPieces)) {
       if (piece.templateKey !== DISPLAY_CASE_TEMPLATE) continue;
-      if (stood.some((shared) => sameSpot(shared, piece))) continue;
+      if (stood.some((shared) => sameSpot(shared, { ...piece, page: piece.page || pageId }))) continue;
       const own = local[piece.id];
       views.push({
         handle: { key: `local:${piece.id}`, source: 'local', id: piece.id, x: piece.x, z: piece.z, page: piece.page || pageId },

@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #6e603e;
+  --foreground-01: #8b7751;
+  --foreground-02: #a8956a;
+  --foreground-03: #5c8a4a;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<g transform="translate(-240 -240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(0 -240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(240 -240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(-240 0)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(0 0)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(240 0)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(-240 240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(0 240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+<g transform="translate(240 240)"><path d="M 20 255 C 34 148.8 14.399999999999999 72 31.200000000000003 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="31.2" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 60 255 C 40 148.8 68 72 44 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="44.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 100 255 C 126 148.8 89.6 72 120.8 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="120.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 140 255 C 126 148.8 145.6 72 128.8 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="128.8" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 180 255 C 200 148.8 172 72 196 -15" fill="none" stroke="var(--foreground-02)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="196.0" cy="-4" r="4.5" fill="var(--foreground-03)"/>
+<path d="M 220 255 C 194 148.8 230.4 72 199.2 -15" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round"/>
+<circle cx="199.2" cy="-4" r="4.5" fill="var(--foreground-03)"/></g>
+</g>
+</svg>

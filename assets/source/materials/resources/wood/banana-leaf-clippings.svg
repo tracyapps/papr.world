@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #3f7234;
+  --foreground-01: #5f9842;
+  --foreground-02: #8fbf5a;
+  --foreground-03: #2f5527;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<path d="M 0.0 18.0 L 8.6 21.1 L 17.1 22.9 L 25.7 22.5 L 34.3 20.2 L 42.9 16.9 L 51.4 14.1 L 60.0 13.0 L 68.6 14.1 L 77.1 16.9 L 85.7 20.2 L 94.3 22.5 L 102.9 22.9 L 111.4 21.1 L 120.0 18.0 L 128.6 14.9 L 137.1 13.1 L 145.7 13.5 L 154.3 15.8 L 162.9 19.1 L 171.4 21.9 L 180.0 23.0 L 188.6 21.9 L 197.1 19.1 L 205.7 15.8 L 214.3 13.5 L 222.9 13.1 L 231.4 14.9 L 240.0 18.0 L 240.0 62.0 L 231.4 58.1 L 222.9 56.0 L 214.3 56.4 L 205.7 59.3 L 197.1 63.4 L 188.6 66.8 L 180.0 68.2 L 171.4 66.8 L 162.9 63.4 L 154.3 59.3 L 145.7 56.4 L 137.1 56.0 L 128.6 58.1 L 120.0 62.0 L 111.4 65.9 L 102.9 68.0 L 94.3 67.6 L 85.7 64.7 L 77.1 60.6 L 68.6 57.2 L 60.0 55.8 L 51.4 57.2 L 42.9 60.6 L 34.3 64.7 L 25.7 67.6 L 17.1 68.0 L 8.6 65.9 L 0.0 62.0 Z" fill="var(--foreground-01)"/>
+<path d="M 20.0 22.0 L 21.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 40.0 22.0 L 41.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 60.0 22.0 L 61.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 80.0 22.0 L 81.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 100.0 22.0 L 101.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 120.0 22.0 L 121.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 140.0 22.0 L 141.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 160.0 22.0 L 161.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 180.0 22.0 L 181.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 200.0 22.0 L 201.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 220.0 22.0 L 221.5 58.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 0.0 92.8 L 8.6 89.9 L 17.1 85.2 L 25.7 80.9 L 34.3 78.9 L 42.9 79.9 L 51.4 83.6 L 60.0 88.3 L 68.6 92.1 L 77.1 93.2 L 85.7 91.1 L 94.3 86.9 L 102.9 82.2 L 111.4 79.2 L 120.0 79.2 L 128.6 82.1 L 137.1 86.8 L 145.7 91.1 L 154.3 93.1 L 162.9 92.1 L 171.4 88.4 L 180.0 83.7 L 188.6 79.9 L 197.1 78.8 L 205.7 80.9 L 214.3 85.1 L 222.9 89.8 L 231.4 92.8 L 240.0 92.8 L 240.0 133.9 L 231.4 133.9 L 222.9 130.4 L 214.3 125.0 L 205.7 120.0 L 197.1 117.6 L 188.6 118.9 L 180.0 123.3 L 171.4 128.8 L 162.9 133.1 L 154.3 134.3 L 145.7 131.9 L 137.1 126.9 L 128.6 121.5 L 120.0 118.1 L 111.4 118.1 L 102.9 121.6 L 94.3 127.0 L 85.7 132.0 L 77.1 134.4 L 68.6 133.1 L 60.0 128.7 L 51.4 123.2 L 42.9 118.9 L 34.3 117.7 L 25.7 120.1 L 17.1 125.1 L 8.6 130.5 L 0.0 133.9 Z" fill="var(--foreground-02)"/>
+<path d="M 20.0 90.0 L 21.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 40.0 90.0 L 41.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 60.0 90.0 L 61.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 80.0 90.0 L 81.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 100.0 90.0 L 101.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 120.0 90.0 L 121.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 140.0 90.0 L 141.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 160.0 90.0 L 161.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 180.0 90.0 L 181.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 200.0 90.0 L 201.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 220.0 90.0 L 221.5 122.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 0.0 144.2 L 8.6 140.9 L 17.1 141.5 L 25.7 145.8 L 34.3 152.0 L 42.9 157.3 L 51.4 159.4 L 60.0 157.4 L 68.6 152.2 L 77.1 146.0 L 85.7 141.6 L 94.3 140.8 L 102.9 144.0 L 111.4 149.9 L 120.0 155.8 L 128.6 159.1 L 137.1 158.5 L 145.7 154.2 L 154.3 148.0 L 162.9 142.7 L 171.4 140.6 L 180.0 142.6 L 188.6 147.8 L 197.1 154.0 L 205.7 158.4 L 214.3 159.2 L 222.9 156.0 L 231.4 150.1 L 240.0 144.2 L 240.0 193.6 L 231.4 196.1 L 222.9 198.5 L 214.3 199.9 L 205.7 199.6 L 197.1 197.7 L 188.6 195.1 L 180.0 192.8 L 171.4 192.0 L 162.9 192.9 L 154.3 195.2 L 145.7 197.8 L 137.1 199.6 L 128.6 199.9 L 120.0 198.4 L 111.4 195.9 L 102.9 193.5 L 94.3 192.1 L 85.7 192.4 L 77.1 194.3 L 68.6 196.9 L 60.0 199.2 L 51.4 200.0 L 42.9 199.1 L 34.3 196.8 L 25.7 194.2 L 17.1 192.4 L 8.6 192.1 L 0.0 193.6 Z" fill="var(--foreground-01)"/>
+<path d="M 20.0 154.0 L 21.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 40.0 154.0 L 41.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 60.0 154.0 L 61.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 80.0 154.0 L 81.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 100.0 154.0 L 101.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 120.0 154.0 L 121.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 140.0 154.0 L 141.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 160.0 154.0 L 161.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 180.0 154.0 L 181.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 200.0 154.0 L 201.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 220.0 154.0 L 221.5 192.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 0.0 203.2 L 8.6 206.4 L 17.1 209.5 L 25.7 211.0 L 34.3 210.3 L 42.9 207.8 L 51.4 204.5 L 60.0 201.8 L 68.6 201.0 L 77.1 202.4 L 85.7 205.3 L 94.3 208.6 L 102.9 210.7 L 111.4 210.8 L 120.0 208.8 L 128.6 205.6 L 137.1 202.5 L 145.7 201.0 L 154.3 201.7 L 162.9 204.2 L 171.4 207.5 L 180.0 210.2 L 188.6 211.0 L 197.1 209.6 L 205.7 206.7 L 214.3 203.4 L 222.9 201.3 L 231.4 201.2 L 240.0 203.2 L 240.0 236.6 L 231.4 234.1 L 222.9 234.2 L 214.3 236.8 L 205.7 240.8 L 197.1 244.5 L 188.6 246.2 L 180.0 245.2 L 171.4 241.9 L 162.9 237.8 L 154.3 234.7 L 145.7 233.9 L 137.1 235.7 L 128.6 239.4 L 120.0 243.4 L 111.4 245.9 L 102.9 245.8 L 94.3 243.2 L 85.7 239.2 L 77.1 235.5 L 68.6 233.8 L 60.0 234.8 L 51.4 238.1 L 42.9 242.2 L 34.3 245.3 L 25.7 246.1 L 17.1 244.3 L 8.6 240.6 L 0.0 236.6 Z" fill="var(--foreground-02)"/>
+<path d="M 20.0 210.0 L 21.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 40.0 210.0 L 41.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 60.0 210.0 L 61.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 80.0 210.0 L 81.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 100.0 210.0 L 101.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 120.0 210.0 L 121.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 140.0 210.0 L 141.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 160.0 210.0 L 161.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 180.0 210.0 L 181.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 200.0 210.0 L 201.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+<path d="M 220.0 210.0 L 221.5 236.0" fill="none" stroke="var(--foreground-03)" stroke-width="2" stroke-linecap="round"/>
+</g>
+</svg>

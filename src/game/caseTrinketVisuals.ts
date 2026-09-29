@@ -1,9 +1,10 @@
 import * as THREE from 'three';
+import { DISPLAY_CASE_TEMPLATE } from '../../shared/src/index';
 import { getTrinketDef } from '../sim/catalogs/trinkets';
-import { onGameStateChanged } from '../sim/state';
+import { getGameState, onGameStateChanged } from '../sim/state';
 import { buildTrinketRig } from './trinketRigs';
 import { getPlacedPieceVisual } from './placedPieceInteractions';
-import { listCases, subscribeCases, type CaseView } from './cases';
+import { listCases, subscribeCases, type CaseHandle, type CaseView } from './cases';
 import { getSharedPieceVisual } from '../net/sharedPieceVisuals';
 import { RESOURCE_DEFS } from '../world/resources';
 import { getMaterial } from '../render/materials';
@@ -44,11 +45,30 @@ function disposeGroup(group: THREE.Group) {
 
 /** Whichever object is actually rendering this case right now. A case you
  * built always has a local piece (see cases.ts); one a neighbor built and
- * shared has only the server-echoed copy. When -- unusually -- both exist,
- * the local one wins, matching what `hasLocalEquivalent` already decided is
- * visible (sharedPieceVisuals.ts). */
+ * shared has only the server-echoed copy. When both exist -- the usual case
+ * for a shared case you built yourself, since the server gives its echo an
+ * id of its own (publishSharedPlacedPiece sends none) -- the local one wins,
+ * matching what `hasLocalEquivalent` already decided is visible
+ * (sharedPieceVisuals.ts): the echo stands hidden, and trinkets parented to
+ * it would be hidden with it. */
 function anchorFor(view: CaseView): THREE.Object3D | null {
-  return getPlacedPieceVisual(view.handle.id) ?? getSharedPieceVisual(view.handle.id);
+  return getPlacedPieceVisual(view.handle.id)
+    ?? localPieceVisualAt(view.handle)
+    ?? getSharedPieceVisual(view.handle.id);
+}
+
+/** The drawn piece standing where this view's case stands. The view's id is
+ * the server echo's, which matches no local piece, so a shared case you
+ * built yourself is tied back to your own piece by its page and spot. */
+function localPieceVisualAt(handle: CaseHandle): THREE.Object3D | null {
+  const pieces = getGameState().world.pages[handle.page]?.placedPieces ?? {};
+  for (const piece of Object.values(pieces)) {
+    if (piece.templateKey !== DISPLAY_CASE_TEMPLATE) continue;
+    if (Math.abs(piece.x - handle.x) >= 0.01 || Math.abs(piece.z - handle.z) >= 0.01) continue;
+    const visual = getPlacedPieceVisual(piece.id);
+    if (visual) return visual;
+  }
+  return null;
 }
 
 function signatureFor(view: CaseView): string {

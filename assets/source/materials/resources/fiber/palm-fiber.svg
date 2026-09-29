@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #4a5f2c;
+  --foreground-01: #7ca24c;
+  --foreground-02: #a0bf68;
+  --foreground-03: #5d7a3a;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<path d="M -240.0 -20 L 40.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -240.0 260 L 40.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M -200.0 -20 L 80.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -200.0 260 L 80.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M -160.0 -20 L 120.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -160.0 260 L 120.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M -120.0 -20 L 160.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -120.0 260 L 160.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M -80.0 -20 L 200.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -80.0 260 L 200.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M -40.0 -20 L 240.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M -40.0 260 L 240.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 0.0 -20 L 280.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 0.0 260 L 280.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 40.0 -20 L 320.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 40.0 260 L 320.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 80.0 -20 L 360.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 80.0 260 L 360.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 120.0 -20 L 400.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 120.0 260 L 400.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 160.0 -20 L 440.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 160.0 260 L 440.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 200.0 -20 L 480.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 200.0 260 L 480.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 240.0 -20 L 520.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 240.0 260 L 520.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 280.0 -20 L 560.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 280.0 260 L 560.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 320.0 -20 L 600.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 320.0 260 L 600.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 360.0 -20 L 640.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 360.0 260 L 640.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 400.0 -20 L 680.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 400.0 260 L 680.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 440.0 -20 L 720.0 260" fill="none" stroke="var(--foreground-01)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 440.0 260 L 720.0 -20" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+<path d="M 480.0 -20 L 760.0 260" fill="none" stroke="var(--foreground-02)" stroke-width="9" stroke-linecap="round"/>
+<path d="M 480.0 260 L 760.0 -20" fill="none" stroke="var(--foreground-01)" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+</g>
+</svg>

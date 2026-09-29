@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #8a5a2e;
+  --foreground-01: #b07a3c;
+  --foreground-02: #d4a05a;
+  --foreground-03: #6f9842;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<g transform="translate(-240 -240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(0 -240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(240 -240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(-240 0)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(0 0)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(240 0)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(-240 240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(0 240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+<g transform="translate(240 240)"><path d="M 120 148.8 Q 108.1 141.5 80.2 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 113.0 127.4 90.1 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 128.0 117.8 120.0 86.8" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 143.0 127.4 149.9 106.0" fill="none" stroke="var(--foreground-02)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 120 148.8 Q 147.9 141.5 159.8 134.3" fill="none" stroke="var(--foreground-01)" stroke-width="7" stroke-linecap="round"/>
+<path d="M 116 148.8 L 119 228" fill="none" stroke="var(--foreground-03)" stroke-width="5" stroke-linecap="round"/></g>
+</g>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<style>
+:root {
+  --background: #3f6e33;
+  --foreground-01: #5f9a3e;
+  --foreground-02: #86bd5c;
+  --foreground-03: #8fbf5a;
+}
+</style>
+<g class="layer-bg">
+<rect width="240" height="240" fill="var(--background)"/>
+</g>
+<g class="layer-foreground">
+<path d="M 0.0 40.0 L 6.0 44.3 L 12.0 48.2 L 18.0 51.3 L 24.0 53.3 L 30.0 54.0 L 36.0 53.3 L 42.0 51.3 L 48.0 48.2 L 54.0 44.3 L 60.0 40.0 L 66.0 35.7 L 72.0 31.8 L 78.0 28.7 L 84.0 26.7 L 90.0 26.0 L 96.0 26.7 L 102.0 28.7 L 108.0 31.8 L 114.0 35.7 L 120.0 40.0 L 126.0 44.3 L 132.0 48.2 L 138.0 51.3 L 144.0 53.3 L 150.0 54.0 L 156.0 53.3 L 162.0 51.3 L 168.0 48.2 L 174.0 44.3 L 180.0 40.0 L 186.0 35.7 L 192.0 31.8 L 198.0 28.7 L 204.0 26.7 L 210.0 26.0 L 216.0 26.7 L 222.0 28.7 L 228.0 31.8 L 234.0 35.7 L 240.0 40.0" fill="none" stroke="var(--foreground-01)" stroke-width="6.5" stroke-linecap="round"/>
+<circle cx="60.0" cy="28.0" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 65.0 32.0 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+<circle cx="180.0" cy="28.0" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 185.0 32.0 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+<path d="M 0.0 133.8 L 6.0 130.6 L 12.0 126.4 L 18.0 121.6 L 24.0 116.6 L 30.0 111.9 L 36.0 108.0 L 42.0 105.3 L 48.0 104.1 L 54.0 104.4 L 60.0 106.2 L 66.0 109.4 L 72.0 113.6 L 78.0 118.4 L 84.0 123.4 L 90.0 128.1 L 96.0 132.0 L 102.0 134.7 L 108.0 135.9 L 114.0 135.6 L 120.0 133.8 L 126.0 130.6 L 132.0 126.4 L 138.0 121.6 L 144.0 116.6 L 150.0 111.9 L 156.0 108.0 L 162.0 105.3 L 168.0 104.1 L 174.0 104.4 L 180.0 106.2 L 186.0 109.4 L 192.0 113.6 L 198.0 118.4 L 204.0 123.4 L 210.0 128.1 L 216.0 132.0 L 222.0 134.7 L 228.0 135.9 L 234.0 135.6 L 240.0 133.8" fill="none" stroke="var(--foreground-02)" stroke-width="6.5" stroke-linecap="round"/>
+<circle cx="60.0" cy="94.2" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 65.0 98.2 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+<circle cx="180.0" cy="94.2" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 185.0 98.2 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+<path d="M 0.0 184.3 L 6.0 182.4 L 12.0 182.1 L 18.0 183.6 L 24.0 186.8 L 30.0 191.2 L 36.0 196.5 L 42.0 202.1 L 48.0 207.5 L 54.0 212.2 L 60.0 215.7 L 66.0 217.6 L 72.0 217.9 L 78.0 216.4 L 84.0 213.2 L 90.0 208.8 L 96.0 203.5 L 102.0 197.9 L 108.0 192.5 L 114.0 187.8 L 120.0 184.3 L 126.0 182.4 L 132.0 182.1 L 138.0 183.6 L 144.0 186.8 L 150.0 191.2 L 156.0 196.5 L 162.0 202.1 L 168.0 207.5 L 174.0 212.2 L 180.0 215.7 L 186.0 217.6 L 192.0 217.9 L 198.0 216.4 L 204.0 213.2 L 210.0 208.8 L 216.0 203.5 L 222.0 197.9 L 228.0 192.5 L 234.0 187.8 L 240.0 184.3" fill="none" stroke="var(--foreground-01)" stroke-width="6.5" stroke-linecap="round"/>
+<circle cx="60.0" cy="203.7" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 65.0 207.7 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+<circle cx="180.0" cy="203.7" r="5.5" fill="none" stroke="var(--foreground-03)" stroke-width="3"/>
+<path d="M 185.0 207.7 q 6 5 3 12" fill="none" stroke="var(--foreground-03)" stroke-width="3" stroke-linecap="round"/>
+</g>
+</svg>
